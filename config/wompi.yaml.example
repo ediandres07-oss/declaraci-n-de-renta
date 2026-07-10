@@ -1,0 +1,26 @@
+# ============================================================
+# Wompi — pasarela de pagos de Bancolombia  (https://comercios.wompi.co)
+# ============================================================
+# 1. Entra a https://comercios.wompi.co y crea tu comercio (con tu cuenta
+#    Bancolombia Ahorros 00514294607 para recibir el dinero).
+# 2. Ve a: Desarrolladores → Llaves API.
+# 3. Copia las 4 llaves aquí abajo:
+#      - public_key       (empieza con pub_test_...  o  pub_prod_...)
+#      - private_key      (empieza con prv_test_...  o  prv_prod_...)
+#      - integrity_secret (para firmar el checkout)  → "Secreto de integridad"
+#      - events_secret    (para validar webhooks)    → "Secreto de eventos"
+# 4. Mientras uses llaves pub_test_/prv_test_ estás en modo PRUEBAS (no cobra
+#    dinero real). Tarjeta de prueba aprobada: 4242 4242 4242 4242, CVC 123,
+#    fecha futura. Para cobrar de verdad, cambia por las llaves pub_prod_/prv_prod_.
+# 5. Registra la URL de eventos (webhook) en el panel de Wompi cuando publiques:
+#      https://TU-DOMINIO/api/wompi-webhook
+#
+# Mientras 'habilitado' sea false, la landing solo ofrece consignación manual.
+
+habilitado: false
+moneda: "COP"
+public_key: ""          # pub_test_... / pub_prod_...
+private_key: ""         # prv_test_... / prv_prod_...
+integrity_secret: ""    # "Secreto de integridad"
+events_secret: ""       # "Secreto de eventos"
+# api_base: ""          # (opcional) sobrescribe la URL de la API si Wompi la cambia

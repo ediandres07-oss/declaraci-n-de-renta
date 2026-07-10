@@ -1,0 +1,16 @@
+# ============================================================
+# Blueprint de Render — despliegue de la app "Declaración de Renta"
+# https://render.com  →  New +  →  Blueprint  →  conecta este repositorio
+# ============================================================
+services:
+  - type: web
+    name: declaracion-renta
+    runtime: python
+    plan: free                 # gratis para empezar (se duerme tras inactividad)
+    region: oregon
+    buildCommand: "pip install -r requirements.txt"
+    # 1 worker + hilos: evita bloqueos de SQLite y da concurrencia suficiente.
+    startCommand: "gunicorn webapp:app --bind 0.0.0.0:$PORT --workers 1 --threads 8 --timeout 120"
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.9"

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Mi cuenta — Declaración de Renta</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root { --azul:#123f6b; --azul2:#1e6bb5; --dorado:#e8a413; --verde:#1e7d43;
+          --rojo:#c0392b; --gris:#f5f7fa; --borde:#dbe3ec; }
+  * { box-sizing:border-box; margin:0; }
+  body { font-family:-apple-system,'Segoe UI',Roboto,sans-serif; color:#1e2b3a; background:var(--gris); }
+  .topbar { background:var(--azul); color:#fff; padding:14px 0; }
+  .contenedor { max-width:760px; margin:0 auto; padding:0 20px; }
+  .topbar .contenedor { display:flex; align-items:center; justify-content:space-between; }
+  .topbar a { color:#cdddf0; text-decoration:none; font-size:.85rem; }
+  .perfil { display:flex; align-items:center; gap:12px; margin:26px 0; }
+  .perfil img { width:56px; height:56px; border-radius:50%; }
+  .perfil .avatar { width:56px; height:56px; border-radius:50%; background:var(--azul2); color:#fff;
+                    display:flex; align-items:center; justify-content:center; font-size:1.5rem; font-weight:700; }
+  .perfil h1 { font-size:1.3rem; color:var(--azul); }
+  .perfil p { font-size:.85rem; color:#5a6b7f; }
+  .tarjeta { background:#fff; border:1px solid var(--borde); border-radius:14px; padding:22px;
+             margin-bottom:18px; box-shadow:0 4px 14px rgba(18,63,107,.05); }
+  .tarjeta h2 { font-size:1rem; color:var(--azul); margin-bottom:4px; }
+  .tarjeta p.desc { font-size:.82rem; color:#5a6b7f; margin-bottom:14px; }
+  .fila { display:flex; gap:10px; }
+  .fila input { flex:1; padding:11px; border:1px solid var(--borde); border-radius:10px; font-size:1rem; }
+  .fila button { border:0; border-radius:10px; padding:11px 20px; font-weight:700; cursor:pointer;
+                 background:var(--azul2); color:#fff; }
+  /* Hover consistente: se levanta un poco y aparece una sombra al pasar el mouse. */
+  button { transition: transform .15s ease, box-shadow .15s ease; }
+  button:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 8px 18px rgba(10,25,45,.18); }
+  .venc { margin-top:16px; padding:18px; border-radius:12px; background:var(--gris); text-align:center; }
+  .venc .etiq { font-size:.72rem; text-transform:uppercase; letter-spacing:.06em; color:#7b8a9c; }
+  .venc .fecha { font-size:1.7rem; font-weight:800; color:var(--azul); margin:6px 0; }
+  .venc .dias { font-size:.86rem; color:#3a4a5c; }
+  .venc .dias b.urgente { color:var(--rojo); }
+  .switch { display:flex; align-items:center; justify-content:space-between; padding:10px 0; }
+  .switch + .switch { border-top:1px solid var(--borde); }
+  .switch .txt b { font-size:.92rem; }
+  .switch .txt p { font-size:.78rem; color:#5a6b7f; }
+  .toggle { position:relative; width:46px; height:26px; }
+  .toggle input { opacity:0; width:0; height:0; }
+  .slider { position:absolute; inset:0; background:#c3ccd6; border-radius:26px; cursor:pointer; transition:.2s; }
+  .slider::before { content:""; position:absolute; width:20px; height:20px; left:3px; top:3px;
+                    background:#fff; border-radius:50%; transition:.2s; }
+  .toggle input:checked + .slider { background:var(--verde); }
+  .toggle input:checked + .slider::before { transform:translateX(20px); }
+  .btn-asesor { width:100%; border:0; border-radius:10px; padding:13px; font-weight:700; cursor:pointer;
+                background:var(--dorado); color:#fff; font-size:.95rem; }
+  .ok-msg { font-size:.82rem; color:var(--verde); font-weight:700; margin-top:8px; min-height:1em; }
+  .oculto { display:none !important; }
+  footer { text-align:center; font-size:.74rem; color:#9db0c4; padding:24px; }
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="contenedor">
+      <a href="/">🧾 Inicio</a>
+      <a href="/logout">Cerrar sesión →</a>
+    </div>
+  </div>
+
+  <div class="contenedor">
+    <div class="perfil">
+      {% if u.foto %}<img src="{{ u.foto }}" alt="foto">
+      {% else %}<div class="avatar">{{ (u.nombre or u.email or '?')[0]|upper }}</div>{% endif %}
+      <div>
+        <h1>Hola, {{ (u.nombre or 'usuario').split()[0] }}</h1>
+        <p>{{ u.email }}</p>
+      </div>
+    </div>
+
+    <!-- Cédula → vencimiento -->
+    <div class="tarjeta">
+      <h2>📅 Tu fecha de vencimiento</h2>
+      <p class="desc">Ingresa tu cédula o NIT y te decimos hasta qué día tienes plazo para declarar.</p>
+      <div class="fila">
+        <input id="cedula" inputmode="numeric" placeholder="Ej: 44004730"
+               value="{{ u.cedula or '' }}">
+        <button id="btnCedula">Consultar</button>
+      </div>
+      <div id="venc" class="venc {{ '' if u.fecha_limite else 'oculto' }}">
+        <div class="etiq">Tu fecha límite para declarar renta</div>
+        <div class="fecha" id="vencFecha">{{ fecha_texto or '—' }}</div>
+        <div class="dias" id="vencDias">
+          {% if dias_restantes is not none %}
+            {% if dias_restantes >= 0 %}
+              Te quedan <b class="{{ 'urgente' if dias_restantes < 30 else '' }}">{{ dias_restantes }} días</b>.
+            {% else %}
+              <b class="urgente">Venció hace {{ -dias_restantes }} días.</b>
+            {% endif %}
+          {% endif %}
+        </div>
+      </div>
+      <div class="ok-msg" id="okCedula"></div>
+    </div>
+
+    <!-- Recordatorios -->
+    <div class="tarjeta">
+      <h2>🔔 Recordatorios</h2>
+      <p class="desc">Te avisamos a <b>{{ u.email }}</b> antes de tu vencimiento para que no pagues sanciones.</p>
+      <div class="switch">
+        <div class="txt"><b>Enviarme recordatorios por correo</b>
+          <p>Un aviso 30 días antes y otro la semana del vencimiento.</p></div>
+        <label class="toggle"><input type="checkbox" id="swRecordatorios"
+          {{ 'checked' if u.acepta_recordatorios else '' }}><span class="slider"></span></label>
+      </div>
+      <div class="ok-msg" id="okPref"></div>
+    </div>
+
+    <!-- Asesor -->
+    <div class="tarjeta">
+      <h2>👨‍💼 ¿Quieres que un asesor te ayude?</h2>
+      <p class="desc">Un profesional contable revisa tu caso, resuelve tus dudas y puede presentar
+        la declaración por ti.</p>
+      <button class="btn-asesor" id="btnAsesor">
+        {{ 'Ya solicitaste asesor ✓' if u.quiere_asesor else 'Quiero que me contacte un asesor' }}
+      </button>
+      <div class="ok-msg" id="okAsesor"></div>
+    </div>
+  </div>
+
+  <footer>Tus datos se usan solo para tu declaración y tus recordatorios. Puedes cerrar sesión cuando quieras.</footer>
+
+<script>
+const $ = s => document.querySelector(s);
+
+$("#btnCedula").onclick = async () => {
+  const cedula = $("#cedula").value.trim();
+  $("#okCedula").textContent = "";
+  const r = await fetch("/api/mi-cuenta/cedula", {method:"POST",
+    headers:{"Content-Type":"application/json"}, body: JSON.stringify({cedula})});
+  const j = await r.json();
+  if (!r.ok) { $("#okCedula").style.color = "#c0392b"; $("#okCedula").textContent = "⚠ " + j.error; return; }
+  $("#venc").classList.remove("oculto");
+  $("#vencFecha").textContent = j.fecha_limite || "Consulta con la DIAN";
+  if (j.dias_restantes === null || j.dias_restantes === undefined) {
+    $("#vencDias").innerHTML = "";
+  } else if (j.dias_restantes >= 0) {
+    const urg = j.dias_restantes < 30 ? "urgente" : "";
+    $("#vencDias").innerHTML = `Te quedan <b class="${urg}">${j.dias_restantes} días</b>.`;
+  } else {
+    $("#vencDias").innerHTML = `<b class="urgente">Venció hace ${-j.dias_restantes} días.</b>`;
+  }
+  $("#okCedula").style.color = "#1e7d43"; $("#okCedula").textContent = "✓ Guardado en tu cuenta";
+};
+
+$("#swRecordatorios").onchange = async (e) => {
+  const r = await fetch("/api/mi-cuenta/preferencias", {method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({acepta_recordatorios: e.target.checked})});
+  if (r.ok) { $("#okPref").textContent = e.target.checked
+    ? "✓ Te enviaremos recordatorios" : "Recordatorios desactivados";
+    setTimeout(()=>$("#okPref").textContent="", 2500); }
+};
+
+$("#btnAsesor").onclick = async () => {
+  const r = await fetch("/api/mi-cuenta/preferencias", {method:"POST",
+    headers:{"Content-Type":"application/json"}, body: JSON.stringify({quiere_asesor: true})});
+  if (r.ok) { $("#btnAsesor").textContent = "Ya solicitaste asesor ✓";
+    $("#okAsesor").textContent = "✓ Un asesor te contactará al correo o celular registrado."; }
+};
+</script>
+</body>
+</html>

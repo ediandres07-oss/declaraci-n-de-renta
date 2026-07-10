@@ -1,0 +1,25 @@
+# ============================================================
+# Integración Realmy — https://dashboard.realmy.io
+# ============================================================
+# 1. Regístrate en realmy.io como comercio (cédula + RUT + cuenta bancaria
+#    donde recibes: Bancolombia Ahorros 00514294607).
+# 2. Ve a Dashboard → Integraciones → Llaves API
+# 3. Copia las llaves aquí. Mientras 'habilitado' sea false, la landing solo
+#    ofrece consignación manual.
+# 4. test: true usa el ambiente de pruebas de Realmy (no cobra dinero real).
+#    Tarjeta de prueba: 4111111111111111, cualquier fecha futura, CVC 123.
+# 5. La URL de webhook debe estar publicada en internet:
+#    https://tu-dominio.com/api/realmy-webhook
+#    Registrala en el dashboard de Realmy.
+
+habilitado: false
+test: true
+api_key: ""           # Clave API privada (para autenticación servidor)
+public_key: ""        # Clave pública (para el cliente)
+merchant_id: ""       # ID del comercio (P_CUST_ID)
+webhook_secret: ""    # Secret para validar webhooks
+
+# Metadata
+banco: "Bancolombia"
+tipo: "Ahorros"
+numero: "00514294607"

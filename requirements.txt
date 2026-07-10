@@ -1,0 +1,34 @@
+# ============================================================
+# Dependencias del proyecto "Declaración de Renta"
+# Instala todo con:  pip install -r requirements.txt
+# ============================================================
+
+# --- Núcleo del cálculo y lectura de exógena ---
+openpyxl>=3.1
+PyYAML>=6.0
+
+# --- App web (landing, login, panel, liquidador) ---
+Flask>=3.1
+Flask-SQLAlchemy>=3.1
+Authlib>=1.6            # login con Google / Microsoft (OAuth)
+requests>=2.32
+
+# --- Generación de PDF (Formulario 210, resumen, checklist) ---
+reportlab>=4.0
+pypdf>=6.0
+
+# --- Asistente de IA del chat (Google Gemini) ---
+google-genai>=1.4
+
+# --- (Opcional) asistente con Anthropic en lugar de Gemini ---
+anthropic>=0.60
+
+# --- Entrevista por consola (CLI) ---
+rich>=13.0
+questionary>=2.0
+
+# --- Servidor de producción (para Render / hosting) ---
+gunicorn>=21.0
+
+# --- Pruebas ---
+pytest>=7.0

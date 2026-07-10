@@ -1,0 +1,37 @@
+# ============================================================
+# Envío de correos (recordatorios de declaración de renta)
+# ============================================================
+# Mientras 'habilitado' sea false, el sistema calcula a quién le tocaría
+# recordatorio pero NO envía nada (modo simulación / pruebas en seco).
+#
+# --- OPCIÓN A: Gmail (rápido para empezar) --------------------
+# 1. Usa una cuenta Gmail dedicada (ej: recordatorios@tudominio o tu Gmail).
+# 2. Activa la verificación en dos pasos en esa cuenta.
+# 3. Crea una "Contraseña de aplicación": myaccount.google.com → Seguridad →
+#    Contraseñas de aplicaciones. Copia los 16 caracteres en 'password'.
+#    (NO uses tu contraseña normal de Gmail.)
+#    host: smtp.gmail.com   port: 465   ssl: true
+#
+# --- OPCIÓN B: SendGrid / Mailgun / SMTP propio ---------------
+# Usa los datos SMTP que te da el proveedor. SendGrid, por ejemplo:
+#    host: smtp.sendgrid.net   port: 465   user: "apikey"
+#    password: "<tu API key>"
+#
+# 'remitente' es el correo que verá el usuario como "De:".
+# 'remitente_nombre' es el nombre visible.
+
+habilitado: true
+host: "smtp.gmail.com"
+port: 465
+ssl: true
+user: "ediandres07@gmail.com"        # usuario SMTP (el mismo correo)
+password: ""         # contraseña de aplicación (16 chars, sin espacios)
+remitente: "ediandres07@gmail.com"   # correo visible como remitente
+remitente_nombre: "Declaración de Renta"
+
+# Contacto que se muestra en los correos por si el usuario responde.
+responder_a: "ediandres07@gmail.com"
+
+# Correo del negocio: aquí llegan los AVISOS cuando un usuario pide asesor.
+# Si lo dejas vacío, se usa 'remitente'. Puedes poner tu Gmail personal.
+notificar_a: "ediandres07@gmail.com"

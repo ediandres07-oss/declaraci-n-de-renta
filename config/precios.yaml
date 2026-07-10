@@ -1,0 +1,16 @@
+# Precios de los servicios de la landing (COP). Edite libremente.
+pago:
+  banco: Bancolombia
+  tipo: Ahorros
+  numero: "00514294607"
+  instrucciones: "Transfiere o consigna el valor exacto y usa tu número de orden como referencia."
+
+planes:
+  pdf:
+    nombre: "Formulario 210 diligenciado en PDF"
+    precio: 79900
+    descripcion: "Borrador del Formulario 210 renglón por renglón + resumen ejecutivo, revisado por el sistema."
+  presentacion:
+    nombre: "Declaración presentada en la DIAN"
+    precio: 189900
+    descripcion: "Elaboramos tu declaración, la montamos en el portal DIAN y la presentamos por ti. Incluye el PDF."

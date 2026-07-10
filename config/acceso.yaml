@@ -1,0 +1,13 @@
+# ============================================================
+# Personal autorizado — acceso al liquidador profesional y al panel /admin
+# ============================================================
+# Solo estos correos (tras iniciar sesión con Google/Microsoft) pueden abrir:
+#   /liquidador   → herramienta profesional de liquidación
+#   /admin        → panel de órdenes y usuarios
+#
+# Cualquier otra persona que intente entrar verá "Acceso restringido".
+# Agrega o quita correos libremente (en minúsculas).
+
+autorizados:
+  - "ediandres07@gmail.com"
+  - "ediandres@hotmail.com"

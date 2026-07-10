@@ -1,0 +1,109 @@
+# =====================================================================
+# Parámetros normativos — Año Gravable 2025 (Colombia, Formulario 210)
+# =====================================================================
+# ADVERTENCIA: verifique estos valores contra la Resolución DIAN vigente
+# y el Estatuto Tributario antes de usar el resultado para presentar una
+# declaración real. La UVT y varios topes cambian cada año.
+# ---------------------------------------------------------------------
+
+anio_gravable: 2025
+
+# UVT del año gravable (Resolución DIAN 000193 de 2024 — verificar).
+uvt: 49799
+
+# ---------------------------------------------------------------------
+# Topes para estar obligado a declarar (en UVT).
+# ---------------------------------------------------------------------
+topes_obligado_declarar_uvt:
+  patrimonio_bruto: 4500        # > 4.500 UVT
+  ingresos_brutos: 1400         # >= 1.400 UVT
+  consumos_tarjeta_credito: 1400
+  consignaciones_inversiones: 1400
+  compras_consumos: 1400
+
+# ---------------------------------------------------------------------
+# Límites de la cédula general (Art. 336 E.T.)
+# ---------------------------------------------------------------------
+limite_rentas_exentas_deducciones:
+  porcentaje: 0.40              # 40% de la base
+  tope_uvt: 1340                # máximo 1.340 UVT
+
+# Renta exenta laboral del 25% (Art. 206 num. 10, mod. Ley 2277/2022)
+renta_exenta_laboral_25:
+  porcentaje: 0.25
+  tope_uvt: 790                 # tope anual en UVT (verificar vigencia)
+
+# Deducción por dependientes (Art. 336 num. 3, Ley 2277/2022):
+# 72 UVT por dependiente, hasta 4 dependientes. NO sujeta al límite del 40%.
+deduccion_dependientes:
+  uvt_por_dependiente: 72
+  maximo_dependientes: 4
+
+# Deducción 1% compras con factura electrónica (Art. 336 num. 5):
+# 1% del valor de las adquisiciones, sin exceder 240 UVT. NO sujeta al 40%.
+deduccion_factura_electronica:
+  porcentaje: 0.01
+  tope_uvt: 240
+
+# Renta presuntiva: tarifa 0% desde el AG 2021 (Art. 188 E.T., Ley 2010/2019).
+renta_presuntiva:
+  tasa: 0.0
+
+# ---------------------------------------------------------------------
+# Tabla del impuesto de renta — Art. 241 E.T. (rangos en UVT)
+# impuesto = (base_uvt - desde_uvt) * tarifa + adicion_uvt
+# ---------------------------------------------------------------------
+tabla_art_241:
+  - {desde_uvt: 0,     hasta_uvt: 1090,  tarifa: 0.00, adicion_uvt: 0}
+  - {desde_uvt: 1090,  hasta_uvt: 1700,  tarifa: 0.19, adicion_uvt: 0}
+  - {desde_uvt: 1700,  hasta_uvt: 4100,  tarifa: 0.28, adicion_uvt: 116}
+  - {desde_uvt: 4100,  hasta_uvt: 8670,  tarifa: 0.33, adicion_uvt: 788}
+  - {desde_uvt: 8670,  hasta_uvt: 18970, tarifa: 0.35, adicion_uvt: 2296}
+  - {desde_uvt: 18970, hasta_uvt: 31000, tarifa: 0.37, adicion_uvt: 5901}
+  - {desde_uvt: 31000, hasta_uvt: null,  tarifa: 0.39, adicion_uvt: 10352}
+
+# ---------------------------------------------------------------------
+# Dividendos y participaciones.
+# NOTA: esta tabla replica la lógica de la plantilla ITGS (régimen del
+# Art. 242 E.T. previo a integración plena). La Ley 2277/2022 modificó el
+# tratamiento de dividendos 2017+; verificar con un profesional.
+# ---------------------------------------------------------------------
+dividendos:
+  # 1a subcédula (año 2017+, num. 3 art. 49 E.T.)
+  subcedula1_tabla:
+    - {desde_uvt: 0,   hasta_uvt: 300,  tarifa: 0.00}
+    - {desde_uvt: 300, hasta_uvt: null, tarifa: 0.10}
+  # 2a subcédula (año 2017+, parágrafo 2 art. 49 E.T.): 35% y el neto
+  # pasa por la misma tabla de la 1a subcédula.
+  subcedula2_tarifa_primera_parte: 0.35
+  # Dividendos 2016 y anteriores: tabla propia
+  tabla_2016:
+    - {desde_uvt: 0,    hasta_uvt: 1090, tarifa: 0.00, adicion_uvt: 0}
+    - {desde_uvt: 1090, hasta_uvt: 1700, tarifa: 0.19, adicion_uvt: 0}
+    - {desde_uvt: 1700, hasta_uvt: 4100, tarifa: 0.28, adicion_uvt: 116}
+    - {desde_uvt: 4100, hasta_uvt: null, tarifa: 0.33, adicion_uvt: 788}
+  # Dividendos recibidos del exterior
+  tarifa_exterior: 0.35
+
+# ---------------------------------------------------------------------
+# Ganancias ocasionales
+# ---------------------------------------------------------------------
+ganancias_ocasionales:
+  tarifa_general: 0.15          # Ley 2277/2022 subió del 10% al 15%
+  tarifa_loterias: 0.20
+
+# ---------------------------------------------------------------------
+# Anticipo de renta (Art. 807 E.T.)
+# ---------------------------------------------------------------------
+anticipo:
+  porcentaje_primer_anio: 0.25
+  porcentaje_segundo_anio: 0.50
+  porcentaje_tercer_anio: 0.75
+
+# Componente inflacionario de rendimientos financieros (INCRNGO, Arts. 38,
+# 40-1 y 41 E.T.). Solo aplica a personas naturales NO obligadas a llevar
+# contabilidad. Para AG 2025: 55,43% (inflación DANE 5,10% / tasa de captación
+# 9,20%), según proyecto de decreto MinHacienda publicado en abril de 2026.
+# VERIFICAR el decreto definitivo antes de declarar (el de AG 2024 fue el
+# Decreto 0771 del 7 de julio de 2025, con 50,88%).
+componente_inflacionario: 0.5543

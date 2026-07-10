@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Formulario 210 — AG {{ anio }}</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root { --azul:#1a4f8b; --azul2:#2d6cb5; --verde:#1e7d43; --rojo:#b3372f;
+          --gris:#f4f6f9; --borde:#d7dee8; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,'Segoe UI',Roboto,sans-serif; margin:0;
+         background:var(--gris); color:#22303f; }
+  header { background:var(--azul); color:#fff; padding:16px 28px; }
+  header h1 { margin:0; font-size:1.25rem; }
+  header p { margin:4px 0 0; font-size:.8rem; opacity:.85; }
+  main { max-width:1080px; margin:20px auto; padding:0 16px 60px; }
+  .aviso { background:#fff6dd; border:1px solid #e8d48a; border-radius:8px;
+           padding:10px 14px; font-size:.82rem; margin-bottom:16px; }
+  #dropzone { border:3px dashed var(--azul2); border-radius:14px; background:#fff;
+              padding:56px 20px; text-align:center; cursor:pointer; transition:.15s; }
+  #dropzone.arrastrando { background:#e8f1fb; border-color:var(--azul); transform:scale(1.01); }
+  #dropzone .icono { font-size:2.6rem; }
+  #dropzone p { margin:8px 0 0; color:#5a6b7f; }
+  .oculto { display:none !important; }
+  section.tarjeta { background:#fff; border:1px solid var(--borde); border-radius:10px;
+                    padding:18px 20px; margin-top:16px; }
+  section.tarjeta h2 { margin:0 0 4px; font-size:1rem; color:var(--azul); }
+  section.tarjeta h2 small { color:#7b8a9c; font-weight:normal; }
+  .campos { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:10px 16px; margin-top:12px; }
+  .campo label { display:block; font-size:.72rem; color:#5a6b7f; margin-bottom:3px; }
+  .campo input, .campo select { width:100%; padding:7px 9px; border:1px solid var(--borde);
+                 border-radius:6px; font-size:.9rem; text-align:right; background:#fbfcfe; }
+  .campo input[type=text] { text-align:left; }
+  .campo input:focus { outline:2px solid var(--azul2); background:#fff; }
+  table { border-collapse:collapse; width:100%; font-size:.8rem; margin-top:10px; }
+  th, td { border-bottom:1px solid var(--borde); padding:6px 8px; text-align:left; }
+  td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
+  .pill { display:inline-block; background:#e8f1fb; color:var(--azul); border-radius:20px;
+          padding:2px 10px; font-size:.72rem; margin:2px 4px 2px 0; }
+  .alerta { color:var(--rojo); font-size:.8rem; }
+  .obligado li { font-size:.82rem; }
+  #resultado { position:sticky; bottom:0; background:#fff; border-top:3px solid var(--azul);
+               box-shadow:0 -4px 18px rgba(0,0,0,.08); padding:12px 20px; margin-top:20px; }
+  #resultado .fila { display:flex; flex-wrap:wrap; gap:18px; align-items:center; }
+  .kpi { min-width:150px; }
+  .kpi .etiq { font-size:.68rem; color:#7b8a9c; text-transform:uppercase; }
+  .kpi .val { font-size:1.15rem; font-weight:700; font-variant-numeric:tabular-nums; }
+  .kpi .val.pagar { color:var(--rojo); }
+  .kpi .val.favor { color:var(--verde); }
+  button { border:0; border-radius:8px; padding:11px 20px; font-size:.92rem; cursor:pointer;
+            transition: transform .15s ease, box-shadow .15s ease; }
+  button:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 8px 18px rgba(10,25,45,.18); }
+  #btnDescargar { background:var(--verde); color:#fff; font-weight:600; }
+  #btnDescargar:disabled { background:#9db6a6; cursor:default; }
+  .btn2 { background:#e8eef6; color:var(--azul); }
+  details summary { cursor:pointer; color:var(--azul2); font-size:.85rem; margin-top:8px; }
+  .error-msg { background:#fdecea; border:1px solid #e7b6b2; color:var(--rojo);
+               padding:10px 14px; border-radius:8px; margin-top:12px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Generador Formulario 210 — Año Gravable {{ anio }}</h1>
+  <p>UVT ${{ '{:,.0f}'.format(uvt) }} · Todo se procesa en su computador, nada se envía a internet.</p>
+</header>
+<main>
+  <div class="aviso">⚠️ <b>Borrador de apoyo.</b> No reemplaza la asesoría de un contador o abogado
+    tributarista. Verifique la normativa DIAN vigente antes de presentar la declaración.</div>
+
+  <div id="dropzone">
+    <div class="icono">📄⬇️</div>
+    <b>Arrastre aquí el archivo de exógena (.xlsx)</b>
+    <p>o haga clic para seleccionarlo — "Consulta de información reportada por terceros" del portal DIAN</p>
+    <input type="file" id="selector" accept=".xlsx,.xlsm" class="oculto">
+  </div>
+  <div id="errorCarga" class="error-msg oculto"></div>
+
+  <div id="panel" class="oculto">
+
+    <section class="tarjeta" id="secResumen">
+      <h2>Exógena cargada</h2>
+      <div id="resumenTexto"></div>
+      <div id="obligado"></div>
+      <details><summary>Ver partidas detectadas (<span id="numPartidas"></span>)</summary>
+        <table id="tablaPartidas"><thead>
+          <tr><th>Fila</th><th>Renglón</th><th>Detalle</th><th>Informante</th>
+              <th class="num">Valor</th><th>Nota</th></tr></thead><tbody></tbody></table>
+      </details>
+    </section>
+
+    <section class="tarjeta">
+      <h2>Datos del declarante</h2>
+      <div class="campos">
+        <div class="campo"><label>NIT / Cédula</label><input type="text" data-clave="contribuyente.nit"></div>
+        <div class="campo"><label>DV</label><input type="text" data-clave="contribuyente.dv"></div>
+        <div class="campo"><label>Primer apellido</label><input type="text" data-clave="contribuyente.primer_apellido"></div>
+        <div class="campo"><label>Segundo apellido</label><input type="text" data-clave="contribuyente.segundo_apellido"></div>
+        <div class="campo"><label>Primer nombre</label><input type="text" data-clave="contribuyente.primer_nombre"></div>
+        <div class="campo"><label>Otros nombres</label><input type="text" data-clave="contribuyente.otros_nombres"></div>
+        <div class="campo"><label>Actividad económica</label><input type="text" data-clave="contribuyente.actividad_economica"></div>
+      </div>
+    </section>
+
+    <section class="tarjeta" id="secDependientes">
+      <h2>Dependientes económicos <small>· deducción de 72 UVT c/u, máx. 4 · renglones 138–139</small></h2>
+      <p style="font-size:.78rem;color:#5a6b7f;margin:4px 0 0">Hijos menores de 18, hijos de 18–25 que estudien,
+        cónyuge o padres en situación de dependencia económica (Art. 336 num. 3 E.T.).</p>
+      <div id="listaDependientes"></div>
+      <button type="button" class="btn2" id="btnAgregarDep" style="margin-top:10px">＋ Agregar dependiente</button>
+      <span id="depResumen" style="font-size:.8rem;color:#5a6b7f;margin-left:10px"></span>
+      <div id="depAviso" class="alerta"></div>
+      <details style="margin-top:10px">
+        <summary>📎 Soportes exigibles en una revisión DIAN (Art. 387 par. 2 E.T.)</summary>
+        <ul style="font-size:.78rem;color:#5a6b7f;margin:6px 0 0 16px;line-height:1.7">
+          <li><b>Hijos &lt;18:</b> registro civil de nacimiento.</li>
+          <li><b>Hijos 18–25 estudiando:</b> registro civil + certificado de la institución educativa (educación financiada por el contribuyente).</li>
+          <li><b>Hijos mayores en dependencia física/psicológica:</b> certificado médico.</li>
+          <li><b>Cónyuge/compañero(a) permanente:</b> certificación de contador público de ingresos anuales &lt; 260 UVT, o certificado médico según el caso.</li>
+          <li><b>Padres o hermanos en dependencia económica:</b> certificación de contador (&lt; 260 UVT) o certificado médico.</li>
+        </ul>
+        <p style="font-size:.74rem;color:#5a6b7f;margin-top:4px">No se adjuntan a la declaración; se conservan por si la DIAN los exige (firmeza general: 3 años).</p>
+      </details>
+    </section>
+
+    <section class="tarjeta">
+      <h2>Patrimonio <small>· renglones 29–31</small></h2>
+      <div class="campos">
+        <div class="campo"><label>Patrimonio bruto (R29) — sume activos no reportados: vehículos, inmuebles, efectivo</label>
+          <input data-clave="patrimonio_bruto" data-tipo="monto"></div>
+        <div class="campo"><label>Deudas a 31 dic (R30)</label><input data-clave="deudas" data-tipo="monto"></div>
+      </div>
+    </section>
+
+    <section class="tarjeta">
+      <h2>Cédula general — Rentas de trabajo <small>· renglones 32–42</small></h2>
+      <div class="campos">
+        <div class="campo"><label>Ingresos brutos (R32)</label><input data-clave="trabajo.ingresos_brutos" data-tipo="monto"></div>
+        <div class="campo"><label>INCRNGO: aportes salud/pensión (R33)</label><input data-clave="trabajo.incrngo" data-tipo="monto"></div>
+        <div class="campo"><label>Aportes AFC / FVP (R35)</label><input data-clave="trabajo.rentas_exentas_afc_fvp" data-tipo="monto"></div>
+        <div class="campo"><label>Otras rentas exentas: cesantías… (R36, sin el 25%)</label><input data-clave="trabajo.otras_rentas_exentas" data-tipo="monto"></div>
+        <div class="campo"><label>Intereses de vivienda (R38)</label><input data-clave="trabajo.intereses_vivienda" data-tipo="monto"></div>
+        <div class="campo"><label>Otras deducciones: medicina prepagada… (R39)</label><input data-clave="trabajo.otras_deducciones" data-tipo="monto"></div>
+        <div class="campo"><label>Renta exenta 25% automática</label>
+          <select data-clave="aplicar_renta_exenta_25" data-tipo="bool"><option value="1">Sí</option><option value="0">No</option></select></div>
+      </div>
+    </section>
+
+    <section class="tarjeta">
+      <h2>Cédula general — Honorarios sin relación laboral <small>· renglones 43–57</small></h2>
+      <div class="campos">
+        <div class="campo"><label>Ingresos brutos (R43)</label><input data-clave="honorarios.ingresos_brutos" data-tipo="monto"></div>
+        <div class="campo"><label>INCRNGO (R44)</label><input data-clave="honorarios.incrngo" data-tipo="monto"></div>
+        <div class="campo"><label>Costos y gastos procedentes (R45)</label><input data-clave="honorarios.costos_deducciones" data-tipo="monto"></div>
+        <div class="campo"><label>Rentas exentas AFC/FVP (R47)</label><input data-clave="honorarios.rentas_exentas_afc_fvp" data-tipo="monto"></div>
+        <div class="campo"><label>Otras rentas exentas (R48)</label><input data-clave="honorarios.otras_rentas_exentas" data-tipo="monto"></div>
+        <div class="campo"><label>Deducciones imputables (R50-51)</label><input data-clave="honorarios.otras_deducciones" data-tipo="monto"></div>
+      </div>
+    </section>
+
+    <section class="tarjeta">
+      <h2>Cédula general — Rentas de capital <small>· renglones 58–73</small></h2>
+      <div class="campos">
+        <div class="campo"><label>Ingresos brutos: rendimientos, arriendos… (R58)</label><input data-clave="capital.ingresos_brutos" data-tipo="monto"></div>
+        <div class="campo"><label>INCRNGO: componente inflacionario 55,43% (R59)</label><input data-clave="capital.incrngo" data-tipo="monto"></div>
+        <div class="campo"><label>Costos y deducciones (R60)</label><input data-clave="capital.costos_deducciones" data-tipo="monto"></div>
+        <div class="campo"><label>Rentas exentas AFC/FVP (R63)</label><input data-clave="capital.rentas_exentas_afc_fvp" data-tipo="monto"></div>
+        <div class="campo"><label>Otras rentas exentas (R64)</label><input data-clave="capital.otras_rentas_exentas" data-tipo="monto"></div>
+        <div class="campo"><label>Intereses de vivienda (R66)</label><input data-clave="capital.intereses_vivienda" data-tipo="monto"></div>
+      </div>
+    </section>
+
+    <section class="tarjeta">
+      <h2>Cédula general — Rentas no laborales <small>· renglones 74–90</small></h2>
+      <div class="campos">
+        <div class="campo"><label>Ingresos brutos (R74)</label><input data-clave="no_laboral.ingresos_brutos" data-tipo="monto"></div>
+        <div class="campo"><label>Devoluciones, rebajas y descuentos (R75)</label><input data-clave="no_laboral.devoluciones" data-tipo="monto"></div>
+        <div class="campo"><label>INCRNGO (R76)</label><input data-clave="no_laboral.incrngo" data-tipo="monto"></div>
+        <div class="campo"><label>Costos y deducciones (R77)</label><input data-clave="no_laboral.costos_deducciones" data-tipo="monto"></div>
+        <div class="campo"><label>Rentas exentas (R80-81)</label><input data-clave="no_laboral.otras_rentas_exentas" data-tipo="monto"></div>
+      </div>
+    </section>
+
+    <section class="tarjeta">
+      <h2>Cédula de pensiones <small>· renglones 99–103</small></h2>
+      <div class="campos">
+        <div class="campo"><label>Ingresos por pensiones (R99)</label><input data-clave="pension_ingresos" data-tipo="monto"></div>
+        <div class="campo"><label>INCRNGO (R100)</label><input data-clave="pension_incrngo" data-tipo="monto"></div>
+        <div class="campo"><label>Parte exenta (R102)</label><input data-clave="pension_exenta" data-tipo="monto"></div>
+      </div>
+    </section>
+
+    <section class="tarjeta">
+      <h2>Cédula de dividendos <small>· renglones 104–110</small></h2>
+      <div class="campos">
+        <div class="campo"><label>Dividendos 2016 y anteriores (R104)</label><input data-clave="dividendos_2016_anteriores" data-tipo="monto"></div>
+        <div class="campo"><label>1a subcédula 2017+ (R107)</label><input data-clave="dividendos_sub1" data-tipo="monto"></div>
+        <div class="campo"><label>2a subcédula 2017+ (R108)</label><input data-clave="dividendos_sub2" data-tipo="monto"></div>
+        <div class="campo"><label>Del exterior (R109)</label><input data-clave="dividendos_exterior" data-tipo="monto"></div>
+      </div>
+    </section>
+
+    <section class="tarjeta">
+      <h2>Ganancias ocasionales, retenciones y saldos <small>· renglones 112–135</small></h2>
+      <div class="campos">
+        <div class="campo"><label>Ingresos ganancias ocasionales (R112)</label><input data-clave="go_ingresos" data-tipo="monto"></div>
+        <div class="campo"><label>Costos (R113)</label><input data-clave="go_costos" data-tipo="monto"></div>
+        <div class="campo"><label>Exentas / no gravadas (R114)</label><input data-clave="go_exentas" data-tipo="monto"></div>
+        <div class="campo"><label>De lo anterior, loterías/rifas (20%)</label><input data-clave="go_loterias" data-tipo="monto"></div>
+        <div class="campo"><label>Compras con factura electrónica (deducción 1%)</label><input data-clave="compras_factura_electronica" data-tipo="monto"></div>
+        <div class="campo"><label>Retenciones del año (R132)</label><input data-clave="retenciones" data-tipo="monto"></div>
+        <div class="campo"><label>Saldo a favor año anterior (R131)</label><input data-clave="saldo_favor_anterior" data-tipo="monto"></div>
+        <div class="campo"><label>Anticipo liquidado año anterior (R130)</label><input data-clave="anticipo_anterior" data-tipo="monto"></div>
+        <div class="campo"><label>Impuesto neto año anterior (para anticipo)</label><input data-clave="impuesto_neto_anio_anterior" data-tipo="monto"></div>
+        <div class="campo"><label>Años declarando</label>
+          <select data-clave="numero_anio_declaracion" data-tipo="entero">
+            <option value="1">Primera vez (25%)</option><option value="2">Segundo año (50%)</option>
+            <option value="3" selected>Tercero o más (75%)</option></select></div>
+        <div class="campo"><label>Descuento por donaciones (R123)</label><input data-clave="descuento_donaciones" data-tipo="monto"></div>
+        <div class="campo"><label>Sanciones (R135)</label><input data-clave="sanciones" data-tipo="monto"></div>
+      </div>
+    </section>
+
+    <div id="resultado">
+      <div class="fila">
+        <div class="kpi"><div class="etiq">Renta líq. gravable (R97+R103)</div><div class="val" id="kpiBase">—</div></div>
+        <div class="kpi"><div class="etiq">Impuesto a cargo (R129)</div><div class="val" id="kpiImpuesto">—</div></div>
+        <div class="kpi"><div class="etiq">Anticipo 2026 (R133)</div><div class="val" id="kpiAnticipo">—</div></div>
+        <div class="kpi"><div class="etiq">Saldo a pagar (R136)</div><div class="val pagar" id="kpiPagar">—</div></div>
+        <div class="kpi"><div class="etiq">Saldo a favor (R137)</div><div class="val favor" id="kpiFavor">—</div></div>
+        <div style="flex:1"></div>
+        <button class="btn2" id="btnRecalcular">Recalcular</button>
+        <button class="btn2" id="btnPdf" disabled>📄 Resumen ejecutivo PDF</button>
+        <button class="btn2" id="btnF210Pdf" disabled>🧾 Formulario 210 PDF</button>
+        <button id="btnDescargar" disabled>⬇ Descargar Formulario 210</button>
+      </div>
+      <div id="advertenciasCalc"></div>
+      <details><summary>Ver todos los renglones</summary>
+        <table id="tablaRenglones"><thead><tr><th>Renglón</th><th class="num">Valor</th></tr></thead><tbody></tbody></table>
+      </details>
+    </div>
+  </div>
+</main>
+
+<script>
+let token = null;
+let datos = null;
+const $ = s => document.querySelector(s);
+const fmt = n => (n === null || n === undefined) ? "—" : Number(n).toLocaleString("es-CO", {maximumFractionDigits: 0});
+
+// ------- carga por arrastre / clic -------
+const dz = $("#dropzone"), selector = $("#selector");
+dz.addEventListener("click", () => selector.click());
+["dragenter","dragover"].forEach(ev => dz.addEventListener(ev, e => {e.preventDefault(); dz.classList.add("arrastrando");}));
+["dragleave","drop"].forEach(ev => dz.addEventListener(ev, e => {e.preventDefault(); dz.classList.remove("arrastrando");}));
+dz.addEventListener("drop", e => { if (e.dataTransfer.files.length) cargar(e.dataTransfer.files[0]); });
+selector.addEventListener("change", () => { if (selector.files.length) cargar(selector.files[0]); });
+
+async function cargar(archivo) {
+  $("#errorCarga").classList.add("oculto");
+  dz.querySelector("b").textContent = "Procesando " + archivo.name + "…";
+  const fd = new FormData();
+  fd.append("exogena", archivo);
+  try {
+    const r = await fetch("/api/cargar", {method: "POST", body: fd});
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error || "Error desconocido");
+    token = j.token; datos = j.datos;
+    mostrarResumen(j.resumen);
+    volcarDatosAFormulario();
+    renderDependientes();
+    $("#panel").classList.remove("oculto");
+    dz.querySelector("b").textContent = "✔ " + archivo.name + " — arrastre otro para reemplazar";
+    await recalcular();
+  } catch (err) {
+    dz.querySelector("b").textContent = "Arrastre aquí el archivo de exógena (.xlsx)";
+    const e = $("#errorCarga"); e.textContent = "⚠ " + err.message; e.classList.remove("oculto");
+  }
+}
+
+function mostrarResumen(res) {
+  $("#resumenTexto").innerHTML =
+    `<b>${res.nombre || "(sin nombre)"}</b> — ${res.identificacion || "?"} · Año ${res.anio || "?"} ` +
+    `<br>` +
+    Object.entries({ "Tope 1 Ingresos": res.topes.ingresos, "Tope 2 Patrimonio": res.topes.patrimonio,
+                     "Tope 3 TC": res.topes.consumos_tc, "Tope 4 Consignaciones": res.topes.consignaciones,
+                     "Tope 5 Compras": res.topes.compras })
+      .map(([k, v]) => `<span class="pill">${k}: $${fmt(v)}</span>`).join("");
+  $("#obligado").innerHTML = res.obligado.length
+    ? `<p class="alerta"><b>Está obligado a declarar:</b></p><ul class="obligado">` +
+      res.obligado.map(r => `<li>${r}</li>`).join("") + "</ul>"
+    : `<p style="color:var(--verde)">Con estos topes no estaría obligado a declarar (revise si fue responsable de IVA).</p>`;
+  $("#numPartidas").textContent = res.num_partidas;
+  const tb = $("#tablaPartidas tbody"); tb.innerHTML = "";
+  res.partidas.forEach(p => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${p.fila}</td><td>${p.renglon ? "R" + p.renglon : "—"}</td>` +
+      `<td>${p.detalle}</td><td>${p.informante}</td><td class="num">${fmt(p.valor)}</td><td>${p.nota || ""}</td>`;
+    tb.appendChild(tr);
+  });
+}
+
+// ------- dependientes económicos -------
+function renderDependientes() {
+  const cont = $("#listaDependientes");
+  cont.innerHTML = "";
+  (datos.dependientes_detalle || []).forEach((nombre, i) => {
+    const fila = document.createElement("div");
+    fila.style.cssText = "display:flex;gap:8px;margin-top:8px;align-items:center";
+    fila.innerHTML =
+      `<span style="font-size:.8rem;color:#7b8a9c;width:20px">${i + 1}.</span>` +
+      `<input type="text" placeholder="Nombre del dependiente" value="${(nombre || "").replace(/"/g, "&quot;")}"` +
+      ` data-dep="${i}" style="flex:1;max-width:380px;padding:7px 9px;border:1px solid var(--borde);border-radius:6px">` +
+      `<button type="button" class="btn2" data-quitar="${i}" title="Quitar">✕</button>`;
+    cont.appendChild(fila);
+  });
+  const n = (datos.dependientes_detalle || []).length;
+  datos.dependientes = n;
+  $("#depResumen").textContent = n === 0 ? "Sin dependientes registrados."
+    : `${n} dependiente(s) → deducción sobre los primeros ${Math.min(n, 4)}.`;
+  $("#depAviso").textContent = n > 4
+    ? "⚠ Solo los primeros 4 dependientes generan deducción (Art. 336 num. 3)." : "";
+}
+$("#btnAgregarDep").addEventListener("click", () => {
+  datos.dependientes_detalle = datos.dependientes_detalle || [];
+  datos.dependientes_detalle.push("");
+  renderDependientes();
+  const inputs = document.querySelectorAll("[data-dep]");
+  if (inputs.length) inputs[inputs.length - 1].focus();
+});
+$("#listaDependientes").addEventListener("click", e => {
+  if (e.target.dataset.quitar !== undefined) {
+    datos.dependientes_detalle.splice(Number(e.target.dataset.quitar), 1);
+    renderDependientes();
+    recalcular();
+  }
+});
+$("#listaDependientes").addEventListener("change", e => {
+  if (e.target.dataset.dep !== undefined) {
+    datos.dependientes_detalle[Number(e.target.dataset.dep)] = e.target.value.trim();
+    renderDependientes();
+    recalcular();
+  }
+});
+
+// ------- formulario <-> datos -------
+function leer(obj, ruta) { return ruta.split(".").reduce((o, k) => (o || {})[k], obj); }
+function escribir(obj, ruta, val) {
+  const partes = ruta.split("."); const ult = partes.pop();
+  const dest = partes.reduce((o, k) => o[k], obj); dest[ult] = val;
+}
+
+function volcarDatosAFormulario() {
+  document.querySelectorAll("[data-clave]").forEach(el => {
+    const v = leer(datos, el.dataset.clave);
+    if (el.dataset.tipo === "bool") el.value = v ? "1" : "0";
+    else if (el.dataset.tipo === "monto") el.value = v ? fmt(v) : "0";
+    else el.value = (v === null || v === undefined) ? "" : v;
+  });
+}
+
+function volcarFormularioADatos() {
+  document.querySelectorAll("[data-clave]").forEach(el => {
+    let v = el.value;
+    if (el.dataset.tipo === "monto") v = Number(String(v).replace(/[^\d\-]/g, "")) || 0;
+    else if (el.dataset.tipo === "entero") v = parseInt(v, 10) || 0;
+    else if (el.dataset.tipo === "bool") v = el.value === "1";
+    escribir(datos, el.dataset.clave, v);
+  });
+}
+
+document.addEventListener("change", e => {
+  if (e.target.matches("[data-clave]")) {
+    if (e.target.dataset.tipo === "monto")
+      e.target.value = fmt(Number(String(e.target.value).replace(/[^\d\-]/g, "")) || 0);
+    recalcular();
+  }
+});
+
+// ------- cálculo y descarga -------
+async function recalcular() {
+  if (!datos) return;
+  volcarFormularioADatos();
+  const r = await fetch("/api/calcular", {method: "POST",
+    headers: {"Content-Type": "application/json"}, body: JSON.stringify({datos})});
+  const j = await r.json();
+  if (!r.ok) { alert(j.error); return; }
+  const R = n => Number(j.renglones[String(n)] || 0);
+  $("#kpiBase").textContent = "$" + fmt(R(97) + R(103));
+  $("#kpiImpuesto").textContent = "$" + fmt(R(129));
+  $("#kpiAnticipo").textContent = "$" + fmt(R(133));
+  $("#kpiPagar").textContent = "$" + fmt(R(136));
+  $("#kpiFavor").textContent = "$" + fmt(R(137));
+  $("#advertenciasCalc").innerHTML = (j.advertencias || [])
+    .map(a => `<p class="alerta">⚠ ${a}</p>`).join("");
+  const tb = $("#tablaRenglones tbody"); tb.innerHTML = "";
+  const NOMBRES = {28:"1% factura electrónica",29:"Patrimonio bruto",30:"Deudas",31:"Patrimonio líquido",
+    32:"Ingresos trabajo",33:"INCRNGO trabajo",37:"Rentas exentas trabajo",41:"Exentas/deducciones limitadas trabajo",
+    42:"Renta líquida trabajo",43:"Ingresos honorarios",58:"Ingresos capital",59:"INCRNGO capital",
+    61:"Renta líquida capital",74:"Ingresos no laborales",91:"Renta líquida céd. general",
+    92:"Exentas y deducciones limitadas",93:"Renta líq. ordinaria céd. gral.",97:"Renta líq. gravable céd. gral.",
+    99:"Ingresos pensiones",103:"Gravable pensiones",111:"Renta líquida gravable total",115:"GO gravables",
+    116:"Impuesto rentas líquidas",121:"Total impuesto",125:"Descuentos",126:"Impuesto neto",
+    127:"Impuesto GO",129:"Total impuesto a cargo",130:"Anticipo año anterior",131:"Saldo favor anterior",
+    132:"Retenciones",133:"Anticipo año siguiente",134:"Saldo a pagar",135:"Sanciones",
+    136:"Total saldo a pagar",137:"Total saldo a favor",138:"Dependientes",139:"Deducción dependientes"};
+  Object.entries(j.renglones).forEach(([k, v]) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>R${k} ${NOMBRES[k] ? "· " + NOMBRES[k] : ""}</td><td class="num">${fmt(v)}</td>`;
+    tb.appendChild(tr);
+  });
+  $("#btnDescargar").disabled = false;
+  $("#btnPdf").disabled = false;
+  $("#btnF210Pdf").disabled = false;
+}
+
+async function descargarPdf(url, nombreDefecto) {
+  volcarFormularioADatos();
+  const r = await fetch(url, {method: "POST",
+    headers: {"Content-Type": "application/json"}, body: JSON.stringify({token, datos})});
+  if (!r.ok) { const j = await r.json().catch(() => ({})); alert(j.error || "Error generando el PDF"); return; }
+  const blob = await r.blob();
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  const cd = r.headers.get("Content-Disposition") || "";
+  a.download = (cd.match(/filename="?([^";]+)/) || [,nombreDefecto])[1];
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+$("#btnF210Pdf").addEventListener("click", () => descargarPdf("/api/formulario-pdf", "Formulario210.pdf"));
+$("#btnRecalcular").addEventListener("click", recalcular);
+
+$("#btnPdf").addEventListener("click", () => descargarPdf("/api/resumen-pdf", "ResumenEjecutivo.pdf"));
+
+$("#btnDescargar").addEventListener("click", async () => {
+  volcarFormularioADatos();
+  const r = await fetch("/api/generar", {method: "POST",
+    headers: {"Content-Type": "application/json"}, body: JSON.stringify({token, datos})});
+  if (!r.ok) { const j = await r.json().catch(() => ({})); alert(j.error || "Error generando el Excel"); return; }
+  const blob = await r.blob();
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  const cd = r.headers.get("Content-Disposition") || "";
+  a.download = (cd.match(/filename="?([^";]+)/) || [,"Formulario210.xlsx"])[1];
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+</script>
+</body>
+</html>

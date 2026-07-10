@@ -1,0 +1,17 @@
+# ============================================================
+# Llaves de ePayco — https://dashboard.epayco.com  →  Integraciones → Llaves
+# ============================================================
+# 1. Cree su cuenta de comercio en epayco.com (cédula + RUT + cuenta bancaria
+#    donde recibe: Bancolombia Ahorros 00514294607).
+# 2. Copie aquí las llaves. Mientras 'habilitado' sea false, la landing solo
+#    ofrece consignación manual.
+# 3. test: true usa el ambiente de pruebas de ePayco (no cobra dinero real).
+#    Tarjeta de prueba: 4575623182290326, cualquier fecha futura, CVC 123.
+# 4. La URL de confirmación (webhook) requiere que la app esté publicada en
+#    internet; mientras tanto, confirme los pagos en /admin.
+
+habilitado: false
+test: true
+public_key: ""        # llave pública (pk_...)
+p_cust_id: ""         # P_CUST_ID_CLIENTE (id del comercio)
+p_key: ""             # P_KEY (para validar la firma del webhook)

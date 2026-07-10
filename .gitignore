@@ -1,0 +1,31 @@
+# Entorno virtual (se regenera con requirements.txt)
+.venv/
+venv/
+
+# Cachés de Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Datos en ejecución (base de datos de usuarios, exógenas de clientes, órdenes)
+# NUNCA deben subirse: contienen información personal.
+sessions/
+uploads/
+
+# Sistema / temporales
+.DS_Store
+*.log
+nohup.out
+
+# ============================================================
+# SECRETOS — NUNCA subir a git. En Render se cargan como "Secret Files".
+# (En el repo solo quedan las plantillas *.example para ver la estructura.)
+# ============================================================
+config/oauth.yaml
+config/ia.yaml
+config/email.yaml
+config/wompi.yaml
+config/realmy.yaml
+config/epayco.yaml
+

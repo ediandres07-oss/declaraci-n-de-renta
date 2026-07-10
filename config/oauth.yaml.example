@@ -1,0 +1,46 @@
+# ============================================================
+# Autenticación social — Google y Microsoft
+# ============================================================
+# Mientras las llaves estén vacías, ese proveedor no aparece en el login.
+#
+# --- GOOGLE ---------------------------------------------------
+# 1. https://console.cloud.google.com  →  crea un proyecto.
+# 2. "APIs y servicios" → "Pantalla de consentimiento OAuth" → tipo Externo,
+#    agrega el scope de email y perfil.
+# 3. "Credenciales" → "Crear credenciales" → "ID de cliente de OAuth" →
+#    Aplicación web.
+# 4. URIs de redireccionamiento autorizados:
+#       http://127.0.0.1:5210/auth/google/callback     (local)
+#       https://TU-DOMINIO/auth/google/callback         (producción)
+# 5. Copia el Client ID y Client Secret aquí abajo.
+#
+# --- MICROSOFT ------------------------------------------------
+# 1. https://portal.azure.com → "Microsoft Entra ID" → "Registros de aplicaciones"
+#    → "Nuevo registro".
+# 2. Tipos de cuenta: "Cuentas en cualquier directorio y cuentas personales".
+# 3. URI de redirección (Web):
+#       http://127.0.0.1:5210/auth/microsoft/callback   (local)
+#       https://TU-DOMINIO/auth/microsoft/callback       (producción)
+# 4. "Certificados y secretos" → "Nuevo secreto de cliente" → copia el VALOR.
+# 5. El Application (client) ID es el client_id.
+
+# Clave para firmar las sesiones (cámbiala por una cadena larga y aleatoria).
+secret_key: ""
+
+# Ingreso de DEMOSTRACIÓN local (sin Google/Microsoft): permite entrar con
+# solo un correo para probar el panel "Mi cuenta".
+# ⚠️ DÉJALO EN false: el login real de Google/Microsoft ya está activo.
+# Si lo enciendes, cualquiera podría escribir un correo autorizado y colarse.
+demo_local: false
+
+google:
+  habilitado: true
+  client_id: ""
+  client_secret: ""
+
+microsoft:
+  habilitado: true
+  client_id: ""
+  client_secret: ""
+  # 'common' permite cuentas personales y de organización.
+  tenant: "common"

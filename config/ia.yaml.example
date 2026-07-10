@@ -1,0 +1,30 @@
+# ============================================================
+# Asistente de IA (chat en la web) — responde dudas del servicio
+# Usa Google Gemini en su plan GRATUITO (Google AI Studio).
+# ============================================================
+# Mientras 'habilitado' sea false o falte la api_key, la burbuja de chat NO
+# aparece en la página (falla de forma segura, sin errores).
+#
+# --- CÓMO OBTENER LA API KEY (GRATIS, sin tarjeta) ----------
+# 1. Entra a https://aistudio.google.com/apikey  (con tu cuenta de Google).
+# 2. Clic en "Create API key" / "Crear clave de API". Copia la clave.
+# 3. Pégala abajo en 'api_key' y pon 'habilitado: true'.
+#    El plan gratuito tiene límites por minuto/día, suficientes para un
+#    chat de preguntas frecuentes de un negocio.
+#
+# 'modelo' — modelos gratuitos de Gemini (rápidos, buenos para FAQ):
+#   gemini-2.0-flash   → estable y recomendado
+#   gemini-2.5-flash   → más nuevo (si está disponible en tu cuenta)
+
+habilitado: true
+api_key: ""   # AI Studio (nivel gratuito)
+modelo: "gemini-2.5-flash"
+
+# Nombre visible del asistente en el chat.
+nombre_asistente: "Asistente de Renta"
+
+# Datos del negocio que el asistente puede compartir con el cliente.
+negocio:
+  nombre: "Declaración de Renta"
+  whatsapp: ""        # con indicativo de país (57 = Colombia)
+  correo: "ediandres07@gmail.com"

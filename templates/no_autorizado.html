@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Acceso restringido</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root { --azul:#123f6b; --azul2:#1e6bb5; --rojo:#c0392b; --borde:#dbe3ec; --gris:#f5f7fa; }
+  * { box-sizing:border-box; margin:0; }
+  body { font-family:-apple-system,'Segoe UI',Roboto,sans-serif; color:#1e2b3a;
+         background:linear-gradient(150deg,var(--azul) 0%,var(--azul2) 100%);
+         min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; }
+  .caja { background:#fff; border-radius:18px; max-width:440px; width:100%; padding:38px 32px;
+          box-shadow:0 18px 50px rgba(10,25,45,.3); text-align:center; }
+  .icono { font-size:2.6rem; }
+  h1 { color:var(--azul); font-size:1.4rem; margin:14px 0 8px; }
+  p { color:#5a6b7f; font-size:.92rem; line-height:1.6; }
+  .quien { background:var(--gris); border:1px solid var(--borde); border-radius:10px;
+           padding:12px 14px; margin:18px 0; font-size:.85rem; }
+  .quien b { color:var(--azul); }
+  .acciones { display:flex; gap:10px; margin-top:20px; }
+  .acciones a { flex:1; text-decoration:none; padding:12px; border-radius:10px; font-weight:700;
+                font-size:.9rem; transition: transform .15s ease, box-shadow .15s ease; }
+  .acciones a:hover { transform:translateY(-2px); box-shadow:0 8px 18px rgba(10,25,45,.18); }
+  .btn-inicio { background:#e8eef6; color:var(--azul); }
+  .btn-salir { background:var(--rojo); color:#fff; }
+</style>
+</head>
+<body>
+  <div class="caja">
+    <div class="icono">🔒</div>
+    <h1>Acceso restringido</h1>
+    <p>Esta sección es exclusiva para <b>personal autorizado</b>. Tu cuenta no tiene
+       permisos para el acceso profesional.</p>
+    <div class="quien">Ingresaste como <b>{{ email }}</b></div>
+    <p style="font-size:.82rem">Si crees que deberías tener acceso, contacta al administrador
+       para que agregue tu correo a la lista de personal autorizado.</p>
+    <div class="acciones">
+      <a class="btn-inicio" href="/">← Ir al inicio</a>
+      <a class="btn-salir" href="/logout">Cerrar sesión</a>
+    </div>
+  </div>
+</body>
+</html>

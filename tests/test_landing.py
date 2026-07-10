@@ -1,0 +1,271 @@
+"""Flujo comercial de la landing: verificación, checkout y desbloqueo por pago."""
+import json
+
+import pytest
+
+from webapp import app
+from .conftest import EXOGENA
+
+
+@pytest.fixture()
+def cliente(tmp_path, monkeypatch):
+    import webapp as w
+    monkeypatch.setattr(w, "ORDENES_PATH", tmp_path / "ordenes.json")
+    monkeypatch.setattr(w, "UPLOADS_DIR", tmp_path / "uploads")
+    monkeypatch.setattr(w, "CLIENTES_DIR", tmp_path / "clientes")
+    app.config["TESTING"] = True
+    with app.test_client() as c:
+        # inicia sesión como personal autorizado (para /admin, /liquidador,
+        # confirmar-pago). Los endpoints públicos de la landing no lo requieren.
+        _login_autorizado(c)
+        yield c
+
+
+def _login_autorizado(cliente):
+    """Crea/usa un usuario autorizado (config/acceso.yaml) y abre su sesión."""
+    from src.auth import db, Usuario, _correos_autorizados
+    email = next(iter(_correos_autorizados()), "staff@test.com")
+    with app.app_context():
+        u = Usuario.query.filter_by(email=email).first()
+        if u is None:
+            u = Usuario(proveedor="google", proveedor_id="staff", email=email, nombre="Staff")
+            db.session.add(u)
+            db.session.commit()
+        elif u.proveedor not in ("google", "microsoft"):
+            u.proveedor = "google"
+            db.session.commit()
+        uid = u.id
+    with cliente.session_transaction() as s:
+        s["uid"] = uid
+
+
+def _cargar(cliente):
+    with open(EXOGENA, "rb") as fh:
+        return cliente.post("/api/cargar-landing",
+                            data={"exogena": (fh, "exogena.xlsx")},
+                            content_type="multipart/form-data")
+
+
+def test_landing_carga_muestra_solo_resultado_comercial(cliente):
+    r = _cargar(cliente)
+    assert r.status_code == 200
+    j = r.get_json()
+    assert j["obligado"] is True and len(j["razones"]) == 3
+    assert j["nit_final"] == "30"
+    assert j["fecha_limite_iso"] == "2026-09-02"    # NIT termina en 30 → 2/sep/2026
+    assert j["valor_a_pagar"] > 0
+    # el liquidador queda oculto: no se exponen renglones ni partidas
+    assert "renglones" not in j and "partidas" not in j and "datos" not in j
+
+
+def test_pdf_bloqueado_hasta_pagar(cliente):
+    token = _cargar(cliente).get_json()["token"]
+    r = cliente.post("/api/checkout", json={
+        "token": token, "plan": "pdf",
+        "contacto": {"nombre": "Eli", "email": "eli@test.com"}})
+    assert r.status_code == 200
+    orden = r.get_json()["orden_id"]
+
+    r = cliente.get(f"/api/orden/{orden}/formulario.pdf")
+    assert r.status_code == 402                      # sin pago no hay PDF
+
+    r = cliente.post("/api/confirmar-pago", json={"orden_id": orden})
+    assert r.get_json()["estado"] == "pagada"
+
+    r = cliente.get(f"/api/orden/{orden}/formulario.pdf")
+    assert r.status_code == 200
+    assert r.data[:5] == b"%PDF-"
+
+
+def test_checkout_requiere_contacto(cliente):
+    token = _cargar(cliente).get_json()["token"]
+    r = cliente.post("/api/checkout", json={"token": token, "plan": "pdf", "contacto": {}})
+    assert r.status_code == 400
+
+
+def test_plan_presentacion_queda_en_tramite(cliente):
+    token = _cargar(cliente).get_json()["token"]
+    orden = cliente.post("/api/checkout", json={
+        "token": token, "plan": "presentacion",
+        "contacto": {"telefono": "3000000000"}}).get_json()["orden_id"]
+    r = cliente.post("/api/confirmar-pago", json={"orden_id": orden})
+    assert r.get_json()["estado"] == "pagada_en_tramite"
+
+
+def test_landing_html_sirve(cliente):
+    r = cliente.get("/")
+    html = r.data.decode()
+    assert "declaración de renta" in html.lower()
+    assert "exógena" in html.lower()
+    r2 = cliente.get("/liquidador")
+    assert r2.status_code == 200 and "Dependientes" in r2.data.decode()
+
+
+def test_recalcular_con_dependientes_rebaja_el_pago(cliente):
+    j = _cargar(cliente).get_json()
+    base = j["valor_a_pagar"]
+    r = cliente.post("/api/recalcular-landing", json={"token": j["token"], "dependientes": 2})
+    assert r.status_code == 200
+    k = r.get_json()
+    assert k["valor_a_pagar"] < base            # 2 dependientes rebajan el pago
+    assert k["ahorro"] == pytest.approx(base - k["valor_a_pagar"], abs=1)
+
+    # la elección queda guardada: el PDF pagado sale con la deducción
+    orden = cliente.post("/api/checkout", json={
+        "token": j["token"], "plan": "pdf",
+        "contacto": {"email": "x@y.co"}}).get_json()["orden_id"]
+    cliente.post("/api/confirmar-pago", json={"orden_id": orden})
+    pdf = cliente.get(f"/api/orden/{orden}/formulario.pdf")
+    assert pdf.status_code == 200
+    import io
+    from pypdf import PdfReader
+    texto = "".join(p.extract_text() for p in PdfReader(io.BytesIO(pdf.data)).pages)
+    assert "7,171,000" in texto                 # R139: 2 × 72 UVT
+
+
+def test_recalcular_sin_token_falla(cliente):
+    r = cliente.post("/api/recalcular-landing", json={"token": "nope", "dependientes": 1})
+    assert r.status_code == 400
+
+
+def test_plan_recomendado_guarda_el_archivo(cliente, tmp_path):
+    import webapp as w
+    j = _cargar(cliente).get_json()
+    # el archivo queda en espera en uploads
+    assert (w.UPLOADS_DIR / f"{j['token']}.xlsx").exists()
+
+    orden = cliente.post("/api/checkout", json={
+        "token": j["token"], "plan": "presentacion",
+        "contacto": {"email": "x@y.co"}}).get_json()["orden_id"]
+    cliente.post("/api/confirmar-pago", json={"orden_id": orden})
+
+    # aceptado el recomendado: copia permanente para el trámite
+    guardados = list(w.CLIENTES_DIR.glob(f"{orden}_Exogena_*.xlsx"))
+    assert len(guardados) == 1
+    assert "44004730" in guardados[0].name
+
+
+def test_si_no_acepta_puede_eliminar(cliente):
+    import webapp as w
+    j = _cargar(cliente).get_json()
+    archivo = w.UPLOADS_DIR / f"{j['token']}.xlsx"
+    assert archivo.exists()
+
+    # crea una orden que nunca paga
+    cliente.post("/api/checkout", json={"token": j["token"], "plan": "pdf",
+                                        "contacto": {"email": "x@y.co"}})
+    r = cliente.post("/api/eliminar-datos", json={"token": j["token"]})
+    assert r.status_code == 200 and r.get_json()["eliminado"] is True
+    assert not archivo.exists()                      # archivo borrado
+    # los datos también: recalcular ya no funciona
+    r = cliente.post("/api/recalcular-landing", json={"token": j["token"], "dependientes": 1})
+    assert r.status_code == 400
+    # y no quedan órdenes pendientes suyas
+    ordenes = w._leer_ordenes()
+    assert not any(o.get("token") == j["token"] for o in ordenes.values())
+
+
+def test_eliminar_no_borra_tramite_pagado(cliente):
+    import webapp as w
+    j = _cargar(cliente).get_json()
+    orden = cliente.post("/api/checkout", json={
+        "token": j["token"], "plan": "presentacion",
+        "contacto": {"email": "x@y.co"}}).get_json()["orden_id"]
+    cliente.post("/api/confirmar-pago", json={"orden_id": orden})
+    cliente.post("/api/eliminar-datos", json={"token": j["token"]})
+    # la copia del trámite aceptado se conserva y la orden pagada también
+    assert list(w.CLIENTES_DIR.glob(f"{orden}_Exogena_*.xlsx"))
+    assert w._leer_ordenes()[orden]["estado"] == "pagada_en_tramite"
+
+
+def test_checklist_documentos_con_tramite_pagado(cliente):
+    import webapp as w
+    j = _cargar(cliente).get_json()
+    orden = cliente.post("/api/checkout", json={
+        "token": j["token"], "plan": "presentacion",
+        "contacto": {"email": "x@y.co"}}).get_json()["orden_id"]
+
+    # sin pago, el checklist también está bloqueado
+    assert cliente.get(f"/api/orden/{orden}/documentos.pdf").status_code == 402
+
+    cliente.post("/api/confirmar-pago", json={"orden_id": orden})
+    r = cliente.get(f"/api/orden/{orden}/documentos.pdf")
+    assert r.status_code == 200 and r.data[:5] == b"%PDF-"
+
+    import io
+    from pypdf import PdfReader
+    texto = "".join(p.extract_text() for p in PdfReader(io.BytesIO(r.data)).pages)
+    assert "Documentos para su declaración de renta" in texto
+    assert "RUT actualizado" in texto
+    assert "ELIZABETH" in texto            # personalizado
+    assert "2026-09-02" in texto           # su fecha límite
+
+    # copia del checklist guardada junto al trámite para control interno
+    assert list(w.CLIENTES_DIR.glob(f"{orden}_Documentos_*.pdf"))
+
+
+def test_reportar_pago_no_desbloquea_hasta_confirmar(cliente):
+    """El cliente reporta la consignación pero el PDF solo se libera cuando
+    el administrador verifica que llegó a la cuenta Bancolombia."""
+    j = _cargar(cliente).get_json()
+    r = cliente.post("/api/checkout", json={"token": j["token"], "plan": "pdf",
+                                            "contacto": {"email": "x@y.co"}})
+    assert "numero" in r.get_json()["pago"]      # instrucciones de consignación
+    orden = r.get_json()["orden_id"]
+
+    r = cliente.post("/api/reportar-pago", json={"orden_id": orden})
+    assert r.get_json()["estado"] == "pago_reportado"
+    assert cliente.get(f"/api/orden/{orden}/formulario.pdf").status_code == 402
+
+    cliente.post("/api/confirmar-pago", json={"orden_id": orden})
+    assert cliente.get(f"/api/orden/{orden}/formulario.pdf").status_code == 200
+
+
+def test_admin_lista_ordenes(cliente):
+    j = _cargar(cliente).get_json()
+    orden = cliente.post("/api/checkout", json={"token": j["token"], "plan": "presentacion",
+                                                "contacto": {"telefono": "300"}}).get_json()["orden_id"]
+    cliente.post("/api/reportar-pago", json={"orden_id": orden})
+    html = cliente.get("/admin").data.decode()
+    assert orden in html
+    assert "pago reportado" in html
+    assert "00514294607" in html
+
+
+def test_liquidador_y_admin_bloqueados_sin_autorizacion(tmp_path, monkeypatch):
+    """El acceso profesional (/liquidador, /admin, confirmar-pago) exige personal autorizado."""
+    import webapp as w
+    from src.auth import db, Usuario
+    monkeypatch.setattr(w, "ORDENES_PATH", tmp_path / "ordenes.json")
+    app.config["TESTING"] = True
+    with app.test_client() as c:
+        # sin sesión → redirige a login
+        assert c.get("/liquidador").status_code == 302
+        assert c.get("/admin").status_code == 302
+        assert c.post("/api/confirmar-pago", json={"orden_id": "x"}).status_code == 302
+        # con sesión de un usuario NO autorizado → 403
+        with app.app_context():
+            Usuario.query.filter_by(email="intruso@test.com").delete(); db.session.commit()
+            u = Usuario(proveedor="demo", proveedor_id="i", email="intruso@test.com", nombre="Intruso")
+            db.session.add(u); db.session.commit(); uid = u.id
+        with c.session_transaction() as s:
+            s["uid"] = uid
+        assert c.get("/liquidador").status_code == 403
+        assert c.get("/admin").status_code == 403
+        assert c.post("/api/confirmar-pago", json={"orden_id": "x"}).status_code == 403
+        with app.app_context():
+            Usuario.query.filter_by(email="intruso@test.com").delete(); db.session.commit()
+
+
+def test_demo_con_correo_admin_no_es_autorizado():
+    """Un ingreso 'demo' con un correo autorizado NO debe dar acceso de admin."""
+    from src.auth import es_autorizado, _correos_autorizados
+
+    class _U:
+        def __init__(self, proveedor, email):
+            self.proveedor = proveedor; self.email = email
+
+    correo_admin = next(iter(_correos_autorizados()), "staff@test.com")
+    assert es_autorizado(_U("demo", correo_admin)) is False       # demo NO
+    assert es_autorizado(_U("google", correo_admin)) is True      # google SÍ
+    assert es_autorizado(_U("google", "otro@test.com")) is False  # no está en la lista
