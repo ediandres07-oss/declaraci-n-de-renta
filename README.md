@@ -145,8 +145,52 @@ Todo vive en `config/parametros_2025.yaml`:
 - Deducción **1%** compras con factura electrónica, tope 240 UVT — fuera del 40%.
 - Tabla **Art. 241 E.T.** (0/19/28/33/35/37/39%).
 - Renta presuntiva **0%** (vigente desde AG 2021).
-- Ganancias ocasionales **15%** general / **20%** loterías.
+- Ganancias ocasionales **15%** general / **20%** loterías (Art. 317, sin costos
+  ni exención).
+- Exenciones de ganancias ocasionales por tipo, en `ganancias_ocasionales.tipos`:
+  vivienda del causante **13.000 UVT** (Art. 307 num. 1), otros inmuebles
+  heredados **6.500 UVT** (num. 2), porción conyugal **3.250 UVT** (num. 3),
+  no legitimarios **20% con techo de 1.625 UVT** (num. 4), seguros de vida
+  **3.250 UVT** (Art. 303-1) y venta de vivienda de habitación **5.000 UVT**
+  (Art. 311-1, solo si el avalúo catastral no supera 15.000 UVT y el producto se
+  deposita en una cuenta AFC). **Verifíquelas**: los numerales del Art. 307 y el
+  Art. 311-1 han cambiado en reformas recientes.
 - Anticipo Art. 807: 25% / 50% / 75% con el método más favorable.
+
+## Firma y verificación del borrador
+
+El Formulario 210 en PDF sale **rellenable**: cada renglón es un campo AcroForm
+editable en cualquier lector, no texto pintado. Los importes viven en los campos
+(`R29`, `R115`, …), no en la capa de texto de la página: para leerlos por
+programa use `PdfReader(...).get_fields()`, no `extract_text()`.
+
+Cada PDF lleva impreso un **código de verificación** derivado de su SHA-256, que
+permite comprobar que el documento entregado es el que se generó
+(`src/firma.sello_integridad` / `verificar_sello`).
+
+Opcionalmente se puede firmar con un certificado propio (`.p12`/`.pfx`) mediante
+**PAdES** (`POST /api/firmar-pdf`, o `src.firma.firmar_pdf`). El certificado y su
+contraseña se procesan en memoria y nunca se escriben a disco ni a los logs.
+`src.firma.validar_firma` devuelve `integro=False` si el PDF fue alterado después
+de firmarse.
+
+> ⚠️ **La firma NO presenta la declaración ante la DIAN.** El Formulario 210 se
+> radica únicamente en el portal MUISCA con la *Firma Electrónica* que la DIAN
+> emite al contribuyente y que está atada a su RUT; no existe API pública de
+> radicación ni se acepta un PDF firmado localmente. La firma PAdES sirve para
+> acreditar la integridad y el origen del **borrador** que un contador entrega a
+> su cliente.
+
+## Segundo factor (2FA)
+
+Los usuarios pueden activar **TOTP** (Google Authenticator, Authy, etc.) desde
+*Mi cuenta*: `POST /api/configurar-2fa` devuelve el QR, y `POST /api/confirmar-2fa`
+lo activa solo tras validar un código real, entregando 10 **códigos de respaldo**
+de un solo uso (se guardan hasheados, nunca en claro).
+
+Con 2FA activo, superar el login social **no abre sesión**: el usuario queda en
+`uid_pendiente` y solo se promueve a sesión real tras verificar su código en
+`/verificar-mfa`. Cinco intentos fallidos bloquean la cuenta 15 minutos.
 
 ### Limitaciones conocidas
 

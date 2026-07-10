@@ -106,6 +106,15 @@ class Parametros:
         return float(self._data["ganancias_ocasionales"]["tarifa_loterias"])
 
     @property
+    def go_tipos(self) -> Dict[str, Any]:
+        return dict(self._data["ganancias_ocasionales"].get("tipos", {}))
+
+    def go_tipo(self, clave: str) -> Dict[str, Any]:
+        """Configuración de un tipo de GO; cae en 'otra' si la clave no existe."""
+        tipos = self.go_tipos
+        return tipos.get(clave, tipos.get("otra", {"exencion": {"tipo": "none"}}))
+
+    @property
     def anticipo_porcentajes(self) -> Dict[int, float]:
         a = self._data["anticipo"]
         return {

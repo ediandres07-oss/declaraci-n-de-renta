@@ -92,6 +92,38 @@ ganancias_ocasionales:
   tarifa_general: 0.15          # Ley 2277/2022 subió del 10% al 15%
   tarifa_loterias: 0.20
 
+  # Catálogo de tipos de ganancia ocasional con su regla de exención.
+  # ADVERTENCIA: estos topes son la lectura del E.T. vigente al AG 2025 y la
+  # Ley 2277/2022. VERIFÍQUELOS con un profesional antes de declarar: los
+  # numerales del Art. 307 y el Art. 311-1 han cambiado en reformas recientes.
+  #
+  # exencion.tipo:
+  #   none               -> sin exención
+  #   tope               -> exento hasta `tope_uvt`, capado a la base gravable
+  #   porcentaje_tope    -> exento el `porcentaje` del ingreso, con techo `tope_uvt`
+  #   vivienda_habitacion-> como `tope`, pero solo si el avalúo catastral no supera
+  #                         `tope_catastral_uvt` y el producto se depositó en AFC
+  tipos:
+    venta_activo_fijo:                  # activo poseído > 2 años (Art. 300)
+      exencion: {tipo: none}
+    venta_vivienda_habitacion:          # Art. 311-1
+      exencion: {tipo: vivienda_habitacion, tope_uvt: 5000, tope_catastral_uvt: 15000}
+    herencia_vivienda_causante:         # Art. 307 num. 1
+      exencion: {tipo: tope, tope_uvt: 13000}
+    herencia_inmueble_distinto:         # Art. 307 num. 2
+      exencion: {tipo: tope, tope_uvt: 6500}
+    herencia_porcion_conyugal:          # Art. 307 num. 3
+      exencion: {tipo: tope, tope_uvt: 3250}
+    herencia_no_legitimario:            # Art. 307 num. 4 (20%, techo 1.625 UVT)
+      exencion: {tipo: porcentaje_tope, porcentaje: 0.20, tope_uvt: 1625}
+    seguro_vida:                        # Art. 303-1
+      exencion: {tipo: tope, tope_uvt: 3250}
+    loteria_rifa_apuesta:               # Art. 317: 20%, sin costos ni exención
+      loteria: true
+      exencion: {tipo: none}
+    otra:
+      exencion: {tipo: none}
+
 # ---------------------------------------------------------------------
 # Anticipo de renta (Art. 807 E.T.)
 # ---------------------------------------------------------------------

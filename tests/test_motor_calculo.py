@@ -2,7 +2,7 @@
 import pytest
 
 from src.entrevista import mapear_exogena_a_datos
-from src.modelos import DatosDeclaracion, SubcedulaGeneral
+from src.modelos import DatosDeclaracion, GananciaOcasional, SubcedulaGeneral
 from src.motor_calculo import calcular, calcular_renta_exenta_25
 
 
@@ -139,6 +139,147 @@ def test_go_tarifas_general_y_loterias(parametros):
     assert liq.r(115) == 80_000_000
     esperado = round((50_000_000 * 0.15 + 30_000_000 * 0.20) / 1000) * 1000
     assert liq.r(127) == esperado
+
+
+def _liq_go(parametros, *partidas):
+    d = DatosDeclaracion(go_partidas=list(partidas), patrimonio_bruto=1)
+    return calcular(d, parametros)
+
+
+def test_go_herencia_vivienda_causante_exenta_hasta_13000_uvt(parametros):
+    """Art. 307 num. 1: exentas las primeras 13.000 UVT."""
+    liq = _liq_go(parametros, GananciaOcasional(
+        tipo="herencia_vivienda_causante", ingreso=800_000_000))
+    exento = 13_000 * parametros.uvt          # 647.387.000
+    assert liq.r(114) == exento
+    assert liq.r(115) == 800_000_000 - exento
+    assert liq.r(127) == round((800_000_000 - exento) * 0.15 / 1000) * 1000
+
+
+def test_go_no_legitimario_20pct_cuando_el_tope_no_ata(parametros):
+    """Art. 307 num. 4: 20% del valor, techo 1.625 UVT (aquí no lo alcanza)."""
+    liq = _liq_go(parametros, GananciaOcasional(
+        tipo="herencia_no_legitimario", ingreso=100_000_000))
+    assert liq.r(114) == 20_000_000
+    assert liq.r(115) == 80_000_000
+
+
+def test_go_no_legitimario_topado_a_1625_uvt(parametros):
+    """El 20% de 500M (=100M) supera el techo, así que manda el techo."""
+    liq = _liq_go(parametros, GananciaOcasional(
+        tipo="herencia_no_legitimario", ingreso=500_000_000))
+    techo = 1_625 * parametros.uvt            # 80.923.375
+    assert liq.r(114) == techo
+    assert liq.r(115) == 500_000_000 - techo
+
+
+def test_go_loteria_ignora_costos_y_no_tiene_exencion(parametros):
+    """Art. 317: 20% sobre el bruto, sin costo fiscal ni exención."""
+    liq = _liq_go(parametros, GananciaOcasional(
+        tipo="loteria_rifa_apuesta", ingreso=50_000_000, costo_fiscal=999))
+    assert liq.r(113) == 0
+    assert liq.r(114) == 0
+    assert liq.r(115) == 50_000_000
+    assert liq.r(127) == 10_000_000
+
+
+def test_go_vivienda_habitacion_exenta_si_cumple_catastro_y_afc(parametros):
+    """Art. 311-1: hasta 5.000 UVT si el catastral no pasa de 15.000 UVT y hay AFC."""
+    liq = _liq_go(parametros, GananciaOcasional(
+        tipo="venta_vivienda_habitacion", ingreso=300_000_000,
+        valor_catastral=14_000 * parametros.uvt, deposito_afc=True))
+    exento = 5_000 * parametros.uvt           # 248.995.000
+    assert liq.r(114) == exento
+    assert liq.r(127) == round((300_000_000 - exento) * 0.15 / 1000) * 1000
+
+
+def test_go_vivienda_habitacion_sin_afc_no_exenta(parametros):
+    liq = _liq_go(parametros, GananciaOcasional(
+        tipo="venta_vivienda_habitacion", ingreso=300_000_000,
+        valor_catastral=14_000 * parametros.uvt, deposito_afc=False))
+    assert liq.r(114) == 0
+    assert liq.r(115) == 300_000_000
+
+
+def test_go_vivienda_habitacion_catastral_excedido_no_exenta(parametros):
+    liq = _liq_go(parametros, GananciaOcasional(
+        tipo="venta_vivienda_habitacion", ingreso=300_000_000,
+        valor_catastral=16_000 * parametros.uvt, deposito_afc=True))
+    assert liq.r(114) == 0
+
+
+def test_go_venta_activo_fijo_descuenta_costo_sin_exencion(parametros):
+    liq = _liq_go(parametros, GananciaOcasional(
+        tipo="venta_activo_fijo", ingreso=200_000_000, costo_fiscal=120_000_000))
+    assert liq.r(113) == 120_000_000
+    assert liq.r(114) == 0
+    assert liq.r(115) == 80_000_000
+    assert liq.r(127) == 12_000_000
+
+
+def test_go_mezcla_tarifas_15_y_20(parametros):
+    liq = _liq_go(
+        parametros,
+        GananciaOcasional(tipo="venta_activo_fijo", ingreso=100_000_000,
+                          costo_fiscal=40_000_000),          # 60M al 15%
+        GananciaOcasional(tipo="loteria_rifa_apuesta", ingreso=25_000_000))  # 25M al 20%
+    assert liq.r(115) == 85_000_000
+    assert liq.r(127) == round((60_000_000 * 0.15 + 25_000_000 * 0.20) / 1000) * 1000
+
+
+def test_go_exencion_nunca_supera_la_base_gravable(parametros):
+    """Herencia de 10M con tope de 13.000 UVT: se exenta solo lo que hay."""
+    liq = _liq_go(parametros, GananciaOcasional(
+        tipo="herencia_vivienda_causante", ingreso=10_000_000))
+    assert liq.r(114) == 10_000_000
+    assert liq.r(115) == 0
+    assert liq.r(127) == 0
+
+
+def test_go_partidas_tipificadas_mandan_sobre_campos_planos(parametros):
+    d = DatosDeclaracion(
+        go_ingresos=999_000_000, go_loterias=500_000_000,   # deben ignorarse
+        go_partidas=[GananciaOcasional(tipo="otra", ingreso=10_000_000)],
+        patrimonio_bruto=1)
+    liq = calcular(d, parametros)
+    assert liq.r(112) == 10_000_000
+
+
+@pytest.mark.parametrize("partida", [
+    GananciaOcasional(tipo="herencia_vivienda_causante", ingreso=800_000_000),
+    GananciaOcasional(tipo="herencia_no_legitimario", ingreso=500_000_000),
+    GananciaOcasional(tipo="loteria_rifa_apuesta", ingreso=50_000_000),
+    GananciaOcasional(tipo="venta_activo_fijo", ingreso=200_000_000,
+                      costo_fiscal=120_000_000),
+    GananciaOcasional(tipo="seguro_vida", ingreso=200_000_000),
+])
+def test_go_invariante_r115_es_r112_menos_r113_menos_r114(parametros, partida):
+    """La plantilla asume esta identidad en el renglón agregado."""
+    liq = _liq_go(parametros, partida)
+    assert liq.r(115) == liq.r(112) - liq.r(113) - liq.r(114)
+
+
+def test_go_tipo_desconocido_cae_en_otra(parametros):
+    liq = _liq_go(parametros, GananciaOcasional(
+        tipo="inventado_que_no_existe", ingreso=50_000_000))
+    assert liq.r(114) == 0
+    assert liq.r(127) == round(50_000_000 * 0.15 / 1000) * 1000
+
+
+def test_go_serializacion_round_trip_conserva_partidas(parametros):
+    d = DatosDeclaracion(go_partidas=[
+        GananciaOcasional(tipo="seguro_vida", ingreso=200_000_000,
+                          descripcion="Póliza de vida")])
+    reconstruido = DatosDeclaracion.from_dict(d.to_dict())
+    assert reconstruido.go_partidas == d.go_partidas
+    assert calcular(reconstruido, parametros).r(115) == calcular(d, parametros).r(115)
+
+
+def test_go_entrada_plana_no_persiste_partidas_sinteticas():
+    """El fallback sintetiza al vuelo; to_dict() no debe inventar partidas."""
+    d = DatosDeclaracion(go_ingresos=100_000_000, go_loterias=30_000_000)
+    assert len(d.go_partidas_efectivas()) == 2
+    assert d.to_dict()["go_partidas"] == []
 
 
 # ------------------- anticipo y saldos --------------------------------------

@@ -17,6 +17,13 @@ requests>=2.32
 reportlab>=4.0
 pypdf>=6.0
 
+# --- Firma PAdES del borrador (integridad y no repudio; NO radica ante DIAN) ---
+pyhanko>=0.25
+
+# --- Segundo factor de autenticación (TOTP + código QR) ---
+pyotp>=2.9
+qrcode[pil]>=7.4
+
 # --- Asistente de IA del chat (Google Gemini) ---
 google-genai>=1.4
 

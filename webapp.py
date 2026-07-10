@@ -34,7 +34,8 @@ from src.exogena_parser import (ExogenaError, calcular_topes_propios,
 from src.modelos import DatosDeclaracion, ResultadoExogena
 from src.motor_calculo import calcular
 from src.parametros import Parametros
-from src.formulario_pdf import generar_formulario_pdf
+from src.firma import AVISO_LEGAL, FirmaError, firmar_pdf
+from src.formulario_pdf import generar_formulario_pdf, sellar_formulario_pdf
 from src.resumen_pdf import generar_resumen_pdf
 
 BASE = Path(__file__).resolve().parent
@@ -131,8 +132,18 @@ def api_chat():
     mensajes = cuerpo.get("mensajes")
     if not isinstance(mensajes, list) or not mensajes:
         return jsonify({"error": "Envía al menos un mensaje."}), 400
+
+    # Si el cliente ya tiene su declaración en pantalla, el asistente responde
+    # conociendo cómo quedó la liquidación en vez de dar respuestas genéricas.
+    liq = None
+    if isinstance(cuerpo.get("datos"), dict):
+        try:
+            liq = calcular(DatosDeclaracion.from_dict(cuerpo["datos"]), PARAMS)
+        except (TypeError, KeyError, ValueError):
+            liq = None                # datos incompletos: se responde sin contexto
+
     try:
-        respuesta = responder_ia(mensajes, IA_CFG)
+        respuesta = responder_ia(mensajes, IA_CFG, usuario=usuario_actual(), liq=liq)
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
     except Exception as e:                       # nunca tumbar el chat por un fallo de la API
@@ -961,6 +972,7 @@ def formulario_pdf():
         salida = Path(tmp.name)
     try:
         generar_formulario_pdf(salida, datos, liq, PARAMS)
+        sellar_formulario_pdf(salida)
         contenido = salida.read_bytes()
     finally:
         salida.unlink(missing_ok=True)
@@ -970,6 +982,52 @@ def formulario_pdf():
         io.BytesIO(contenido),
         as_attachment=True,
         download_name=f"Formulario210_{nit}.pdf",
+        mimetype="application/pdf",
+    )
+
+
+@app.post("/api/firmar-pdf")
+@autorizado_requerido
+def firmar_formulario_pdf():
+    """Formulario 210 firmado con el certificado .p12/.pfx del usuario (PAdES).
+
+    El certificado y su contraseña se procesan en memoria y no se guardan ni se
+    registran en logs. La firma acredita integridad y origen del borrador; NO
+    presenta la declaración ante la DIAN (eso ocurre solo en el portal MUISCA).
+    """
+    archivo = request.files.get("certificado")
+    passphrase = request.form.get("passphrase", "")
+    if archivo is None or not archivo.filename:
+        return jsonify({"error": "Adjunte su certificado .p12 o .pfx."}), 400
+
+    try:
+        datos = DatosDeclaracion.from_dict(json.loads(request.form.get("datos", "{}")))
+    except (TypeError, KeyError, ValueError) as exc:
+        return jsonify({"error": f"Datos inválidos: {exc}"}), 400
+
+    certificado = archivo.read()
+    liq = calcular(datos, PARAMS)
+
+    with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
+        borrador = Path(tmp.name)
+    firmado = borrador.with_name(f"{borrador.stem}_firmado.pdf")
+    try:
+        generar_formulario_pdf(borrador, datos, liq, PARAMS)
+        sellar_formulario_pdf(borrador)          # el sello reescribe: va antes de firmar
+        firmar_pdf(borrador, certificado, passphrase, razon=AVISO_LEGAL, salida=firmado)
+        contenido = firmado.read_bytes()
+    except FirmaError as exc:
+        return jsonify({"error": str(exc)}), 400
+    finally:
+        del certificado, passphrase
+        borrador.unlink(missing_ok=True)
+        firmado.unlink(missing_ok=True)
+
+    nit = datos.contribuyente.nit or "sin_nit"
+    return send_file(
+        io.BytesIO(contenido),
+        as_attachment=True,
+        download_name=f"Formulario210_{nit}_firmado.pdf",
         mimetype="application/pdf",
     )
 

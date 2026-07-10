@@ -6,7 +6,11 @@ y su cédula/NIT para calcular la fecha de vencimiento. Todo local en SQLite.
 from __future__ import annotations
 
 import functools
-from datetime import date, datetime
+import hashlib
+import hmac
+import json
+import secrets
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Optional
 
@@ -66,6 +70,10 @@ class Usuario(db.Model):
     recordatorio_7_year = db.Column(db.Integer)
     creado = db.Column(db.DateTime, default=datetime.utcnow)
     ultimo_acceso = db.Column(db.DateTime, default=datetime.utcnow)
+    # segundo factor (TOTP)
+    mfa_habilitado = db.Column(db.Boolean, default=False)
+    intentos_fallidos = db.Column(db.Integer, default=0)
+    bloqueado_hasta = db.Column(db.DateTime)
 
     def to_dict(self) -> dict:
         return {
@@ -77,12 +85,99 @@ class Usuario(db.Model):
             "fecha_limite": self.fecha_limite.isoformat() if self.fecha_limite else None,
             "acepta_recordatorios": self.acepta_recordatorios,
             "quiere_asesor": self.quiere_asesor,
+            "mfa_habilitado": bool(self.mfa_habilitado),
         }
+
+
+class UsuarioMFA(db.Model):
+    """Segundo factor de un usuario. El secreto TOTP y los códigos de respaldo
+    son material sensible: los códigos se guardan hasheados, nunca en claro."""
+    __tablename__ = "usuario_mfa"
+    id = db.Column(db.Integer, primary_key=True)
+    usuario_id = db.Column(db.Integer, db.ForeignKey("usuarios.id"), unique=True)
+    totp_secreto = db.Column(db.String(64))
+    totp_habilitado = db.Column(db.Boolean, default=False)
+    backup_hashes = db.Column(db.Text)            # JSON: lista de sha256 hex
+    creado = db.Column(db.DateTime, default=datetime.utcnow)
+    ultimo_uso = db.Column(db.DateTime)
+
+    usuario = db.relationship("Usuario", backref=db.backref("mfa", uselist=False))
+
+
+# --------------------------------------------------------------- segundo factor
+MAX_INTENTOS_MFA = 5
+BLOQUEO_MINUTOS = 15
+NUM_BACKUP_CODES = 10
+
+
+def _hash_backup(codigo: str) -> str:
+    return hashlib.sha256(codigo.strip().upper().encode()).hexdigest()
+
+
+def generar_backup_codes(n: int = NUM_BACKUP_CODES) -> list:
+    """Códigos de emergencia en claro. Se muestran una sola vez al usuario."""
+    return [secrets.token_hex(4).upper() for _ in range(n)]
+
+
+def esta_bloqueado(usuario: Usuario) -> bool:
+    return bool(usuario.bloqueado_hasta and datetime.utcnow() < usuario.bloqueado_hasta)
+
+
+def registrar_intento_fallido(usuario: Usuario) -> None:
+    usuario.intentos_fallidos = (usuario.intentos_fallidos or 0) + 1
+    if usuario.intentos_fallidos >= MAX_INTENTOS_MFA:
+        usuario.bloqueado_hasta = datetime.utcnow() + timedelta(minutes=BLOQUEO_MINUTOS)
+    db.session.commit()
+
+
+def limpiar_intentos_fallidos(usuario: Usuario) -> None:
+    usuario.intentos_fallidos = 0
+    usuario.bloqueado_hasta = None
+    db.session.commit()
+
+
+def verificar_totp(usuario: Usuario, codigo: str) -> bool:
+    """Valida un código TOTP o, en su defecto, uno de respaldo (que se consume)."""
+    import pyotp
+
+    mfa = usuario.mfa
+    if mfa is None or not mfa.totp_habilitado:
+        return False
+    codigo = (codigo or "").strip().replace(" ", "")
+
+    if pyotp.TOTP(mfa.totp_secreto).verify(codigo, valid_window=1):
+        mfa.ultimo_uso = datetime.utcnow()
+        db.session.commit()
+        return True
+
+    # código de respaldo: de un solo uso
+    hashes = json.loads(mfa.backup_hashes or "[]")
+    objetivo = _hash_backup(codigo)
+    for h in hashes:
+        if hmac.compare_digest(h, objetivo):
+            hashes.remove(h)
+            mfa.backup_hashes = json.dumps(hashes)
+            mfa.ultimo_uso = datetime.utcnow()
+            db.session.commit()
+            return True
+    return False
 
 
 # ------------------------------------------------------------- helpers sesión
 def usuario_actual() -> Optional[Usuario]:
     uid = session.get("uid")
+    if uid is None:
+        return None
+    return db.session.get(Usuario, uid)
+
+
+def usuario_pendiente_mfa() -> Optional[Usuario]:
+    """Usuario que ya pasó OAuth pero aún no ha superado el segundo factor.
+
+    Vive en `uid_pendiente`, nunca en `uid`: mientras esté ahí no tiene sesión
+    y los decoradores de autorización lo tratan como anónimo.
+    """
+    uid = session.get("uid_pendiente")
     if uid is None:
         return None
     return db.session.get(Usuario, uid)
@@ -174,6 +269,9 @@ def _migrar_columnas_faltantes():
     nuevas = {
         "recordatorio_30_year": "INTEGER",
         "recordatorio_7_year": "INTEGER",
+        "mfa_habilitado": "BOOLEAN DEFAULT 0",
+        "intentos_fallidos": "INTEGER DEFAULT 0",
+        "bloqueado_hasta": "DATETIME",
     }
     with db.engine.begin() as con:
         for nombre, tipo in nuevas.items():
@@ -238,6 +336,13 @@ def callback(proveedor):
     usuario.ultimo_acceso = datetime.utcnow()
     db.session.commit()
 
+    # Con segundo factor activo, OAuth por sí solo NO abre sesión: el usuario
+    # queda "pendiente" hasta que valide su código en /verificar-mfa.
+    if usuario.mfa_habilitado:
+        session.pop("uid", None)
+        session["uid_pendiente"] = usuario.id
+        return redirect(url_for("auth.verificar_mfa"))
+
     session["uid"] = usuario.id
     destino = session.pop("next", "/mi-cuenta")
     return redirect(destino)
@@ -261,6 +366,11 @@ def login_demo():
     usuario.ultimo_acceso = datetime.utcnow()
     db.session.commit()
 
+    if usuario.mfa_habilitado:
+        session.pop("uid", None)
+        session["uid_pendiente"] = usuario.id
+        return redirect(url_for("auth.verificar_mfa"))
+
     session["uid"] = usuario.id
     return redirect(request.form.get("next") or "/mi-cuenta")
 
@@ -268,4 +378,106 @@ def login_demo():
 @auth_bp.get("/logout")
 def logout():
     session.pop("uid", None)
+    session.pop("uid_pendiente", None)
     return redirect("/")
+
+
+# ------------------------------------------------------- rutas segundo factor
+@auth_bp.get("/verificar-mfa")
+def verificar_mfa():
+    if usuario_pendiente_mfa() is None:
+        return redirect(url_for("login_page"))
+    return render_template("verificar_mfa.html")
+
+
+@auth_bp.post("/api/verificar-codigo-totp")
+def verificar_codigo_totp():
+    """Promueve la sesión pendiente a sesión real si el código es válido."""
+    usuario = usuario_pendiente_mfa()
+    if usuario is None:
+        return jsonify({"error": "No hay una verificación en curso."}), 401
+
+    if esta_bloqueado(usuario):
+        restante = int((usuario.bloqueado_hasta - datetime.utcnow()).total_seconds() // 60) + 1
+        return jsonify({"error": f"Demasiados intentos. Reintente en {restante} minutos."}), 429
+
+    codigo = (request.get_json(silent=True) or {}).get("codigo", "")
+    if not verificar_totp(usuario, codigo):
+        registrar_intento_fallido(usuario)
+        return jsonify({"error": "Código incorrecto."}), 401
+
+    limpiar_intentos_fallidos(usuario)
+    session.pop("uid_pendiente", None)
+    session["uid"] = usuario.id
+    return jsonify({"ok": True, "destino": session.pop("next", "/mi-cuenta")})
+
+
+@auth_bp.post("/api/configurar-2fa")
+@login_requerido
+def configurar_2fa():
+    """Genera un secreto TOTP y su código QR. Nada se persiste hasta confirmarlo."""
+    import base64
+    import io
+
+    import pyotp
+    import qrcode
+
+    usuario = usuario_actual()
+    secreto = pyotp.random_base32()
+    uri = pyotp.TOTP(secreto).provisioning_uri(
+        name=usuario.email or "usuario", issuer_name="Declaración de Renta")
+
+    buffer = io.BytesIO()
+    qrcode.make(uri).save(buffer, format="PNG")
+    qr = base64.b64encode(buffer.getvalue()).decode()
+
+    # el secreto vive en la sesión hasta que el usuario demuestre que lo escaneó
+    session["totp_pendiente"] = secreto
+    return jsonify({"qr": f"data:image/png;base64,{qr}", "secreto": secreto})
+
+
+@auth_bp.post("/api/confirmar-2fa")
+@login_requerido
+def confirmar_2fa():
+    """Activa el 2FA solo si el usuario prueba un código válido del secreto nuevo."""
+    import pyotp
+
+    secreto = session.get("totp_pendiente")
+    if not secreto:
+        return jsonify({"error": "No hay una configuración de 2FA en curso."}), 400
+
+    codigo = (request.get_json(silent=True) or {}).get("codigo", "").strip()
+    if not pyotp.TOTP(secreto).verify(codigo, valid_window=1):
+        return jsonify({"error": "Código incorrecto. Verifique la hora de su teléfono."}), 401
+
+    usuario = usuario_actual()
+    mfa = usuario.mfa or UsuarioMFA(usuario_id=usuario.id)
+    codigos = generar_backup_codes()
+    mfa.totp_secreto = secreto
+    mfa.totp_habilitado = True
+    mfa.backup_hashes = json.dumps([_hash_backup(c) for c in codigos])
+    usuario.mfa_habilitado = True
+    db.session.add(mfa)
+    db.session.commit()
+    session.pop("totp_pendiente", None)
+
+    # los códigos en claro se devuelven una única vez; solo guardamos sus hashes
+    return jsonify({"ok": True, "backup_codes": codigos})
+
+
+@auth_bp.post("/api/desactivar-2fa")
+@login_requerido
+def desactivar_2fa():
+    """Requiere un código válido: si no, quien robe una sesión podría apagarlo."""
+    usuario = usuario_actual()
+    if not usuario.mfa_habilitado:
+        return jsonify({"error": "El 2FA no está activo."}), 400
+    codigo = (request.get_json(silent=True) or {}).get("codigo", "")
+    if not verificar_totp(usuario, codigo):
+        return jsonify({"error": "Código incorrecto."}), 401
+
+    if usuario.mfa:
+        db.session.delete(usuario.mfa)
+    usuario.mfa_habilitado = False
+    db.session.commit()
+    return jsonify({"ok": True})

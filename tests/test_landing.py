@@ -119,8 +119,8 @@ def test_recalcular_con_dependientes_rebaja_el_pago(cliente):
     assert pdf.status_code == 200
     import io
     from pypdf import PdfReader
-    texto = "".join(p.extract_text() for p in PdfReader(io.BytesIO(pdf.data)).pages)
-    assert "7,171,000" in texto                 # R139: 2 × 72 UVT
+    campos = PdfReader(io.BytesIO(pdf.data)).get_fields()
+    assert campos["R139"]["/V"] == "7,171,000"  # R139: 2 × 72 UVT
 
 
 def test_recalcular_sin_token_falla(cliente):

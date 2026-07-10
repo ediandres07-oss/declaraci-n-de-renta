@@ -12,9 +12,10 @@ que la hoja 'FORMULARIO 210' de la plantilla ITGS usada como destino.
 Todo parámetro normativo (UVT, tarifas, topes) proviene de Parametros; el
 motor no conoce cifras del año.
 """
-from typing import Dict, Tuple
+from typing import Any, Dict, Tuple
 
-from .modelos import DatosDeclaracion, Liquidacion, SubcedulaGeneral
+from .modelos import (DatosDeclaracion, GananciaOcasional, Liquidacion,
+                      SubcedulaGeneral)
 from .parametros import Parametros
 
 
@@ -32,6 +33,66 @@ def _liquidar_subcedula(s: SubcedulaGeneral, con_devoluciones: bool = False) -> 
         "renta_liquida": max(0.0, base + s.rentas_pasivas_ece),
         "perdida": max(0.0, -(base + s.rentas_pasivas_ece)),
     }
+
+
+def _exencion_go(go: GananciaOcasional, cfg: Dict[str, Any], p: Parametros) -> float:
+    """Exención de una ganancia ocasional, según la regla de su tipo.
+
+    Se capa siempre a la base gravable (ingreso menos costo), de modo que la
+    identidad R115 = R112 - R113 - R114 se mantiene renglón a renglón. La
+    exención manual del usuario actúa como piso: si declara más de lo que la
+    ley concede automáticamente, se respeta su cifra (puede conocer un
+    beneficio que el catálogo no modela), pero nunca por encima de la base.
+    """
+    costo = 0.0 if cfg.get("loteria") else go.costo_fiscal
+    base = max(0.0, go.ingreso - costo)
+    ex = cfg.get("exencion") or {}
+    tipo = ex.get("tipo", "none")
+
+    automatica = 0.0
+    if tipo == "tope":
+        automatica = min(base, p.a_pesos(ex["tope_uvt"]))
+    elif tipo == "porcentaje_tope":
+        automatica = min(go.ingreso * ex["porcentaje"], p.a_pesos(ex["tope_uvt"]))
+    elif tipo == "vivienda_habitacion":
+        cumple_catastro = (not go.valor_catastral
+                           or go.valor_catastral <= p.a_pesos(ex["tope_catastral_uvt"]))
+        if cumple_catastro and go.deposito_afc:
+            automatica = min(base, p.a_pesos(ex["tope_uvt"]))
+
+    return min(base, max(automatica, go.exenta_manual))
+
+
+def _liquidar_ganancias_ocasionales(d: DatosDeclaracion, p: Parametros,
+                                    liq: Liquidacion) -> None:
+    """Renglones 112–115 y 127. Las GO no entran al límite del 40% / 1.340 UVT."""
+    total_ingreso = total_costo = total_exenta = 0.0
+    base_general = base_loterias = 0.0
+
+    for go in d.go_partidas_efectivas():
+        cfg = p.go_tipo(go.tipo)
+        es_loteria = bool(cfg.get("loteria"))
+        costo = 0.0 if es_loteria else go.costo_fiscal
+        exenta = _exencion_go(go, cfg, p)
+        gravable = max(0.0, go.ingreso - costo - exenta)
+
+        total_ingreso += go.ingreso
+        total_costo += costo
+        total_exenta += exenta
+        if es_loteria:
+            base_loterias += gravable
+        else:
+            base_general += gravable
+
+    liq.set(112, total_ingreso, "ingresos por ganancias ocasionales")
+    liq.set(113, total_costo, "costos ganancias ocasionales")
+    liq.set(114, total_exenta, "ganancias ocasionales exentas/no gravadas")
+    liq.set(115, base_general + base_loterias, "ganancias ocasionales gravables")
+
+    r127 = _round_mil(base_general * p.go_tarifa_general
+                      + base_loterias * p.go_tarifa_loterias)
+    liq.set(127, r127, f"impuesto GO ({p.go_tarifa_general:.0%} general, "
+            f"{p.go_tarifa_loterias:.0%} loterías)")
 
 
 def calcular_renta_exenta_25(datos: DatosDeclaracion, p: Parametros) -> float:
@@ -300,17 +361,7 @@ def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
     liq.set(121, r121, "total impuesto sobre rentas líquidas gravables")
 
     # ==================== Ganancias ocasionales ==========================
-    liq.set(112, d.go_ingresos, "ingresos por ganancias ocasionales")
-    liq.set(113, d.go_costos, "costos ganancias ocasionales")
-    liq.set(114, d.go_exentas, "ganancias ocasionales exentas/no gravadas")
-    r115 = max(0.0, d.go_ingresos - d.go_costos - d.go_exentas)
-    liq.set(115, r115, "ganancias ocasionales gravables")
-
-    go_loterias = min(d.go_loterias, r115)
-    go_resto = r115 - go_loterias
-    r127 = _round_mil(go_resto * p.go_tarifa_general + go_loterias * p.go_tarifa_loterias)
-    liq.set(127, r127, f"impuesto GO ({p.go_tarifa_general:.0%} general, "
-            f"{p.go_tarifa_loterias:.0%} loterías)")
+    _liquidar_ganancias_ocasionales(d, p, liq)
 
     # ==================== Descuentos e impuesto a cargo ==================
     liq.set(122, d.descuento_impuestos_exterior, "descuento impuestos pagados en el exterior")
@@ -327,6 +378,7 @@ def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
 
     r126 = max(0.0, r121 - r125)
     liq.set(126, r126, "impuesto neto de renta")
+    r127 = liq.r(127)
     liq.set(128, min(d.descuento_go_exterior, r127), "descuento GO exterior")
     r129 = max(0.0, r126 + r127 - liq.r(128))
     liq.set(129, r129, "total impuesto a cargo")

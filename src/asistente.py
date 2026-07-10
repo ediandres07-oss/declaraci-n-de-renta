@@ -122,10 +122,54 @@ explicación genérica; si no queda claro qué necesita, pregunta en qué parte 
 redirige con amabilidad al tema."""
 
 
-def responder(mensajes: list[dict], cfg: dict | None = None) -> str:
+def _contexto_usuario(usuario=None, liq=None) -> str:
+    """Datos del usuario y de su liquidación que el asistente puede citar.
+
+    Deliberadamente NO se envían el NIT completo ni el patrimonio: el asistente
+    solo necesita saber a quién atiende, cuándo vence su declaración y en qué
+    quedó su liquidación para responder sin pedir que repita todo.
+    """
+    lineas = []
+    if usuario is not None:
+        nombre = (getattr(usuario, "nombre", "") or "").strip()
+        if nombre:
+            lineas.append(f"- Se llama {nombre}. Salúdalo por su nombre.")
+        if getattr(usuario, "cedula", None):
+            lineas.append("- Ya registró su cédula, así que su fecha límite está calculada.")
+        else:
+            lineas.append("- Aún NO ha registrado su cédula: sin ella no se puede "
+                          "calcular su fecha límite. Invítalo a ingresarla en 'Mi cuenta'.")
+        limite = getattr(usuario, "fecha_limite", None)
+        if limite:
+            lineas.append(f"- Su declaración vence el {limite.strftime('%d/%m/%Y')}.")
+
+    if liq is not None:
+        def _peso(n):
+            return f"${liq.r(n):,.0f}".replace(",", ".")
+        if liq.r(137):
+            lineas.append(f"- Su liquidación da SALDO A FAVOR de {_peso(137)}.")
+        elif liq.r(136):
+            lineas.append(f"- Su liquidación da SALDO A PAGAR de {_peso(136)}.")
+        else:
+            lineas.append("- Su liquidación da saldo en cero.")
+        if liq.r(132):
+            lineas.append(f"- Le retuvieron {_peso(132)} durante el año.")
+        if liq.r(115):
+            lineas.append(f"- Tiene ganancias ocasionales gravables por {_peso(115)}.")
+
+    if not lineas:
+        return ""
+    return ("\n\nCONTEXTO DEL CLIENTE CON QUIEN HABLAS (úsalo, pero no lo recites de golpe; "
+            "estas cifras son de un BORRADOR y así debes presentarlas):\n" + "\n".join(lineas))
+
+
+def responder(mensajes: list[dict], cfg: dict | None = None,
+              usuario=None, liq=None) -> str:
     """Recibe el historial [{rol, texto}] y devuelve la respuesta del asistente.
 
-    'rol' es "user" o "assistant". Lanza RuntimeError si el asistente no está activo.
+    'rol' es "user" o "assistant". `usuario` y `liq` son opcionales: si vienen,
+    el asistente responde conociendo a quién atiende y cómo quedó su liquidación.
+    Lanza RuntimeError si el asistente no está activo.
     """
     cfg = cfg if cfg is not None else cargar_config()
     if not asistente_activo(cfg):
@@ -147,7 +191,7 @@ def responder(mensajes: list[dict], cfg: dict | None = None) -> str:
 
     cliente = genai.Client(api_key=cfg["api_key"])
     config = types.GenerateContentConfig(
-        system_instruction=_prompt_sistema(cfg),
+        system_instruction=_prompt_sistema(cfg) + _contexto_usuario(usuario, liq),
         max_output_tokens=_MAX_TOKENS,
         temperature=0.4,
     )

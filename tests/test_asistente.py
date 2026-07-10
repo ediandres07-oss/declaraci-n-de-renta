@@ -143,3 +143,56 @@ def test_widget_visible_si_activo(cliente, monkeypatch):
     # Visible sin necesidad de iniciar sesión (la barrera está en interactuar, no en ver).
     monkeypatch.setattr("webapp.IA_CFG", _cfg_activa())
     assert 'id="chat-fab"' in cliente.get("/").data.decode()
+
+
+# ------------------- contexto del usuario en el prompt ----------------------
+
+def test_contexto_vacio_sin_usuario_ni_liquidacion():
+    assert asistente._contexto_usuario(None, None) == ""
+
+
+def test_contexto_incluye_nombre_y_vencimiento():
+    from datetime import date
+
+    usuario = types.SimpleNamespace(nombre="Ana Ruiz", cedula="1234",
+                                    fecha_limite=date(2026, 8, 12))
+    ctx = asistente._contexto_usuario(usuario, None)
+    assert "Ana Ruiz" in ctx
+    assert "12/08/2026" in ctx
+
+
+def test_contexto_avisa_cuando_falta_la_cedula():
+    usuario = types.SimpleNamespace(nombre="Ana", cedula=None, fecha_limite=None)
+    ctx = asistente._contexto_usuario(usuario, None)
+    assert "NO ha registrado su cédula" in ctx
+
+
+def test_contexto_reporta_saldo_a_pagar_y_a_favor(parametros):
+    from src.modelos import DatosDeclaracion, SubcedulaGeneral
+    from src.motor_calculo import calcular
+
+    pagar = calcular(DatosDeclaracion(
+        trabajo=SubcedulaGeneral(ingresos_brutos=300_000_000),
+        aplicar_renta_exenta_25=False, patrimonio_bruto=1), parametros)
+    assert "SALDO A PAGAR" in asistente._contexto_usuario(None, pagar)
+
+    favor = calcular(DatosDeclaracion(
+        trabajo=SubcedulaGeneral(ingresos_brutos=80_000_000),
+        retenciones=20_000_000, patrimonio_bruto=1), parametros)
+    assert "SALDO A FAVOR" in asistente._contexto_usuario(None, favor)
+
+
+def test_contexto_no_filtra_nit_ni_patrimonio(parametros):
+    """Privacidad: el prompt no debe llevar identificadores ni el patrimonio."""
+    from src.modelos import (DatosContribuyente, DatosDeclaracion,
+                             SubcedulaGeneral)
+    from src.motor_calculo import calcular
+
+    datos = DatosDeclaracion(
+        contribuyente=DatosContribuyente(nit="900123456"),
+        trabajo=SubcedulaGeneral(ingresos_brutos=100_000_000),
+        patrimonio_bruto=987_654_321)
+    usuario = types.SimpleNamespace(nombre="Ana", cedula="900123456", fecha_limite=None)
+    ctx = asistente._contexto_usuario(usuario, calcular(datos, parametros))
+    assert "900123456" not in ctx
+    assert "987" not in ctx

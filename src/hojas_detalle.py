@@ -344,7 +344,7 @@ def _hoja_dividendos(wb, datos) -> None:
         _set(ws, "E41", datos.dividendos_exterior_exentos)
 
 
-def _hoja_gocas(wb, datos, p: Parametros) -> None:
+def _hoja_gocas(wb, datos, liq: Liquidacion, p: Parametros) -> None:
     if "G.OCAS" not in wb.sheetnames:
         return
     ws = wb["G.OCAS"]
@@ -356,15 +356,29 @@ def _hoja_gocas(wb, datos, p: Parametros) -> None:
     _limpiar_constantes(ws, "F24:F24")
     _limpiar_constantes(ws, "D46:D66")
     _set(ws, "E89", p.uvt)
-    ingresos_15 = max(0.0, datos.go_ingresos - datos.go_loterias)
+
+    # Se recorren las partidas efectivas para que funcione igual con entrada
+    # plana (campos go_*) que con ganancias tipificadas.
+    ingresos_15 = costos_15 = loterias = 0.0
+    descripciones = []
+    for go in datos.go_partidas_efectivas():
+        if p.go_tipo(go.tipo).get("loteria"):
+            loterias += go.ingreso
+        else:
+            ingresos_15 += go.ingreso
+            costos_15 += go.costo_fiscal
+            if go.descripcion:
+                descripciones.append(go.descripcion)
+
     if ingresos_15:
-        _set(ws, "C3", "Ganancias ocasionales declaradas (detalle en entrevista)")
+        _set(ws, "C3", "; ".join(descripciones)
+             or "Ganancias ocasionales declaradas (detalle en entrevista)")
         _set(ws, "D3", ingresos_15)
-        _set(ws, "G3", datos.go_costos)      # reemplaza la fórmula de costo fiscal
-    if datos.go_loterias:
-        _set(ws, "D63", datos.go_loterias)
-    if datos.go_exentas:
-        _set(ws, "D83", datos.go_exentas)    # reemplaza el cálculo de ejemplo
+        _set(ws, "G3", costos_15)            # reemplaza la fórmula de costo fiscal
+    if loterias:
+        _set(ws, "D63", loterias)
+    if liq.r(114):
+        _set(ws, "D83", liq.r(114))          # reemplaza el cálculo de ejemplo
 
 
 def _actualizar_uvt(wb, p: Parametros) -> None:
@@ -398,5 +412,5 @@ def llenar_hojas_detalle(wb, datos: DatosDeclaracion, liq: Liquidacion,
     _hoja_no_laboral(wb, datos, exogena)
     _hoja_pensiones(wb, datos)
     _hoja_dividendos(wb, datos)
-    _hoja_gocas(wb, datos, p)
+    _hoja_gocas(wb, datos, liq, p)
     _actualizar_uvt(wb, p)

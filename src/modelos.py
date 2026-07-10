@@ -105,6 +105,31 @@ class SubcedulaGeneral:
 
 
 @dataclass
+class GananciaOcasional:
+    """Una ganancia ocasional tipificada por origen (Arts. 300–317 E.T.).
+
+    `tipo` es una clave del catálogo `ganancias_ocasionales.tipos` del YAML de
+    parámetros, que define la tarifa y la regla de exención aplicable. El motor
+    de cálculo es quien resuelve la exención contra el tope en UVT: este modelo
+    no conoce la UVT del año.
+    """
+    tipo: str = "otra"
+    descripcion: str = ""
+    ingreso: float = 0.0             # valor recibido / precio de venta
+    costo_fiscal: float = 0.0        # se ignora en loterías (Art. 317)
+    exenta_manual: float = 0.0       # exención declarada por el usuario
+    valor_catastral: float = 0.0     # venta de vivienda: tope 15.000 UVT (Art. 311-1)
+    deposito_afc: bool = False       # venta de vivienda: requisito de depósito en AFC
+
+    def to_dict(self) -> Dict[str, Any]:
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, d: Dict[str, Any]) -> "GananciaOcasional":
+        return cls(**d)
+
+
+@dataclass
 class DatosDeclaracion:
     """Todo lo necesario para liquidar el Formulario 210."""
     contribuyente: DatosContribuyente = field(default_factory=DatosContribuyente)
@@ -132,11 +157,13 @@ class DatosDeclaracion:
     dividendos_exterior: float = 0.0
     dividendos_exterior_exentos: float = 0.0
 
-    # ganancias ocasionales
+    # ganancias ocasionales — entrada rápida (agregada, sin tipificar)
     go_ingresos: float = 0.0
     go_costos: float = 0.0
     go_exentas: float = 0.0
     go_loterias: float = 0.0                 # parte de go_ingresos que es loterías/rifas
+    # ganancias ocasionales tipificadas: si trae elementos, manda sobre los campos planos
+    go_partidas: List[GananciaOcasional] = field(default_factory=list)
 
     # rentas gravables especiales (activos omitidos, etc.) R96
     rentas_gravables: float = 0.0
@@ -159,6 +186,28 @@ class DatosDeclaracion:
     descuento_go_exterior: float = 0.0          # R128
     aporte_voluntario_141: float = 0.0
 
+    def go_partidas_efectivas(self) -> List["GananciaOcasional"]:
+        """Ganancias ocasionales a liquidar, tipificadas.
+
+        Si `go_partidas` trae elementos es la fuente de verdad. Si está vacía se
+        sintetizan al vuelo desde los campos planos (`go_ingresos`, `go_costos`,
+        `go_exentas`, `go_loterias`), que es como los alimentan la entrevista y
+        el formulario web. No se persiste la síntesis: así `to_dict()` nunca
+        confunde una partida derivada con una declarada.
+        """
+        if self.go_partidas:
+            return self.go_partidas
+        partidas: List[GananciaOcasional] = []
+        resto = self.go_ingresos - self.go_loterias
+        if resto or self.go_costos or self.go_exentas:
+            partidas.append(GananciaOcasional(
+                tipo="otra", ingreso=resto,
+                costo_fiscal=self.go_costos, exenta_manual=self.go_exentas))
+        if self.go_loterias:
+            partidas.append(GananciaOcasional(
+                tipo="loteria_rifa_apuesta", ingreso=self.go_loterias))
+        return partidas
+
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
 
@@ -168,6 +217,8 @@ class DatosDeclaracion:
         d["contribuyente"] = DatosContribuyente(**d.get("contribuyente", {}))
         for k in ("trabajo", "honorarios", "capital", "no_laboral"):
             d[k] = SubcedulaGeneral(**d.get(k, {}))
+        d["go_partidas"] = [GananciaOcasional.from_dict(g)
+                            for g in d.get("go_partidas", [])]
         return cls(**d)
 
 

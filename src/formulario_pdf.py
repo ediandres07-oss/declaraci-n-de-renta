@@ -34,8 +34,10 @@ def _mil(v: float) -> str:
 class _F210Canvas:
     """Ayudas de dibujo sobre el canvas."""
 
-    def __init__(self, c: canvas.Canvas):
+    def __init__(self, c: canvas.Canvas, rellenable: bool = True):
         self.c = c
+        self.rellenable = rellenable
+        self._campos = set()      # renglones ya registrados como campo de formulario
 
     def caja(self, x, y, w, h, relleno=None):
         self.c.setStrokeColor(GRIS)
@@ -57,7 +59,12 @@ class _F210Canvas:
         self.c.setFillColor(black)
 
     def casilla(self, x, y, w, h, num, valor, tam=6.6):
-        """Celda oficial: numerito en recuadro azul + valor a la derecha."""
+        """Celda oficial: numerito en recuadro azul + valor a la derecha.
+
+        En modo rellenable el valor lo pinta un campo AcroForm editable, no
+        texto estático: así el usuario puede corregir el borrador en su lector
+        de PDF. El campo se alinea a la derecha en `_alinear_campos_derecha`.
+        """
         self.caja(x, y, w, h)
         nb = 14
         self.caja(x, y, nb, h, relleno=FONDO)
@@ -65,8 +72,19 @@ class _F210Canvas:
         self.c.setFillColor(AZUL)
         self.c.drawCentredString(x + nb / 2, y + h / 2 - 2, str(num))
         self.c.setFillColor(black)
-        self.c.setFont("Helvetica", tam)
-        self.c.drawRightString(x + w - 3, y + h / 2 - 2.2, valor)
+
+        if self.rellenable and num not in self._campos:
+            self._campos.add(num)
+            self.c.acroForm.textfield(
+                name=f"R{num}", value=valor, tooltip=f"Renglón {num}",
+                x=x + nb + 1, y=y + 1, width=w - nb - 3, height=h - 2,
+                fontName="Helvetica", fontSize=tam, textColor=black,
+                fillColor=None, borderColor=None, borderWidth=0,
+                maxlen=24, annotationFlags="print",
+            )
+        else:
+            self.c.setFont("Helvetica", tam)
+            self.c.drawRightString(x + w - 3, y + h / 2 - 2.2, valor)
 
     def seccion_vertical(self, x, y, h, texto):
         self.caja(x, y, 13, h, relleno=FONDO)
@@ -80,16 +98,47 @@ class _F210Canvas:
         self.c.setFillColor(black)
 
 
+def _alinear_campos_derecha(ruta: Path) -> None:
+    """Marca los campos como alineados a la derecha (/Q 2), como el formulario oficial.
+
+    reportlab no expone la alineación al crear el campo y escribe la apariencia
+    alineada a la izquierda. Se fija `/Q 2` en cada anotación y `/NeedAppearances`
+    en el AcroForm, para que el lector regenere la apariencia respetándola. En
+    lectores que no regeneran apariencias el valor sigue siendo correcto, solo
+    queda alineado a la izquierda.
+    """
+    from pypdf import PdfReader, PdfWriter
+    from pypdf.generic import BooleanObject, NameObject, NumberObject
+
+    lector = PdfReader(str(ruta))
+    escritor = PdfWriter()
+    escritor.append(lector)
+
+    for pagina in escritor.pages:
+        for anot in pagina.get("/Annots", []) or []:
+            obj = anot.get_object()
+            if obj.get("/FT") == "/Tx":
+                obj[NameObject("/Q")] = NumberObject(2)
+
+    raiz = escritor._root_object
+    if "/AcroForm" in raiz:
+        raiz["/AcroForm"][NameObject("/NeedAppearances")] = BooleanObject(True)
+
+    with open(ruta, "wb") as fh:
+        escritor.write(fh)
+
+
 def generar_formulario_pdf(
     ruta: Path,
     datos: DatosDeclaracion,
     liq: Liquidacion,
     p: Parametros,
+    rellenable: bool = True,
 ) -> Path:
     ruta = Path(ruta)
     ruta.parent.mkdir(parents=True, exist_ok=True)
     c = canvas.Canvas(str(ruta), pagesize=letter)
-    f = _F210Canvas(c)
+    f = _F210Canvas(c, rellenable=rellenable)
     R = liq.r
     con = datos.contribuyente
 
@@ -334,4 +383,41 @@ def generar_formulario_pdf(
 
     c.showPage()
     c.save()
+    if rellenable:
+        _alinear_campos_derecha(ruta)
     return ruta
+
+
+def sellar_formulario_pdf(ruta: Path) -> str:
+    """Estampa el código de verificación del documento y lo devuelve.
+
+    Se hace en una segunda pasada porque el código depende del contenido ya
+    escrito. El PDF sellado incorpora su propio código, de modo que el sello
+    que se recalcule después ya no coincide con el impreso: el código impreso
+    identifica el documento, y `src.firma.sello_integridad` sobre el archivo
+    final es lo que se compara para detectar alteraciones posteriores.
+    """
+    from pypdf import PdfReader, PdfWriter
+    from reportlab.pdfgen import canvas as _canvas
+
+    from .firma import codigo_verificacion
+
+    codigo = codigo_verificacion(ruta)
+
+    superposicion = ruta.with_suffix(".sello.pdf")
+    c = _canvas.Canvas(str(superposicion), pagesize=letter)
+    c.setFont("Helvetica", 5.4)
+    c.setFillColor(GRIS)
+    c.drawRightString(W - MR, 12, f"Código de verificación: {codigo}")
+    c.showPage()
+    c.save()
+
+    lector = PdfReader(str(ruta))
+    sello = PdfReader(str(superposicion))
+    escritor = PdfWriter()
+    escritor.append(lector)
+    escritor.pages[0].merge_page(sello.pages[0])
+    with open(ruta, "wb") as fh:
+        escritor.write(fh)
+    superposicion.unlink(missing_ok=True)
+    return codigo

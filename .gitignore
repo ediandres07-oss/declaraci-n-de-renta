@@ -12,6 +12,8 @@ __pycache__/
 # NUNCA deben subirse: contienen información personal.
 sessions/
 uploads/
+# Declaraciones generadas: llevan NIT, patrimonio y liquidación de personas reales.
+output/
 
 # Sistema / temporales
 .DS_Store
