@@ -13,6 +13,9 @@ Flask-SQLAlchemy>=3.1
 Authlib>=1.6            # login con Google / Microsoft (OAuth)
 requests>=2.32
 
+# --- Postgres en producción (local usa SQLite; ver src/auth.uri_base_datos) ---
+psycopg2-binary>=2.9
+
 # --- Generación de PDF (Formulario 210, resumen, checklist) ---
 reportlab>=4.0
 pypdf>=6.0

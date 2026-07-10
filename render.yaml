@@ -1,7 +1,21 @@
 # ============================================================
 # Blueprint de Render — despliegue de la app "Declaración de Renta"
 # https://render.com  →  New +  →  Blueprint  →  conecta este repositorio
+#
+# Los secretos NO viven aquí. Se cargan como "Secret Files" en el panel de
+# Render, con la misma ruta que tienen en el repo:
+#     config/oauth.yaml   (login Google/Microsoft + secret_key)
+#     config/ia.yaml      (asistente, opcional)
+#     config/email.yaml   (recordatorios, opcional)
 # ============================================================
+databases:
+  # El disco del servicio web es efímero: se borra en cada despliegue. Las
+  # cuentas, las cédulas y los secretos TOTP del 2FA tienen que vivir aquí.
+  - name: declaracion-renta-db
+    databaseName: declaracion_renta
+    plan: free                 # REVISE la vigencia del plan gratuito de Postgres
+    region: oregon
+
 services:
   - type: web
     name: declaracion-renta
@@ -9,8 +23,16 @@ services:
     plan: free                 # gratis para empezar (se duerme tras inactividad)
     region: oregon
     buildCommand: "pip install -r requirements.txt"
-    # 1 worker + hilos: evita bloqueos de SQLite y da concurrencia suficiente.
+    # 1 worker + hilos: suficiente concurrencia sin multiplicar conexiones a la BD.
     startCommand: "gunicorn webapp:app --bind 0.0.0.0:$PORT --workers 1 --threads 8 --timeout 120"
     envVars:
       - key: PYTHON_VERSION
         value: "3.11.9"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: declaracion-renta-db
+          property: connectionString
+      # Firma las cookies de sesión. Render la genera y la guarda; sin ella la
+      # app se niega a arrancar en producción (ver src/auth._clave_de_sesion).
+      - key: SECRET_KEY
+        generateValue: true

@@ -157,6 +157,22 @@ Todo vive en `config/parametros_2025.yaml`:
   Art. 311-1 han cambiado en reformas recientes.
 - Anticipo Art. 807: 25% / 50% / 75% con el método más favorable.
 
+## Base de datos y despliegue
+
+En local la base de usuarios es un SQLite en `sessions/usuarios.db`. En producción
+**debe ser Postgres**: el disco de Render es efímero y se borra en cada despliegue,
+lo que se llevaría por delante las cuentas, las cédulas guardadas y los secretos
+TOTP del 2FA.
+
+`src.auth.uri_base_datos()` elige sola: si existe `DATABASE_URL` usa Postgres
+(normalizando el `postgres://` que entrega Render, que SQLAlchemy 2 ya no acepta);
+si no, cae en SQLite. El `render.yaml` declara la base y le inyecta la variable.
+
+La clave de sesión sale de `SECRET_KEY` (variable de entorno) o de `secret_key` en
+`config/oauth.yaml`. **En producción la app se niega a arrancar sin ella**: la
+constante de desarrollo está publicada en este repositorio, y con ella cualquiera
+podría falsificar una cookie de sesión y hacerse pasar por un usuario autorizado.
+
 ## Firma y verificación del borrador
 
 El Formulario 210 en PDF sale **rellenable**: cada renglón es un campo AcroForm

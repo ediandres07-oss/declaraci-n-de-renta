@@ -9,6 +9,7 @@ import functools
 import hashlib
 import hmac
 import json
+import os
 import secrets
 from datetime import date, datetime, timedelta
 from pathlib import Path
@@ -215,16 +216,56 @@ def autorizado_requerido(f):
     return wrapper
 
 
+# --------------------------------------------------------------- base de datos
+def uri_base_datos() -> str:
+    """URI de la BD: Postgres si hay DATABASE_URL, SQLite local en caso contrario.
+
+    En Render el disco es efímero: un SQLite en sessions/ se pierde en cada
+    despliegue, y con él las cuentas y los secretos TOTP. Por eso producción
+    debe apuntar a un Postgres gestionado mediante DATABASE_URL.
+    """
+    url = os.environ.get("DATABASE_URL", "").strip()
+    if url:
+        # Render entrega 'postgres://', un esquema que SQLAlchemy 2 ya no acepta.
+        if url.startswith("postgres://"):
+            url = url.replace("postgres://", "postgresql://", 1)
+        return url
+    # La carpeta sessions/ no viene en el repo (está en .gitignore); la creamos
+    # al arrancar para que SQLite pueda escribir la base de datos.
+    (BASE / "sessions").mkdir(parents=True, exist_ok=True)
+    return f"sqlite:///{BASE / 'sessions' / 'usuarios.db'}"
+
+
+def _clave_de_sesion(cfg: dict) -> str:
+    """Clave para firmar las cookies de sesión.
+
+    Prioriza la variable de entorno para que en producción no dependa de un
+    archivo de configuración. La constante de desarrollo es pública (está en el
+    repositorio): con ella, cualquiera podría falsificar una cookie de sesión y
+    hacerse pasar por un usuario autorizado, así que nunca debe usarse fuera de
+    la máquina local.
+    """
+    clave = os.environ.get("SECRET_KEY") or cfg.get("secret_key")
+    if clave:
+        return clave
+    if os.environ.get("RENDER") or os.environ.get("DATABASE_URL"):
+        raise RuntimeError(
+            "Falta SECRET_KEY en producción. Defínala como variable de entorno "
+            "o incluya 'secret_key' en config/oauth.yaml (Secret File)."
+        )
+    return "clave-temporal-de-desarrollo"
+
+
 # ------------------------------------------------------------- registro OAuth
 def init_auth(app):
     """Configura la BD y los proveedores OAuth sobre la app Flask."""
     cfg = cargar_config_oauth()
-    app.secret_key = cfg.get("secret_key") or "clave-temporal-de-desarrollo"
-    # La carpeta sessions/ no viene en el repo (está en .gitignore); la creamos
-    # al arrancar para que SQLite pueda escribir la base de datos.
-    (BASE / "sessions").mkdir(parents=True, exist_ok=True)
-    app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{BASE / 'sessions' / 'usuarios.db'}"
+    app.secret_key = _clave_de_sesion(cfg)
+    app.config["SQLALCHEMY_DATABASE_URI"] = uri_base_datos()
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    # Render cierra las conexiones ociosas; sin esto Postgres devuelve
+    # "server closed the connection unexpectedly" tras un rato de inactividad.
+    app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {"pool_pre_ping": True}
 
     db.init_app(app)
     oauth.init_app(app)
@@ -260,18 +301,22 @@ def init_auth(app):
 
 
 def _migrar_columnas_faltantes():
-    """Agrega columnas nuevas a una BD SQLite ya existente (create_all no altera)."""
+    """Agrega columnas nuevas a una BD ya existente (create_all no altera tablas)."""
     from sqlalchemy import inspect, text
     insp = inspect(db.engine)
     if "usuarios" not in insp.get_table_names():
         return
     existentes = {c["name"] for c in insp.get_columns("usuarios")}
+    # SQLite acepta 'BOOLEAN DEFAULT 0' y 'DATETIME'; Postgres exige FALSE y TIMESTAMP.
+    es_postgres = db.engine.dialect.name == "postgresql"
+    falso = "FALSE" if es_postgres else "0"
+    marca_tiempo = "TIMESTAMP" if es_postgres else "DATETIME"
     nuevas = {
         "recordatorio_30_year": "INTEGER",
         "recordatorio_7_year": "INTEGER",
-        "mfa_habilitado": "BOOLEAN DEFAULT 0",
+        "mfa_habilitado": f"BOOLEAN DEFAULT {falso}",
         "intentos_fallidos": "INTEGER DEFAULT 0",
-        "bloqueado_hasta": "DATETIME",
+        "bloqueado_hasta": marca_tiempo,
     }
     with db.engine.begin() as con:
         for nombre, tipo in nuevas.items():
