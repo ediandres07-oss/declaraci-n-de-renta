@@ -76,3 +76,28 @@ def test_produccion_nunca_devuelve_la_clave_de_desarrollo(monkeypatch):
     monkeypatch.setenv("DATABASE_URL", "postgresql://u:p@host/db")
     monkeypatch.setenv("SECRET_KEY", "otra-clave")
     assert _clave_de_sesion({}) != CLAVE_DEV
+
+
+# ------------------- endpoint de salud --------------------------------------
+
+def test_salud_reporta_motor_y_conexion():
+    from webapp import app
+
+    app.config["TESTING"] = True
+    with app.test_client() as c:
+        r = c.get("/api/salud")
+    assert r.status_code == 200
+    j = r.get_json()
+    assert j["ok"] is True
+    assert j["motor"] in ("sqlite", "postgresql")
+    assert j["anio_gravable"] == 2025
+
+
+def test_salud_no_filtra_credenciales():
+    from webapp import app
+
+    app.config["TESTING"] = True
+    with app.test_client() as c:
+        cuerpo = c.get("/api/salud").get_data(as_text=True).lower()
+    for fuga in ("password", "usuarios.db", "@", "sqlite:///", "postgresql://"):
+        assert fuga not in cuerpo

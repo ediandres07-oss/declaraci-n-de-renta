@@ -104,6 +104,28 @@ def _guardar_ordenes(ordenes: dict) -> None:
         json.dump(ordenes, fh, ensure_ascii=False, indent=2, default=str)
 
 
+@app.get("/api/salud")
+def salud():
+    """Chequeo de salud: confirma que la app responde y contra qué base corre.
+
+    Solo expone el nombre del motor y si la conexión vive; nunca credenciales,
+    host ni nombre de la base. Sirve para verificar tras un despliegue que
+    producción quedó apuntando a Postgres y no a un SQLite efímero.
+    """
+    from sqlalchemy import text
+
+    try:
+        db.session.execute(text("SELECT 1"))
+        conectada = True
+    except Exception:
+        conectada = False
+    return jsonify({
+        "ok": conectada,
+        "motor": db.engine.dialect.name,
+        "anio_gravable": PARAMS.anio_gravable,
+    }), (200 if conectada else 503)
+
+
 @app.get("/")
 def landing():
     # Todo el contenido de la landing es visible sin iniciar sesión; solo las
