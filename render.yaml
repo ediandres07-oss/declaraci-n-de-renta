@@ -20,11 +20,12 @@ services:
   - type: web
     name: declaracion-renta
     runtime: python
-    plan: free                 # gratis para empezar (se duerme tras inactividad)
+    plan: starter              # siempre despierto (el plan free se dormía tras inactividad)
     region: oregon
     buildCommand: "pip install -r requirements.txt"
-    # 1 worker + hilos: suficiente concurrencia sin multiplicar conexiones a la BD.
-    startCommand: "gunicorn webapp:app --bind 0.0.0.0:$PORT --workers 1 --threads 8 --timeout 120"
+    # 2 workers + hilos: 16 solicitudes simultáneas; el pool de SQLAlchemy por
+    # worker (5+10) sigue holgado frente al límite de conexiones del Postgres.
+    startCommand: "gunicorn webapp:app --bind 0.0.0.0:$PORT --workers 2 --threads 8 --timeout 120"
     envVars:
       - key: PYTHON_VERSION
         value: "3.11.9"
