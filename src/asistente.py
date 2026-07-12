@@ -15,7 +15,15 @@ from pathlib import Path
 import yaml
 
 BASE = Path(__file__).resolve().parent.parent
-_IA_PATH = BASE / "config" / "ia.yaml"
+
+# Rutas candidatas, en orden. En local vive en config/ia.yaml. En Render se
+# carga como Secret File: su panel no admite '/' en el nombre, así que el
+# archivo se llama 'ia.yaml' y se monta en /etc/secrets/ y en la raíz.
+_IA_PATHS = [
+    BASE / "config" / "ia.yaml",
+    Path("/etc/secrets/ia.yaml"),
+    BASE / "ia.yaml",
+]
 
 # Límite de mensajes que aceptamos por conversación (evita abusos/costos).
 _MAX_MENSAJES = 20
@@ -23,9 +31,10 @@ _MAX_TOKENS = 1100  # suficiente para respuestas cortas y para la guía paso a p
 
 
 def cargar_config() -> dict:
-    if _IA_PATH.exists():
-        with open(_IA_PATH, "r", encoding="utf-8") as fh:
-            return yaml.safe_load(fh) or {}
+    for ruta in _IA_PATHS:
+        if ruta.exists():
+            with open(ruta, "r", encoding="utf-8") as fh:
+                return yaml.safe_load(fh) or {}
     return {}
 
 
