@@ -25,14 +25,24 @@ db = SQLAlchemy()
 oauth = OAuth()
 
 BASE = Path(__file__).resolve().parent.parent
-_OAUTH_PATH = BASE / "config" / "oauth.yaml"
 _ACCESO_PATH = BASE / "config" / "acceso.yaml"
+
+# Rutas candidatas para la configuración OAuth, en orden de preferencia.
+# En local vive en config/oauth.yaml. En Render se carga como Secret File: su
+# panel no admite '/' en el nombre, así que el archivo se llama 'oauth.yaml' y
+# Render lo monta en /etc/secrets/oauth.yaml (y también en la raíz del proyecto).
+_OAUTH_PATHS = [
+    BASE / "config" / "oauth.yaml",
+    Path("/etc/secrets/oauth.yaml"),
+    BASE / "oauth.yaml",
+]
 
 
 def cargar_config_oauth() -> dict:
-    if _OAUTH_PATH.exists():
-        with open(_OAUTH_PATH, "r", encoding="utf-8") as fh:
-            return yaml.safe_load(fh) or {}
+    for ruta in _OAUTH_PATHS:
+        if ruta.exists():
+            with open(ruta, "r", encoding="utf-8") as fh:
+                return yaml.safe_load(fh) or {}
     return {}
 
 
