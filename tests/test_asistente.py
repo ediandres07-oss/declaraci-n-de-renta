@@ -16,7 +16,7 @@ def cliente():
 
 def _login_cliente(cliente):
     """Inicia sesión con un usuario CUALQUIERA (no personal autorizado) —
-    /api/chat solo exige estar logueado, no estar en la lista de admins."""
+    sirve para probar que el chat conoce al usuario cuando SÍ hay sesión."""
     from src.auth import db, Usuario
     with app.app_context():
         u = Usuario.query.filter_by(email="cliente@test.com").first()
@@ -102,16 +102,32 @@ def test_responder_falla_si_inactivo():
                             {"habilitado": False, "api_key": ""})
 
 
-def test_chat_exige_login(cliente, monkeypatch):
-    """Ver la página es libre, pero interactuar con el chat exige sesión iniciada."""
+def test_chat_no_exige_login(cliente, monkeypatch):
+    """El chat es el primer contacto de un cliente potencial: responde sin sesión."""
+    captura = {}
+    _mock_gemini(monkeypatch, captura)
     monkeypatch.setattr("webapp.IA_CFG", _cfg_activa())
+    monkeypatch.setattr("webapp._chat_ips", {})
     r = cliente.post("/api/chat", json={"mensajes": [{"rol": "user", "texto": "hola"}]})
-    assert r.status_code == 401
-    assert r.get_json()["login_requerido"] is True
+    assert r.status_code == 200
+    assert r.get_json()["respuesta"] == "Respuesta de prueba."
+
+
+def test_chat_limita_mensajes_por_ip(cliente, monkeypatch):
+    """Sin login el abuso se frena con un límite de mensajes por IP (429)."""
+    _mock_gemini(monkeypatch, {})
+    monkeypatch.setattr("webapp.IA_CFG", _cfg_activa())
+    monkeypatch.setattr("webapp._chat_ips", {})
+    monkeypatch.setattr("webapp._CHAT_MAX_POR_IP", 2)
+    cuerpo = {"mensajes": [{"rol": "user", "texto": "hola"}]}
+    assert cliente.post("/api/chat", json=cuerpo).status_code == 200
+    assert cliente.post("/api/chat", json=cuerpo).status_code == 200
+    r = cliente.post("/api/chat", json=cuerpo)
+    assert r.status_code == 429
+    assert "muchos mensajes" in r.get_json()["error"]
 
 
 def test_endpoint_chat_desactivado(cliente, monkeypatch):
-    _login_cliente(cliente)
     monkeypatch.setattr("webapp.IA_CFG", {"habilitado": False, "api_key": ""})
     r = cliente.post("/api/chat", json={"mensajes": [{"rol": "user", "texto": "hola"}]})
     assert r.status_code == 503
@@ -122,14 +138,15 @@ def test_endpoint_chat_activo(cliente, monkeypatch):
     captura = {}
     _mock_gemini(monkeypatch, captura)
     monkeypatch.setattr("webapp.IA_CFG", _cfg_activa())
+    monkeypatch.setattr("webapp._chat_ips", {})
     r = cliente.post("/api/chat", json={"mensajes": [{"rol": "user", "texto": "¿precios?"}]})
     assert r.status_code == 200
     assert r.get_json()["respuesta"] == "Respuesta de prueba."
 
 
 def test_endpoint_chat_valida_cuerpo(cliente, monkeypatch):
-    _login_cliente(cliente)
     monkeypatch.setattr("webapp.IA_CFG", _cfg_activa())
+    monkeypatch.setattr("webapp._chat_ips", {})
     assert cliente.post("/api/chat", json={"mensajes": []}).status_code == 400
 
 

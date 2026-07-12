@@ -266,7 +266,8 @@ const $ = s => document.querySelector(s);
 const fmt = n => Number(n||0).toLocaleString("es-CO", {maximumFractionDigits:0});
 
 // Toda la página se ve sin iniciar sesión; solo INTERACTUAR (subir la exógena,
-// usar el chat, elegir un plan) pide login primero. Nada de contenido se oculta.
+// elegir un plan) pide login primero. Nada de contenido se oculta. El chat de
+// soporte es libre: el servidor lo protege con un límite de mensajes por IP.
 const USUARIO_LOGUEADO = {{ usuario_logueado|tojson }};
 function requiereLogin() {
   if (!USUARIO_LOGUEADO) {

@@ -91,7 +91,8 @@ def test_login_con_2fa_no_abre_sesion_hasta_verificar(cliente, usuario):
         s["uid_pendiente"] = usuario        # estado tras el callback de OAuth
 
     # una ruta protegida debe rechazarlo: aún no tiene sesión
-    assert cliente.post("/api/chat", json={"mensajes": [{"rol": "user", "texto": "hola"}]}
+    # (el chat es libre; la cédula de "Mi cuenta" sí exige sesión iniciada)
+    assert cliente.post("/api/mi-cuenta/cedula", json={"cedula": "123"}
                         ).status_code == 401
     assert cliente.get("/verificar-mfa").status_code == 200
 

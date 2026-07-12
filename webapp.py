@@ -9,6 +9,8 @@ import io
 import json
 import shutil
 import tempfile
+import threading
+import time
 import uuid
 import warnings
 from datetime import date
@@ -129,8 +131,9 @@ def salud():
 @app.get("/")
 def landing():
     # Todo el contenido de la landing es visible sin iniciar sesión; solo las
-    # interacciones (subir exógena, chat, checkout) piden login — ver JS abajo
-    # y los decoradores @login_requerido en las rutas /api/* correspondientes.
+    # interacciones (subir exógena, checkout) piden login — ver JS abajo y los
+    # decoradores @login_requerido en las rutas /api/* correspondientes. El chat
+    # de soporte es libre: solo tiene límite de mensajes por IP.
     return render_template("landing.html", anio=PARAMS.anio_gravable,
                            planes=PLANES, realmy_habilitado=REALMY.get("habilitado"),
                            realmy_public_key=REALMY.get("public_key", ""),
@@ -144,12 +147,41 @@ def landing():
                            usuario_logueado=usuario_actual() is not None)
 
 
+# El chat de soporte es LIBRE (sin login): es el primer punto de contacto de un
+# cliente potencial, que debe poder preguntar antes de registrarse. Un límite de
+# mensajes por IP protege la cuota gratuita de Gemini contra abusos.
+_CHAT_VENTANA = 10 * 60      # segundos
+_CHAT_MAX_POR_IP = 20        # mensajes por IP dentro de la ventana
+_chat_ips: dict = {}
+_chat_lock = threading.Lock()
+
+
+def _chat_permitido(ip: str) -> bool:
+    ahora = time.time()
+    with _chat_lock:
+        marcas = [t for t in _chat_ips.get(ip, ()) if ahora - t < _CHAT_VENTANA]
+        if len(marcas) >= _CHAT_MAX_POR_IP:
+            _chat_ips[ip] = marcas
+            return False
+        marcas.append(ahora)
+        _chat_ips[ip] = marcas
+        return True
+
+
+def _ip_cliente() -> str:
+    # Detrás del proxy de Render la IP real viaja en X-Forwarded-For.
+    xff = request.headers.get("X-Forwarded-For", "")
+    return (xff.split(",")[0].strip() or request.remote_addr or "?")
+
+
 @app.post("/api/chat")
-@login_requerido
 def api_chat():
-    """Responde una duda del cliente con el asistente de IA (Claude)."""
+    """Responde una duda del cliente con el asistente de IA (sin exigir login)."""
     if not asistente_ia_activo(IA_CFG):
         return jsonify({"error": "El asistente no está disponible."}), 503
+    if not _chat_permitido(_ip_cliente()):
+        return jsonify({"error": "Has enviado muchos mensajes seguidos. "
+                                 "Espera unos minutos e inténtalo de nuevo. 🙏"}), 429
     cuerpo = request.get_json(silent=True) or {}
     mensajes = cuerpo.get("mensajes")
     if not isinstance(mensajes, list) or not mensajes:
