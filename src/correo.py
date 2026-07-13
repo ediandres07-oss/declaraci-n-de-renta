@@ -11,6 +11,7 @@ programa para correr una vez al día.
 """
 from __future__ import annotations
 
+import logging
 import smtplib
 from dataclasses import dataclass
 from datetime import date
@@ -20,6 +21,8 @@ from pathlib import Path
 from typing import List, Optional
 
 import yaml
+
+_log = logging.getLogger(__name__)
 
 BASE = Path(__file__).resolve().parent.parent
 
@@ -179,7 +182,8 @@ def notificar_solicitud_asesor(nombre: str, email_usuario: str, cedula: str,
         enviar_email(destino, f"⚑ Nuevo cliente pide asesor: {nombre or email_usuario}",
                      html, cfg)
         return True
-    except Exception:
+    except Exception as e:
+        _log.warning("No se pudo enviar el aviso de asesor a %s: %s", destino, e)
         return False
 
 
@@ -238,7 +242,9 @@ def notificar_pago(orden_id: str, orden: dict, confirmado: bool,
     try:
         enviar_email(destino, asunto, html, cfg)
         return True
-    except Exception:
+    except Exception as e:
+        _log.warning("No se pudo enviar el aviso de pago de la orden %s a %s: %s",
+                     orden_id, destino, e)
         return False
 
 
