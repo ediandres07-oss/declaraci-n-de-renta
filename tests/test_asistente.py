@@ -150,6 +150,25 @@ def test_endpoint_chat_valida_cuerpo(cliente, monkeypatch):
     assert cliente.post("/api/chat", json={"mensajes": []}).status_code == 400
 
 
+def test_activar_asesor_avisa_cada_vez(cliente, monkeypatch, _sin_smtp_real):
+    """Cada activación de 'quiere asesor' notifica al negocio, aunque ya
+    estuviera activada antes (un lead que insiste no debe perderse)."""
+    import src.correo as correo
+    monkeypatch.setattr(correo, "cargar_config_email", lambda: {
+        "habilitado": True, "user": "smtp@test.co", "notificar_a": "negocio@test.co"})
+    _login_cliente(cliente)
+
+    r1 = cliente.post("/api/mi-cuenta/preferencias", json={"quiere_asesor": True})
+    r2 = cliente.post("/api/mi-cuenta/preferencias", json={"quiere_asesor": True})
+    assert r1.get_json()["aviso_enviado"] is True
+    assert r2.get_json()["aviso_enviado"] is True
+    assert len(_sin_smtp_real) == 2
+
+    # desactivar nunca notifica
+    cliente.post("/api/mi-cuenta/preferencias", json={"quiere_asesor": False})
+    assert len(_sin_smtp_real) == 2
+
+
 def test_widget_oculto_si_desactivado(cliente, monkeypatch):
     # Ver la página NUNCA exige login — el widget se oculta solo si la IA está apagada.
     monkeypatch.setattr("webapp.IA_CFG", {"habilitado": False, "api_key": ""})

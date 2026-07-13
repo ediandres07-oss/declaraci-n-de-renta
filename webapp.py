@@ -852,11 +852,12 @@ def guardar_preferencias():
     if "acepta_recordatorios" in cuerpo:
         u.acepta_recordatorios = bool(cuerpo["acepta_recordatorios"])
 
-    # detectar transición a "quiere asesor" para notificar solo una vez
+    # Cada activación de la casilla avisa al negocio: un lead que insiste vale
+    # más que el riesgo de un correo repetido (desactivarla nunca notifica).
     pidio_asesor_ahora = False
     if "quiere_asesor" in cuerpo:
         nuevo = bool(cuerpo["quiere_asesor"])
-        pidio_asesor_ahora = nuevo and not u.quiere_asesor
+        pidio_asesor_ahora = nuevo
         u.quiere_asesor = nuevo
     db.session.commit()
 
