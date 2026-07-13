@@ -514,20 +514,34 @@ def checkout_realmy():
 def reportar_pago():
     """El cliente informa que ya hizo la consignación/transferencia."""
     cuerpo = request.get_json(silent=True) or {}
+    orden_id = cuerpo.get("orden_id", "")
     ordenes = _leer_ordenes()
-    orden = ordenes.get(cuerpo.get("orden_id", ""))
+    orden = ordenes.get(orden_id)
     if not orden or orden.get("tipo") != "orden":
         return jsonify({"error": "Orden no encontrada."}), 404
     if orden["estado"] == "pendiente_pago":
         orden["estado"] = "pago_reportado"
+        # Aviso al negocio: hay una consignación por verificar. Nunca tumba el
+        # endpoint (la orden queda en el panel /admin de todos modos).
+        from src.correo import notificar_pago
+        if notificar_pago(orden_id, orden, confirmado=False):
+            orden["aviso_pago_enviado"] = True
         _guardar_ordenes(ordenes)
-    return jsonify({"estado": orden["estado"], "orden_id": cuerpo.get("orden_id")})
+    return jsonify({"estado": orden["estado"], "orden_id": orden_id})
 
 
 def _finalizar_pago_orden(orden_id: str, orden: dict, ordenes: dict) -> None:
     """Marca la orden como pagada y, si es plan de presentación, conserva la
     exógena y genera el checklist para el trámite. Idempotente."""
     orden["estado"] = "pagada" if orden["plan"] == "pdf" else "pagada_en_tramite"
+
+    # Aviso al negocio de que entró dinero confirmado. La bandera evita
+    # reenviarlo cuando la pasarela repite el webhook (esta función es
+    # idempotente y puede ejecutarse más de una vez por orden).
+    if not orden.get("aviso_pago_confirmado_enviado"):
+        from src.correo import notificar_pago
+        if notificar_pago(orden_id, orden, confirmado=True):
+            orden["aviso_pago_confirmado_enviado"] = True
 
     # plan recomendado aceptado: se conserva la exógena para hacer el trámite
     if orden["plan"] == "presentacion":

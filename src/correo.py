@@ -22,7 +22,15 @@ from typing import List, Optional
 import yaml
 
 BASE = Path(__file__).resolve().parent.parent
-_EMAIL_PATH = BASE / "config" / "email.yaml"
+
+# Rutas candidatas, en orden. En local vive en config/email.yaml. En Render se
+# carga como Secret File: su panel no admite '/' en el nombre, así que el
+# archivo se llama 'email.yaml' y se monta en /etc/secrets/ y en la raíz.
+_EMAIL_PATHS = [
+    BASE / "config" / "email.yaml",
+    Path("/etc/secrets/email.yaml"),
+    BASE / "email.yaml",
+]
 
 # Umbrales (días antes del vencimiento)
 DIAS_AVISO_1 = 30      # primer aviso
@@ -37,9 +45,10 @@ def fecha_texto(f: Optional[date]) -> str:
 
 
 def cargar_config_email() -> dict:
-    if _EMAIL_PATH.exists():
-        with open(_EMAIL_PATH, "r", encoding="utf-8") as fh:
-            return yaml.safe_load(fh) or {}
+    for ruta in _EMAIL_PATHS:
+        if ruta.exists():
+            with open(ruta, "r", encoding="utf-8") as fh:
+                return yaml.safe_load(fh) or {}
     return {}
 
 
@@ -169,6 +178,65 @@ def notificar_solicitud_asesor(nombre: str, email_usuario: str, cedula: str,
     try:
         enviar_email(destino, f"⚑ Nuevo cliente pide asesor: {nombre or email_usuario}",
                      html, cfg)
+        return True
+    except Exception:
+        return False
+
+
+def notificar_pago(orden_id: str, orden: dict, confirmado: bool,
+                   cfg: Optional[dict] = None) -> bool:
+    """Avisa al negocio que un cliente pagó (o reportó haber pagado) una orden.
+
+    `confirmado=True` cuando la pasarela ya validó el dinero (Wompi/Realmy);
+    `confirmado=False` cuando el cliente reportó una consignación manual que
+    hay que verificar. No lanza excepción: si el correo está deshabilitado o
+    falla, retorna False (la orden queda registrada en el panel /admin igual).
+    """
+    cfg = cfg or cargar_config_email()
+    if not cfg.get("habilitado"):
+        return False
+    destino = cfg.get("notificar_a") or cfg.get("remitente") or cfg.get("user")
+    if not destino:
+        return False
+
+    contacto = orden.get("contacto") or {}
+    precio = orden.get("precio") or 0
+    plan = orden.get("plan", "")
+    titulo = ("✓ Pago confirmado — inicia el trámite" if confirmado
+              else "$ Un cliente reportó su pago — verifica la consignación")
+    color = "#227a63" if confirmado else "#e8a413"
+    filas = [
+        ("Orden", orden_id.upper()),
+        ("Plan", "Formulario 210 en PDF" if plan == "pdf" else "Presentación en la DIAN"),
+        ("Valor", f"${precio:,.0f}".replace(",", ".") + " COP"),
+        ("Cliente", orden.get("nombre") or contacto.get("nombre") or "—"),
+        ("Correo", contacto.get("email") or "—"),
+        ("Teléfono", contacto.get("telefono") or "—"),
+        ("NIT/Cédula termina en", str(orden.get("nit", ""))[-4:] or "—"),
+    ]
+    filas_html = "".join(
+        f"<tr><td style='padding:6px 12px;color:#7b8a9c'>{k}</td>"
+        f"<td style='padding:6px 12px;font-weight:600'>{v}</td></tr>" for k, v in filas)
+    siguiente = ("El dinero ya está validado por la pasarela. Siguiente paso: "
+                 "elaborar y entregar según el plan."
+                 if confirmado else
+                 "Revisa tu cuenta de Bancolombia: cuando confirmes la consignación, "
+                 "marca la orden como pagada en el panel /admin para liberar la entrega.")
+    html = f"""<!DOCTYPE html><html><body style="font-family:-apple-system,Segoe UI,sans-serif;
+      background:#f5f7fa;padding:24px;color:#1e2b3a">
+      <div style="max-width:520px;margin:0 auto;background:#fff;border-radius:14px;overflow:hidden">
+        <div style="background:{color};color:#fff;padding:18px 22px;font-size:1.1rem;font-weight:700">
+          {titulo}</div>
+        <div style="padding:20px 22px">
+          <table style="border-collapse:collapse;font-size:.9rem">{filas_html}</table>
+          <p style="font-size:.82rem;color:#5a6b7f;margin-top:16px">{siguiente}</p>
+        </div>
+      </div></body></html>"""
+    asunto = (f"✓ Pago confirmado ${precio:,.0f} — orden {orden_id.upper()}"
+              if confirmado else
+              f"$ Pago reportado por verificar — orden {orden_id.upper()}").replace(",", ".")
+    try:
+        enviar_email(destino, asunto, html, cfg)
         return True
     except Exception:
         return False

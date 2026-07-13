@@ -221,6 +221,52 @@ def test_reportar_pago_no_desbloquea_hasta_confirmar(cliente):
     assert cliente.get(f"/api/orden/{orden}/formulario.pdf").status_code == 200
 
 
+def test_reportar_pago_avisa_al_negocio(cliente, monkeypatch, _sin_smtp_real):
+    """Cuando el cliente reporta la consignación, el negocio recibe un aviso
+    por correo con los datos de la orden (antes solo quedaba en /admin)."""
+    import src.correo as correo
+    monkeypatch.setattr(correo, "cargar_config_email", lambda: {
+        "habilitado": True, "user": "smtp@test.co", "notificar_a": "negocio@test.co"})
+
+    j = _cargar(cliente).get_json()
+    orden = cliente.post("/api/checkout", json={"token": j["token"], "plan": "pdf",
+        "contacto": {"nombre": "Ana", "email": "ana@test.co", "telefono": "300"}}
+        ).get_json()["orden_id"]
+    cliente.post("/api/reportar-pago", json={"orden_id": orden})
+
+    assert len(_sin_smtp_real) == 1
+    aviso = _sin_smtp_real[0]
+    assert aviso["destino"] == "negocio@test.co"
+    assert "por verificar" in aviso["asunto"]
+    assert orden.upper() in aviso["asunto"]
+    assert "ana@test.co" in aviso["html"] and "79.900" in aviso["html"]
+
+    # reportar dos veces no duplica el aviso (el estado ya no es pendiente_pago)
+    cliente.post("/api/reportar-pago", json={"orden_id": orden})
+    assert len(_sin_smtp_real) == 1
+
+
+def test_pago_confirmado_avisa_una_sola_vez(cliente, monkeypatch, _sin_smtp_real):
+    """La confirmación (pasarela o admin) avisa con '✓ confirmado'; si el
+    webhook se repite, el aviso no se duplica."""
+    import src.correo as correo
+    monkeypatch.setattr(correo, "cargar_config_email", lambda: {
+        "habilitado": True, "user": "smtp@test.co"})
+
+    j = _cargar(cliente).get_json()
+    orden = cliente.post("/api/checkout", json={"token": j["token"], "plan": "presentacion",
+        "contacto": {"email": "x@y.co"}}).get_json()["orden_id"]
+
+    cliente.post("/api/confirmar-pago", json={"orden_id": orden})
+    confirmados = [a for a in _sin_smtp_real if "confirmado" in a["asunto"]]
+    assert len(confirmados) == 1
+    assert "189.900" in confirmados[0]["html"]
+
+    cliente.post("/api/confirmar-pago", json={"orden_id": orden})   # webhook repetido
+    confirmados = [a for a in _sin_smtp_real if "confirmado" in a["asunto"]]
+    assert len(confirmados) == 1
+
+
 def test_admin_lista_ordenes(cliente):
     j = _cargar(cliente).get_json()
     orden = cliente.post("/api/checkout", json={"token": j["token"], "plan": "presentacion",
