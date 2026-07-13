@@ -321,6 +321,24 @@
             <option value="4">4 o más</option>
           </select>
           <span id="depAhorro" style="font-size:.82rem;color:var(--verde);font-weight:700;margin-left:8px"></span>
+          <div id="patPregunta" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--borde)">
+            <div style="font-size:.85rem;font-weight:700;color:var(--azul)">
+              🏠 ¿Tu patrimonio está completo?</div>
+            <div style="font-size:.75rem;color:#5a6b7f;margin:4px 0 8px">
+              Lo que tenías al 31 de diciembre: casa, carro, cuentas, inversiones… y tus deudas.
+              La DIAN no siempre lo tiene completo — corrígelo aquí.</div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:end">
+              <label style="font-size:.72rem;color:#5a6b7f">Patrimonio bruto<br>
+                <input id="patBruto" inputmode="numeric" autocomplete="off"
+                       style="width:150px;padding:8px;border:1px solid var(--borde);border-radius:8px;font-size:.9rem"></label>
+              <label style="font-size:.72rem;color:#5a6b7f">Deudas<br>
+                <input id="patDeudas" inputmode="numeric" autocomplete="off"
+                       style="width:130px;padding:8px;border:1px solid var(--borde);border-radius:8px;font-size:.9rem"></label>
+              <button id="patAplicar" style="border:0;border-radius:8px;padding:9px 14px;font-size:.85rem;
+                font-weight:700;cursor:pointer;background:var(--azul2);color:#fff">Actualizar</button>
+            </div>
+            <div id="patOk" style="font-size:.78rem;color:var(--verde);font-weight:700;margin-top:6px"></div>
+          </div>
           <details id="depSoportes" style="margin-top:10px">
             <summary style="font-size:.76rem;color:var(--azul2);cursor:pointer">
               📎 Soportes que debes conservar por si la DIAN te revisa</summary>
@@ -536,9 +554,21 @@ function mostrarResultado(j) {
        (verifica si fuiste responsable de IVA). Aun así puedes declarar voluntariamente.</p>`;
   $("#depSelect").value = "0";
   $("#depAhorro").textContent = "";
+  $("#patBruto").value = fmt(j.patrimonio_bruto || 0);
+  $("#patDeudas").value = fmt(j.deudas || 0);
+  $("#patOk").textContent = "";
   $("#resultado").classList.remove("oculto");
   $("#seccionPlanes").classList.remove("oculto");
   $("#seccionPlanes").scrollIntoView({behavior:"smooth", block:"nearest"});
+}
+
+// Pinta el estimado (a pagar o a favor) con la respuesta del recálculo.
+function pintarValor(j) {
+  const favor = Number(j.saldo_a_favor||0) > 0;
+  const v = $("#resValor");
+  if (favor) { v.textContent = "$" + fmt(j.saldo_a_favor); v.className = "grande favor";
+    $("#resValorNota").textContent = "¡Tendrías saldo a FAVOR! La DIAN te devolvería este valor."; }
+  else { v.textContent = "$" + fmt(j.valor_a_pagar); v.className = "grande pagar"; }
 }
 
 // ---------- dependientes: recalcular estimado ----------
@@ -549,13 +579,39 @@ $("#depSelect").addEventListener("change", async () => {
     body: JSON.stringify({token, dependientes: Number($("#depSelect").value)})});
   const j = await r.json();
   if (!r.ok) { alert(j.error); return; }
-  const favor = Number(j.saldo_a_favor||0) > 0;
-  const v = $("#resValor");
-  if (favor) { v.textContent = "$" + fmt(j.saldo_a_favor); v.className = "grande favor";
-    $("#resValorNota").textContent = "¡Tendrías saldo a FAVOR! La DIAN te devolvería este valor."; }
-  else { v.textContent = "$" + fmt(j.valor_a_pagar); v.className = "grande pagar"; }
+  pintarValor(j);
   $("#depAhorro").textContent = j.dependientes > 0 && j.ahorro > 0
     ? `✓ Te ahorras $${fmt(j.ahorro)}` : (j.dependientes > 0 ? "✓ Registrado" : "");
+});
+
+// ---------- patrimonio y deudas: corregir y recalcular ----------
+// Los campos se ven con puntos de miles; al servidor viajan solo los dígitos.
+const soloDigitos = s => Number(String(s).replace(/[^\d]/g, "") || 0);
+["patBruto", "patDeudas"].forEach(id =>
+  document.getElementById(id).addEventListener("input", e => {
+    const n = soloDigitos(e.target.value);
+    e.target.value = n ? fmt(n) : "";
+  }));
+
+$("#patAplicar").addEventListener("click", async () => {
+  if (!token) return;
+  const boton = $("#patAplicar");
+  boton.disabled = true; boton.textContent = "Calculando…";
+  try {
+    const r = await fetch("/api/recalcular-landing", {method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({token,
+        patrimonio_bruto: soloDigitos($("#patBruto").value),
+        deudas: soloDigitos($("#patDeudas").value)})});
+    const j = await r.json();
+    if (!r.ok) { alert(j.error); return; }
+    pintarValor(j);
+    $("#patOk").textContent = "✓ Guardado — tu declaración saldrá con estos valores.";
+  } catch (e) {
+    alert("Problema de conexión. Intenta de nuevo.");
+  } finally {
+    boton.disabled = false; boton.textContent = "Actualizar";
+  }
 });
 
 // ---------- eliminar datos ----------

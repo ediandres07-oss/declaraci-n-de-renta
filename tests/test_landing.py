@@ -128,6 +128,45 @@ def test_recalcular_sin_token_falla(cliente):
     assert r.status_code == 400
 
 
+def test_cargar_devuelve_patrimonio_detectado(cliente):
+    j = _cargar(cliente).get_json()
+    assert j["patrimonio_bruto"] > 0            # la exógena de prueba trae patrimonio
+    assert "deudas" in j
+
+
+def test_recalcular_patrimonio_no_borra_dependientes(cliente):
+    """Corregir el patrimonio conserva los dependientes ya elegidos, y al
+    revés: cada campo del recálculo es independiente y todo queda guardado."""
+    j = _cargar(cliente).get_json()
+    cliente.post("/api/recalcular-landing", json={"token": j["token"], "dependientes": 2})
+
+    r = cliente.post("/api/recalcular-landing", json={
+        "token": j["token"], "patrimonio_bruto": 350_000_000, "deudas": 80_000_000})
+    assert r.status_code == 200
+    k = r.get_json()
+    assert k["patrimonio_bruto"] == 350_000_000
+    assert k["deudas"] == 80_000_000
+    assert k["dependientes"] == 2               # no se borraron
+
+    # y viceversa: cambiar dependientes no pisa el patrimonio corregido
+    r2 = cliente.post("/api/recalcular-landing", json={"token": j["token"], "dependientes": 1})
+    assert r2.get_json()["patrimonio_bruto"] == 350_000_000
+
+    # quedó persistido en la orden para el PDF pagado
+    import webapp as w
+    datos = w._leer_ordenes()[j["token"]]["datos"]
+    assert datos["patrimonio_bruto"] == 350_000_000
+    assert datos["deudas"] == 80_000_000
+
+
+def test_recalcular_patrimonio_invalido_falla(cliente):
+    j = _cargar(cliente).get_json()
+    for malo in (-1, "no-numero", 1e14):
+        r = cliente.post("/api/recalcular-landing",
+                         json={"token": j["token"], "patrimonio_bruto": malo})
+        assert r.status_code == 400, f"debió rechazar {malo}"
+
+
 def test_plan_recomendado_guarda_el_archivo(cliente, tmp_path):
     import webapp as w
     j = _cargar(cliente).get_json()

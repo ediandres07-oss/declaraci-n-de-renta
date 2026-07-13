@@ -413,39 +413,70 @@ def cargar_landing():
         "dias_restantes": dias,
         "valor_a_pagar": liq.r(136),
         "saldo_a_favor": liq.r(137),
+        "patrimonio_bruto": datos.patrimonio_bruto,
+        "deudas": datos.deudas,
     })
+
+
+def _monto_valido(valor) -> float:
+    """Convierte un monto del cliente a float sano (0 .. 1 billón de billones no)."""
+    monto = float(valor)
+    if monto < 0 or monto > 1e13:
+        raise ValueError(valor)
+    return monto
 
 
 @app.post("/api/recalcular-landing")
 @login_requerido
 def recalcular_landing():
-    """Recalcula el estimado de la landing al indicar dependientes económicos.
-    Guarda la elección para que los PDF pagados salgan con la deducción."""
+    """Recalcula el estimado al ajustar dependientes y/o patrimonio (R29/R30).
+    Cada campo es opcional y lo que no venga conserva su valor guardado, para
+    que corregir el patrimonio no borre los dependientes ya elegidos (y al
+    revés). Todo queda guardado para que el PDF pagado salga con esos datos."""
     cuerpo = request.get_json(silent=True) or {}
     token = cuerpo.get("token", "")
     ordenes = _leer_ordenes()
     if token not in ordenes or ordenes[token].get("tipo") != "carga":
         return jsonify({"error": "Cargue primero su archivo de exógena."}), 400
-    try:
-        dependientes = max(0, min(int(cuerpo.get("dependientes", 0)), 10))
-    except (TypeError, ValueError):
-        return jsonify({"error": "Número de dependientes inválido."}), 400
 
     datos = DatosDeclaracion.from_dict(ordenes[token]["datos"])
-    datos.dependientes = 0
+    if "dependientes" in cuerpo:
+        try:
+            dependientes = max(0, min(int(cuerpo["dependientes"]), 10))
+        except (TypeError, ValueError):
+            return jsonify({"error": "Número de dependientes inválido."}), 400
+        datos.dependientes = dependientes
+        datos.dependientes_detalle = [f"Dependiente {i+1}"
+                                      for i in range(min(dependientes, 4))]
+    if "patrimonio_bruto" in cuerpo:
+        try:
+            datos.patrimonio_bruto = _monto_valido(cuerpo["patrimonio_bruto"])
+        except (TypeError, ValueError):
+            return jsonify({"error": "Patrimonio inválido."}), 400
+    if "deudas" in cuerpo:
+        try:
+            datos.deudas = _monto_valido(cuerpo["deudas"])
+        except (TypeError, ValueError):
+            return jsonify({"error": "Valor de deudas inválido."}), 400
+
+    # El "ahorro" por dependientes se calcula contra el mismo escenario sin ellos.
+    dependientes_elegidos = datos.dependientes
+    detalle_elegido = list(datos.dependientes_detalle)
+    datos.dependientes, datos.dependientes_detalle = 0, []
     sin_dep = calcular(datos, PARAMS)
-    datos.dependientes = dependientes
-    datos.dependientes_detalle = [f"Dependiente {i+1}" for i in range(min(dependientes, 4))]
-    con_dep = calcular(datos, PARAMS)
+    datos.dependientes, datos.dependientes_detalle = dependientes_elegidos, detalle_elegido
+    liq = calcular(datos, PARAMS)
 
     ordenes[token]["datos"] = datos.to_dict()
     _guardar_ordenes(ordenes)
     return jsonify({
-        "dependientes": dependientes,
-        "valor_a_pagar": con_dep.r(136),
-        "saldo_a_favor": con_dep.r(137),
+        "dependientes": datos.dependientes,
+        "patrimonio_bruto": datos.patrimonio_bruto,
+        "deudas": datos.deudas,
+        "valor_a_pagar": liq.r(136),
+        "saldo_a_favor": liq.r(137),
         "ahorro": max(0.0, (sin_dep.r(136) - sin_dep.r(137))
-                      - (con_dep.r(136) - con_dep.r(137))),
+                      - (liq.r(136) - liq.r(137))),
     })
 
 
