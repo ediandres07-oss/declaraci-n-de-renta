@@ -838,7 +838,11 @@ function mostrarConsignacionManual(plan, j, p) {
       <div style="font-size:.72rem;color:#7b8a9c;text-transform:uppercase">Consigna o transfiere a</div>
       <div style="font-size:1.15rem;font-weight:800;margin-top:4px">${p.banco || "Bancolombia"} · Cuenta de ${p.tipo || "Ahorros"}</div>
       <div style="font-size:1.5rem;font-weight:800;letter-spacing:.06em;margin:6px 0">${p.numero || ""}</div>
-      <div style="font-size:.8rem;color:#3a4a5c">Referencia / descripción del pago:
+      ${p.nequi ? `<div style="border-top:1px dashed var(--borde);margin-top:8px;padding-top:8px">
+        <div style="font-size:.72rem;color:#7b8a9c;text-transform:uppercase">o por Nequi 📲</div>
+        <div style="font-size:1.5rem;font-weight:800;letter-spacing:.06em;margin:2px 0">${p.nequi}</div>
+      </div>` : ""}
+      <div style="font-size:.8rem;color:#3a4a5c;margin-top:8px">Referencia / descripción del pago:
         <b>ORDEN ${ordenActual.toUpperCase()}</b></div>
     </div>
     <ol style="font-size:.82rem;color:#3a4a5c;margin:14px 0 0 18px;line-height:1.8">

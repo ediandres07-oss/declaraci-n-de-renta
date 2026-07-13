@@ -3,6 +3,7 @@ pago:
   banco: Bancolombia
   tipo: Ahorros
   numero: "00514294607"
+  nequi: "3207526680"
   instrucciones: "Transfiere o consigna el valor exacto y usa tu número de orden como referencia."
 
 planes:
