@@ -898,10 +898,11 @@ function mostrarExito(plan) {
       return;
     }
     copiarTexto(CORREO).then(function(copiado){
-      var msg = copiado
-        ? '¡Listo! Copié nuestro correo al portapapeles: **'+CORREO+'**. Pégalo (Ctrl+V o Cmd+V) en tu app de correo. '
-        : 'Con gusto, escríbenos a **'+CORREO+'**. ';
-      burbuja(msg+'Cuéntanos brevemente tu caso y un asesor te contactará a la brevedad. 🙌', 'bot');
+      var msg = 'Con gusto 😊 Nuestro correo es **'+CORREO+'**'
+        + (copiado ? ' (ya te lo dejé copiado para que solo lo pegues).' : '.')
+        + '\n\nTambién puedes contarme tu duda aquí mismo en el chat, o hablar con '
+        + 'un asesor por WhatsApp. Te respondemos el mismo día. 🙌';
+      burbuja(msg, 'bot');
     });
   }
 
