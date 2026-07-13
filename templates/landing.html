@@ -174,6 +174,8 @@
               transition:transform .18s ease, box-shadow .18s ease, background-color .18s ease; }
   .btn-guia:hover { transform:translateY(-2px); background:var(--marca-osc); }
   .guia-nota { font-size:.78rem; color:var(--tenue); }
+  .demo-gif { display:block; width:100%; max-width:660px; height:auto; margin-top:14px;
+              border-radius:14px; border:1px solid var(--borde); box-shadow:var(--sombra-2); }
 
   /* ---------------------------- Confianza --------------------------- */
   .confianza { background:var(--gris); border-top:1px solid var(--gris2); padding:48px 0; }
@@ -420,7 +422,10 @@
         <div>
           <h3>Súbelo aquí y conoce tu resultado</h3>
           <p>Vuelve a esta página y arrastra el archivo a la zona de carga: en segundos sabrás si
-            estás obligado a declarar, tu fecha límite y el valor estimado.</p>
+            estás obligado a declarar, tu fecha límite y el valor estimado. Así se ve:</p>
+          <img class="demo-gif" loading="lazy" width="1147" height="541"
+               src="{{ url_for('static', filename='img/demo-tributando.gif') }}"
+               alt="Demostración: al soltar el archivo de exógena aparece el resultado con el valor estimado y la fecha límite">
         </div>
       </li>
     </ol>
