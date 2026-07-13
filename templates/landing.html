@@ -147,6 +147,34 @@
   .plan.destacado button:hover:not(:disabled) { background:#d29310; }
   .plan button:disabled { background:#b9c6d4; cursor:default; }
 
+  /* ------------------ Guía: descargar la exógena -------------------- */
+  #guia-exogena { margin: 8px 0 48px; }
+  .guia-intro { font-size:.92rem; color:var(--suave); margin:-8px 0 22px; max-width:640px; }
+  .guia { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:0; }
+  .guia li { display:grid; grid-template-columns:auto 1fr; gap:0 18px; position:relative;
+             padding:0 0 26px 0; }
+  /* línea que conecta los pasos */
+  .guia li::before { content:""; position:absolute; left:19px; top:40px; bottom:0;
+                     width:2px; background:var(--gris2); }
+  .guia li:last-child::before { display:none; }
+  .guia li:last-child { padding-bottom:0; }
+  .gnum { width:40px; height:40px; border-radius:50%; color:#fff; font-weight:800;
+          background:linear-gradient(135deg, var(--marca), var(--marca-osc));
+          display:flex; align-items:center; justify-content:center; position:relative; z-index:1;
+          box-shadow:0 4px 10px rgba(46,143,119,.3); }
+  .guia h3 { font-size:.98rem; color:var(--azul); margin:9px 0 5px; letter-spacing:-.01em; }
+  .guia p { font-size:.87rem; color:var(--texto); line-height:1.65; max-width:640px; }
+  .guia p b { color:var(--azul); }
+  .guia .gtip { display:inline-block; margin-top:8px; font-size:.78rem; color:var(--marca-osc);
+                background:var(--gris2); border-radius:8px; padding:6px 12px; line-height:1.5; }
+  .guia-cta { margin-top:26px; display:flex; flex-wrap:wrap; align-items:center; gap:14px; }
+  .btn-guia { display:inline-flex; align-items:center; gap:8px; background:var(--marca); color:#fff;
+              font-weight:700; font-size:.95rem; padding:13px 24px; min-height:46px; border-radius:24px;
+              text-decoration:none; box-shadow:0 6px 16px rgba(46,143,119,.3);
+              transition:transform .18s ease, box-shadow .18s ease, background-color .18s ease; }
+  .btn-guia:hover { transform:translateY(-2px); background:var(--marca-osc); }
+  .guia-nota { font-size:.78rem; color:var(--tenue); }
+
   /* ---------------------------- Confianza --------------------------- */
   .confianza { background:var(--gris); border-top:1px solid var(--gris2); padding:48px 0; }
   .confianza .contenedor { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; text-align:center; }
@@ -264,6 +292,11 @@
     <p>o haz clic para seleccionarlo · tus datos se procesan de forma segura y no se comparten</p>
     <input type="file" id="selector" accept=".xlsx,.xlsm" class="oculto">
   </div>
+  <p style="text-align:center; font-size:.85rem; color:var(--suave); margin:2px 0 8px">
+    ¿Aún no tienes el archivo?
+    <a href="#guia-exogena" style="color:var(--marca-osc); font-weight:700"
+       onclick="event.stopPropagation()">Mira cómo descargarlo de la DIAN en 5 pasos ↓</a>
+  </p>
   <div id="errorCarga" class="error-msg oculto"></div>
 
   <div id="resultado" class="oculto">
@@ -339,6 +372,62 @@
         </ul>
         <button data-plan="presentacion">Quiero que la presenten por mí</button>
       </div>
+    </div>
+  </div>
+
+  <div id="guia-exogena">
+    <h2 class="titulo-seccion">¿Cómo descargo mi exógena de la DIAN?</h2>
+    <p class="guia-intro">Es gratis, 100% en línea y solo necesitas tu cédula. El Excel que
+      descargas es el mismo que subes aquí para conocer tu resultado.</p>
+    <ol class="guia">
+      <li>
+        <span class="gnum">1</span>
+        <div>
+          <h3>Entra al portal de la DIAN</h3>
+          <p>Ve a <b>www.dian.gov.co</b> y haz clic en <b>"Usuarios registrados"</b> para entrar
+            a la plataforma MUISCA.</p>
+          <span class="gtip">¿Primera vez? Usa la opción <b>"Habilitar cuenta de usuario"</b> con tu
+            cédula. Solo necesitas tener RUT (también se saca en línea).</span>
+        </div>
+      </li>
+      <li>
+        <span class="gnum">2</span>
+        <div>
+          <h3>Inicia sesión a nombre propio</h3>
+          <p>Ingresa con tu <b>número de cédula</b> y tu contraseña, marcando
+            <b>"A nombre propio"</b>. Si olvidaste la contraseña, el portal tiene la opción de
+            recuperarla con tu correo.</p>
+        </div>
+      </li>
+      <li>
+        <span class="gnum">3</span>
+        <div>
+          <h3>Busca tu información exógena</h3>
+          <p>Dentro del portal, busca la opción <b>"Consulta información exógena reportada por
+            terceros"</b>. Si no la ves, escribe <b>"exógena"</b> en el buscador del portal.</p>
+        </div>
+      </li>
+      <li>
+        <span class="gnum">4</span>
+        <div>
+          <h3>Elige el año y descarga el Excel</h3>
+          <p>Selecciona el <b>año gravable {{ anio }}</b> y descarga el archivo
+            <b>.xlsx</b> que genera el sistema. Ese es tu reporte de exógena.</p>
+        </div>
+      </li>
+      <li>
+        <span class="gnum">5</span>
+        <div>
+          <h3>Súbelo aquí y conoce tu resultado</h3>
+          <p>Vuelve a esta página y arrastra el archivo a la zona de carga: en segundos sabrás si
+            estás obligado a declarar, tu fecha límite y el valor estimado.</p>
+        </div>
+      </li>
+    </ol>
+    <div class="guia-cta">
+      <a class="btn-guia" href="#dropzone">📎 Ya lo tengo — subir mi exógena</a>
+      <span class="guia-nota">¿Te perdiste en algún paso? Pregúntale al asistente del chat
+        (burbuja de abajo a la derecha) — te guía en vivo.</span>
     </div>
   </div>
 </div>
