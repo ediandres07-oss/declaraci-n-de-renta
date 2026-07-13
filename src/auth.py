@@ -115,6 +115,18 @@ class UsuarioMFA(db.Model):
     usuario = db.relationship("Usuario", backref=db.backref("mfa", uselist=False))
 
 
+class LeadEspera(db.Model):
+    """Correo captado por la guía-obsequio: lista de espera para avisar a la
+    persona cuando la DIAN habilite la exógena. Va en Postgres (no en el
+    filesystem) para no perder los leads en cada despliegue de Render."""
+    __tablename__ = "lista_espera"
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(200), unique=True, index=True)
+    nombre = db.Column(db.String(120))
+    ip = db.Column(db.String(60))
+    creado = db.Column(db.DateTime, default=datetime.utcnow)
+
+
 # --------------------------------------------------------------- segundo factor
 MAX_INTENTOS_MFA = 5
 BLOQUEO_MINUTOS = 15

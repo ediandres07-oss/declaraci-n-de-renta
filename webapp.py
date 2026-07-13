@@ -26,8 +26,8 @@ from src import wompi as wompi_mod
 from src.asistente import asistente_activo as asistente_ia_activo
 from src.asistente import cargar_config as cargar_config_ia
 from src.asistente import responder as responder_ia
-from src.auth import (Usuario, auth_bp, autorizado_requerido, db, init_auth,
-                      login_requerido, usuario_actual)
+from src.auth import (LeadEspera, Usuario, auth_bp, autorizado_requerido, db,
+                      init_auth, login_requerido, usuario_actual)
 from src.calendario import fecha_limite
 from src.documentos import generar_checklist_pdf
 
@@ -72,13 +72,11 @@ _EXOGENAS = {}
 PARAMS = Parametros.cargar(2025)
 
 ORDENES_PATH = BASE / "sessions" / "ordenes.json"
-LISTA_ESPERA_PATH = BASE / "sessions" / "lista_espera.json"   # correos que pidieron la guía-obsequio
 UPLOADS_DIR = BASE / "sessions" / "uploads"      # exógenas en espera de decisión
 CLIENTES_DIR = BASE / "sessions" / "clientes"    # exógenas de trámites aceptados
 
 GUIA_ARCHIVO = "guia-declarar-renta-2025.pdf"    # lead magnet en static/
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
-_lista_lock = threading.Lock()
 with open(BASE / "config" / "precios.yaml", "r", encoding="utf-8") as _fh:
     _CFG_PRECIOS = yaml.safe_load(_fh)
     PLANES = _CFG_PRECIOS["planes"]
@@ -111,19 +109,6 @@ def _guardar_ordenes(ordenes: dict) -> None:
     ORDENES_PATH.parent.mkdir(parents=True, exist_ok=True)
     with open(ORDENES_PATH, "w", encoding="utf-8") as fh:
         json.dump(ordenes, fh, ensure_ascii=False, indent=2, default=str)
-
-
-def _leer_lista_espera() -> list:
-    if LISTA_ESPERA_PATH.exists():
-        with open(LISTA_ESPERA_PATH, "r", encoding="utf-8") as fh:
-            return json.load(fh)
-    return []
-
-
-def _guardar_lista_espera(lista: list) -> None:
-    LISTA_ESPERA_PATH.parent.mkdir(parents=True, exist_ok=True)
-    with open(LISTA_ESPERA_PATH, "w", encoding="utf-8") as fh:
-        json.dump(lista, fh, ensure_ascii=False, indent=2, default=str)
 
 
 @app.get("/api/salud")
@@ -274,12 +259,16 @@ def api_guia():
     nombre = (cuerpo.get("nombre") or "").strip()[:80]
     if not _EMAIL_RE.match(email) or len(email) > 120:
         return jsonify({"error": "Escribe un correo válido para enviarte la guía."}), 400
-    with _lista_lock:
-        lista = _leer_lista_espera()
-        if not any(r.get("email") == email for r in lista):
-            lista.append({"email": email, "nombre": nombre,
-                          "fecha": date.today().isoformat(), "ip": _ip_cliente()})
-            _guardar_lista_espera(lista)
+    # Guarda el lead en Postgres (no en el filesystem, que Render borra en cada
+    # despliegue). Si falla el guardado, igual entregamos la guía: la descarga
+    # del cliente no debe depender de un tropiezo de la BD.
+    try:
+        if not LeadEspera.query.filter_by(email=email).first():
+            db.session.add(LeadEspera(email=email, nombre=nombre, ip=_ip_cliente()))
+            db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        app.logger.warning("No se pudo guardar el lead %s: %s", email, e)
     return jsonify({"ok": True, "url": url_for("static", filename=GUIA_ARCHIVO)})
 
 
