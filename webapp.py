@@ -121,10 +121,14 @@ def salud():
         conectada = True
     except Exception:
         conectada = False
+    # Solo booleanos de configuración, nunca credenciales ni direcciones.
+    from src.correo import cargar_config_email
     return jsonify({
         "ok": conectada,
         "motor": db.engine.dialect.name,
         "anio_gravable": PARAMS.anio_gravable,
+        "correo": bool(cargar_config_email().get("habilitado")),
+        "asistente": asistente_ia_activo(IA_CFG),
     }), (200 if conectada else 503)
 
 
