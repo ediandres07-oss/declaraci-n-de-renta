@@ -43,6 +43,29 @@ def asistente_activo(cfg: dict | None = None) -> bool:
     return bool(cfg.get("habilitado") and cfg.get("api_key"))
 
 
+def _planes_texto() -> str:
+    """Arma las líneas de planes/precios del prompt LEYENDO config/precios.yaml,
+    para que el asistente siempre cotice el precio vigente (no uno hardcodeado)."""
+    try:
+        with open(BASE / "config" / "precios.yaml", "r", encoding="utf-8") as fh:
+            planes = (yaml.safe_load(fh) or {}).get("planes", {})
+    except (OSError, yaml.YAMLError):
+        planes = {}
+
+    def _linea(clave, nombre_resp, desc_resp):
+        p = planes.get(clave, {})
+        precio = p.get("precio")
+        precio_txt = f"${precio:,.0f}".replace(",", ".") if precio else "consultar"
+        return f'- "{p.get("nombre", nombre_resp)}": {precio_txt}. {p.get("descripcion", desc_resp)}'
+
+    return "\n".join([
+        _linea("pdf", "Formulario 210 diligenciado en PDF",
+               "Borrador del Formulario 210 renglón por renglón + resumen ejecutivo, revisado por el sistema."),
+        _linea("presentacion", "Declaración presentada en la DIAN",
+               "Elaboramos la declaración, la montamos en el portal DIAN y la presentamos por el cliente. Incluye el PDF."),
+    ])
+
+
 def _prompt_sistema(cfg: dict) -> str:
     negocio = cfg.get("negocio", {})
     nombre_neg = negocio.get("nombre", "Declaración de Renta")
@@ -54,6 +77,7 @@ def _prompt_sistema(cfg: dict) -> str:
     if correo:
         contacto.append(f"correo {correo}")
     contacto_txt = " o ".join(contacto) if contacto else "los canales de contacto del sitio"
+    planes_txt = _planes_texto()
 
     return f"""Eres el asistente virtual de "{nombre_neg}", un servicio colombiano que ayuda a \
 personas naturales a preparar y presentar su Declaración de Renta (Formulario 210) a partir del \
@@ -102,10 +126,7 @@ Si el cliente parece perdido o el portal le da un error, ofrécele amablemente q
 para guiarlo en vivo (usa el canal de contacto humano).
 
 PLANES Y PRECIOS (en pesos colombianos):
-- "Formulario 210 diligenciado en PDF": $79.900. Borrador del Formulario 210 renglón por renglón + \
-resumen ejecutivo, revisado por el sistema.
-- "Declaración presentada en la DIAN": $189.900. Elaboramos la declaración, la montamos en el portal \
-DIAN y la presentamos por el cliente. Incluye el PDF.
+{planes_txt}
 Pago por Bancolombia Ahorros o pasarela en línea; el borrador/PDF se libera cuando el pago se confirma.
 
 QUIÉN ESTÁ OBLIGADO A DECLARAR RENTA (año gravable 2025, aproximado): una persona natural debe declarar \

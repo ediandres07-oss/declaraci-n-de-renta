@@ -7,6 +7,7 @@ Ejecutar:  .venv/bin/python webapp.py   →  http://127.0.0.1:5210
 """
 import io
 import json
+import re
 import shutil
 import tempfile
 import threading
@@ -20,6 +21,7 @@ import yaml
 from flask import (Flask, jsonify, redirect, render_template,
                    render_template_string, request, send_file, session, url_for)
 
+from src import whatsapp as wa_mod
 from src import wompi as wompi_mod
 from src.asistente import asistente_activo as asistente_ia_activo
 from src.asistente import cargar_config as cargar_config_ia
@@ -70,8 +72,13 @@ _EXOGENAS = {}
 PARAMS = Parametros.cargar(2025)
 
 ORDENES_PATH = BASE / "sessions" / "ordenes.json"
+LISTA_ESPERA_PATH = BASE / "sessions" / "lista_espera.json"   # correos que pidieron la guía-obsequio
 UPLOADS_DIR = BASE / "sessions" / "uploads"      # exógenas en espera de decisión
 CLIENTES_DIR = BASE / "sessions" / "clientes"    # exógenas de trámites aceptados
+
+GUIA_ARCHIVO = "guia-declarar-renta-2025.pdf"    # lead magnet en static/
+_EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+_lista_lock = threading.Lock()
 with open(BASE / "config" / "precios.yaml", "r", encoding="utf-8") as _fh:
     _CFG_PRECIOS = yaml.safe_load(_fh)
     PLANES = _CFG_PRECIOS["planes"]
@@ -104,6 +111,19 @@ def _guardar_ordenes(ordenes: dict) -> None:
     ORDENES_PATH.parent.mkdir(parents=True, exist_ok=True)
     with open(ORDENES_PATH, "w", encoding="utf-8") as fh:
         json.dump(ordenes, fh, ensure_ascii=False, indent=2, default=str)
+
+
+def _leer_lista_espera() -> list:
+    if LISTA_ESPERA_PATH.exists():
+        with open(LISTA_ESPERA_PATH, "r", encoding="utf-8") as fh:
+            return json.load(fh)
+    return []
+
+
+def _guardar_lista_espera(lista: list) -> None:
+    LISTA_ESPERA_PATH.parent.mkdir(parents=True, exist_ok=True)
+    with open(LISTA_ESPERA_PATH, "w", encoding="utf-8") as fh:
+        json.dump(lista, fh, ensure_ascii=False, indent=2, default=str)
 
 
 @app.get("/api/salud")
@@ -212,6 +232,62 @@ def api_chat():
         app.logger.warning("Fallo del asistente de IA: %s", e)
         return jsonify({"error": "No pude responder ahora mismo. Intenta de nuevo en un momento."}), 502
     return jsonify({"respuesta": respuesta})
+
+
+# --- WhatsApp Cloud API: el asistente responde también por WhatsApp ---------
+# Meta valida el webhook con un GET (handshake) y entrega los mensajes con un
+# POST. El POST debe responder 200 rápido o Meta reintenta; por eso cualquier
+# fallo se traga y siempre devolvemos 200.
+@app.get("/api/whatsapp")
+def whatsapp_verificar():
+    challenge = wa_mod.verificar_webhook(
+        IA_CFG,
+        request.args.get("hub.mode", ""),
+        request.args.get("hub.verify_token", ""),
+        request.args.get("hub.challenge", ""),
+    )
+    if challenge is None:
+        return "forbidden", 403
+    return challenge, 200
+
+
+@app.post("/api/whatsapp")
+def whatsapp_webhook():
+    payload = request.get_json(silent=True) or {}
+    if wa_mod.activo(IA_CFG) and asistente_ia_activo(IA_CFG):
+        wa_mod.atender(IA_CFG, payload, lambda hist: responder_ia(hist, IA_CFG))
+    return "ok", 200
+
+
+@app.post("/api/guia")
+def api_guia():
+    """Captura el correo para la lista de espera y entrega la guía-obsequio.
+
+    Guarda el correo (dedup) para avisarle a la persona cuando la DIAN habilite
+    la exógena, y devuelve el enlace de descarga del PDF. El correo es opcional
+    para el negocio pero es lo que convierte la visita en un contacto.
+    """
+    if not _chat_permitido(_ip_cliente()):        # mismo antiabuso por IP que el chat
+        return jsonify({"error": "Demasiados intentos. Espera unos minutos. 🙏"}), 429
+    cuerpo = request.get_json(silent=True) or {}
+    email = (cuerpo.get("email") or "").strip().lower()
+    nombre = (cuerpo.get("nombre") or "").strip()[:80]
+    if not _EMAIL_RE.match(email) or len(email) > 120:
+        return jsonify({"error": "Escribe un correo válido para enviarte la guía."}), 400
+    with _lista_lock:
+        lista = _leer_lista_espera()
+        if not any(r.get("email") == email for r in lista):
+            lista.append({"email": email, "nombre": nombre,
+                          "fecha": date.today().isoformat(), "ip": _ip_cliente()})
+            _guardar_lista_espera(lista)
+    return jsonify({"ok": True, "url": url_for("static", filename=GUIA_ARCHIVO)})
+
+
+@app.get("/contabilidad")
+def contabilidad():
+    """Página del servicio de contabilidad para negocios (cross-sell)."""
+    return render_template("contabilidad.html",
+                           ia_whatsapp=IA_CFG.get("negocio", {}).get("whatsapp", ""))
 
 
 @app.get("/liquidador")

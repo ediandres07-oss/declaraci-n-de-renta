@@ -68,7 +68,7 @@ def test_activo_requiere_habilitado_y_key():
 
 def test_prompt_incluye_datos_del_servicio():
     p = asistente._prompt_sistema(_cfg_activa())
-    assert "79.900" in p and "189.900" in p        # precios de los planes
+    assert asistente._planes_texto() in p          # planes/precios vigentes (de precios.yaml)
     assert "Formulario 210" in p and "exógena" in p
     assert "4.500 UVT" in p and "1.400 UVT" in p    # topes de obligación
 
@@ -87,7 +87,7 @@ def test_responder_arma_bien_la_llamada(monkeypatch):
     assert [m["role"] for m in captura["contents"]] == ["user", "model", "user"]
     assert captura["contents"][0]["parts"][0]["text"] == "¿Cuánto cuesta?"
     # el prompt del servicio viaja como system_instruction
-    assert "79.900" in captura["config_kwargs"]["system_instruction"]
+    assert asistente._planes_texto() in captura["config_kwargs"]["system_instruction"]
 
 
 def test_responder_rechaza_si_no_empieza_en_usuario(monkeypatch):

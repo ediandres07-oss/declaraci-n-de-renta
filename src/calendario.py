@@ -30,6 +30,16 @@ def cargar_calendario(plantilla: Path) -> Dict[str, date]:
             if isinstance(fecha, datetime):
                 calendario[clave] = fecha.date()
     wb.close()
+    # Corrige años atípicos por tipeo en la plantilla: los vencimientos de un
+    # mismo año gravable caen todos en el mismo año calendario, así que forzamos
+    # los outliers al año mayoritario (p. ej. cédulas 63/64 venían con 2025 en vez
+    # de 2026). Evita mostrarle a esas personas una fecha límite ya vencida.
+    if calendario:
+        from collections import Counter
+        anio_ok = Counter(f.year for f in calendario.values()).most_common(1)[0][0]
+        for clave, f in calendario.items():
+            if f.year != anio_ok:
+                calendario[clave] = f.replace(year=anio_ok)
     _CACHE = calendario
     return calendario
 

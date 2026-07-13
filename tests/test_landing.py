@@ -278,7 +278,9 @@ def test_reportar_pago_avisa_al_negocio(cliente, monkeypatch, _sin_smtp_real):
     assert aviso["destino"] == "negocio@test.co"
     assert "por verificar" in aviso["asunto"]
     assert orden.upper() in aviso["asunto"]
-    assert "ana@test.co" in aviso["html"] and "79.900" in aviso["html"]
+    from webapp import PLANES
+    precio_pdf = f"{PLANES['pdf']['precio']:,.0f}".replace(",", ".")   # precio vigente del plan PDF
+    assert "ana@test.co" in aviso["html"] and precio_pdf in aviso["html"]
 
     # reportar dos veces no duplica el aviso (el estado ya no es pendiente_pago)
     cliente.post("/api/reportar-pago", json={"orden_id": orden})

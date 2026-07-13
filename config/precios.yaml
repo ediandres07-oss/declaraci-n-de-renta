@@ -8,7 +8,7 @@ pago:
 planes:
   pdf:
     nombre: "Formulario 210 diligenciado en PDF"
-    precio: 79900
+    precio: 49900
     descripcion: "Borrador del Formulario 210 renglón por renglón + resumen ejecutivo, revisado por el sistema."
   presentacion:
     nombre: "Declaración presentada en la DIAN"
