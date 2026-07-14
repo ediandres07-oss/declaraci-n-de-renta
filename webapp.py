@@ -26,7 +26,7 @@ from src import wompi as wompi_mod
 from src.asistente import asistente_activo as asistente_ia_activo
 from src.asistente import cargar_config as cargar_config_ia
 from src.asistente import responder as responder_ia
-from src.auth import (LeadEspera, Usuario, auth_bp, autorizado_requerido, db,
+from src.auth import (LeadEspera, Orden, Usuario, auth_bp, autorizado_requerido, db,
                       init_auth, login_requerido, usuario_actual)
 from src.calendario import fecha_limite
 from src.documentos import generar_checklist_pdf

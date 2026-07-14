@@ -127,6 +127,25 @@ class LeadEspera(db.Model):
     creado = db.Column(db.DateTime, default=datetime.utcnow)
 
 
+class Orden(db.Model):
+    """Orden de compra: cliente solicita un plan y realiza pago. Va en Postgres
+    para no perder órdenes (y por tanto dinero) en cada redeploy de Render."""
+    __tablename__ = "ordenes"
+    id = db.Column(db.String(60), primary_key=True)  # ej. "o_ABC123XYZ"
+    email = db.Column(db.String(200), index=True)
+    cedula = db.Column(db.String(30))
+    plan = db.Column(db.String(30))                  # pdf | presentacion
+    precio = db.Column(db.Integer)
+    estado = db.Column(db.String(30), default="pendiente")  # pendiente|pagado|procesando|listo|cancelado
+    referencia_pago = db.Column(db.String(120))      # id de Wompi, ref de consignación, etc.
+    metodo_pago = db.Column(db.String(30))           # wompi | realmy | consignacion_manual
+    formulario_210 = db.Column(db.Text)              # JSON con resultado del cálculo
+    ip = db.Column(db.String(60))
+    creado = db.Column(db.DateTime, default=datetime.utcnow)
+    pagado = db.Column(db.DateTime)                  # timestamp del pago confirmado
+    procesado = db.Column(db.DateTime)               # timestamp de gen. PDF / presentación DIAN
+
+
 # --------------------------------------------------------------- segundo factor
 MAX_INTENTOS_MFA = 5
 BLOQUEO_MINUTOS = 15
