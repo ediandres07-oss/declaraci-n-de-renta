@@ -127,6 +127,17 @@ class LeadEspera(db.Model):
     creado = db.Column(db.DateTime, default=datetime.utcnow)
 
 
+class ArchivoExogena(db.Model):
+    """Excel de exógena subido por el cliente, guardado en la BD (Postgres en
+    producción) para que un redeploy no borre el insumo del trámite: es el
+    archivo con el que se elabora y presenta la declaración de quien ya pagó."""
+    __tablename__ = "archivos_exogena"
+    id = db.Column(db.String(100), primary_key=True)   # token de carga u "orden:<id>"
+    nombre = db.Column(db.String(200))
+    datos = db.Column(db.LargeBinary, nullable=False)
+    creado = db.Column(db.DateTime, default=datetime.utcnow)
+
+
 class OrdenRegistro(db.Model):
     """Órdenes y cargas de exógena, persistidas en la BD (Postgres en producción)
     para no perderlas en cada redeploy de Render. Se guarda el dict completo como

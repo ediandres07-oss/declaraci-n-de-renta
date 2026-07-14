@@ -186,6 +186,28 @@ def test_plan_recomendado_guarda_el_archivo(cliente, tmp_path):
     assert len(guardados) == 1
     assert "44004730" in guardados[0].name
 
+    # y el Excel queda en la BD (sobrevive redeploys): por token y por orden
+    from src.auth import ArchivoExogena
+    with app.app_context():
+        assert ArchivoExogena.query.get(j["token"]) is not None
+        copia = ArchivoExogena.query.get(f"orden:{orden}")
+        assert copia is not None and copia.datos[:2] == b"PK"   # es un xlsx real
+
+    # el personal puede descargarla desde /admin
+    r = cliente.get(f"/api/orden/{orden}/exogena.xlsx")
+    assert r.status_code == 200 and r.data[:2] == b"PK"
+
+
+def test_eliminar_borra_el_excel_de_la_bd(cliente):
+    """Si el cliente no continúa, su Excel también sale de la BD."""
+    from src.auth import ArchivoExogena
+    j = _cargar(cliente).get_json()
+    with app.app_context():
+        assert ArchivoExogena.query.get(j["token"]) is not None
+    cliente.post("/api/eliminar-datos", json={"token": j["token"]})
+    with app.app_context():
+        assert ArchivoExogena.query.get(j["token"]) is None
+
 
 def test_si_no_acepta_puede_eliminar(cliente):
     import webapp as w

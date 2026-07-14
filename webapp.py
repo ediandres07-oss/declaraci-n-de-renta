@@ -26,8 +26,9 @@ from src import wompi as wompi_mod
 from src.asistente import asistente_activo as asistente_ia_activo
 from src.asistente import cargar_config as cargar_config_ia
 from src.asistente import responder as responder_ia
-from src.auth import (LeadEspera, OrdenRegistro, Usuario, auth_bp, autorizado_requerido,
-                      db, init_auth, login_requerido, usuario_actual)
+from src.auth import (ArchivoExogena, LeadEspera, OrdenRegistro, Usuario, auth_bp,
+                      autorizado_requerido, db, init_auth, login_requerido,
+                      usuario_actual)
 from src.calendario import fecha_limite
 from src.documentos import generar_checklist_pdf
 
@@ -125,6 +126,25 @@ def _guardar_ordenes(ordenes: dict) -> None:
     except Exception:
         db.session.rollback()
         raise
+
+
+def _guardar_archivo_bd(clave: str, nombre: str, datos: bytes) -> None:
+    """Guarda (o reemplaza) un Excel de exógena en la BD bajo la clave dada."""
+    try:
+        fila = db.session.get(ArchivoExogena, clave)
+        if fila is None:
+            db.session.add(ArchivoExogena(id=clave, nombre=nombre, datos=datos))
+        else:
+            fila.nombre, fila.datos = nombre, datos
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error("No se pudo guardar el Excel %s en la BD: %s", clave, e)
+
+
+def _leer_archivo_bd(clave: str):
+    """Devuelve la fila ArchivoExogena o None."""
+    return db.session.get(ArchivoExogena, clave)
 
 
 # Migración única: si la BD está vacía y existe el ordenes.json viejo, se importa
@@ -498,6 +518,10 @@ def cargar_landing():
                       "archivo": str(ruta_upload),
                       "fecha_carga": str(date.today())}
     _guardar_ordenes(ordenes)
+    # El Excel también va a la BD: el disco local es efímero en Render y este
+    # archivo es el insumo del trámite si el cliente luego paga presentación.
+    _guardar_archivo_bd(token, f"Exogena_{exogena.identificacion or 'sin_nit'}.xlsx",
+                        ruta_upload.read_bytes())
 
     primer_nombre = (exogena.nombre or "").split()[-1].title() if exogena.nombre else ""
     return jsonify({
@@ -685,6 +709,12 @@ def _finalizar_pago_orden(orden_id: str, orden: dict, ordenes: dict) -> None:
             destino = CLIENTES_DIR / f"{orden_id}_Exogena_{carga.get('nit','')}.xlsx"
             shutil.copy2(origen, destino)
             orden["archivo_cliente"] = str(destino)
+        # copia ligada a la orden en la BD (sobrevive redeploys aunque el disco no)
+        fila_x = _leer_archivo_bd(orden.get("token", ""))
+        datos_x = fila_x.datos if fila_x else (origen.read_bytes() if origen.exists() else None)
+        if datos_x:
+            _guardar_archivo_bd(f"orden:{orden_id}",
+                                f"Exogena_{carga.get('nit','')}.xlsx", datos_x)
         # checklist de documentos junto al trámite, para control interno
         try:
             limite = fecha_limite(carga.get("nit", ""), PLANTILLA)
@@ -770,6 +800,12 @@ def realmy_webhook():
                 destino = CLIENTES_DIR / f"{orden_id}_Exogena_{carga.get('nit','')}.xlsx"
                 shutil.copy2(origen, destino)
                 orden["archivo_cliente"] = str(destino)
+            # copia ligada a la orden en la BD (sobrevive redeploys aunque el disco no)
+            fila_x = _leer_archivo_bd(orden.get("token", ""))
+            datos_x = fila_x.datos if fila_x else (origen.read_bytes() if origen.exists() else None)
+            if datos_x:
+                _guardar_archivo_bd(f"orden:{orden_id}",
+                                    f"Exogena_{carga.get('nit','')}.xlsx", datos_x)
             try:
                 limite = fecha_limite(carga.get("nit", ""), PLANTILLA)
                 generar_checklist_pdf(
@@ -1024,7 +1060,8 @@ def admin():
                         f"padding:6px 10px;cursor:pointer'>✓ Confirmar pago</button>")
         else:
             acciones = (f"<a href='/api/orden/{oid}/formulario.pdf'>F210 PDF</a> · "
-                        f"<a href='/api/orden/{oid}/documentos.pdf'>Checklist</a>")
+                        f"<a href='/api/orden/{oid}/documentos.pdf'>Checklist</a> · "
+                        f"<a href='/api/orden/{oid}/exogena.xlsx'>Exógena</a>")
         filas.append(
             f"<tr><td>{o.get('fecha','')}</td><td><code>{oid}</code></td>"
             f"<td>{o.get('nombre','')}<br><small>{o.get('nit','')}</small></td>"
@@ -1119,6 +1156,11 @@ def eliminar_datos():
         return jsonify({"error": "No hay datos para eliminar."}), 404
 
     Path(carga.get("archivo", "/nonexistent")).unlink(missing_ok=True)
+    try:   # también la copia del Excel en la BD (la de "orden:<id>" pagada se conserva)
+        ArchivoExogena.query.filter_by(id=token).delete()
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
     _EXOGENAS.pop(token, None)
     del ordenes[token]
     # órdenes no pagadas asociadas también se eliminan
@@ -1128,6 +1170,25 @@ def eliminar_datos():
         del ordenes[oid]
     _guardar_ordenes(ordenes)
     return jsonify({"eliminado": True})
+
+
+@app.get("/api/orden/<orden_id>/exogena.xlsx")
+@autorizado_requerido
+def descargar_exogena_orden(orden_id):
+    """Excel de la exógena de un trámite (para el personal). Se lee de la BD;
+    si no está, se intenta el archivo local como respaldo."""
+    fila = _leer_archivo_bd(f"orden:{orden_id}")
+    if fila is None:
+        orden = _leer_ordenes().get(orden_id) or {}
+        fila = _leer_archivo_bd(orden.get("token", ""))
+        if fila is None:
+            ruta = Path(orden.get("archivo_cliente", "/nonexistent"))
+            if ruta.exists():
+                return send_file(ruta, as_attachment=True, download_name=ruta.name)
+            return jsonify({"error": "No hay Excel guardado para esta orden."}), 404
+    return send_file(io.BytesIO(fila.datos), as_attachment=True,
+                     download_name=fila.nombre or f"{orden_id}_exogena.xlsx",
+                     mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
 
 @app.get("/api/orden/<orden_id>/formulario.pdf")
