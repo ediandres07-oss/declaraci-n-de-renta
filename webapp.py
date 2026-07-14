@@ -26,8 +26,8 @@ from src import wompi as wompi_mod
 from src.asistente import asistente_activo as asistente_ia_activo
 from src.asistente import cargar_config as cargar_config_ia
 from src.asistente import responder as responder_ia
-from src.auth import (LeadEspera, Orden, Usuario, auth_bp, autorizado_requerido, db,
-                      init_auth, login_requerido, usuario_actual)
+from src.auth import (LeadEspera, OrdenRegistro, Usuario, auth_bp, autorizado_requerido,
+                      db, init_auth, login_requerido, usuario_actual)
 from src.calendario import fecha_limite
 from src.documentos import generar_checklist_pdf
 
@@ -99,55 +99,49 @@ WOMPI = wompi_mod.cargar_config()
 
 
 def _leer_ordenes() -> dict:
-    if ORDENES_PATH.exists():
-        with open(ORDENES_PATH, "r", encoding="utf-8") as fh:
-            return json.load(fh)
-    return {}
+    """Todas las órdenes/cargas como dict {id: registro}, desde la BD."""
+    return {fila.id: json.loads(fila.data) for fila in OrdenRegistro.query.all()}
 
 
 def _guardar_ordenes(ordenes: dict) -> None:
-    ORDENES_PATH.parent.mkdir(parents=True, exist_ok=True)
-    with open(ORDENES_PATH, "w", encoding="utf-8") as fh:
-        json.dump(ordenes, fh, ensure_ascii=False, indent=2, default=str)
+    """Sincroniza la BD con el dict completo (upsert + borrado de faltantes).
 
-
-# Helpers nuevos para Postgres (fase 2 de migración)
-def _guardar_orden_pg(orden_id: str, orden_dict: dict) -> None:
-    """Guarda orden en Postgres. Si existe, actualiza; si no, crea."""
+    Conserva la semántica que tenía el archivo ordenes.json: quien llama lee el
+    dict entero, lo modifica y lo vuelve a guardar; borrar una clave del dict
+    la elimina también del almacenamiento.
+    """
     try:
-        o = Orden.query.filter_by(id=orden_id).first()
-        if o:
-            # Actualiza
-            for k, v in orden_dict.items():
-                if k in ("estado", "referencia_pago", "metodo_pago", "precio", "email",
-                         "cedula", "plan", "formulario_210", "pagado", "procesado"):
-                    setattr(o, k, v)
-            db.session.commit()
-        else:
-            # Crea nuevo
-            o = Orden(id=orden_id, **{k: v for k, v in orden_dict.items()
-                      if k in ("email", "cedula", "plan", "precio", "estado",
-                               "referencia_pago", "metodo_pago", "formulario_210", "ip")})
-            db.session.add(o)
-            db.session.commit()
-    except Exception as e:
+        existentes = {fila.id: fila for fila in OrdenRegistro.query.all()}
+        for oid, registro in ordenes.items():
+            blob = json.dumps(registro, ensure_ascii=False, default=str)
+            fila = existentes.pop(oid, None)
+            if fila is None:
+                db.session.add(OrdenRegistro(id=oid, data=blob))
+            elif fila.data != blob:
+                fila.data = blob
+        for fila in existentes.values():   # claves borradas del dict
+            db.session.delete(fila)
+        db.session.commit()
+    except Exception:
         db.session.rollback()
-        app.logger.error("Error guardar orden en PG: %s", e)
+        raise
 
 
-def _leer_orden_pg(orden_id: str) -> dict:
-    """Lee orden desde Postgres."""
-    o = Orden.query.filter_by(id=orden_id).first()
-    if not o:
-        return {}
-    return {
-        "id": o.id, "email": o.email, "cedula": o.cedula, "plan": o.plan,
-        "precio": o.precio, "estado": o.estado, "referencia_pago": o.referencia_pago,
-        "metodo_pago": o.metodo_pago, "formulario_210": o.formulario_210, "ip": o.ip,
-        "creado": o.creado.isoformat() if o.creado else None,
-        "pagado": o.pagado.isoformat() if o.pagado else None,
-        "procesado": o.procesado.isoformat() if o.procesado else None,
-    }
+# Migración única: si la BD está vacía y existe el ordenes.json viejo, se importa
+# para no perder lo que hubiera en el disco (órdenes de prueba, cargas activas).
+with app.app_context():
+    try:
+        if ORDENES_PATH.exists() and OrdenRegistro.query.first() is None:
+            with open(ORDENES_PATH, "r", encoding="utf-8") as fh:
+                _viejas = json.load(fh)
+            for _oid, _reg in _viejas.items():
+                db.session.add(OrdenRegistro(
+                    id=_oid, data=json.dumps(_reg, ensure_ascii=False, default=str)))
+            db.session.commit()
+            app.logger.info("ordenes.json importado a la BD: %d registros", len(_viejas))
+    except Exception as _e:
+        db.session.rollback()
+        app.logger.warning("No se pudo importar ordenes.json: %s", _e)
 
 
 @app.get("/api/salud")

@@ -10,7 +10,10 @@ from .conftest import EXOGENA
 @pytest.fixture()
 def cliente(tmp_path, monkeypatch):
     import webapp as w
-    monkeypatch.setattr(w, "ORDENES_PATH", tmp_path / "ordenes.json")
+    from src.auth import OrdenRegistro, db
+    with app.app_context():           # órdenes ahora viven en la BD: tabla limpia por test
+        OrdenRegistro.query.delete()
+        db.session.commit()
     monkeypatch.setattr(w, "UPLOADS_DIR", tmp_path / "uploads")
     monkeypatch.setattr(w, "CLIENTES_DIR", tmp_path / "clientes")
     app.config["TESTING"] = True
@@ -323,7 +326,6 @@ def test_liquidador_y_admin_bloqueados_sin_autorizacion(tmp_path, monkeypatch):
     """El acceso profesional (/liquidador, /admin, confirmar-pago) exige personal autorizado."""
     import webapp as w
     from src.auth import db, Usuario
-    monkeypatch.setattr(w, "ORDENES_PATH", tmp_path / "ordenes.json")
     app.config["TESTING"] = True
     with app.test_client() as c:
         # sin sesión → redirige a login
