@@ -111,6 +111,45 @@ def _guardar_ordenes(ordenes: dict) -> None:
         json.dump(ordenes, fh, ensure_ascii=False, indent=2, default=str)
 
 
+# Helpers nuevos para Postgres (fase 2 de migración)
+def _guardar_orden_pg(orden_id: str, orden_dict: dict) -> None:
+    """Guarda orden en Postgres. Si existe, actualiza; si no, crea."""
+    try:
+        o = Orden.query.filter_by(id=orden_id).first()
+        if o:
+            # Actualiza
+            for k, v in orden_dict.items():
+                if k in ("estado", "referencia_pago", "metodo_pago", "precio", "email",
+                         "cedula", "plan", "formulario_210", "pagado", "procesado"):
+                    setattr(o, k, v)
+            db.session.commit()
+        else:
+            # Crea nuevo
+            o = Orden(id=orden_id, **{k: v for k, v in orden_dict.items()
+                      if k in ("email", "cedula", "plan", "precio", "estado",
+                               "referencia_pago", "metodo_pago", "formulario_210", "ip")})
+            db.session.add(o)
+            db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error("Error guardar orden en PG: %s", e)
+
+
+def _leer_orden_pg(orden_id: str) -> dict:
+    """Lee orden desde Postgres."""
+    o = Orden.query.filter_by(id=orden_id).first()
+    if not o:
+        return {}
+    return {
+        "id": o.id, "email": o.email, "cedula": o.cedula, "plan": o.plan,
+        "precio": o.precio, "estado": o.estado, "referencia_pago": o.referencia_pago,
+        "metodo_pago": o.metodo_pago, "formulario_210": o.formulario_210, "ip": o.ip,
+        "creado": o.creado.isoformat() if o.creado else None,
+        "pagado": o.pagado.isoformat() if o.pagado else None,
+        "procesado": o.procesado.isoformat() if o.procesado else None,
+    }
+
+
 @app.get("/api/salud")
 def salud():
     """Chequeo de salud: confirma que la app responde y contra qué base corre.
