@@ -82,6 +82,9 @@ with open(BASE / "config" / "precios.yaml", "r", encoding="utf-8") as _fh:
     _CFG_PRECIOS = yaml.safe_load(_fh)
     PLANES = _CFG_PRECIOS["planes"]
     PAGO = _CFG_PRECIOS.get("pago", {})
+    # El WhatsApp de contacto es público (no secreto): vive en precios.yaml
+    # dentro del repo para poder cambiarlo con un deploy, sin tocar Secret Files.
+    _CONTACTO = _CFG_PRECIOS.get("contacto", {})
 
 _EPAYCO_PATH = BASE / "config" / "epayco.yaml"
 EPAYCO = {"habilitado": False}
@@ -96,6 +99,11 @@ if _REALMY_PATH.exists():
         REALMY = yaml.safe_load(_fh) or REALMY
 
 IA_CFG = cargar_config_ia()
+# Si precios.yaml (repo) define un WhatsApp de contacto, manda sobre el del
+# Secret File ia.yaml. Así el número público se cambia con un git push y lo
+# usan a la vez landing, /contabilidad, /links, la guía PDF y el asistente.
+if _CONTACTO.get("whatsapp"):
+    IA_CFG.setdefault("negocio", {})["whatsapp"] = _CONTACTO["whatsapp"]
 WOMPI = wompi_mod.cargar_config()
 
 

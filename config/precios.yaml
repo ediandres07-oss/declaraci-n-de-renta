@@ -1,4 +1,11 @@
 # Precios de los servicios de la landing (COP). Edite libremente.
+
+# WhatsApp de contacto (dato público). Con indicativo de país (57 = Colombia).
+# Cambiarlo aquí actualiza a la vez landing, /contabilidad, /links, la guía
+# PDF y el asistente. NO es el Nequi de pagos (ese va abajo en pago.nequi).
+contacto:
+  whatsapp: "573332470715"
+
 pago:
   banco: Bancolombia
   tipo: Ahorros
