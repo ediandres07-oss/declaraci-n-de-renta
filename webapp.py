@@ -332,6 +332,14 @@ def contabilidad():
                            ia_whatsapp=IA_CFG.get("negocio", {}).get("whatsapp", ""))
 
 
+@app.get("/links")
+@app.get("/enlaces")
+def enlaces():
+    """Página 'link en la bio': reúne todos los servicios en botones para redes."""
+    return render_template("enlaces.html",
+                           ia_whatsapp=IA_CFG.get("negocio", {}).get("whatsapp", ""))
+
+
 @app.get("/liquidador")
 @autorizado_requerido
 def index():

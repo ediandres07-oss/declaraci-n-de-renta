@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Tributando.co — Enlaces</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Declaración de renta, contabilidad y más — todo en un solo lugar.">
+<style>
+  :root{ --navy:#1e2432; --navy2:#12161f; --dorado:#cdab7e; --dorado2:#b8955f; }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{ font-family:-apple-system,'Segoe UI',Roboto,sans-serif; min-height:100vh;
+        background:radial-gradient(700px 380px at 50% -8%, rgba(205,171,126,.14), transparent 60%),
+                   linear-gradient(160deg,#12161f 0%,#1e2432 60%,#2a3145 100%);
+        color:#fff; display:flex; flex-direction:column; align-items:center;
+        padding:54px 22px 40px; }
+  .wrap{ width:100%; max-width:460px; display:flex; flex-direction:column; align-items:center; }
+  .logo{ width:96px; height:96px; border-radius:50%; box-shadow:0 0 0 2px rgba(205,171,126,.55), 0 12px 30px rgba(0,0,0,.35); }
+  .marca{ margin-top:18px; font-size:1.7rem; font-weight:800; letter-spacing:.3px; }
+  .marca span{ color:var(--dorado); }
+  .tag{ margin-top:8px; font-size:.98rem; color:#c9cede; text-align:center; line-height:1.5; max-width:340px; }
+  .links{ margin-top:34px; width:100%; display:flex; flex-direction:column; gap:15px; }
+  .btn{ display:flex; align-items:center; gap:16px; width:100%; text-decoration:none;
+        background:rgba(255,255,255,.06); border:1px solid rgba(205,171,126,.28);
+        border-radius:18px; padding:18px 20px; color:#fff;
+        transition:transform .15s ease, background .15s ease, border-color .15s ease; }
+  .btn:hover{ transform:translateY(-2px); background:rgba(205,171,126,.12); border-color:rgba(205,171,126,.6); }
+  .btn.primary{ background:var(--dorado); border-color:var(--dorado); color:var(--navy); }
+  .btn.primary:hover{ background:var(--dorado2); }
+  .ic{ font-size:1.7rem; width:40px; text-align:center; flex-shrink:0; }
+  .txt b{ display:block; font-size:1.06rem; font-weight:700; }
+  .txt small{ display:block; font-size:.82rem; opacity:.72; margin-top:2px; font-weight:400; }
+  .btn.primary .txt small{ opacity:.7; }
+  .foot{ margin-top:38px; font-size:.82rem; color:#8a919c; text-align:center; }
+  .foot a{ color:var(--dorado); text-decoration:none; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <img class="logo" src="/static/img/logo-tributando.png" alt="Tributando.co">
+    <div class="marca">Tributando<span>.co</span></div>
+    <p class="tag">Tu declaración de renta y tu contabilidad, sin enredos. Elige lo que necesitas 👇</p>
+
+    <div class="links">
+      <a class="btn primary" href="/">
+        <span class="ic">🧾</span>
+        <span class="txt"><b>¿Estás obligado a declarar?</b><small>Súbelo y revísalo gratis en segundos</small></span>
+      </a>
+      <a class="btn" href="/#guia-obsequio">
+        <span class="ic">🎁</span>
+        <span class="txt"><b>Descarga la guía gratis</b><small>Checklist y tu fecha límite según tu cédula</small></span>
+      </a>
+      <a class="btn" href="/contabilidad">
+        <span class="ic">📊</span>
+        <span class="txt"><b>Contabilidad para tu negocio</b><small>Independientes y empresas, al día</small></span>
+      </a>
+      <a class="btn" id="wa" href="#" target="_blank" rel="noopener">
+        <span class="ic">💬</span>
+        <span class="txt"><b>Escríbenos por WhatsApp</b><small>Resolvemos tus dudas al instante</small></span>
+      </a>
+    </div>
+
+    <div class="foot">
+      tributando.co · <a href="https://instagram.com/tributando.co" target="_blank" rel="noopener">@tributando.co</a>
+    </div>
+  </div>
+
+  <script>
+    var wa = {{ ia_whatsapp|tojson }};
+    var num = String(wa || "573207526680").replace(/\D/g,"");
+    var msg = "Hola, vengo de sus redes y quiero más información.";
+    document.getElementById("wa").href = "https://wa.me/" + num + "?text=" + encodeURIComponent(msg);
+  </script>
+</body>
+</html>
