@@ -487,9 +487,9 @@
         <h3>{{ planes.pdf.nombre }}</h3>
         <div class="precio">${{ '{:,.0f}'.format(planes.pdf.precio)|replace(',', '.') }} <small>COP · pago único</small></div>
         <ul>
-          <li>Formulario 210 diligenciado renglón por renglón (PDF)</li>
+          <li>Borrador de tu declaración: Formulario 210 diligenciado renglón por renglón (PDF)</li>
           <li>Resumen ejecutivo de tu liquidación</li>
-          <li>Listo para transcribir al portal DIAN</li>
+          <li>Guía paso a paso para subirla tú mismo a la DIAN</li>
         </ul>
         <button data-plan="pdf">Obtener mi Formulario 210</button>
       </div>
@@ -926,23 +926,32 @@ function mostrarExito(plan) {
       <p style="font-size:.88rem;color:#3a4a5c;margin:10px 0 18px">
         Tu orden es la <b>${ordenActual}</b>. En cuanto verifiquemos la consignación
         ${esPdf
-          ? "te enviaremos tu <b>Formulario 210 en PDF</b> al correo o WhatsApp que registraste (normalmente el mismo día)."
+          ? "te enviaremos el <b>borrador de tu declaración</b> (Formulario 210 en PDF) al correo o WhatsApp que registraste (normalmente el mismo día). Tú la subes a la DIAN siguiendo la <b>guía paso a paso</b> que puedes descargar aquí."
           : "un profesional iniciará tu trámite: montamos tu declaración en el portal DIAN y la presentamos antes de tu fecha límite. Te contactaremos al correo o celular que registraste. Mientras tanto, <b>descarga la lista de documentos</b> y ve preparándolos."}
       </p>
       <div class="acciones" style="flex-direction:column">
-        ${esPdf ? "" : `<button id="btnDocs" style="background:var(--azul2);color:#fff">📋 Lista de documentos que debes preparar (PDF)</button>`}
+        ${esPdf
+          ? `<button id="btnGuia" style="background:var(--azul2);color:#fff">📘 Guía: cómo subir tu declaración a la DIAN (PDF)</button>`
+          : `<button id="btnDocs" style="background:var(--azul2);color:#fff">📋 Lista de documentos que debes preparar (PDF)</button>`}
         <button id="btnCancelar">Cerrar</button>
       </div>
     </div>`;
   $("#btnCancelar").onclick = () => $("#modal").classList.add("oculto");
-  const bd = $("#btnDocs");
-  if (bd) bd.onclick = async () => {
-    const r = await fetch(`/api/orden/${ordenActual}/documentos.pdf`);
+  const descargar = async (url, nombre, aviso) => {
+    const r = await fetch(url);
     if (r.ok) { const blob = await r.blob(); const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob); a.download = "Documentos_declaracion_renta.pdf"; a.click();
+      a.href = URL.createObjectURL(blob); a.download = nombre; a.click();
       URL.revokeObjectURL(a.href);
-    } else alert("La lista estará disponible al confirmarse el pago. Te la enviaremos también por correo.");
+    } else alert(aviso);
   };
+  const bd = $("#btnDocs");
+  if (bd) bd.onclick = () => descargar(`/api/orden/${ordenActual}/documentos.pdf`,
+    "Documentos_declaracion_renta.pdf",
+    "La lista estará disponible al confirmarse el pago. Te la enviaremos también por correo.");
+  const bg = $("#btnGuia");
+  if (bg) bg.onclick = () => descargar(`/api/orden/${ordenActual}/guia-dian.pdf`,
+    "Guia_presentar_declaracion_DIAN.pdf",
+    "La guía se enviará junto con tu Formulario 210. Escríbenos si la necesitas antes.");
 }
 </script>
 

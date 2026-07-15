@@ -60,7 +60,7 @@ def _planes_texto() -> str:
 
     return "\n".join([
         _linea("pdf", "Formulario 210 diligenciado en PDF",
-               "Borrador del Formulario 210 renglón por renglón + resumen ejecutivo, revisado por el sistema."),
+               "Borrador de tu declaración (Formulario 210 renglón por renglón) + resumen ejecutivo + guía paso a paso para que la subas tú mismo a la DIAN. Con este plan NO la presentamos nosotros."),
         _linea("presentacion", "Declaración presentada en la DIAN",
                "Elaboramos la declaración, la montamos en el portal DIAN y la presentamos por el cliente. Incluye el PDF."),
     ])

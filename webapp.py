@@ -31,6 +31,7 @@ from src.auth import (ArchivoExogena, LeadEspera, OrdenRegistro, Usuario, auth_b
                       usuario_actual)
 from src.calendario import fecha_limite
 from src.documentos import generar_checklist_pdf
+from src.guia_dian import generar_guia_dian_pdf
 
 from src.entrevista import mapear_exogena_a_datos
 from src.excel_writer import escribir_formulario
@@ -968,6 +969,31 @@ def descargar_checklist(orden_id):
         salida.unlink(missing_ok=True)
     return send_file(io.BytesIO(contenido), as_attachment=True,
                      download_name="Documentos_declaracion_renta.pdf",
+                     mimetype="application/pdf")
+
+
+@app.get("/api/orden/<orden_id>/guia-dian.pdf")
+@login_requerido
+def descargar_guia_dian(orden_id):
+    """Guía paso a paso para que el cliente suba él mismo su Formulario 210
+    a la DIAN. Acompaña al plan PDF (el borrador). Contenido genérico: no
+    requiere que la orden esté pagada; se personaliza con nombre y fecha si
+    la orden existe."""
+    ordenes = _leer_ordenes()
+    orden = ordenes.get(orden_id) or {}
+    carga = ordenes.get(orden.get("token", ""), {})
+    limite = fecha_limite(carga.get("nit", orden.get("nit", "")), PLANTILLA)
+
+    with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
+        salida = Path(tmp.name)
+    try:
+        generar_guia_dian_pdf(salida, nombre=carga.get("nombre", orden.get("nombre", "")),
+                              fecha_limite=str(limite) if limite else None)
+        contenido = salida.read_bytes()
+    finally:
+        salida.unlink(missing_ok=True)
+    return send_file(io.BytesIO(contenido), as_attachment=True,
+                     download_name="Guia_presentar_declaracion_DIAN.pdf",
                      mimetype="application/pdf")
 
 
