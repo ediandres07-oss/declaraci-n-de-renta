@@ -86,6 +86,7 @@ with open(BASE / "config" / "precios.yaml", "r", encoding="utf-8") as _fh:
     # El WhatsApp de contacto es público (no secreto): vive en precios.yaml
     # dentro del repo para poder cambiarlo con un deploy, sin tocar Secret Files.
     _CONTACTO = _CFG_PRECIOS.get("contacto", {})
+    URL_PUBLICA = str(_CONTACTO.get("sitio", "https://tributando.co")).rstrip("/")
 
 _EPAYCO_PATH = BASE / "config" / "epayco.yaml"
 EPAYCO = {"habilitado": False}
@@ -704,6 +705,99 @@ def reportar_pago():
     return jsonify({"estado": orden["estado"], "orden_id": orden_id})
 
 
+def _entregar_pdf_al_cliente(orden_id: str, orden: dict, ordenes: dict) -> None:
+    """Envía al cliente su Formulario 210 y la guía por correo, con links de
+    descarga. Solo para el plan PDF (en presentación lo hacemos nosotros).
+    Idempotente: no reenvía si ya se entregó. No lanza excepción."""
+    if orden.get("plan") != "pdf" or orden.get("entrega_cliente_enviada"):
+        return
+    email = (orden.get("contacto") or {}).get("email", "").strip()
+    if not email:
+        return
+    try:
+        from src.correo import cargar_config_email, enviar_email
+        cfg = cargar_config_email()
+        if not cfg.get("habilitado"):
+            return
+
+        carga = ordenes.get(orden.get("token", ""), {})
+        datos = DatosDeclaracion.from_dict(carga.get("datos", {}))
+        liq = calcular(datos, PARAMS)
+        limite = fecha_limite(carga.get("nit", orden.get("nit", "")), PLANTILLA)
+        nombre = carga.get("nombre", orden.get("nombre", ""))
+        nit = orden.get("nit", "")
+
+        with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tf:
+            p_form = Path(tf.name)
+        with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tg:
+            p_guia = Path(tg.name)
+        try:
+            generar_formulario_pdf(p_form, datos, liq, PARAMS)
+            generar_guia_dian_pdf(p_guia, nombre=nombre,
+                                  fecha_limite=str(limite) if limite else None)
+            adj_form = p_form.read_bytes()
+            adj_guia = p_guia.read_bytes()
+        finally:
+            p_form.unlink(missing_ok=True)
+            p_guia.unlink(missing_ok=True)
+
+        primer = (nombre or "").split()[0] if nombre else ""
+        saludo = f"Hola {primer}," if primer else "Hola,"
+        link_form = f"{URL_PUBLICA}/api/orden/{orden_id}/formulario.pdf"
+        link_guia = f"{URL_PUBLICA}/api/orden/{orden_id}/guia-dian.pdf"
+        azul, dorado = "#123f6b", "#cdab7e"
+        html = f"""<!DOCTYPE html><html><body style="margin:0;background:#f5f7fa;
+          font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:#1e2b3a">
+          <div style="max-width:560px;margin:0 auto;padding:24px">
+            <div style="background:#fff;border-radius:16px;overflow:hidden;
+              box-shadow:0 6px 20px rgba(18,63,107,.08)">
+              <div style="background:{azul};color:#fff;padding:22px 26px">
+                <div style="font-size:1.4rem">🧾</div>
+                <div style="font-size:1.15rem;font-weight:700;margin-top:6px">
+                  Tu declaración de renta está lista</div>
+              </div>
+              <div style="padding:24px 26px;font-size:.95rem;line-height:1.6">
+                <p>{saludo}</p>
+                <p>¡Gracias por confiar en Tributando.co! Adjunto a este correo
+                  encuentras <b>dos documentos</b>:</p>
+                <ul style="padding-left:18px">
+                  <li><b>Formulario 210 (borrador)</b> — tu declaración diligenciada
+                    renglón por renglón.</li>
+                  <li><b>Guía para presentarla en la DIAN</b> — el paso a paso para
+                    que la subas tú mismo al portal.</li>
+                </ul>
+                <p style="margin-top:6px">También puedes descargarlos desde tu cuenta:</p>
+                <p style="text-align:center;margin:20px 0">
+                  <a href="{link_form}" style="background:{dorado};color:{azul};
+                    text-decoration:none;padding:12px 22px;border-radius:10px;
+                    font-weight:700;display:inline-block;margin:4px">Descargar Formulario 210</a>
+                  <a href="{link_guia}" style="background:#eef2f7;color:{azul};
+                    text-decoration:none;padding:12px 22px;border-radius:10px;
+                    font-weight:700;display:inline-block;margin:4px">Descargar la guía</a>
+                </p>
+                <p style="font-size:.85rem;color:#5a6b7f">Recuerda: con este plan
+                  <b>tú presentas</b> la declaración en la DIAN siguiendo la guía. Si
+                  prefieres que la presentemos por ti, responde este correo y te
+                  ayudamos.</p>
+              </div>
+              <div style="padding:16px 26px;border-top:1px solid #eef2f7;
+                font-size:.72rem;color:#9db0c4">
+                Orden {orden_id.upper()}{f" · NIT/Cédula termina en {str(nit)[-4:]}" if nit else ""}
+                · Tributando.co
+              </div>
+            </div>
+          </div></body></html>"""
+        asunto = "🧾 Tu Formulario 210 y la guía para presentarlo — Tributando.co"
+        enviar_email(email, asunto, html, cfg, adjuntos=[
+            (f"Formulario210_{nit or 'borrador'}.pdf", adj_form, "application/pdf"),
+            ("Guia_presentar_declaracion_DIAN.pdf", adj_guia, "application/pdf"),
+        ])
+        orden["entrega_cliente_enviada"] = True
+    except Exception as e:
+        app.logger.warning("No se pudo entregar el PDF al cliente de la orden %s: %s",
+                           orden_id, e)
+
+
 def _finalizar_pago_orden(orden_id: str, orden: dict, ordenes: dict) -> None:
     """Marca la orden como pagada y, si es plan de presentación, conserva la
     exógena y genera el checklist para el trámite. Idempotente."""
@@ -716,6 +810,9 @@ def _finalizar_pago_orden(orden_id: str, orden: dict, ordenes: dict) -> None:
         from src.correo import notificar_pago
         if notificar_pago(orden_id, orden, confirmado=True):
             orden["aviso_pago_confirmado_enviado"] = True
+
+    # Entrega automática al cliente (plan PDF): Formulario 210 + guía + links.
+    _entregar_pdf_al_cliente(orden_id, orden, ordenes)
 
     # plan recomendado aceptado: se conserva la exógena para hacer el trámite
     if orden["plan"] == "presentacion":
@@ -804,34 +901,11 @@ def realmy_webhook():
 
     # Realmy estados: "Exitosa", "Fallida", "Pendiente", etc.
     if status_tx.lower() in ("exitosa", "succeeded", "aprobada", "approved"):
-        orden["estado"] = "pagada" if orden["plan"] == "pdf" else "pagada_en_tramite"
         orden["referencia_realmy"] = referencia
         orden["tx_id"] = cuerpo.get("x_transaction_id", "")
-
-        # Si es presentación, guardar la exógena para el trámite
-        if orden["plan"] == "presentacion":
-            carga = ordenes.get(orden.get("token", ""), {})
-            origen = Path(carga.get("archivo", ""))
-            if origen.exists():
-                CLIENTES_DIR.mkdir(parents=True, exist_ok=True)
-                destino = CLIENTES_DIR / f"{orden_id}_Exogena_{carga.get('nit','')}.xlsx"
-                shutil.copy2(origen, destino)
-                orden["archivo_cliente"] = str(destino)
-            # copia ligada a la orden en la BD (sobrevive redeploys aunque el disco no)
-            fila_x = _leer_archivo_bd(orden.get("token", ""))
-            datos_x = fila_x.datos if fila_x else (origen.read_bytes() if origen.exists() else None)
-            if datos_x:
-                _guardar_archivo_bd(f"orden:{orden_id}",
-                                    f"Exogena_{carga.get('nit','')}.xlsx", datos_x)
-            try:
-                limite = fecha_limite(carga.get("nit", ""), PLANTILLA)
-                generar_checklist_pdf(
-                    CLIENTES_DIR / f"{orden_id}_Documentos_{carga.get('nit','')}.pdf",
-                    nombre=carga.get("nombre", ""),
-                    fecha_limite=str(limite) if limite else None)
-            except Exception:
-                pass
-
+        # Unifica el cierre del pago: marca pagada, avisa al negocio, entrega al
+        # cliente (plan PDF) y conserva la exógena/checklist (presentación).
+        _finalizar_pago_orden(orden_id, orden, ordenes)
         _guardar_ordenes(ordenes)
         return jsonify({"status": "ok", "mensaje": "Pago confirmado."})
 

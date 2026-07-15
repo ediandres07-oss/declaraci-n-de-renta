@@ -19,8 +19,9 @@ def _sin_smtp_real(monkeypatch):
     import src.correo as correo
     enviados = []
 
-    def _falso_envio(destino, asunto, html, cfg=None):
-        enviados.append({"destino": destino, "asunto": asunto, "html": html})
+    def _falso_envio(destino, asunto, html, cfg=None, adjuntos=None):
+        enviados.append({"destino": destino, "asunto": asunto, "html": html,
+                         "adjuntos": adjuntos or []})
 
     monkeypatch.setattr(correo, "enviar_email", _falso_envio)
     return enviados

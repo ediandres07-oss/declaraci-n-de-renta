@@ -5,6 +5,9 @@
 # PDF y el asistente. NO es el Nequi de pagos (ese va abajo en pago.nequi).
 contacto:
   whatsapp: "573332470715"
+  # URL pública del sitio. Se usa para los links de descarga en el correo de
+  # entrega al cliente. Sin barra final.
+  sitio: "https://tributando.co"
 
 pago:
   banco: Bancolombia

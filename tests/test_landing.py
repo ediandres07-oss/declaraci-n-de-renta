@@ -333,6 +333,37 @@ def test_pago_confirmado_avisa_una_sola_vez(cliente, monkeypatch, _sin_smtp_real
     assert len(confirmados) == 1
 
 
+def test_pago_pdf_confirmado_entrega_al_cliente(cliente, monkeypatch, _sin_smtp_real):
+    """Al confirmar el pago del plan PDF, el cliente recibe por correo su
+    Formulario 210 + la guía (dos adjuntos) y links de descarga."""
+    import src.correo as correo
+    monkeypatch.setattr(correo, "cargar_config_email", lambda: {
+        "habilitado": True, "user": "smtp@test.co"})
+
+    j = _cargar(cliente).get_json()
+    orden = cliente.post("/api/checkout", json={"token": j["token"], "plan": "pdf",
+        "contacto": {"nombre": "Ana Ruiz", "email": "ana@test.co"}}).get_json()["orden_id"]
+
+    cliente.post("/api/confirmar-pago", json={"orden_id": orden})
+
+    entregas = [a for a in _sin_smtp_real if a["destino"] == "ana@test.co"]
+    assert len(entregas) == 1
+    e = entregas[0]
+    assert len(e["adjuntos"]) == 2                       # formulario + guía
+    nombres = [n for (n, _b, _m) in e["adjuntos"]]
+    assert any("Formulario210" in n for n in nombres)
+    assert any("Guia" in n for n in nombres)
+    for (_n, datos, mimetype) in e["adjuntos"]:
+        assert datos[:5] == b"%PDF-" and mimetype == "application/pdf"
+    assert f"/api/orden/{orden}/formulario.pdf" in e["html"]    # link de descarga
+    assert f"/api/orden/{orden}/guia-dian.pdf" in e["html"]
+
+    # confirmar de nuevo (webhook repetido) no reenvía la entrega
+    cliente.post("/api/confirmar-pago", json={"orden_id": orden})
+    entregas = [a for a in _sin_smtp_real if a["destino"] == "ana@test.co"]
+    assert len(entregas) == 1
+
+
 def test_admin_lista_ordenes(cliente):
     j = _cargar(cliente).get_json()
     orden = cliente.post("/api/checkout", json={"token": j["token"], "plan": "presentacion",

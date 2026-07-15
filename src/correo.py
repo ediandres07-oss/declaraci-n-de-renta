@@ -56,8 +56,14 @@ def cargar_config_email() -> dict:
 
 
 def enviar_email(destino: str, asunto: str, html: str,
-                 cfg: Optional[dict] = None) -> None:
-    """Envía un correo HTML. Lanza excepción si el SMTP falla."""
+                 cfg: Optional[dict] = None,
+                 adjuntos: Optional[list] = None) -> None:
+    """Envía un correo HTML. Lanza excepción si el SMTP falla.
+
+    `adjuntos` es una lista opcional de tuplas (nombre, bytes, mimetype); por
+    ejemplo ("Formulario210.pdf", b"...", "application/pdf"). El mimetype se
+    divide en tipo/subtipo para adjuntarlo.
+    """
     cfg = cfg or cargar_config_email()
     msg = EmailMessage()
     msg["Subject"] = asunto
@@ -68,6 +74,11 @@ def enviar_email(destino: str, asunto: str, html: str,
         msg["Reply-To"] = cfg["responder_a"]
     msg.set_content("Tu cliente de correo no muestra HTML. Abre el mensaje en uno que sí.")
     msg.add_alternative(html, subtype="html")
+
+    for nombre, datos, mimetype in (adjuntos or []):
+        maintype, _, subtype = (mimetype or "application/octet-stream").partition("/")
+        msg.add_attachment(datos, maintype=maintype,
+                           subtype=subtype or "octet-stream", filename=nombre)
 
     host, port = cfg.get("host", "smtp.gmail.com"), int(cfg.get("port", 465))
     if cfg.get("ssl", True):
