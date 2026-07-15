@@ -350,6 +350,14 @@ def enlaces():
                            ia_whatsapp=IA_CFG.get("negocio", {}).get("whatsapp", ""))
 
 
+@app.get("/guia-dian")
+def guia_dian_web():
+    """Versión web (HTML) de la guía para presentar el Formulario 210 en la DIAN.
+    Complementa el PDF: se ve bien en el celular y se comparte con un link."""
+    return render_template("guia_dian.html",
+                           ia_whatsapp=IA_CFG.get("negocio", {}).get("whatsapp", ""))
+
+
 @app.get("/liquidador")
 @autorizado_requerido
 def index():

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Cómo presentar tu Formulario 210 en la DIAN — Tributando.co</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Guía paso a paso para subir y presentar tú mismo tu declaración de renta (Formulario 210) en el portal de la DIAN.">
+<style>
+  :root{
+    --navy:#1e2432; --navy2:#12161f; --dorado:#cdab7e; --dorado2:#b8955f;
+    --gris:#f7f5f1; --borde:#e2ddd2; --suave:#5c6470; --tenue:#8a919c;
+    --verde:#1f8a5f;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;color:var(--navy);
+       background:#fff;-webkit-font-smoothing:antialiased;line-height:1.55;}
+  a{color:inherit;}
+  .cont{max-width:820px;margin:0 auto;padding:0 22px;}
+
+  /* barra */
+  .barra{background:var(--navy);position:sticky;top:0;z-index:50;box-shadow:0 2px 14px rgba(10,25,45,.16);}
+  .barra .cont{display:flex;align-items:center;justify-content:space-between;padding:12px 22px;max-width:1020px;}
+  .marca{color:#fff;font-weight:800;font-size:1.12rem;display:flex;align-items:center;gap:10px;}
+  .marca img{height:34px;width:34px;border-radius:50%;box-shadow:0 0 0 1.5px rgba(205,171,126,.55);}
+  .marca span{color:var(--dorado);}
+  .barra a.volver{color:#fff;background:rgba(255,255,255,.10);border:1px solid rgba(205,171,126,.35);
+    padding:8px 16px;border-radius:22px;text-decoration:none;font-size:.84rem;font-weight:700;}
+
+  /* hero */
+  .hero{color:#fff;text-align:center;padding:66px 0 84px;
+    background:radial-gradient(700px 380px at 50% -10%, rgba(205,171,126,.16), transparent 60%),
+               linear-gradient(160deg,#12161f 0%,#1e2432 60%,#0a0d11 100%);}
+  .hero .kick{display:inline-block;background:rgba(205,171,126,.16);color:var(--dorado);
+    font-weight:800;font-size:.76rem;letter-spacing:.10em;padding:8px 18px;border-radius:30px;text-transform:uppercase;}
+  .hero h1{font-size:clamp(2rem,4.4vw+.7rem,3rem);line-height:1.1;margin-top:20px;letter-spacing:-.02em;font-weight:800;}
+  .hero h1 b{color:var(--dorado);}
+  .hero p{max-width:560px;margin:18px auto 0;font-size:1.06rem;opacity:.92;}
+  .hero .meta{margin-top:26px;font-size:.82rem;opacity:.7;}
+
+  /* intro */
+  .intro{background:var(--gris);border:1px solid var(--borde);border-radius:18px;
+    padding:22px 24px;margin:-46px auto 0;position:relative;box-shadow:0 12px 30px rgba(10,25,45,.10);font-size:1rem;}
+  .intro b{color:var(--navy);}
+
+  /* pasos */
+  .pasos{margin:40px 0 10px;position:relative;}
+  .paso{display:flex;gap:20px;padding:22px 0;border-top:1px solid var(--borde);}
+  .paso:first-child{border-top:none;}
+  .num{flex-shrink:0;width:52px;height:52px;border-radius:50%;
+    background:linear-gradient(135deg,var(--dorado),var(--dorado2));color:var(--navy);
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.4rem;
+    box-shadow:0 6px 16px rgba(205,171,126,.4);}
+  .paso .txt h3{font-size:1.16rem;letter-spacing:-.01em;display:flex;align-items:center;gap:9px;}
+  .paso .txt p{color:var(--suave);margin-top:7px;font-size:.98rem;}
+  .paso .txt p b{color:var(--navy);}
+
+  /* CTA */
+  .cta{background:var(--navy);color:#fff;border-radius:20px;padding:32px 28px;margin:34px 0;text-align:center;
+    box-shadow:0 16px 40px rgba(10,25,45,.20);}
+  .cta h2{font-size:1.4rem;letter-spacing:-.01em;}
+  .cta h2 b{color:var(--dorado);}
+  .cta p{opacity:.9;margin-top:10px;font-size:.98rem;max-width:520px;margin-left:auto;margin-right:auto;}
+  .cta .btns{margin-top:22px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+  .btn{display:inline-flex;align-items:center;gap:9px;text-decoration:none;font-weight:800;font-size:1rem;
+    padding:14px 26px;border-radius:30px;transition:transform .15s ease;}
+  .btn:hover{transform:translateY(-2px);}
+  .btn.oro{background:var(--dorado);color:var(--navy);box-shadow:0 10px 24px rgba(205,171,126,.35);}
+  .btn.wa{background:#25D366;color:#fff;}
+  .btn.linea{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.35);}
+
+  .aviso{color:var(--tenue);font-size:.8rem;text-align:center;margin:26px 0 10px;line-height:1.6;}
+
+  footer{border-top:1px solid var(--borde);margin-top:30px;padding:26px 0 46px;text-align:center;
+    color:var(--tenue);font-size:.82rem;}
+  footer a{color:var(--dorado2);text-decoration:none;font-weight:700;}
+
+  /* wa flotante */
+  .wa-fab{position:fixed;right:20px;bottom:20px;z-index:60;background:#25D366;color:#fff;
+    width:58px;height:58px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:1.7rem;text-decoration:none;box-shadow:0 8px 22px rgba(37,211,102,.45);}
+  @media(max-width:560px){ .paso{gap:14px;} .num{width:44px;height:44px;font-size:1.2rem;} }
+</style>
+</head>
+<body>
+  <div class="barra">
+    <div class="cont">
+      <a href="/" class="marca"><img src="/static/img/logo-tributando.png" alt="">Tributando<span>.co</span></a>
+      <a href="/" class="volver">← Ir a la app</a>
+    </div>
+  </div>
+
+  <header class="hero">
+    <div class="cont">
+      <span class="kick">Guía paso a paso</span>
+      <h1>Cómo presentar tu <b>Formulario 210</b> en la DIAN</h1>
+      <p>Recibiste el borrador de tu declaración. Aquí te mostramos cómo subirlo tú mismo al portal de la DIAN, sin enredos.</p>
+      <div class="meta">🕒 Lectura de 3 minutos · 7 pasos</div>
+    </div>
+  </header>
+
+  <main class="cont">
+    <div class="intro">
+      Con tu plan recibes el <b>borrador de tu declaración</b> (Formulario 210 diligenciado
+      renglón por renglón). Tú la subes al portal de la DIAN siguiendo estos 7 pasos.
+      Si en cualquier punto tienes dudas, <b>escríbenos y te ayudamos</b>.
+    </div>
+
+    <section class="pasos">
+      <div class="paso"><div class="num">1</div><div class="txt">
+        <h3>📄 Ten a la mano tu borrador</h3>
+        <p>En tu PDF está el Formulario 210 diligenciado renglón por renglón. Cada casilla tiene su
+        número (por ejemplo, 29, 36, 65…). Vas a copiar esos mismos valores en el formulario oficial de la DIAN.</p>
+      </div></div>
+
+      <div class="paso"><div class="num">2</div><div class="txt">
+        <h3>🔐 Entra al portal de la DIAN</h3>
+        <p>Ingresa a <b>www.dian.gov.co</b> → <b>Usuario Registrado</b> y entra con tu tipo de documento,
+        número y clave. Si es tu primera vez, crea tu cuenta y habilita la <b>firma electrónica (IFE)</b> desde el mismo portal.</p>
+      </div></div>
+
+      <div class="paso"><div class="num">3</div><div class="txt">
+        <h3>🗂️ Abre el Formulario 210</h3>
+        <p>Dentro del portal ve a <b>Diligenciar / Presentar</b> → busca el <b>Formulario 210</b>
+        (Declaración de Renta Personas Naturales) → selecciona el <b>año gravable</b> correcto y crea un nuevo borrador.</p>
+      </div></div>
+
+      <div class="paso"><div class="num">4</div><div class="txt">
+        <h3>⌨️ Transcribe casilla por casilla</h3>
+        <p>Copia en el formulario de la DIAN cada valor de tu PDF, guiándote por el número de casilla.
+        El portal calcula solo los totales y las casillas sombreadas. <b>Verifica que los totales coincidan</b> con los de tu borrador.</p>
+      </div></div>
+
+      <div class="paso"><div class="num">5</div><div class="txt">
+        <h3>💾 Guarda y revisa</h3>
+        <p>Usa <b>Guardar</b> con frecuencia. Antes de enviar, revisa que el impuesto a cargo o el saldo a
+        favor sea igual al de tu borrador. Si algo no cuadra, escríbenos y lo revisamos contigo.</p>
+      </div></div>
+
+      <div class="paso"><div class="num">6</div><div class="txt">
+        <h3>✍️ Firma y presenta</h3>
+        <p>Cuando todo esté correcto, presiona <b>Firmar</b> (con tu firma electrónica) y luego <b>Presentar</b>.
+        El portal genera el formulario definitivo con su número de radicado: <b>guárdalo</b>.</p>
+      </div></div>
+
+      <div class="paso"><div class="num">7</div><div class="txt">
+        <h3>💳 Paga si tienes saldo a cargo</h3>
+        <p>Si tu declaración arroja impuesto a pagar, genera el <b>recibo de pago 480</b> desde el portal y
+        págalo por PSE o en el banco antes de tu fecha límite. Si te da saldo a favor o en ceros, con presentar es suficiente.</p>
+      </div></div>
+    </section>
+
+    <div class="cta">
+      <h2>¿Prefieres que <b>la presentemos por ti</b>?</h2>
+      <p>Con el plan de presentación, un profesional monta tu declaración en el portal DIAN y la
+      presenta por ti antes de tu fecha límite. Tú no tocas nada.</p>
+      <div class="btns">
+        <a class="btn oro" href="/">Ver los planes</a>
+        <a class="btn wa" id="wa" href="#" target="_blank" rel="noopener">💬 Escríbenos por WhatsApp</a>
+      </div>
+    </div>
+
+    <p class="aviso">Esta es una guía de apoyo. Verifica siempre la normativa vigente y los plazos
+    oficiales de la DIAN según tu cédula.</p>
+  </main>
+
+  <footer>
+    Tributando<span style="color:var(--dorado2)">.co</span> · Tu declaración de renta sin enredos ·
+    <a href="/">tributando.co</a>
+  </footer>
+
+  <a class="wa-fab" id="waFab" href="#" target="_blank" rel="noopener" aria-label="WhatsApp">💬</a>
+
+  <script>
+    var wa = {{ ia_whatsapp|tojson }};
+    var num = String(wa || "573332470715").replace(/\D/g,"");
+    var msg = "Hola, tengo una duda para presentar mi Formulario 210 en la DIAN.";
+    var url = "https://wa.me/" + num + "?text=" + encodeURIComponent(msg);
+    document.getElementById("wa").href = url;
+    document.getElementById("waFab").href = url;
+  </script>
+</body>
+</html>
