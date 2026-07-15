@@ -866,7 +866,7 @@ function mostrarConsignacionManual(plan, j, p) {
     <p class="demo-aviso" style="color:#5a6b7f">Tu orden queda guardada con el número
     <b>${ordenActual}</b>. Si pagas después, escríbenos indicando ese número.</p>`;
   $("#btnCancelar").onclick = () => $("#modal").classList.add("oculto");
-  $("#btnPagar").onclick = () => reportarPago("consignacion");
+  $("#btnPagar").onclick = () => reportarPago(plan);
 }
 
 async function procesarRealmy(plan, j) {
