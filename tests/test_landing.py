@@ -394,6 +394,27 @@ def test_muestra_contador_requiere_carga(cliente):
     assert r.status_code == 400
 
 
+def test_reset_muestra_devuelve_la_prueba(cliente):
+    """Reiniciar desde /admin le devuelve la prueba gratis al contador."""
+    from src.auth import MuestraContador, db
+    with app.app_context():
+        MuestraContador.query.delete()
+        db.session.commit()
+
+    j = _cargar(cliente).get_json()
+    assert cliente.get(f"/api/muestra-contador/{j['token']}.pdf").status_code == 200
+    with app.app_context():
+        uid = MuestraContador.query.first().usuario_id
+
+    j2 = _cargar(cliente).get_json()                       # segunda distinta: bloqueada
+    assert cliente.get(f"/api/muestra-contador/{j2['token']}.pdf").status_code == 402
+
+    r = cliente.post("/api/muestra-contador/reset", json={"usuario_id": uid})
+    assert r.status_code == 200
+    # tras reiniciar, vuelve a poder generar una muestra
+    assert cliente.get(f"/api/muestra-contador/{j2['token']}.pdf").status_code == 200
+
+
 def test_admin_lista_ordenes(cliente):
     j = _cargar(cliente).get_json()
     orden = cliente.post("/api/checkout", json={"token": j["token"], "plan": "presentacion",

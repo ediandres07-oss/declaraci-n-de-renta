@@ -1288,6 +1288,17 @@ def admin():
                     f"border-radius:8px'>⚑ <b>{n_asesor}</b> usuario(s) solicitaron que un asesor "
                     f"los contacte.</p>" if n_asesor else "")
 
+    # ---- contadores que usaron su muestra gratis (termómetro + reinicio) ----
+    filas_m = []
+    for m in MuestraContador.query.order_by(MuestraContador.creado.desc()).all():
+        fecha_m = m.creado.strftime("%Y-%m-%d %H:%M") if m.creado else ""
+        filas_m.append(
+            f"<tr><td>{fecha_m}</td><td>{m.email or ''}</td>"
+            f"<td>{m.nit_muestra or '—'}</td>"
+            f"<td><button onclick=\"reiniciar({m.usuario_id})\" "
+            f"style='background:#b3372f;color:#fff;border:0;border-radius:6px;"
+            f"padding:6px 10px;cursor:pointer'>↺ Reiniciar prueba</button></td></tr>")
+
     return f"""<!DOCTYPE html><html lang="es"><head><meta charset="utf-8">
 <title>Admin — Panel</title>
 <style>body{{font-family:-apple-system,sans-serif;margin:24px;color:#1e2b3a}}
@@ -1311,6 +1322,12 @@ consignación llegó (valor y referencia) antes de confirmar.</p>
 <table><tr><th>Fecha</th><th>Orden</th><th>Cliente</th><th>Plan</th><th>Valor</th>
 <th>Contacto</th><th>Estado</th><th>Acciones</th></tr>{''.join(filas) or
 '<tr><td colspan=8>Sin órdenes todavía.</td></tr>'}</table>
+
+<h2>👔 Contadores que probaron gratis ({len(filas_m)})</h2>
+<p>Cada uno ya usó su declaración de muestra (termómetro de interés).
+"Reiniciar" le devuelve su prueba gratis — útil para demos.</p>
+<table><tr><th>Fecha</th><th>Contador</th><th>NIT muestra</th><th>Acción</th></tr>{''.join(filas_m) or
+'<tr><td colspan=4>Ningún contador ha probado todavía.</td></tr>'}</table>
 <script>
 async function confirmar(oid) {{
   if (!confirm('¿Confirmar que la consignación de la orden ' + oid + ' llegó a la cuenta?')) return;
@@ -1318,7 +1335,28 @@ async function confirmar(oid) {{
     headers:{{'Content-Type':'application/json'}}, body: JSON.stringify({{orden_id: oid}})}});
   if (r.ok) location.reload(); else alert('Error confirmando');
 }}
+async function reiniciar(uid) {{
+  if (!confirm('¿Devolverle su prueba gratis a este contador?')) return;
+  const r = await fetch('/api/muestra-contador/reset', {{method:'POST',
+    headers:{{'Content-Type':'application/json'}}, body: JSON.stringify({{usuario_id: uid}})}});
+  if (r.ok) location.reload(); else alert('Error reiniciando');
+}}
 </script></body></html>"""
+
+
+@app.post("/api/muestra-contador/reset")
+@autorizado_requerido
+def reset_muestra_contador():
+    """Devuelve la prueba gratis a un contador (borra su registro de muestra).
+    Solo personal autorizado, desde /admin."""
+    cuerpo = request.get_json(silent=True) or {}
+    uid = cuerpo.get("usuario_id")
+    fila = db.session.get(MuestraContador, uid) if uid is not None else None
+    if fila is None:
+        return jsonify({"error": "No encontrado."}), 404
+    db.session.delete(fila)
+    db.session.commit()
+    return jsonify({"ok": True})
 
 
 @app.post("/api/eliminar-datos")
