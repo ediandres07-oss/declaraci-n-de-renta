@@ -134,7 +134,12 @@ def generar_formulario_pdf(
     liq: Liquidacion,
     p: Parametros,
     rellenable: bool = True,
+    marca: str = "BORRADOR",
 ) -> Path:
+    """`marca` es el texto de la marca de agua. Con "BORRADOR" (defecto) se
+    imprime una sola diagonal tenue. Con cualquier otro valor (ej. "MUESTRA")
+    se tejen varias diagonales más visibles: así una muestra gratis para
+    contadores no puede pasar como declaración real."""
     ruta = Path(ruta)
     ruta.parent.mkdir(parents=True, exist_ok=True)
     c = canvas.Canvas(str(ruta), pagesize=letter)
@@ -143,13 +148,25 @@ def generar_formulario_pdf(
     con = datos.contribuyente
 
     # ================= marca de agua =================
-    c.saveState()
-    c.translate(W / 2, H / 2)
-    c.rotate(45)
-    c.setFont("Helvetica-Bold", 64)
-    c.setFillColor(HexColor("#d8dee6"))
-    c.drawCentredString(0, 0, "BORRADOR")
-    c.restoreState()
+    if marca == "BORRADOR":
+        c.saveState()
+        c.translate(W / 2, H / 2)
+        c.rotate(45)
+        c.setFont("Helvetica-Bold", 64)
+        c.setFillColor(HexColor("#d8dee6"))
+        c.drawCentredString(0, 0, "BORRADOR")
+        c.restoreState()
+    else:
+        # marca tejida y más visible (p. ej. muestra gratis)
+        c.saveState()
+        c.translate(W / 2, H / 2)
+        c.rotate(45)
+        c.setFont("Helvetica-Bold", 46)
+        c.setFillColor(HexColor("#e6c9a3"))          # dorado tenue
+        for fila in range(-3, 4):
+            for col in range(-1, 2):
+                c.drawCentredString(col * 360, fila * 150, marca)
+        c.restoreState()
     c.setFillColor(black)
 
     # ================= encabezado =================

@@ -364,6 +364,36 @@ def test_pago_pdf_confirmado_entrega_al_cliente(cliente, monkeypatch, _sin_smtp_
     assert len(entregas) == 1
 
 
+def test_muestra_contador_una_gratis(cliente):
+    """Un contador (usuario logueado) obtiene 1 Formulario 210 de MUESTRA gratis;
+    una segunda declaración distinta queda bloqueada hasta pagar el pase."""
+    from src.auth import MuestraContador, db
+    with app.app_context():
+        MuestraContador.query.delete()
+        db.session.commit()
+
+    j = _cargar(cliente).get_json()
+    r = cliente.get(f"/api/muestra-contador/{j['token']}.pdf")
+    assert r.status_code == 200
+    assert r.data[:5] == b"%PDF-"                       # es un PDF
+
+    # re-descargar la MISMA muestra: permitido (no cuenta como segunda)
+    r = cliente.get(f"/api/muestra-contador/{j['token']}.pdf")
+    assert r.status_code == 200
+
+    # una segunda exógena distinta: bloqueada (ya usó su prueba)
+    j2 = _cargar(cliente).get_json()
+    r = cliente.get(f"/api/muestra-contador/{j2['token']}.pdf")
+    assert r.status_code == 402
+    assert "muestra" in r.get_json()["error"].lower()
+
+
+def test_muestra_contador_requiere_carga(cliente):
+    """Sin exógena cargada, la muestra responde error (no revienta)."""
+    r = cliente.get("/api/muestra-contador/token-inexistente.pdf")
+    assert r.status_code == 400
+
+
 def test_admin_lista_ordenes(cliente):
     j = _cargar(cliente).get_json()
     orden = cliente.post("/api/checkout", json={"token": j["token"], "plan": "presentacion",

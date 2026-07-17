@@ -26,9 +26,9 @@ from src import wompi as wompi_mod
 from src.asistente import asistente_activo as asistente_ia_activo
 from src.asistente import cargar_config as cargar_config_ia
 from src.asistente import responder as responder_ia
-from src.auth import (ArchivoExogena, LeadEspera, OrdenRegistro, Usuario, auth_bp,
-                      autorizado_requerido, db, init_auth, login_requerido,
-                      usuario_actual)
+from src.auth import (ArchivoExogena, LeadEspera, MuestraContador, OrdenRegistro,
+                      Usuario, auth_bp, autorizado_requerido, db, init_auth,
+                      login_requerido, usuario_actual)
 from src.calendario import fecha_limite
 from src.documentos import generar_checklist_pdf
 from src.guia_dian import generar_guia_dian_pdf
@@ -352,11 +352,60 @@ def enlaces():
 
 @app.get("/contadores")
 def contadores():
-    """Página mayorista para contadores: pase de temporada (venta por WhatsApp).
-    El acceso se habilita agregando el correo del contador a config/acceso.yaml."""
+    """Página mayorista para contadores: pase de temporada (venta por WhatsApp)
+    + prueba gratis de 1 declaración de muestra. El acceso pago se habilita
+    agregando el correo del contador a config/acceso.yaml."""
+    u = usuario_actual()
+    muestra_usada = False
+    if u is not None:
+        muestra_usada = db.session.get(MuestraContador, u.id) is not None
     return render_template("contadores.html",
                            contadores=_CFG_PRECIOS.get("contadores", {}),
+                           logueado=u is not None,
+                           muestra_usada=muestra_usada,
                            ia_whatsapp=IA_CFG.get("negocio", {}).get("whatsapp", ""))
+
+
+@app.get("/api/muestra-contador/<token>.pdf")
+@login_requerido
+def muestra_contador_pdf(token):
+    """Entrega UNA vez, gratis, el Formulario 210 de MUESTRA (con marca de agua)
+    a un contador que se registró. El límite (1 por usuario) vive en la BD."""
+    u = usuario_actual()
+    ordenes = _leer_ordenes()
+    carga = ordenes.get(token)
+    if not carga or carga.get("tipo") != "carga":
+        return jsonify({"error": "Sube primero una exógena."}), 400
+    try:
+        datos = DatosDeclaracion.from_dict(carga.get("datos", {}))
+    except (TypeError, KeyError):
+        return jsonify({"error": "No hay datos válidos para la muestra."}), 410
+
+    previa = db.session.get(MuestraContador, u.id)
+    if previa is not None and previa.token != token:
+        return jsonify({"error": "Ya usaste tu declaración de muestra gratis. "
+                        "Activa tu pase de temporada para ilimitadas."}), 402
+
+    liq = calcular(datos, PARAMS)
+    with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
+        salida = Path(tmp.name)
+    try:
+        generar_formulario_pdf(salida, datos, liq, PARAMS, marca="MUESTRA · TRIBUTANDO.CO")
+        contenido = salida.read_bytes()
+    finally:
+        salida.unlink(missing_ok=True)
+
+    if previa is None:
+        try:
+            db.session.add(MuestraContador(usuario_id=u.id, email=u.email,
+                                           token=token, nit_muestra=carga.get("nit", "")))
+            db.session.commit()
+        except Exception:
+            db.session.rollback()   # si falla el registro, igual entregamos la muestra
+
+    return send_file(io.BytesIO(contenido), as_attachment=True,
+                     download_name=f"MUESTRA_Formulario210_{carga.get('nit','')}.pdf",
+                     mimetype="application/pdf")
 
 
 @app.get("/guia-dian")

@@ -100,6 +100,24 @@
     color:var(--tenue);font-size:.82rem;}
   footer a{color:var(--dorado2);text-decoration:none;font-weight:700;}
 
+  /* prueba gratis */
+  .prueba-caja{max-width:620px;margin:0 auto;background:#fff;border:1px solid var(--borde);
+    border-radius:var(--radio);padding:28px;box-shadow:var(--sombra-2);}
+  .dz{border:2px dashed var(--dorado);border-radius:14px;background:var(--gris);padding:34px 18px;
+    text-align:center;cursor:pointer;transition:background .15s ease, border-color .15s ease;}
+  .dz:hover,.dz.drag{background:var(--gris2);border-color:var(--dorado2);}
+  .dz b{display:block;margin-top:10px;font-size:1rem;}
+  .dz p{font-size:.85rem;color:var(--suave);margin-top:6px;}
+  .dz-err{background:#fdecea;border:1px solid #e7b6b2;color:#c0392b;padding:11px 14px;
+    border-radius:10px;margin-top:12px;font-size:.9rem;}
+  .dz-res{margin-top:18px;border:1px solid var(--borde);border-radius:14px;overflow:hidden;text-align:center;}
+  .res-cab{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;padding:12px;font-size:.9rem;}
+  .res-body{display:grid;grid-template-columns:1fr 1fr;}
+  .res-body>div{padding:18px;}
+  .res-body>div+div{border-left:1px solid var(--borde);}
+  .res-lbl{display:block;font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tenue);}
+  .res-val{display:block;font-size:1.5rem;font-weight:800;margin-top:6px;letter-spacing:-.01em;}
+
   @media(max-width:760px){
     .comp,.pasos{grid-template-columns:1fr;}
   }
@@ -168,6 +186,51 @@
           <h3>Revisa y presenta</h3>
           <p>Tú validas con tu criterio profesional, firmas y lo presentas en la DIAN.</p></div>
       </div>
+    </div>
+  </section>
+
+  <section id="prueba">
+    <div class="contenedor">
+      <h2 class="titulo">Pruébalo gratis con un cliente real</h2>
+      <p class="sub-sec">Sube la exógena de un cliente y mira el resultado y su Formulario 210.
+        <b>Una prueba gratis por contador.</b></p>
+      {% if not logueado %}
+        <div class="prueba-caja" style="text-align:center">
+          <div style="font-size:2rem">🔓</div>
+          <p style="margin:12px 0 18px">Inicia sesión con tu Google o Microsoft para hacer tu prueba gratis.</p>
+          <a class="btn-hero" href="/login?next=/contadores">Entrar y probar gratis</a>
+        </div>
+      {% elif muestra_usada %}
+        <div class="prueba-caja" style="text-align:center">
+          <div style="font-size:2rem">✅</div>
+          <h3 style="margin:8px 0">Ya usaste tu prueba gratis</h3>
+          <p style="color:var(--suave);margin-bottom:18px">Para procesar todas las declaraciones que
+            necesites, activa tu pase de temporada.</p>
+          <button class="btn-wa" id="ctaWa3">💬 Activar mi pase de temporada</button>
+        </div>
+      {% else %}
+        <div class="prueba-caja">
+          <div id="dz" class="dz">
+            <div style="font-size:2rem">📄</div>
+            <b>Arrastra aquí la exógena (.xlsx) de tu cliente</b>
+            <p>o haz clic para seleccionarla</p>
+            <input type="file" id="fx" accept=".xlsx,.xlsm" hidden>
+          </div>
+          <div id="dzErr" class="dz-err" hidden></div>
+          <div id="dzRes" class="dz-res" hidden>
+            <div class="res-cab">Resultado — NIT terminado en <b id="rNit"></b></div>
+            <div class="res-body">
+              <div><span class="res-lbl">Valor estimado a pagar</span><span class="res-val" id="rVal"></span></div>
+              <div><span class="res-lbl">Fecha límite</span><span class="res-val" id="rFecha" style="font-size:1.15rem"></span></div>
+            </div>
+          </div>
+          <div id="dzAcc" hidden style="text-align:center;margin-top:18px">
+            <button class="btn-hero" id="btnMuestra">📄 Descargar el 210 de muestra (gratis)</button>
+            <p style="font-size:.75rem;color:var(--tenue);margin-top:10px">El PDF va con marca "MUESTRA".
+              Con el pase de temporada los generas limpios e ilimitados.</p>
+          </div>
+        </div>
+      {% endif %}
     </div>
   </section>
 
@@ -242,10 +305,64 @@
     var num = String(wa || "573332470715").replace(/\D/g,"");
     var msg = "Hola, soy contador(a) y quiero información del pase de temporada para procesar las rentas de mis clientes.";
     var url = "https://wa.me/" + num + "?text=" + encodeURIComponent(msg);
-    ["ctaWa","ctaWa2"].forEach(function(id){
+    ["ctaWa","ctaWa2","ctaWa3"].forEach(function(id){
       var b = document.getElementById(id);
       if (b) b.onclick = function(){ window.open(url, "_blank"); };
     });
+
+    // ---- Prueba gratis: subir exógena -> resultado -> descargar 210 de muestra ----
+    var dz = document.getElementById("dz"), fx = document.getElementById("fx"), tok = null;
+    if (dz) {
+      dz.onclick = function(){ fx.click(); };
+      dz.ondragover = function(e){ e.preventDefault(); dz.classList.add("drag"); };
+      dz.ondragleave = function(){ dz.classList.remove("drag"); };
+      dz.ondrop = function(e){ e.preventDefault(); dz.classList.remove("drag");
+        if (e.dataTransfer.files[0]) subir(e.dataTransfer.files[0]); };
+      fx.onchange = function(){ if (fx.files[0]) subir(fx.files[0]); };
+    }
+    async function subir(file){
+      var err = document.getElementById("dzErr"); err.hidden = true;
+      var b = dz.querySelector("b"); b.textContent = "⏳ Analizando " + file.name + "…";
+      var fd = new FormData(); fd.append("exogena", file);
+      try {
+        var r = await fetch("/api/cargar-landing", {method:"POST", body: fd});
+        var j = await r.json();
+        if (!r.ok) { err.textContent = j.error || "No pudimos leer el archivo."; err.hidden = false;
+          b.textContent = "Arrastra aquí la exógena (.xlsx) de tu cliente"; return; }
+        tok = j.token;
+        document.getElementById("rNit").textContent = j.nit_final || "—";
+        document.getElementById("rVal").textContent = j.valor_a_pagar
+          ? "$" + Number(j.valor_a_pagar).toLocaleString("es-CO") : "$0";
+        document.getElementById("rFecha").textContent = j.fecha_limite || "—";
+        document.getElementById("dzRes").hidden = false;
+        document.getElementById("dzAcc").hidden = false;
+        b.textContent = "✔ " + file.name + " — sube otra para reemplazar";
+      } catch(e) {
+        err.textContent = "Problema de conexión. Intenta de nuevo."; err.hidden = false;
+        b.textContent = "Arrastra aquí la exógena (.xlsx) de tu cliente";
+      }
+    }
+    var btnM = document.getElementById("btnMuestra");
+    if (btnM) btnM.onclick = async function(){
+      if (!tok) return;
+      btnM.disabled = true; btnM.textContent = "Generando…";
+      try {
+        var r = await fetch("/api/muestra-contador/" + tok + ".pdf");
+        if (r.ok) {
+          var blob = await r.blob(), a = document.createElement("a");
+          a.href = URL.createObjectURL(blob); a.download = "MUESTRA_Formulario210.pdf"; a.click();
+          URL.revokeObjectURL(a.href);
+          btnM.textContent = "✓ Descargado — ¿te convenció? Activa tu pase 👇";
+        } else {
+          var j = await r.json().catch(function(){ return {}; });
+          alert(j.error || "No pudimos generar la muestra.");
+          btnM.disabled = false; btnM.textContent = "📄 Descargar el 210 de muestra (gratis)";
+        }
+      } catch(e) {
+        alert("Problema de conexión. Intenta de nuevo.");
+        btnM.disabled = false; btnM.textContent = "📄 Descargar el 210 de muestra (gratis)";
+      }
+    };
   </script>
 </body>
 </html>

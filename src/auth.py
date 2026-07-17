@@ -149,6 +149,18 @@ class OrdenRegistro(db.Model):
     actualizado = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
+class MuestraContador(db.Model):
+    """Registra que un contador (usuario) ya usó su declaración de MUESTRA gratis.
+    La sola existencia de la fila = prueba consumida. Una por usuario. Vive en la
+    BD para que el límite sobreviva a los redeploys de Render."""
+    __tablename__ = "muestras_contador"
+    usuario_id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(200))
+    token = db.Column(db.String(80))                  # token de la carga usada
+    nit_muestra = db.Column(db.String(30))            # cédula del cliente de la muestra
+    creado = db.Column(db.DateTime, default=datetime.utcnow)
+
+
 # --------------------------------------------------------------- segundo factor
 MAX_INTENTOS_MFA = 5
 BLOQUEO_MINUTOS = 15
