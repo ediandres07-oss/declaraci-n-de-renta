@@ -889,6 +889,77 @@ def _entregar_pdf_al_cliente(orden_id: str, orden: dict, ordenes: dict) -> None:
                            orden_id, e)
 
 
+def _entregar_pase_contador(orden_id: str, orden: dict) -> None:
+    """Correo de bienvenida del pase de temporada: le dice al contador que su
+    acceso al liquidador quedó habilitado y cómo entrar. Idempotente (bandera
+    bienvenida_pase_enviada). Nunca lanza excepción."""
+    if orden.get("plan") != "contadores" or orden.get("bienvenida_pase_enviada"):
+        return
+    email = (orden.get("contacto") or {}).get("email", "").strip()
+    if not email:
+        return
+    try:
+        from src.correo import cargar_config_email, enviar_email
+        cfg = cargar_config_email()
+        if not cfg.get("habilitado"):
+            return
+        cont = _CFG_PRECIOS.get("contadores", {})
+        sitio = (_CONTACTO.get("sitio") or "https://tributando.co").rstrip("/")
+        wa = re.sub(r"\D", "", str(_CONTACTO.get("whatsapp", "")))
+        nombre = ((orden.get("contacto") or {}).get("nombre", "")
+                  or orden.get("nombre", ""))
+        primer = nombre.split()[0].title() if nombre else ""
+        saludo = f"Hola {primer}," if primer else "Hola,"
+        navy, dorado = "#1e2432", "#b8955f"
+        html = f"""<!DOCTYPE html><html><body style="margin:0;background:#f5f7fa;
+          font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:#1e2b3a">
+          <div style="max-width:560px;margin:0 auto;padding:24px">
+            <div style="background:#fff;border-radius:16px;overflow:hidden;
+              box-shadow:0 6px 20px rgba(18,63,107,.08)">
+              <div style="background:{navy};color:#fff;padding:24px 26px">
+                <div style="font-size:1.5rem">👔</div>
+                <div style="font-size:1.2rem;font-weight:800;margin-top:6px">
+                  Tu pase de temporada está <span style="color:{dorado}">activo</span></div>
+              </div>
+              <div style="padding:24px 26px;font-size:.95rem;line-height:1.65">
+                <p>{saludo}</p>
+                <p>Confirmamos tu pago del <b>{cont.get('nombre', 'Pase de temporada')}</b>
+                  (orden <code>{orden_id}</code>). Tu acceso al <b>liquidador profesional</b>
+                  ya quedó habilitado con este correo (<b>{email}</b>).</p>
+                <div style="background:#f5f7fa;border-radius:12px;padding:18px 20px;margin:18px 0">
+                  <b>Para empezar:</b>
+                  <ol style="margin:10px 0 0 18px;padding:0">
+                    <li>Entra a <a href="{sitio}/liquidador">{sitio.replace('https://','')}/liquidador</a></li>
+                    <li>Inicia sesión con <b>Google o Microsoft</b> usando <b>este mismo correo</b></li>
+                    <li>Sube la exógena de tu cliente y descarga su Formulario 210</li>
+                  </ol>
+                </div>
+                <p><b>Tu pase incluye</b> (temporada {cont.get('temporada', '')}):</p>
+                <ul style="margin:8px 0 0 18px;padding:0">
+                  <li>Declaraciones <b>ilimitadas</b></li>
+                  <li>Formulario 210 en PDF y Excel con papeles de trabajo</li>
+                  <li>Anexo del cruce exógena → 210 (NIT por NIT) y topes evaluados</li>
+                  <li>Soporte directo por WhatsApp</li>
+                </ul>
+                <p style="text-align:center;margin:24px 0 8px">
+                  <a href="{sitio}/liquidador" style="background:{dorado};color:#fff;
+                    text-decoration:none;padding:13px 28px;border-radius:10px;
+                    font-weight:700;display:inline-block">Entrar al liquidador</a></p>
+                <p style="font-size:.82rem;color:#5a6b7f;text-align:center">
+                  ¿Dudas? Escríbenos por <a href="https://wa.me/{wa}">WhatsApp</a>
+                  o responde este correo.</p>
+              </div>
+              <div style="padding:16px 26px;border-top:1px solid #eef2f7;font-size:.72rem;color:#9db0c4">
+                Tributando.co · herramienta profesional para contadores</div>
+            </div>
+          </div></body></html>"""
+        enviar_email(email, "✅ Tu pase de temporada está activo — liquidador habilitado",
+                     html, cfg)
+        orden["bienvenida_pase_enviada"] = True
+    except Exception:
+        pass
+
+
 def _finalizar_pago_orden(orden_id: str, orden: dict, ordenes: dict) -> None:
     """Marca la orden como pagada y, si es plan de presentación, conserva la
     exógena y genera el checklist para el trámite. Idempotente."""
@@ -907,6 +978,8 @@ def _finalizar_pago_orden(orden_id: str, orden: dict, ordenes: dict) -> None:
                 db.session.commit()
             except Exception:
                 db.session.rollback()
+        # correo de bienvenida con el acceso (idempotente)
+        _entregar_pase_contador(orden_id, orden)
 
     # Aviso al negocio de que entró dinero confirmado. La bandera evita
     # reenviarlo cuando la pasarela repite el webhook (esta función es
@@ -1283,7 +1356,12 @@ def admin():
                 acciones += ("<br><small style='color:#1e7d43'>al confirmar se le "
                              "habilita el liquidador solo (con su correo)</small>")
         elif o.get("plan") == "contadores":
-            acciones = "<small style='color:#1e7d43'>✓ acceso al liquidador habilitado</small>"
+            correo_ok = ("📧 correo de acceso enviado" if o.get("bienvenida_pase_enviada")
+                         else (f"<button onclick=\"confirmar('{oid}')\" "
+                               f"style='background:#123f6b;color:#fff;border:0;border-radius:6px;"
+                               f"padding:5px 9px;cursor:pointer'>📧 Enviar correo de acceso</button>"))
+            acciones = (f"<small style='color:#1e7d43'>✓ acceso al liquidador habilitado</small>"
+                        f"<br>{correo_ok}")
         else:
             acciones = (f"<a href='/api/orden/{oid}/formulario.pdf'>F210 PDF</a> · "
                         f"<a href='/api/orden/{oid}/documentos.pdf'>Checklist</a> · "
