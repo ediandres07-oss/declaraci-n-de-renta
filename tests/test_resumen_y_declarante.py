@@ -67,7 +67,10 @@ def test_formulario_210_pdf_oficial(tmp_path, exogena_elizabeth, parametros):
     lector = PdfReader(str(ruta))
     texto = "".join(pg.extract_text() for pg in lector.pages)
     assert "BORRADOR" in texto
-    assert "Formulario 210" in texto
+    # encabezado con el layout oficial: caja "210" y título en tres líneas
+    assert "210" in texto
+    assert "Declaración de renta y complementario" in texto
+    assert "sucesiones ilíquidas de causantes residentes" in texto
     assert "GIRALDO" in texto and "ELIZABETH" in texto
     assert "No válido para presentación" in texto
     # Los importes viven en los campos AcroForm (el PDF es rellenable), no en la

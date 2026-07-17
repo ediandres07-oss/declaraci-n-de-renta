@@ -20,8 +20,10 @@ from .modelos import DatosDeclaracion, Liquidacion
 from .parametros import Parametros
 
 AZUL = HexColor("#27506e")
+AZUL210 = HexColor("#46759e")        # caja del "210" del encabezado oficial
 FONDO = HexColor("#dce7f0")
 GRIS = HexColor("#8fa6b8")
+GRIS_BLOQ = HexColor("#d9dfe7")      # celdas no diligenciables (como el oficial)
 
 ML, MR, MT = 20, 20, 24          # márgenes
 W, H = letter                    # 612 × 792
@@ -157,46 +159,94 @@ def generar_formulario_pdf(
         c.drawCentredString(0, 0, "BORRADOR")
         c.restoreState()
     else:
-        # marca tejida y más visible (p. ej. muestra gratis)
+        # marca de muestra: tres diagonales tenues, sin invadir la lectura
         c.saveState()
         c.translate(W / 2, H / 2)
         c.rotate(45)
-        c.setFont("Helvetica-Bold", 46)
-        c.setFillColor(HexColor("#e6c9a3"))          # dorado tenue
-        for fila in range(-3, 4):
-            for col in range(-1, 2):
-                c.drawCentredString(col * 360, fila * 150, marca)
+        c.setFont("Helvetica-Bold", 42)
+        c.setFillColor(HexColor("#efe1cb"))          # dorado muy suave
+        for fila in (-1, 0, 1):
+            c.drawCentredString(0, fila * 260, marca)
         c.restoreState()
     c.setFillColor(black)
 
-    # ================= encabezado =================
+    # ================= encabezado (layout oficial) =================
     y = H - MT
-    f.caja(ML, y - 40, W - ML - MR, 40)
-    f.etiqueta(ML + 4, y - 10, "Declaración de Renta y Complementario Personas Naturales"
-               " y Asimiladas Residentes — Formulario 210", 8.5, bold=True, color=AZUL)
-    f.etiqueta(ML + 4, y - 21, f"Año gravable {p.anio_gravable} · UVT ${p.uvt:,.0f} · "
-               f"Generado {date.today().strftime('%d/%m/%Y')}", 6.5)
-    f.etiqueta(ML + 4, y - 33, "BORRADOR DE TRABAJO — No válido para presentación ante la DIAN. "
-               "Espacios oficiales (código de barras, No. de formulario) no aplican.", 6.2,
-               bold=True, color=HexColor("#b3372f"))
-    y -= 46
+    h1 = 36
+    w_logo, w_blank, w_210 = 150, 70, 86
+    w_titulo = W - ML - MR - w_logo - w_blank - w_210
+    # logotipo (trazo aproximado al oficial)
+    f.caja(ML, y - h1, w_logo, h1)
+    c.setFont("Helvetica-Bold", 24)
+    c.setFillColor(HexColor("#6b7680"))
+    c.drawCentredString(ML + w_logo / 2, y - h1 / 2 - 8, "D I A N")
+    c.setFillColor(black)
+    # título central en tres líneas, como el formulario oficial
+    f.caja(ML + w_logo, y - h1, w_titulo, h1)
+    cx_t = ML + w_logo + w_titulo / 2
+    c.setFont("Helvetica-Bold", 8.6)
+    c.drawCentredString(cx_t, y - 11, "Declaración de renta y complementario")
+    c.drawCentredString(cx_t, y - 21, "personas naturales y asimiladas residentes")
+    c.drawCentredString(cx_t, y - 31, "y sucesiones ilíquidas de causantes residentes")
+    # caja en blanco y gran "210" azul
+    f.caja(ML + w_logo + w_titulo, y - h1, w_blank, h1)
+    f.caja(W - MR - w_210, y - h1, w_210, h1, relleno=AZUL210)
+    c.setFont("Helvetica-Bold", 27)
+    c.setFillColor(white)
+    c.drawCentredString(W - MR - w_210 / 2, y - h1 / 2 - 9, "210")
+    c.setFillColor(black)
+    y -= h1
 
-    # ---- fila datos del declarante ----
+    # ---- 1. Año (cajitas de dígitos) ----
+    h_a = 13
+    f.etiqueta(ML + 2, y - 9, "1. Año", 6.0)
+    for i, digito in enumerate(str(p.anio_gravable)):
+        bx = ML + 32 + i * 15
+        f.caja(bx, y - h_a + 1, 13, h_a - 2)
+        c.setFont("Helvetica-Bold", 7.5)
+        c.drawCentredString(bx + 6.5, y - h_a / 2 - 3, digito)
+    y -= h_a
+
+    # ---- espacio reservado para la DIAN + 4. número de formulario ----
+    h_r = 34
+    w_res = (W - ML - MR) * 0.55
+    f.caja(ML, y - h_r, w_res, h_r)
+    f.etiqueta(ML + 3, y - 8, "Espacio reservado para la DIAN", 5.4)
+    f.etiqueta(ML + 3, y - 18, "BORRADOR DE TRABAJO — No válido para presentación ante la DIAN. "
+               "Espacios oficiales no aplican.", 5.8, bold=True, color=HexColor("#b3372f"),
+               ancho=w_res - 6)
+    f.etiqueta(ML + 3, y - 27, f"Año gravable {p.anio_gravable} · UVT ${p.uvt:,.0f} · "
+               f"Generado {date.today().strftime('%d/%m/%Y')}", 5.6)
+    f.caja(ML + w_res, y - h_r, W - ML - MR - w_res, h_r)
+    f.etiqueta(ML + w_res + 3, y - 8, "4. Número de formulario", 5.4)
+    y -= h_r
+
+    # ---- fila datos del declarante (con casilla 12, como el oficial) ----
     alto = 22
     campos = [
-        ("5. Número de Identificación Tributaria (NIT)", 120, " ".join(con.nit or "")),
-        ("6. DV", 26, con.dv),
-        ("7. Primer apellido", 100, con.primer_apellido),
-        ("8. Segundo apellido", 100, con.segundo_apellido),
-        ("9. Primer nombre", 96, con.primer_nombre),
-        ("10. Otros nombres", 130, con.otros_nombres),
+        ("5. Número de Identificación Tributaria (NIT)", 108, " ".join(con.nit or "")),
+        ("6. DV", 24, con.dv),
+        ("7. Primer apellido", 96, con.primer_apellido),
+        ("8. Segundo apellido", 96, con.segundo_apellido),
+        ("9. Primer nombre", 88, con.primer_nombre),
+        ("10. Otros nombres", 102, con.otros_nombres),
+        ("12. Cód. Dirección seccional", 58, ""),
     ]
     x = ML
     for titulo, w, valor in campos:
         f.caja(x, y - alto, w, alto)
-        f.etiqueta(x + 2, y - 7, titulo, 5.2, color=AZUL, ancho=w - 4)
+        f.etiqueta(x + 2, y - 7, titulo, 5.0, color=AZUL, ancho=w - 4)
         f.etiqueta(x + 3, y - 17.5, str(valor or ""), 7.5, bold=True)
         x += w
+    # rótulo vertical "Datos del declarante" en el margen, como el oficial
+    c.saveState()
+    c.translate(ML - 6, y - alto)
+    c.rotate(90)
+    c.setFont("Helvetica", 4.6)
+    c.setFillColor(GRIS)
+    c.drawString(0, 0, "Datos del declarante")
+    c.restoreState()
+    c.setFillColor(black)
     y -= alto
 
     campos2 = [
@@ -230,7 +280,7 @@ def generar_formulario_pdf(
     # ================= cédula general =================
     col_label = 128
     ancho_col = (W - ML - MR - 13 - col_label) / 4
-    fila_h = 12.6
+    fila_h = 11.8
 
     # (etiqueta, casillas por columna [trabajo, honorarios, capital, no laboral])
     filas = [
@@ -273,7 +323,7 @@ def generar_formulario_pdf(
         for i, num in enumerate(nums):
             cx = x0 + col_label + i * ancho_col
             if num is None:
-                f.caja(cx, yy, ancho_col, fila_h, relleno=HexColor("#eef2f6"))
+                f.caja(cx, yy, ancho_col, fila_h, relleno=GRIS_BLOQ)
             else:
                 f.casilla(cx, yy, ancho_col, fila_h, num, _mil(R(num)), tam=6.2)
     y = yy - 3
@@ -289,7 +339,7 @@ def generar_formulario_pdf(
         x = ML
         for texto, num in fila_pares:
             f.caja(x, y - alto, mitades, alto)
-            f.etiqueta(x + 2, y - 6.5, texto, 5.0, color=AZUL, ancho=mitades - 4)
+            f.etiqueta(x + 2, y - 6.5, texto, 5.0, color=AZUL, ancho=mitades - 92)
             f.casilla(x + mitades - 88, y - alto + 1, 86, alto - 2, num, _mil(R(num)), tam=6.2)
             x += mitades
         y -= alto
@@ -297,7 +347,7 @@ def generar_formulario_pdf(
 
     # ================= bloques inferiores =================
     mitad = (W - ML - MR) / 2
-    fila_h2 = 12.6
+    fila_h2 = 11.8
 
     def bloque(x, y0, titulo, items):
         n = len(items)
@@ -373,7 +423,7 @@ def generar_formulario_pdf(
                                       ("Total saldo a favor", 137)]):
         x = ML + i * cuartos
         f.caja(x, y - alto, cuartos, alto)
-        f.etiqueta(x + 2, y - 6.5, texto, 5.2, bold=True, color=AZUL, ancho=cuartos - 4)
+        f.etiqueta(x + 2, y - 6.5, texto, 5.2, bold=True, color=AZUL, ancho=cuartos - 94)
         f.casilla(x + cuartos - 90, y - alto + 1, 88, alto - 2, num, _mil(R(num)), tam=6.6)
     y -= alto
     for i, (texto, num, val) in enumerate([
@@ -383,17 +433,37 @@ def generar_formulario_pdf(
             ("Aporte voluntario", 141, _mil(R(141)))]):
         x = ML + i * cuartos
         f.caja(x, y - alto, cuartos, alto)
-        f.etiqueta(x + 2, y - 6.5, texto, 5.2, color=AZUL, ancho=cuartos - 4)
+        f.etiqueta(x + 2, y - 6.5, texto, 5.2, color=AZUL, ancho=cuartos - 94)
         f.casilla(x + cuartos - 90, y - alto + 1, 88, alto - 2, num, val, tam=6.6)
     y -= alto + 6
 
-    # ---- pie de firmas ----
-    f.caja(ML, y - 34, (W - ML - MR) / 2, 34)
-    f.etiqueta(ML + 3, y - 8, "Firma del declarante o de quien lo representa", 5.4, color=AZUL)
-    f.caja(ML + (W - ML - MR) / 2, y - 34, (W - ML - MR) / 2, 34)
-    f.etiqueta(ML + (W - ML - MR) / 2 + 3, y - 8, "Firma contador · 994. Con salvedades",
-               5.4, color=AZUL)
-    y -= 40
+    # ---- pie de firmas (layout oficial: 981/982/983/994/997/980/996) ----
+    mitad2 = (W - ML - MR) / 2
+    h_f = 13
+    # izquierda: representación, firma declarante, contador, tarjeta
+    f.caja(ML, y - h_f, 92, h_f)
+    f.etiqueta(ML + 2, y - 6, "981. Cód. Representación", 4.8)
+    f.caja(ML, y - 2 * h_f, 92, h_f)
+    f.etiqueta(ML + 2, y - h_f - 6, "982. Cód. Contador", 4.8)
+    f.caja(ML, y - 3 * h_f, 92, h_f)
+    f.etiqueta(ML + 2, y - 2 * h_f - 6, "983. No. Tarjeta profesional", 4.8)
+    f.caja(ML + 92, y - 2 * h_f, mitad2 - 92, 2 * h_f)
+    f.etiqueta(ML + 95, y - 6, "Firma del declarante o de quien lo representa", 5.0)
+    f.caja(ML + 92, y - 3 * h_f, mitad2 - 92 - 78, h_f)
+    f.etiqueta(ML + 95, y - 2 * h_f - 6, "Firma contador", 5.0)
+    f.caja(ML + mitad2 - 78, y - 3 * h_f, 78, h_f)
+    f.etiqueta(ML + mitad2 - 75, y - 2 * h_f - 6, "994. Con salvedades", 4.8)
+    # derecha: sello recaudadora, pago total, número interno
+    f.caja(ML + mitad2, y - 2 * h_f, mitad2, 2 * h_f)
+    f.etiqueta(ML + mitad2 + 3, y - 6,
+               "997. Espacio exclusivo para el sello de la entidad recaudadora", 5.0)
+    f.caja(ML + mitad2, y - 3 * h_f, mitad2 / 2, h_f)
+    f.etiqueta(ML + mitad2 + 3, y - 2 * h_f - 6, "980. Pago total $", 5.2, bold=True)
+    f.caja(ML + mitad2 + mitad2 / 2, y - 3 * h_f, mitad2 / 2, h_f)
+    f.etiqueta(ML + mitad2 + mitad2 / 2 + 3, y - 2 * h_f - 6,
+               "996. Espacio para el número interno de la DIAN / Adhesivo", 4.6,
+               color=AZUL210, ancho=mitad2 / 2 - 6)
+    y -= 3 * h_f + 6
     f.etiqueta(ML, y, "Documento de trabajo generado localmente a partir de la información "
                "exógena y los datos del contribuyente. Verifique la normativa vigente con su "
                "contador antes de diligenciar el formulario oficial en el portal DIAN.", 5.8)
