@@ -1279,6 +1279,11 @@ def admin():
             acciones = (f"<button onclick=\"confirmar('{oid}')\" "
                         f"style='background:#1e7d43;color:#fff;border:0;border-radius:6px;"
                         f"padding:6px 10px;cursor:pointer'>✓ Confirmar pago</button>")
+            if o.get("plan") == "contadores":
+                acciones += ("<br><small style='color:#1e7d43'>al confirmar se le "
+                             "habilita el liquidador solo (con su correo)</small>")
+        elif o.get("plan") == "contadores":
+            acciones = "<small style='color:#1e7d43'>✓ acceso al liquidador habilitado</small>"
         else:
             acciones = (f"<a href='/api/orden/{oid}/formulario.pdf'>F210 PDF</a> · "
                         f"<a href='/api/orden/{oid}/documentos.pdf'>Checklist</a> · "
