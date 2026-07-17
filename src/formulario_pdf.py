@@ -19,11 +19,12 @@ from reportlab.pdfgen import canvas
 from .modelos import DatosDeclaracion, Liquidacion
 from .parametros import Parametros
 
-AZUL = HexColor("#27506e")
-AZUL210 = HexColor("#46759e")        # caja del "210" del encabezado oficial
-FONDO = HexColor("#dce7f0")
-GRIS = HexColor("#8fa6b8")
-GRIS_BLOQ = HexColor("#d9dfe7")      # celdas no diligenciables (como el oficial)
+# Paleta muestreada del Formulario_210_2025.pdf oficial de la DIAN
+AZUL = black                          # las etiquetas del oficial van en negro
+AZUL210 = HexColor("#3f6a96")         # caja del "210" del encabezado
+FONDO = HexColor("#e6e9f0")           # cajita del número de casilla
+GRIS = HexColor("#9c9c9c")            # líneas de la cuadrícula
+GRIS_BLOQ = HexColor("#bdc6d9")       # celdas no diligenciables
 
 ML, MR, MT = 20, 20, 24          # márgenes
 W, H = letter                    # 612 × 792
@@ -89,7 +90,7 @@ class _F210Canvas:
             self.c.drawRightString(x + w - 3, y + h / 2 - 2.2, valor)
 
     def seccion_vertical(self, x, y, h, texto):
-        self.caja(x, y, 13, h, relleno=FONDO)
+        self.caja(x, y, 13, h)               # el oficial la deja en blanco
         self.c.saveState()
         self.c.translate(x + 8.5, y + h / 2)
         self.c.rotate(90)
@@ -266,8 +267,8 @@ def generar_formulario_pdf(
 
     # ---- patrimonio ----
     alto = 15
-    f.caja(ML, y - alto, 62, alto, relleno=FONDO)
-    f.etiqueta(ML + 3, y - 9.5, "Patrimonio", 6.4, bold=True, color=AZUL)
+    f.caja(ML, y - alto, 62, alto)
+    f.etiqueta(ML + 3, y - 9.5, "Patrimonio", 6.4, bold=True)
     tercio = (W - ML - MR - 62) / 3
     f.etiqueta(ML + 66, y - 9.5, "Total patrimonio bruto", 5.6)
     f.casilla(ML + 62 + tercio - 108, y - alto, 108, alto, 29, _mil(R(29)))
@@ -309,12 +310,12 @@ def generar_formulario_pdf(
     f.seccion_vertical(ML, y - alto_grid, alto_grid, "Cédula general")
     x0 = ML + 13
     # encabezados de columnas
-    f.caja(x0, y - 13, col_label, 13, relleno=FONDO)
-    f.etiqueta(x0 + 2, y - 9, "Conceptos / renta", 5.6, bold=True, color=AZUL)
+    f.caja(x0, y - 13, col_label, 13)
+    f.etiqueta(x0 + 2, y - 9, "Conceptos / renta", 5.6, bold=True)
     for i, enc in enumerate(encabezados):
         cx = x0 + col_label + i * ancho_col
-        f.caja(cx, y - 13, ancho_col, 13, relleno=FONDO)
-        f.etiqueta(cx + 2, y - 9, enc, 5.4, bold=True, color=AZUL, ancho=ancho_col - 4)
+        f.caja(cx, y - 13, ancho_col, 13)
+        f.etiqueta(cx + 2, y - 9, enc, 5.4, bold=True, ancho=ancho_col - 4)
     yy = y - 13
     for etiqueta, nums in filas:
         yy -= fila_h
@@ -353,7 +354,7 @@ def generar_formulario_pdf(
         n = len(items)
         alto_b = fila_h2 * n + 11
         f.seccion_vertical(x, y0 - alto_b, alto_b, titulo)
-        f.caja(x + 13, y0 - 11, mitad - 13, 11, relleno=FONDO)
+        f.caja(x + 13, y0 - 11, mitad - 13, 11)
         yy = y0 - 11
         for texto, num in items:
             yy -= fila_h2
