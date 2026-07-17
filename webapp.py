@@ -350,6 +350,15 @@ def enlaces():
                            ia_whatsapp=IA_CFG.get("negocio", {}).get("whatsapp", ""))
 
 
+@app.get("/contadores")
+def contadores():
+    """Página mayorista para contadores: pase de temporada (venta por WhatsApp).
+    El acceso se habilita agregando el correo del contador a config/acceso.yaml."""
+    return render_template("contadores.html",
+                           contadores=_CFG_PRECIOS.get("contadores", {}),
+                           ia_whatsapp=IA_CFG.get("negocio", {}).get("whatsapp", ""))
+
+
 @app.get("/guia-dian")
 def guia_dian_web():
     """Versión web (HTML) de la guía para presentar el Formulario 210 en la DIAN.

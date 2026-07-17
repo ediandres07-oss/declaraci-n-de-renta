@@ -16,6 +16,14 @@ pago:
   nequi: "3207526680"
   instrucciones: "Transfiere o consigna el valor exacto y usa tu número de orden como referencia."
 
+# Plan mayorista para contadores (página /contadores). Pase de temporada:
+# acceso ilimitado al liquidador profesional durante la temporada de renta.
+# Se habilita agregando el correo del contador a config/acceso.yaml.
+contadores:
+  nombre: "Pase de temporada"
+  precio: 249000
+  temporada: "agosto a octubre de 2026"
+
 planes:
   pdf:
     nombre: "Formulario 210 diligenciado en PDF"

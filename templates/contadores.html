@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Para contadores — procesa tus rentas en minutos | Tributando.co</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Herramienta profesional para contadores: sube la exógena de tu cliente y obtén el Formulario 210 diligenciado en minutos. Pase de temporada con declaraciones ilimitadas.">
+<style>
+  :root{
+    --navy:#1e2432; --navy2:#12161f; --dorado:#cdab7e; --dorado2:#b8955f;
+    --gris:#f7f5f1; --gris2:#f1ede5; --borde:#e2ddd2;
+    --suave:#5c6470; --tenue:#8a919c; --verde:#1f8a5f;
+    --radio:16px;
+    --sombra-1:0 1px 2px rgba(10,25,45,.06), 0 4px 12px rgba(10,25,45,.06);
+    --sombra-2:0 2px 4px rgba(10,25,45,.08), 0 12px 28px rgba(10,25,45,.10);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;color:var(--navy);background:#fff;
+       -webkit-font-smoothing:antialiased;line-height:1.55;}
+  a{color:inherit;}
+  .contenedor{max-width:1000px;margin:0 auto;padding:0 22px;}
+  section{padding:52px 0;}
+
+  .barra-sup{background:var(--navy);position:sticky;top:0;z-index:50;box-shadow:0 2px 14px rgba(10,25,45,.16);}
+  .barra-sup .contenedor{display:flex;align-items:center;justify-content:space-between;padding:11px 22px;}
+  .marca{color:#fff;font-weight:800;font-size:1.1rem;display:flex;align-items:center;gap:9px;text-decoration:none;}
+  .marca img{height:34px;width:34px;border-radius:50%;box-shadow:0 0 0 1.5px rgba(205,171,126,.55);}
+  .volver{color:#fff;background:rgba(255,255,255,.10);border:1px solid rgba(205,171,126,.35);
+    padding:8px 16px;border-radius:22px;text-decoration:none;font-size:.82rem;font-weight:700;}
+
+  header.hero{color:#fff;text-align:center;padding:74px 0 84px;
+    background:radial-gradient(700px 380px at 50% -10%, rgba(205,171,126,.16), transparent 60%),
+               linear-gradient(160deg,#12161f 0%,#1e2432 60%,#0a0d11 100%);}
+  .tag{display:inline-block;background:rgba(205,171,126,.16);color:var(--dorado);font-weight:800;
+    font-size:.76rem;letter-spacing:.10em;padding:8px 18px;border-radius:30px;text-transform:uppercase;}
+  .hero h1{font-size:clamp(2.1rem,4.4vw+.7rem,3.2rem);line-height:1.08;margin-top:20px;
+    letter-spacing:-.02em;font-weight:800;}
+  .hero h1 span{color:var(--dorado);}
+  .hero .sub{max-width:620px;margin:18px auto 0;font-size:1.08rem;opacity:.93;}
+  .btn-hero{display:inline-flex;align-items:center;gap:10px;margin-top:30px;background:var(--dorado);
+    color:var(--navy);font-weight:800;font-size:1.06rem;padding:15px 34px;border-radius:32px;
+    text-decoration:none;box-shadow:0 12px 28px rgba(205,171,126,.35);border:none;cursor:pointer;
+    transition:transform .15s ease;}
+  .btn-hero:hover{transform:translateY(-2px);}
+  .nota-hero{margin-top:14px;font-size:.82rem;opacity:.8;}
+
+  .titulo{font-size:clamp(1.35rem,1vw+1.1rem,1.75rem);letter-spacing:-.01em;text-align:center;margin-bottom:8px;}
+  .sub-sec{text-align:center;color:var(--suave);max-width:620px;margin:0 auto 30px;font-size:1rem;}
+
+  /* comparación */
+  .comp{display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:780px;margin:0 auto;}
+  .caja{border:1px solid var(--borde);border-radius:var(--radio);padding:24px;background:#fff;box-shadow:var(--sombra-1);}
+  .caja.mal{background:var(--gris);}
+  .caja.bien{border:2px solid var(--dorado);box-shadow:var(--sombra-2);}
+  .caja h3{font-size:1.02rem;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+  .caja ul{list-style:none;}
+  .caja li{font-size:.9rem;color:var(--suave);padding:6px 0 6px 22px;position:relative;line-height:1.5;}
+  .caja.mal li::before{content:"✕";position:absolute;left:0;color:#c0392b;font-weight:800;}
+  .caja.bien li::before{content:"✓";position:absolute;left:0;color:var(--verde);font-weight:800;}
+
+  /* pasos */
+  .pasos{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+  .paso{background:#fff;border:1px solid var(--borde);border-radius:var(--radio);padding:26px 20px;
+    text-align:center;box-shadow:var(--sombra-1);}
+  .paso .n{width:42px;height:42px;border-radius:50%;color:var(--navy);font-weight:800;
+    background:linear-gradient(135deg,var(--dorado),var(--dorado2));display:inline-flex;
+    align-items:center;justify-content:center;box-shadow:0 4px 10px rgba(205,171,126,.4);}
+  .paso h3{font-size:1rem;margin:12px 0 7px;}
+  .paso p{font-size:.86rem;color:var(--suave);line-height:1.55;}
+
+  /* precio */
+  .precio-wrap{background:var(--navy);color:#fff;border-radius:22px;padding:44px 30px;text-align:center;
+    box-shadow:0 18px 46px rgba(10,25,45,.24);max-width:640px;margin:0 auto;position:relative;}
+  .cinta{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--dorado);
+    color:var(--navy);font-size:.72rem;font-weight:800;letter-spacing:.06em;padding:6px 18px;border-radius:14px;}
+  .precio-wrap .plan{font-size:1.2rem;font-weight:800;}
+  .precio-wrap .temp{font-size:.85rem;opacity:.75;margin-top:4px;}
+  .precio-wrap .valor{font-size:clamp(2.6rem,4vw+1.4rem,3.4rem);font-weight:800;color:var(--dorado);
+    margin:14px 0 2px;letter-spacing:-.02em;font-variant-numeric:tabular-nums;}
+  .precio-wrap .cop{font-size:.9rem;opacity:.7;}
+  .incluye{text-align:left;max-width:420px;margin:24px auto 0;list-style:none;}
+  .incluye li{padding:7px 0 7px 26px;position:relative;font-size:.95rem;}
+  .incluye li::before{content:"✓";position:absolute;left:0;color:var(--dorado);font-weight:800;}
+  .calc{background:rgba(205,171,126,.12);border:1px solid rgba(205,171,126,.3);border-radius:12px;
+    padding:14px;margin-top:22px;font-size:.9rem;}
+  .calc b{color:var(--dorado);}
+  .btn-wa{display:inline-flex;align-items:center;gap:9px;margin-top:24px;background:#25D366;color:#fff;
+    font-weight:800;font-size:1.04rem;padding:15px 32px;border-radius:32px;text-decoration:none;border:none;
+    cursor:pointer;transition:transform .15s ease;}
+  .btn-wa:hover{transform:translateY(-2px);}
+
+  /* faq */
+  .faq{max-width:720px;margin:0 auto;}
+  .faq details{border:1px solid var(--borde);border-radius:12px;padding:14px 18px;margin-bottom:10px;background:#fff;}
+  .faq summary{font-weight:700;cursor:pointer;font-size:.96rem;}
+  .faq p{color:var(--suave);font-size:.9rem;margin-top:9px;line-height:1.6;}
+
+  footer{background:var(--gris);border-top:1px solid var(--borde);padding:28px 0 44px;text-align:center;
+    color:var(--tenue);font-size:.82rem;}
+  footer a{color:var(--dorado2);text-decoration:none;font-weight:700;}
+
+  @media(max-width:760px){
+    .comp,.pasos{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+  <div class="barra-sup">
+    <div class="contenedor">
+      <a class="marca" href="/"><img src="/static/img/logo-tributando.png" alt="">Tributando<b style="color:var(--dorado)">.co</b></a>
+      <a class="volver" href="/">← Declaración de renta</a>
+    </div>
+  </div>
+
+  <header class="hero">
+    <div class="contenedor">
+      <span class="tag">Para contadores</span>
+      <h1>Deja de digitar rentas.<br><span>Procésalas en minutos.</span></h1>
+      <p class="sub">Sube la exógena de tu cliente y recibe el <b>Formulario 210 diligenciado
+        renglón por renglón</b>. Tú lo revisas, lo firmas y lo presentas. Sin planillas, sin fórmulas.</p>
+      <a class="btn-hero" href="#precio">Ver el pase de temporada</a>
+      <div class="nota-hero">Temporada {{ contadores.temporada }} · declaraciones ilimitadas</div>
+    </div>
+  </header>
+
+  <section>
+    <div class="contenedor">
+      <h2 class="titulo">Tú conoces el dolor</h2>
+      <p class="sub-sec">Cada renta te consume horas de digitación que no le puedes cobrar al cliente.</p>
+      <div class="comp">
+        <div class="caja mal">
+          <h3>😩 Como lo haces hoy</h3>
+          <ul>
+            <li>1 a 2 horas por declaración</li>
+            <li>Digitar la exógena a mano en una planilla</li>
+            <li>Revisar topes, UVT y deducciones uno por uno</li>
+            <li>Riesgo de errores de transcripción</li>
+            <li>En temporada, cuello de botella: no das abasto</li>
+          </ul>
+        </div>
+        <div class="caja bien">
+          <h3>⚡ Con Tributando.co</h3>
+          <ul>
+            <li><b>5 minutos</b> por declaración</li>
+            <li>Subes la exógena y el sistema la lee sola</li>
+            <li>Topes, UVT 2025 y deducciones ya calculados</li>
+            <li>Formulario 210 renglón por renglón, sin errores</li>
+            <li>Atiendes 3× más clientes en la misma temporada</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="background:var(--gris);">
+    <div class="contenedor">
+      <h2 class="titulo">Cómo funciona</h2>
+      <p class="sub-sec">Tú sigues siendo el contador. Esto es tu herramienta, no tu reemplazo.</p>
+      <div class="pasos">
+        <div class="paso"><span class="n">1</span>
+          <h3>Sube la exógena</h3>
+          <p>El Excel que tu cliente descarga gratis del portal DIAN. Lo arrastras y listo.</p></div>
+        <div class="paso"><span class="n">2</span>
+          <h3>Recibe el 210</h3>
+          <p>En segundos: Formulario 210 diligenciado, resumen de la liquidación y topes evaluados.</p></div>
+        <div class="paso"><span class="n">3</span>
+          <h3>Revisa y presenta</h3>
+          <p>Tú validas con tu criterio profesional, firmas y lo presentas en la DIAN.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="precio">
+    <div class="contenedor">
+      <h2 class="titulo">Pase de temporada</h2>
+      <p class="sub-sec">Un solo pago. Todas las declaraciones que necesites durante la temporada.</p>
+      <div class="precio-wrap">
+        <span class="cinta">SIN LÍMITE DE DECLARACIONES</span>
+        <div class="plan">{{ contadores.nombre }}</div>
+        <div class="temp">Temporada {{ contadores.temporada }}</div>
+        <div class="valor">${{ '{:,.0f}'.format(contadores.precio)|replace(',', '.') }}</div>
+        <div class="cop">COP · pago único por toda la temporada</div>
+        <ul class="incluye">
+          <li>Declaraciones <b>ilimitadas</b> durante la temporada</li>
+          <li>Acceso al liquidador profesional</li>
+          <li>Formulario 210 en PDF y en Excel</li>
+          <li>Resumen ejecutivo de cada liquidación</li>
+          <li>Evaluación automática de topes y obligación de declarar</li>
+          <li>Soporte directo por WhatsApp</li>
+        </ul>
+        <div class="calc">
+          Si atiendes <b>25 clientes</b>, te sale a <b>menos de $10.000</b> por declaración.
+          Le cobras a cada uno lo de siempre.
+        </div>
+        <button class="btn-wa" id="ctaWa">💬 Quiero mi pase de temporada</button>
+      </div>
+    </div>
+  </section>
+
+  <section style="background:var(--gris);">
+    <div class="contenedor">
+      <h2 class="titulo">Preguntas frecuentes</h2>
+      <div class="faq" style="margin-top:24px">
+        <details><summary>¿Esto reemplaza al contador?</summary>
+          <p>No. Es una herramienta para ti. El sistema arma el borrador a partir de la exógena;
+          el criterio profesional, la revisión, la firma y la presentación siguen siendo tuyos.</p></details>
+        <details><summary>¿Qué pasa si mi cliente tiene información que no está en la exógena?</summary>
+          <p>Puedes ajustar patrimonio, deudas y dependientes antes de generar el formulario. La exógena
+          es el punto de partida, no la camisa de fuerza.</p></details>
+        <details><summary>¿Cómo me habilitan el acceso?</summary>
+          <p>Escríbenos por WhatsApp, coordinamos el pago y habilitamos tu correo el mismo día.
+          Entras por <b>"Acceso profesional"</b> con tu cuenta de Google o Microsoft.</p></details>
+        <details><summary>¿Los datos de mis clientes están seguros?</summary>
+          <p>Sí. Cada exógena se usa solo para elaborar esa declaración y no se comparte con terceros.</p></details>
+        <details><summary>¿Puedo probarlo antes de pagar?</summary>
+          <p>Claro. Escríbenos y coordinamos una demostración con un caso real tuyo, sin compromiso.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding:44px 0 60px">
+    <div class="contenedor" style="text-align:center">
+      <h2 class="titulo">¿Listo para tu mejor temporada?</h2>
+      <p class="sub-sec">Coordinamos el pago y te habilitamos hoy mismo.</p>
+      <button class="btn-wa" id="ctaWa2">💬 Hablar por WhatsApp</button>
+    </div>
+  </section>
+
+  <footer>
+    <div class="contenedor">
+      Tributando<b style="color:var(--dorado2)">.co</b> · Herramienta profesional para contadores<br>
+      <span style="display:inline-block;margin-top:8px">
+        ¿Ya tienes tu pase? <a href="/liquidador">🔒 Acceso profesional</a> ·
+        <a href="/">Ir a la app</a>
+      </span>
+    </div>
+  </footer>
+
+  <script>
+    var wa = {{ ia_whatsapp|tojson }};
+    var num = String(wa || "573332470715").replace(/\D/g,"");
+    var msg = "Hola, soy contador(a) y quiero información del pase de temporada para procesar las rentas de mis clientes.";
+    var url = "https://wa.me/" + num + "?text=" + encodeURIComponent(msg);
+    ["ctaWa","ctaWa2"].forEach(function(id){
+      var b = document.getElementById(id);
+      if (b) b.onclick = function(){ window.open(url, "_blank"); };
+    });
+  </script>
+</body>
+</html>
