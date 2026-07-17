@@ -97,6 +97,7 @@
   /* modal pago del pase */
   .modal-pase{position:fixed;inset:0;z-index:100;background:rgba(10,18,30,.6);
     display:flex;align-items:center;justify-content:center;padding:18px;}
+  .modal-pase[hidden]{display:none;}   /* sin esto, display:flex le gana a hidden */
   .modal-card{background:#fff;color:var(--navy);border-radius:20px;max-width:440px;width:100%;
     padding:26px;position:relative;max-height:92vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.4);}
   .modal-x{position:absolute;top:12px;right:14px;border:0;background:transparent;font-size:1.2rem;
