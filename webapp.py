@@ -26,9 +26,9 @@ from src import wompi as wompi_mod
 from src.asistente import asistente_activo as asistente_ia_activo
 from src.asistente import cargar_config as cargar_config_ia
 from src.asistente import responder as responder_ia
-from src.auth import (ArchivoExogena, LeadEspera, MuestraContador, OrdenRegistro,
-                      Usuario, auth_bp, autorizado_requerido, db, init_auth,
-                      login_requerido, usuario_actual)
+from src.auth import (AccesoAutorizado, ArchivoExogena, LeadEspera, MuestraContador,
+                      OrdenRegistro, Usuario, auth_bp, autorizado_requerido, db,
+                      init_auth, login_requerido, pro_requerido, usuario_actual)
 from src.calendario import fecha_limite
 from src.documentos import generar_checklist_pdf
 from src.guia_dian import generar_guia_dian_pdf
@@ -417,13 +417,13 @@ def guia_dian_web():
 
 
 @app.get("/liquidador")
-@autorizado_requerido
+@pro_requerido
 def index():
     return render_template("index.html", anio=PARAMS.anio_gravable, uvt=PARAMS.uvt)
 
 
 @app.post("/api/cargar")
-@autorizado_requerido
+@pro_requerido
 def cargar():
     """Recibe el .xlsx arrastrado, lo parsea y devuelve datos + resumen."""
     archivo = request.files.get("exogena")
@@ -476,7 +476,7 @@ def cargar():
 
 
 @app.post("/api/calcular")
-@autorizado_requerido
+@pro_requerido
 def calcular_api():
     """Recibe los datos (posiblemente editados) y devuelve la liquidación."""
     cuerpo = request.get_json(silent=True) or {}
@@ -493,7 +493,7 @@ def calcular_api():
 
 
 @app.post("/api/generar")
-@autorizado_requerido
+@pro_requerido
 def generar():
     """Genera y descarga el Excel del Formulario 210 con los datos editados."""
     cuerpo = request.get_json(silent=True) or {}
@@ -524,7 +524,7 @@ def generar():
 
 
 @app.post("/api/resumen-pdf")
-@autorizado_requerido
+@pro_requerido
 def resumen_pdf():
     """Genera y descarga el resumen ejecutivo en PDF."""
     cuerpo = request.get_json(silent=True) or {}
@@ -1299,6 +1299,17 @@ def admin():
             f"style='background:#b3372f;color:#fff;border:0;border-radius:6px;"
             f"padding:6px 10px;cursor:pointer'>↺ Reiniciar prueba</button></td></tr>")
 
+    # ---- contadores habilitados al liquidador (pase de temporada) ----
+    filas_a = []
+    for a in AccesoAutorizado.query.order_by(AccesoAutorizado.creado.desc()).all():
+        fecha_a = a.creado.strftime("%Y-%m-%d") if a.creado else ""
+        filas_a.append(
+            f"<tr><td>{a.email}</td><td>{a.nombre or '—'}</td>"
+            f"<td>{a.nota or ''}</td><td>{fecha_a}</td>"
+            f"<td><button onclick=\"revocar('{a.email}')\" "
+            f"style='background:#b3372f;color:#fff;border:0;border-radius:6px;"
+            f"padding:6px 10px;cursor:pointer'>✕ Quitar acceso</button></td></tr>")
+
     return f"""<!DOCTYPE html><html lang="es"><head><meta charset="utf-8">
 <title>Admin — Panel</title>
 <style>body{{font-family:-apple-system,sans-serif;margin:24px;color:#1e2b3a}}
@@ -1328,7 +1339,39 @@ consignación llegó (valor y referencia) antes de confirmar.</p>
 "Reiniciar" le devuelve su prueba gratis — útil para demos.</p>
 <table><tr><th>Fecha</th><th>Contador</th><th>NIT muestra</th><th>Acción</th></tr>{''.join(filas_m) or
 '<tr><td colspan=4>Ningún contador ha probado todavía.</td></tr>'}</table>
+
+<h2>🔑 Acceso al liquidador — contadores con pase ({len(filas_a)})</h2>
+<p>Habilita a un contador que pagó el pase de temporada. Usa el <b>mismo correo</b>
+con el que él entra por Google o Microsoft. Le da acceso a <code>/liquidador</code>
+(declaraciones ilimitadas), <b>NO</b> a este panel de pagos.</p>
+<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px">
+  <label style="font-size:.78rem">Correo del contador<br>
+    <input id="acEmail" type="email" placeholder="contador@gmail.com"
+      style="padding:8px;border:1px solid #dbe3ec;border-radius:6px;width:250px"></label>
+  <label style="font-size:.78rem">Nombre (opcional)<br>
+    <input id="acNombre" placeholder="Nombre del contador"
+      style="padding:8px;border:1px solid #dbe3ec;border-radius:6px;width:200px"></label>
+  <button onclick="otorgar()" style="background:#1e7d43;color:#fff;border:0;
+    border-radius:6px;padding:10px 18px;cursor:pointer;font-weight:700">+ Dar acceso</button>
+</div>
+<table><tr><th>Correo</th><th>Nombre</th><th>Nota</th><th>Desde</th><th>Acción</th></tr>{''.join(filas_a) or
+'<tr><td colspan=5>Ningún contador habilitado todavía.</td></tr>'}</table>
 <script>
+async function otorgar() {{
+  const email = document.getElementById('acEmail').value.trim();
+  const nombre = document.getElementById('acNombre').value.trim();
+  if (!email) {{ alert('Escribe el correo del contador.'); return; }}
+  const r = await fetch('/api/acceso/otorgar', {{method:'POST',
+    headers:{{'Content-Type':'application/json'}}, body: JSON.stringify({{email, nombre}})}});
+  const j = await r.json();
+  if (r.ok) location.reload(); else alert(j.error || 'Error');
+}}
+async function revocar(email) {{
+  if (!confirm('¿Quitar el acceso al liquidador de ' + email + '?')) return;
+  const r = await fetch('/api/acceso/revocar', {{method:'POST',
+    headers:{{'Content-Type':'application/json'}}, body: JSON.stringify({{email}})}});
+  if (r.ok) location.reload(); else alert('Error');
+}}
 async function confirmar(oid) {{
   if (!confirm('¿Confirmar que la consignación de la orden ' + oid + ' llegó a la cuenta?')) return;
   const r = await fetch('/api/confirmar-pago', {{method:'POST',
@@ -1352,6 +1395,39 @@ def reset_muestra_contador():
     cuerpo = request.get_json(silent=True) or {}
     uid = cuerpo.get("usuario_id")
     fila = db.session.get(MuestraContador, uid) if uid is not None else None
+    if fila is None:
+        return jsonify({"error": "No encontrado."}), 404
+    db.session.delete(fila)
+    db.session.commit()
+    return jsonify({"ok": True})
+
+
+@app.post("/api/acceso/otorgar")
+@autorizado_requerido
+def otorgar_acceso():
+    """Habilita a un contador (por correo) al liquidador profesional, sin editar
+    el Secret File ni redesplegar. Solo personal autorizado, desde /admin.
+    El correo debe ser el mismo con el que el contador entra por Google/Microsoft."""
+    cuerpo = request.get_json(silent=True) or {}
+    email = (cuerpo.get("email") or "").strip().lower()
+    nombre = (cuerpo.get("nombre") or "").strip()
+    nota = (cuerpo.get("nota") or "Pase de temporada").strip()
+    if not email or "@" not in email:
+        return jsonify({"error": "Correo inválido."}), 400
+    if db.session.get(AccesoAutorizado, email) is not None:
+        return jsonify({"error": "Ese correo ya tiene acceso."}), 409
+    db.session.add(AccesoAutorizado(email=email, nombre=nombre, nota=nota))
+    db.session.commit()
+    return jsonify({"ok": True})
+
+
+@app.post("/api/acceso/revocar")
+@autorizado_requerido
+def revocar_acceso():
+    """Quita el acceso al liquidador de un contador. Solo personal autorizado."""
+    cuerpo = request.get_json(silent=True) or {}
+    email = (cuerpo.get("email") or "").strip().lower()
+    fila = db.session.get(AccesoAutorizado, email)
     if fila is None:
         return jsonify({"error": "No encontrado."}), 404
     db.session.delete(fila)
@@ -1441,7 +1517,7 @@ def descargar_orden_pdf(orden_id):
 
 
 @app.post("/api/formulario-pdf")
-@autorizado_requerido
+@pro_requerido
 def formulario_pdf():
     """PDF con el layout del formulario 210 oficial (marcado BORRADOR)."""
     cuerpo = request.get_json(silent=True) or {}
@@ -1470,7 +1546,7 @@ def formulario_pdf():
 
 
 @app.post("/api/firmar-pdf")
-@autorizado_requerido
+@pro_requerido
 def firmar_formulario_pdf():
     """Formulario 210 firmado con el certificado .p12/.pfx del usuario (PAdES).
 

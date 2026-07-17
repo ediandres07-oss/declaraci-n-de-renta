@@ -161,6 +161,18 @@ class MuestraContador(db.Model):
     creado = db.Column(db.DateTime, default=datetime.utcnow)
 
 
+class AccesoAutorizado(db.Model):
+    """Contadores habilitados al liquidador profesional desde /admin (pase de
+    temporada). Vive en la BD para poder otorgar/revocar con un botón, sin editar
+    el Secret File acceso.yaml ni redesplegar. NO da acceso al panel /admin: eso
+    sigue restringido a la lista bootstrap de acceso.yaml (es_autorizado)."""
+    __tablename__ = "accesos_autorizados"
+    email = db.Column(db.String(200), primary_key=True)   # en minúsculas
+    nombre = db.Column(db.String(200))
+    nota = db.Column(db.String(200))                       # ej. "Pase temporada 2026"
+    creado = db.Column(db.DateTime, default=datetime.utcnow)
+
+
 # --------------------------------------------------------------- segundo factor
 MAX_INTENTOS_MFA = 5
 BLOQUEO_MINUTOS = 15
@@ -267,6 +279,42 @@ def autorizado_requerido(f):
             # las rutas de API responden JSON; las de página, HTML
             if request.path.startswith("/api/"):
                 return jsonify({"error": "Acceso restringido a personal autorizado."}), 403
+            return render_template("no_autorizado.html", email=u.email), 403
+        return f(*args, **kwargs)
+    return wrapper
+
+
+def _correos_pase() -> set:
+    """Correos de contadores con pase, habilitados desde /admin (BD)."""
+    try:
+        return {(a.email or "").lower() for a in AccesoAutorizado.query.all()}
+    except Exception:
+        # la tabla puede no existir todavía en el primer arranque
+        return set()
+
+
+def es_pro(usuario) -> bool:
+    """Acceso al liquidador profesional: personal autorizado (acceso.yaml) o
+    contador con pase habilitado desde /admin (BD). Siempre exige proveedor real.
+    NO habilita el panel /admin (ese usa es_autorizado, más estricto)."""
+    if not usuario or usuario.proveedor not in ("google", "microsoft"):
+        return False
+    if es_autorizado(usuario):
+        return True
+    return (usuario.email or "").lower() in _correos_pase()
+
+
+def pro_requerido(f):
+    """Acceso al liquidador: personal autorizado o contador con pase (es_pro)."""
+    @functools.wraps(f)
+    def wrapper(*args, **kwargs):
+        u = usuario_actual()
+        if u is None:
+            return redirect(url_for("login_page", next=request.path))
+        if not es_pro(u):
+            if request.path.startswith("/api/"):
+                return jsonify({"error": "Necesitas el pase de temporada para usar "
+                                "el liquidador profesional."}), 403
             return render_template("no_autorizado.html", email=u.email), 403
         return f(*args, **kwargs)
     return wrapper
