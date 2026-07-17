@@ -1,4 +1,5 @@
 """Las hojas de detalle deben traer los datos reales y no los ejemplos."""
+import re
 import warnings
 
 import openpyxl
@@ -127,3 +128,47 @@ def test_gocas_limpia_y_uvt(wb_elizabeth):
     ws = wb["G.OCAS"]
     assert ws["D3"].value in (None, "")     # venta de ejemplo borrada
     assert ws["E89"].value == 49799
+
+
+# ---------------------------------------------------------------- papeles pro
+
+def test_anexo_exogena_trazabilidad(wb_elizabeth, exogena_elizabeth):
+    """El Anexo lista TODAS las partidas sin recortes, con NIT, estado y total."""
+    wb, _, _ = wb_elizabeth
+    assert "Anexo Exógena" in wb.sheetnames
+    ws = wb["Anexo Exógena"]
+    # encabezados de la tabla
+    cab = [ws.cell(row=4, column=j).value for j in range(1, 10)]
+    assert cab[:4] == ["Fila", "Concepto reportado", "Informante", "NIT informante"]
+    # tantas filas de datos como partidas (todas, incluidas las excluidas)
+    n = len(exogena_elizabeth.partidas)
+    filas = [ws.cell(row=5 + i, column=8).value for i in range(n)]
+    assert all(f in ("Incluida", "Ajustada", "Excluida") for f in filas)
+    # el total tomado = suma de partidas activas
+    total = ws.cell(row=5 + n, column=6).value
+    esperado = sum(p.valor for p in exogena_elizabeth.partidas_activas())
+    assert total == pytest.approx(esperado)
+    # interactivo: filtros y encabezado congelado
+    assert ws.auto_filter.ref.startswith("A4:I")
+    assert ws.freeze_panes == "A5"
+
+
+def test_indice_navegable(wb_elizabeth):
+    """El Índice existe, es la primera hoja y sus links apuntan a hojas reales."""
+    wb, _, _ = wb_elizabeth
+    assert wb.sheetnames[0] == "Índice"
+    ws = wb["Índice"]
+    links = [c.hyperlink.location for fila in ws["B5:B20"] for c in fila
+             if c.hyperlink is not None]
+    assert links, "el índice debe tener hipervínculos"
+    for loc in links:
+        hoja = loc.split("!")[0].strip("'")
+        assert hoja in wb.sheetnames
+
+
+def test_etiquetas_con_nit_del_informante(wb_elizabeth):
+    """Las hojas de detalle muestran el NIT del tercero para poder cruzar."""
+    wb, _, _ = wb_elizabeth
+    textos = [str(v) for v in _constantes(wb["Deudas"], "B2:B41")]
+    assert any(re.search(r"\(\d{6,}\)", t) for t in textos), \
+        "las deudas deben traer el NIT del informante entre paréntesis"

@@ -11,9 +11,33 @@ import re
 from typing import List, Optional
 
 from openpyxl.cell.cell import MergedCell
+from openpyxl.comments import Comment
+from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+from openpyxl.worksheet.hyperlink import Hyperlink
 
 from .modelos import DatosDeclaracion, Liquidacion, PartidaExogena, ResultadoExogena
 from .parametros import Parametros
+
+# ----------------------------------------------------------------------
+# identidad visual Tributando.co (hojas nuevas: Índice y Anexo Exógena)
+# ----------------------------------------------------------------------
+NAVY = "1E2432"
+DORADO = "CDAB7E"
+DORADO_OSCURO = "8A6D3B"       # dorado legible sobre blanco (texto)
+GRIS_SUAVE = "F7F5F1"
+BORDE_SUAVE = "E2DDD2"
+# semáforo (fondo de fila / texto del estado)
+VERDE_BG, VERDE_TX = "E8F5EE", "1F8A5F"
+AMARILLO_BG, AMARILLO_TX = "FDF6E3", "9A6B00"
+ROJO_BG, ROJO_TX = "FDECEA", "B3372F"
+
+_FILL_NAVY = PatternFill("solid", fgColor=NAVY)
+_FILL_GRIS = PatternFill("solid", fgColor=GRIS_SUAVE)
+_BORDE_FINO = Border(bottom=Side(style="thin", color=BORDE_SUAVE))
+
+
+def _fill(color: str) -> PatternFill:
+    return PatternFill("solid", fgColor=color)
 
 
 # ----------------------------------------------------------------------
@@ -42,11 +66,15 @@ def _limpiar_constantes(ws, rango: str) -> None:
                 cell.value = None
 
 
-def _etiqueta(p: PartidaExogena, ancho: int = 70) -> str:
-    """'Detalle — Informante', garantizando que el informante quede visible."""
+def _etiqueta(p: PartidaExogena, ancho: int = 84) -> str:
+    """'Detalle — Informante (NIT)', garantizando que el informante quede visible.
+    El NIT permite al contador cruzar contra la exógena sin ambigüedad."""
     inf = (p.informante_nombre or "").strip()
     if len(inf) > 28:
         inf = inf[:27] + "…"
+    nit = (p.informante_nit or "").strip()
+    if nit:
+        inf = f"{inf} ({nit})" if inf else f"NIT {nit}"
     detalle = p.detalle.strip()
     if inf:
         max_detalle = max(20, ancho - len(inf) - 3)
@@ -54,6 +82,42 @@ def _etiqueta(p: PartidaExogena, ancho: int = 70) -> str:
             detalle = detalle[: max_detalle - 1] + "…"
         return f"{detalle} — {inf}"
     return detalle[:ancho]
+
+
+def _comentar(ws, coord: str, p: PartidaExogena) -> None:
+    """Comentario con la partida completa (sin recortes): al pasar el mouse el
+    contador ve el concepto íntegro, el informante con NIT y la regla aplicada."""
+    lineas = [p.detalle.strip()]
+    if p.informante_nombre or p.informante_nit:
+        lineas.append(f"Informante: {(p.informante_nombre or '').strip()} "
+                      f"(NIT {(p.informante_nit or '—').strip()})")
+    if p.valor_reportado is not None and abs(p.valor_reportado - p.valor) > 0.5:
+        lineas.append(f"Valor reportado: ${p.valor_reportado:,.0f} → tomado: ${p.valor:,.0f}")
+    if p.nota:
+        lineas.append(f"Nota: {p.nota}")
+    lineas.append(f"Fila {p.fila} de la exógena · Tributando.co")
+    cell = ws[coord]
+    if isinstance(cell, MergedCell):
+        for rango in ws.merged_cells.ranges:
+            if coord in rango:
+                cell = ws.cell(row=rango.min_row, column=rango.min_col)
+                break
+    com = Comment("\n".join(lineas), "Tributando.co")
+    com.width, com.height = 340, 150
+    cell.comment = com
+
+
+def _marcar_entrevista(ws, *coords) -> None:
+    """Distingue en dorado itálica los valores que vienen de la entrevista/app
+    (no de la exógena), para que se vea de dónde salió cada cifra."""
+    for coord in coords:
+        cell = ws[coord]
+        if isinstance(cell, MergedCell):
+            for rango in ws.merged_cells.ranges:
+                if coord in rango:
+                    cell = ws.cell(row=rango.min_row, column=rango.min_col)
+                    break
+        cell.font = Font(italic=True, color=DORADO_OSCURO)
 
 
 def _escribir_lista(ws, partidas: List[PartidaExogena], filas: range,
@@ -66,11 +130,12 @@ def _escribir_lista(ws, partidas: List[PartidaExogena], filas: range,
     for i, p in enumerate(individuales):
         _set(ws, f"{col_desc}{filas[i]}", _etiqueta(p))
         _set(ws, f"{col_val}{filas[i]}", p.valor)
+        _comentar(ws, f"{col_desc}{filas[i]}", p)
         total += p.valor
     resto = sum(p.valor for p in partidas[len(individuales):])
     if resto > 0:
         fila = filas[len(individuales)]
-        _set(ws, f"{col_desc}{fila}", resto_etiqueta)
+        _set(ws, f"{col_desc}{fila}", resto_etiqueta + " (detalle en Anexo Exógena)")
         _set(ws, f"{col_val}{fila}", resto)
         total += resto
     return total
@@ -97,6 +162,7 @@ def _hoja_deudas(wb, datos, exogena) -> None:
     if extra > 0.5:
         _set(ws, "B40", "Otras deudas declaradas (entrevista)")
         _set(ws, "C40", extra)
+        _marcar_entrevista(ws, "B40", "C40")
 
 
 def _hoja_pat_bruto(wb, datos, exogena) -> None:
@@ -138,6 +204,7 @@ def _hoja_pat_bruto(wb, datos, exogena) -> None:
         fila = filas_af[min(len(avaluos), len(filas_af) - 1)]
         _set(ws, f"B{fila}", "Otros activos declarados (vehículos, muebles, efectivo — entrevista)")
         _set(ws, f"D{fila}", extra)
+        _marcar_entrevista(ws, f"B{fila}", f"D{fila}")
 
 
 def _hoja_retefuente(wb, datos, exogena) -> None:
@@ -152,6 +219,7 @@ def _hoja_retefuente(wb, datos, exogena) -> None:
     if extra > 0.5:
         _set(ws, "C35", "Otras retenciones (entrevista)")
         _set(ws, "D35", extra)
+        _marcar_entrevista(ws, "C35", "D35")
 
 
 def _hoja_anticipo(wb, datos) -> None:
@@ -266,11 +334,13 @@ def _hoja_capital(wb, datos, exogena, p: Parametros) -> None:
     if extra > 0.5:
         _set(ws, "C18", "Otros ingresos de capital (entrevista)")
         _set(ws, "E18", extra)
+        _marcar_entrevista(ws, "C18", "E18")
     # el componente inflacionario queda como fórmula F41 = F3 × % (config)
     _set(ws, "F41", f"=F3*{p.componente_inflacionario*100:.2f}%")
     if c.costos_deducciones:
         _set(ws, "C46", "Costos y gastos de rentas de capital (entrevista)")
         _set(ws, "F46", c.costos_deducciones)
+        _marcar_entrevista(ws, "C46", "F46")
     _set(ws, "E55", c.intereses_vivienda)
 
 
@@ -294,6 +364,7 @@ def _hoja_no_laboral(wb, datos, exogena) -> None:
     if extra > 0.5:
         _set(ws, "C16", "Otros ingresos no laborales (entrevista)")
         _set(ws, "F16", extra)
+        _marcar_entrevista(ws, "C16", "F16")
     if nl.devoluciones:
         _set(ws, "C18", "Devoluciones, rebajas y descuentos")
         _set(ws, "F18", nl.devoluciones)
@@ -381,6 +452,179 @@ def _hoja_gocas(wb, datos, liq: Liquidacion, p: Parametros) -> None:
         _set(ws, "D83", liq.r(114))          # reemplaza el cálculo de ejemplo
 
 
+def _estado_partida(p: PartidaExogena) -> str:
+    if p.excluida:
+        return "Excluida"
+    if p.valor_reportado is not None and abs(p.valor_reportado - p.valor) > 0.5:
+        return "Ajustada"
+    return "Incluida"
+
+
+def _hoja_anexo(wb, datos, liq: Liquidacion, exogena: Optional[ResultadoExogena]) -> None:
+    """Anexo Exógena: el cruce completo exógena → Formulario 210, partida por
+    partida y SIN recortes. Semáforo por estado, filtros y encabezado fijo.
+    Es el papel de trabajo de auditoría del contador."""
+    if exogena is None or not exogena.partidas:
+        return
+    nombre = "Anexo Exógena"
+    if nombre in wb.sheetnames:
+        del wb[nombre]
+    ws = wb.create_sheet(nombre)
+    ws.sheet_view.showGridLines = False
+
+    # ---- título ----
+    ws.merge_cells("A1:I1")
+    c = ws["A1"]
+    c.value = "  CRUCE EXÓGENA → FORMULARIO 210 · papel de trabajo"
+    c.fill = _FILL_NAVY
+    c.font = Font(bold=True, size=13, color=DORADO)
+    c.alignment = Alignment(vertical="center")
+    ws.row_dimensions[1].height = 30
+    ws.merge_cells("A2:I2")
+    c = ws["A2"]
+    c.value = (f"  {exogena.nombre or ''} · NIT {exogena.identificacion or '—'} · "
+               f"año {exogena.anio or ''} · generado por Tributando.co")
+    c.fill = _FILL_NAVY
+    c.font = Font(size=9, color="FFFFFF")
+    ws.row_dimensions[2].height = 16
+
+    # ---- encabezados ----
+    cabeceras = ["Fila", "Concepto reportado", "Informante", "NIT informante",
+                 "Valor reportado", "Valor tomado", "Renglón 210", "Estado", "Nota"]
+    for j, texto in enumerate(cabeceras, start=1):
+        c = ws.cell(row=4, column=j, value=texto)
+        c.fill = _FILL_GRIS
+        c.font = Font(bold=True, size=9, color=NAVY)
+        c.border = Border(bottom=Side(style="medium", color=DORADO))
+        c.alignment = Alignment(vertical="center", wrap_text=True)
+
+    # ---- partidas (todas: incluidas, ajustadas y excluidas) ----
+    colores = {"Incluida": (None, VERDE_TX), "Ajustada": (AMARILLO_BG, AMARILLO_TX),
+               "Excluida": (ROJO_BG, ROJO_TX)}
+    fila = 5
+    total_tomado = 0.0
+    for p in sorted(exogena.partidas, key=lambda q: q.fila):
+        estado = _estado_partida(p)
+        bg, tx = colores[estado]
+        reportado = p.valor_reportado if p.valor_reportado is not None else p.valor
+        tomado = 0.0 if p.excluida else p.valor
+        total_tomado += tomado
+        valores = [p.fila, p.detalle.strip(), (p.informante_nombre or "").strip(),
+                   (p.informante_nit or "").strip(), reportado, tomado,
+                   p.renglon_asignado or "—", estado, (p.nota or "").strip()]
+        for j, v in enumerate(valores, start=1):
+            c = ws.cell(row=fila, column=j, value=v)
+            c.border = _BORDE_FINO
+            c.font = Font(size=9, color=NAVY)
+            if bg:
+                c.fill = _fill(bg)
+            if j in (5, 6):
+                c.number_format = "#,##0"
+            if j == 2 or j == 9:
+                c.alignment = Alignment(wrap_text=True, vertical="top")
+        ws.cell(row=fila, column=8).font = Font(size=9, bold=True, color=tx)
+        fila += 1
+
+    # ---- total ----
+    c = ws.cell(row=fila, column=2, value="TOTAL TOMADO EN LA DECLARACIÓN")
+    c.font = Font(bold=True, size=9, color=NAVY)
+    c = ws.cell(row=fila, column=6, value=total_tomado)
+    c.font = Font(bold=True, size=10, color=DORADO_OSCURO)
+    c.number_format = "#,##0"
+    for j in range(1, 10):
+        ws.cell(row=fila, column=j).border = Border(
+            top=Side(style="medium", color=DORADO))
+
+    # ---- advertencias del análisis ----
+    advertencias = list(exogena.advertencias or []) + list(liq.advertencias or [])
+    if advertencias:
+        fila += 2
+        ws.merge_cells(start_row=fila, start_column=1, end_row=fila, end_column=9)
+        c = ws.cell(row=fila, column=1, value="  ⚠ ADVERTENCIAS DEL ANÁLISIS — revisar con criterio profesional")
+        c.fill = _FILL_NAVY
+        c.font = Font(bold=True, size=10, color=DORADO)
+        ws.row_dimensions[fila].height = 20
+        for adv in advertencias:
+            fila += 1
+            ws.merge_cells(start_row=fila, start_column=1, end_row=fila, end_column=9)
+            c = ws.cell(row=fila, column=1, value=f"• {adv}")
+            c.font = Font(size=9, color=AMARILLO_TX)
+            c.alignment = Alignment(wrap_text=True, vertical="top")
+
+    # ---- interactividad: filtros + encabezado fijo + anchos ----
+    ws.auto_filter.ref = f"A4:I{4 + len(exogena.partidas)}"
+    ws.freeze_panes = "A5"
+    anchos = {"A": 6, "B": 52, "C": 26, "D": 15, "E": 14, "F": 14,
+              "G": 11, "H": 11, "I": 42}
+    for col, ancho in anchos.items():
+        ws.column_dimensions[col].width = ancho
+
+
+def _hoja_indice(wb) -> None:
+    """Portada Índice: navegación con un clic a cada hoja, con la marca."""
+    nombre = "Índice"
+    if nombre in wb.sheetnames:
+        del wb[nombre]
+    ws = wb.create_sheet(nombre, 0)
+    ws.sheet_view.showGridLines = False
+
+    ws.merge_cells("B2:E2")
+    c = ws["B2"]
+    c.value = "  Tributando.co"
+    c.fill = _FILL_NAVY
+    c.font = Font(bold=True, size=16, color=DORADO)
+    c.alignment = Alignment(vertical="center")
+    ws.row_dimensions[2].height = 34
+    ws.merge_cells("B3:E3")
+    c = ws["B3"]
+    c.value = "  Papeles de trabajo — Declaración de Renta · Formulario 210"
+    c.fill = _FILL_NAVY
+    c.font = Font(size=10, color="FFFFFF")
+    ws.row_dimensions[3].height = 18
+
+    secciones = [
+        ("FORMULARIO 210", "🧾  Formulario 210 (autoritativo)"),
+        ("Anexo Exógena", "📋  Anexo Exógena — cruce completo y advertencias"),
+        ("Pat bruto", "🏠  Patrimonio bruto"),
+        ("Deudas", "💳  Deudas"),
+        ("R.trabajo y honorarios", "💼  Rentas de trabajo y honorarios"),
+        ("R.capital", "🏦  Rentas de capital"),
+        ("R.no laboral y R gravables", "📦  Rentas no laborales y gravables"),
+        ("C.pensiones", "👴  Cédula de pensiones"),
+        ("C divid.", "📈  Dividendos"),
+        ("G.OCAS", "🎯  Ganancias ocasionales"),
+        ("Dependientes ", "👨‍👩‍👧  Dependientes"),
+        ("retefuente", "🧮  Retenciones en la fuente"),
+        ("anticipo", "⏭  Anticipo de renta"),
+        ("dtos tribut", "🎫  Descuentos tributarios"),
+    ]
+    fila = 5
+    for i, (hoja, etiqueta) in enumerate(secciones):
+        if hoja not in wb.sheetnames:
+            continue
+        ws.merge_cells(start_row=fila, start_column=2, end_row=fila, end_column=5)
+        c = ws.cell(row=fila, column=2, value=f"  {etiqueta}")
+        c.hyperlink = Hyperlink(ref=c.coordinate, location=f"'{hoja}'!A1")
+        c.font = Font(size=11, color=NAVY, underline="single")
+        if i % 2 == 0:
+            for j in range(2, 6):
+                ws.cell(row=fila, column=j).fill = _FILL_GRIS
+        ws.row_dimensions[fila].height = 22
+        fila += 1
+
+    fila += 1
+    ws.merge_cells(start_row=fila, start_column=2, end_row=fila, end_column=5)
+    c = ws.cell(row=fila, column=2,
+                value="  Clic en una sección para ir directo. Los valores en dorado itálica "
+                      "provienen de la entrevista/app; el resto, de la exógena DIAN.")
+    c.font = Font(size=8, italic=True, color=DORADO_OSCURO)
+    c.alignment = Alignment(wrap_text=True, vertical="top")
+    ws.column_dimensions["A"].width = 3
+    for col in ("B", "C", "D", "E"):
+        ws.column_dimensions[col].width = 16
+    wb.active = 0
+
+
 def _actualizar_uvt(wb, p: Parametros) -> None:
     """La plantilla trae UVT de años anteriores en varias celdas."""
     if "R.trabajo y honorarios" in wb.sheetnames:
@@ -414,3 +658,5 @@ def llenar_hojas_detalle(wb, datos: DatosDeclaracion, liq: Liquidacion,
     _hoja_dividendos(wb, datos)
     _hoja_gocas(wb, datos, liq, p)
     _actualizar_uvt(wb, p)
+    _hoja_anexo(wb, datos, liq, exogena)
+    _hoja_indice(wb)                    # al final, para enlazar el anexo
