@@ -232,7 +232,8 @@
           <h3 style="margin:8px 0">Ya usaste tu prueba gratis</h3>
           <p style="color:var(--suave);margin-bottom:18px">Para procesar todas las declaraciones que
             necesites, activa tu pase de temporada.</p>
-          <button class="btn-wa" id="ctaWa3">💬 Activar mi pase de temporada</button>
+          <button class="btn-pagar" id="btnPagarPase2" style="width:auto;padding:15px 34px">💳 Pagar el pase en línea (QR)</button>
+          <div style="margin-top:10px"><button class="btn-wa" id="ctaWa3" style="margin-top:0">💬 O coordinar por WhatsApp</button></div>
         </div>
       {% else %}
         <div class="prueba-caja">
@@ -399,22 +400,26 @@
 
     // ---- Pago del pase de temporada (QR Bre-B + reportar) ----
     var logueado = {{ logueado|tojson }};
-    var btnPagar = document.getElementById("btnPagarPase");
-    if (btnPagar) btnPagar.onclick = async function(){
-      if (!logueado) { window.location.href = "/login?next=/contadores"; return; }
-      btnPagar.disabled = true; btnPagar.textContent = "Creando tu orden…";
-      try {
-        var r = await fetch("/api/pase-contador/crear", {method:"POST",
-          headers:{"Content-Type":"application/json"}, body:"{}"});
-        var j = await r.json();
-        if (!r.ok) { alert(j.error || "No pudimos crear la orden."); return; }
-        document.getElementById("paseRef").textContent = "PASE " + String(j.orden_id).toUpperCase();
-        document.getElementById("paseRef2").textContent = j.orden_id;
-        var m = document.getElementById("modalPase");
-        m.dataset.orden = j.orden_id; m.hidden = false;
-      } catch(e){ alert("Problema de conexión."); }
-      finally { btnPagar.disabled = false; btnPagar.textContent = "💳 Pagar el pase en línea"; }
-    };
+    ["btnPagarPase", "btnPagarPase2"].forEach(function(id){
+      var btnPagar = document.getElementById(id);
+      if (!btnPagar) return;
+      var etiqueta = btnPagar.textContent;
+      btnPagar.onclick = async function(){
+        if (!logueado) { window.location.href = "/login?next=/contadores"; return; }
+        btnPagar.disabled = true; btnPagar.textContent = "Creando tu orden…";
+        try {
+          var r = await fetch("/api/pase-contador/crear", {method:"POST",
+            headers:{"Content-Type":"application/json"}, body:"{}"});
+          var j = await r.json();
+          if (!r.ok) { alert(j.error || "No pudimos crear la orden."); return; }
+          document.getElementById("paseRef").textContent = "PASE " + String(j.orden_id).toUpperCase();
+          document.getElementById("paseRef2").textContent = j.orden_id;
+          var m = document.getElementById("modalPase");
+          m.dataset.orden = j.orden_id; m.hidden = false;
+        } catch(e){ alert("Problema de conexión."); }
+        finally { btnPagar.disabled = false; btnPagar.textContent = etiqueta; }
+      };
+    });
     function cerrarPase(){ var m=document.getElementById("modalPase"); if(m) m.hidden = true; }
     var mx = document.getElementById("modalX"); if (mx) mx.onclick = cerrarPase;
     var bc = document.getElementById("btnCerrarPase");
