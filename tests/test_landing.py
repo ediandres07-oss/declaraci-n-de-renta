@@ -415,6 +415,26 @@ def test_reset_muestra_devuelve_la_prueba(cliente):
     assert cliente.get(f"/api/muestra-contador/{j2['token']}.pdf").status_code == 200
 
 
+def test_pase_contador_pago_habilita_acceso(cliente):
+    """Pase de contadores: crear orden → reportar → confirmar habilita el acceso
+    al liquidador con el correo del comprador (automático)."""
+    import webapp as w
+    from src.auth import AccesoAutorizado, db
+    with app.app_context():
+        AccesoAutorizado.query.delete()
+        db.session.commit()
+
+    oid = cliente.post("/api/pase-contador/crear", json={}).get_json()["orden_id"]
+    assert cliente.post("/api/reportar-pago", json={"orden_id": oid}).status_code == 200
+    assert cliente.post("/api/confirmar-pago", json={"orden_id": oid}).status_code == 200
+
+    orden = w._leer_ordenes()[oid]
+    assert orden["estado"] == "pagada" and orden["plan"] == "contadores"
+    email = orden["contacto"]["email"].lower()
+    with app.app_context():
+        assert db.session.get(AccesoAutorizado, email) is not None
+
+
 def test_admin_lista_ordenes(cliente):
     j = _cargar(cliente).get_json()
     orden = cliente.post("/api/checkout", json={"token": j["token"], "plan": "presentacion",

@@ -363,7 +363,32 @@ def contadores():
                            contadores=_CFG_PRECIOS.get("contadores", {}),
                            logueado=u is not None,
                            muestra_usada=muestra_usada,
+                           pago=PAGO,
                            ia_whatsapp=IA_CFG.get("negocio", {}).get("whatsapp", ""))
+
+
+@app.post("/api/pase-contador/crear")
+@login_requerido
+def crear_pase_contador():
+    """Crea la orden del pase de temporada de un contador (sin exógena). Usa el
+    correo del usuario logueado, que es con el que se le habilita al confirmar."""
+    u = usuario_actual()
+    cont = _CFG_PRECIOS.get("contadores", {})
+    cuerpo = request.get_json(silent=True) or {}
+    contacto = {"email": (u.email or "").strip(), "nombre": (u.nombre or "").strip(),
+                "telefono": str(cuerpo.get("telefono", "")).strip()}
+    if not contacto["email"]:
+        return jsonify({"error": "Tu cuenta no tiene correo; usa otra o escríbenos."}), 400
+    orden_id = uuid.uuid4().hex[:12]
+    ordenes = _leer_ordenes()
+    ordenes[orden_id] = {
+        "tipo": "orden", "plan": "contadores",
+        "precio": cont.get("precio", 249000), "contacto": contacto,
+        "estado": "pendiente_pago", "fecha": str(date.today()),
+        "nit": "", "nombre": (u.nombre or "Contador"),
+    }
+    _guardar_ordenes(ordenes)
+    return jsonify({"orden_id": orden_id, "precio": cont.get("precio", 249000)})
 
 
 @app.get("/api/muestra-contador/<token>.pdf")
@@ -867,7 +892,21 @@ def _entregar_pdf_al_cliente(orden_id: str, orden: dict, ordenes: dict) -> None:
 def _finalizar_pago_orden(orden_id: str, orden: dict, ordenes: dict) -> None:
     """Marca la orden como pagada y, si es plan de presentación, conserva la
     exógena y genera el checklist para el trámite. Idempotente."""
-    orden["estado"] = "pagada" if orden["plan"] == "pdf" else "pagada_en_tramite"
+    orden["estado"] = ("pagada" if orden["plan"] in ("pdf", "contadores")
+                       else "pagada_en_tramite")
+
+    # Pase de contadores: al confirmar el pago se habilita SOLO el acceso al
+    # liquidador (usando el correo con que el contador entró y compró el pase).
+    if orden["plan"] == "contadores":
+        email = (orden.get("contacto") or {}).get("email", "").strip().lower()
+        if email and db.session.get(AccesoAutorizado, email) is None:
+            try:
+                db.session.add(AccesoAutorizado(
+                    email=email, nombre=(orden.get("contacto") or {}).get("nombre", ""),
+                    nota="Pase de temporada (pago confirmado)"))
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
 
     # Aviso al negocio de que entró dinero confirmado. La bandera evita
     # reenviarlo cuando la pasarela repite el webhook (esta función es
@@ -1247,7 +1286,7 @@ def admin():
         filas.append(
             f"<tr><td>{o.get('fecha','')}</td><td><code>{oid}</code></td>"
             f"<td>{o.get('nombre','')}<br><small>{o.get('nit','')}</small></td>"
-            f"<td>{PLANES.get(o.get('plan',''),{}).get('nombre', o.get('plan',''))}</td>"
+            f"<td>{('👔 ' + _CFG_PRECIOS.get('contadores',{}).get('nombre','Pase de temporada')) if o.get('plan')=='contadores' else PLANES.get(o.get('plan',''),{}).get('nombre', o.get('plan',''))}</td>"
             f"<td style='text-align:right'>${o.get('precio',0):,.0f}</td>"
             f"<td>{c.get('nombre','')}<br><small>{c.get('email','')} {c.get('telefono','')}</small></td>"
             f"<td style='color:{color};font-weight:700'>{estado.replace('_',' ')}</td>"

@@ -89,6 +89,25 @@
     font-weight:800;font-size:1.04rem;padding:15px 32px;border-radius:32px;text-decoration:none;border:none;
     cursor:pointer;transition:transform .15s ease;}
   .btn-wa:hover{transform:translateY(-2px);}
+  .btn-pagar{display:inline-flex;align-items:center;justify-content:center;gap:9px;margin-top:24px;
+    background:var(--dorado);color:var(--navy);font-weight:800;font-size:1.06rem;padding:15px 32px;
+    border-radius:32px;border:0;cursor:pointer;width:100%;box-shadow:0 10px 24px rgba(205,171,126,.35);
+    transition:transform .15s ease;}
+  .btn-pagar:hover{transform:translateY(-2px);}
+  /* modal pago del pase */
+  .modal-pase{position:fixed;inset:0;z-index:100;background:rgba(10,18,30,.6);
+    display:flex;align-items:center;justify-content:center;padding:18px;}
+  .modal-card{background:#fff;color:var(--navy);border-radius:20px;max-width:440px;width:100%;
+    padding:26px;position:relative;max-height:92vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.4);}
+  .modal-x{position:absolute;top:12px;right:14px;border:0;background:transparent;font-size:1.2rem;
+    cursor:pointer;color:var(--tenue);}
+  .valor-pase{font-size:2.4rem;font-weight:800;color:var(--dorado2);letter-spacing:-.02em;margin:2px 0 14px;}
+  .valor-pase small{font-size:.9rem;color:var(--tenue);}
+  .pago-box{background:var(--gris);border:1px solid var(--borde);border-radius:14px;padding:16px;text-align:center;}
+  .pago-lbl{font-weight:800;font-size:.92rem;color:var(--navy)}
+  .pago-sub{font-size:.76rem;color:var(--tenue);margin-bottom:4px}
+  .pago-cta{font-size:.82rem;color:var(--suave);margin-top:6px;line-height:1.5}
+  .pago-ref{font-size:.86rem;margin-top:8px;color:var(--navy)}
 
   /* faq */
   .faq{max-width:720px;margin:0 auto;}
@@ -289,10 +308,43 @@
           Si atiendes <b>25 clientes</b>, te sale a <b>menos de $10.000</b> por declaración.
           Le cobras a cada uno lo de siempre.
         </div>
-        <button class="btn-wa" id="ctaWa">💬 Quiero mi pase de temporada</button>
+        <button class="btn-pagar" id="btnPagarPase">💳 Pagar el pase en línea</button>
+        <button class="btn-wa" id="ctaWa" style="margin-top:12px">💬 O coordinar por WhatsApp</button>
       </div>
     </div>
   </section>
+
+  <!-- Modal de pago del pase -->
+  <div id="modalPase" class="modal-pase" hidden>
+    <div class="modal-card">
+      <button class="modal-x" id="modalX" aria-label="Cerrar">✕</button>
+      <div id="paseStep1">
+        <h3 style="margin-bottom:4px">Pagar el pase de temporada</h3>
+        <div class="valor-pase">${{ '{:,.0f}'.format(contadores.precio)|replace(',', '.') }} <small>COP</small></div>
+        <div class="pago-box">
+          <div class="pago-lbl">Escanea y paga con Bre-B 📲</div>
+          <div class="pago-sub">Desde Nequi, Bancolombia o cualquier banco</div>
+          <img src="/static/img/qr-bre-b.png" alt="Código QR Bre-B de Tributando"
+            style="width:230px;max-width:80%;border-radius:14px;margin:8px auto;display:block">
+          <div class="pago-cta">O transfiere a <b>{{ pago.banco }} {{ pago.tipo }} {{ pago.numero }}</b>
+            {% if pago.nequi %}· Nequi <b>{{ pago.nequi }}</b>{% endif %}</div>
+          <div class="pago-ref">Referencia: <b id="paseRef">—</b></div>
+        </div>
+        <ol style="font-size:.82rem;color:var(--suave);margin:12px 0 0 18px;line-height:1.7;text-align:left">
+          <li>Transfiere el <b>valor exacto</b> con esa referencia.</li>
+          <li>Presiona "Ya pagué". Verificamos y te habilitamos el liquidador.</li>
+        </ol>
+        <button class="btn-hero" id="btnYaPague" style="width:100%;margin-top:18px;justify-content:center">✓ Ya pagué</button>
+      </div>
+      <div id="paseStep2" hidden style="text-align:center;padding:12px 0">
+        <div style="font-size:2.4rem">🤝</div>
+        <h3 style="margin:10px 0">¡Recibimos tu reporte de pago!</h3>
+        <p style="color:var(--suave);font-size:.95rem">Tu orden es <b id="paseRef2">—</b>. En cuanto
+          verifiquemos la consignación te <b>habilitamos el liquidador</b> con este mismo correo y te avisamos.</p>
+        <button class="btn-hero" id="btnCerrarPase" style="margin-top:16px">Entendido</button>
+      </div>
+    </div>
+  </div>
 
   <section style="background:var(--gris);">
     <div class="contenedor">
@@ -342,6 +394,43 @@
       var b = document.getElementById(id);
       if (b) b.onclick = function(){ window.open(url, "_blank"); };
     });
+
+    // ---- Pago del pase de temporada (QR Bre-B + reportar) ----
+    var logueado = {{ logueado|tojson }};
+    var btnPagar = document.getElementById("btnPagarPase");
+    if (btnPagar) btnPagar.onclick = async function(){
+      if (!logueado) { window.location.href = "/login?next=/contadores"; return; }
+      btnPagar.disabled = true; btnPagar.textContent = "Creando tu orden…";
+      try {
+        var r = await fetch("/api/pase-contador/crear", {method:"POST",
+          headers:{"Content-Type":"application/json"}, body:"{}"});
+        var j = await r.json();
+        if (!r.ok) { alert(j.error || "No pudimos crear la orden."); return; }
+        document.getElementById("paseRef").textContent = "PASE " + String(j.orden_id).toUpperCase();
+        document.getElementById("paseRef2").textContent = j.orden_id;
+        var m = document.getElementById("modalPase");
+        m.dataset.orden = j.orden_id; m.hidden = false;
+      } catch(e){ alert("Problema de conexión."); }
+      finally { btnPagar.disabled = false; btnPagar.textContent = "💳 Pagar el pase en línea"; }
+    };
+    function cerrarPase(){ var m=document.getElementById("modalPase"); if(m) m.hidden = true; }
+    var mx = document.getElementById("modalX"); if (mx) mx.onclick = cerrarPase;
+    var bc = document.getElementById("btnCerrarPase");
+    if (bc) bc.onclick = function(){ cerrarPase(); };
+    var byp = document.getElementById("btnYaPague");
+    if (byp) byp.onclick = async function(){
+      var oid = document.getElementById("modalPase").dataset.orden;
+      if (!oid) return;
+      byp.disabled = true; byp.textContent = "Enviando…";
+      try {
+        var r = await fetch("/api/reportar-pago", {method:"POST",
+          headers:{"Content-Type":"application/json"}, body: JSON.stringify({orden_id: oid})});
+        if (r.ok) { document.getElementById("paseStep1").hidden = true;
+                    document.getElementById("paseStep2").hidden = false; }
+        else { alert("No pudimos registrar el reporte."); }
+      } catch(e){ alert("Problema de conexión."); }
+      finally { byp.disabled = false; byp.textContent = "✓ Ya pagué"; }
+    };
 
     // ---- Prueba gratis: subir exógena -> resultado -> descargar 210 de muestra ----
     var dz = document.getElementById("dz"), fx = document.getElementById("fx"), tok = null;
