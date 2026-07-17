@@ -117,6 +117,11 @@
   .res-body>div+div{border-left:1px solid var(--borde);}
   .res-lbl{display:block;font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tenue);}
   .res-val{display:block;font-size:1.5rem;font-weight:800;margin-top:6px;letter-spacing:-.01em;}
+  .dz-edit{margin-top:16px;background:var(--gris);border:1px solid var(--borde);border-radius:14px;padding:16px 18px;}
+  .dz-edit select,.dz-edit input{padding:8px 10px;border:1px solid var(--borde);border-radius:8px;font-size:.9rem;}
+  .dz-edit #patBruto{width:150px;} .dz-edit #patDeudas{width:130px;}
+  .dz-edit #patAplicar{border:0;border-radius:8px;padding:9px 16px;font-size:.85rem;font-weight:700;
+    cursor:pointer;background:var(--navy);color:#fff;}
 
   @media(max-width:760px){
     .comp,.pasos{grid-template-columns:1fr;}
@@ -224,6 +229,34 @@
               <div><span class="res-lbl">Fecha límite</span><span class="res-val" id="rFecha" style="font-size:1.15rem"></span></div>
             </div>
           </div>
+
+          <div id="dzEdit" hidden class="dz-edit">
+            <div class="ed-fila">
+              <div style="font-size:.86rem;font-weight:700">👨‍👩‍👧 Dependientes económicos del cliente</div>
+              <div style="font-size:.74rem;color:var(--suave);margin:3px 0 8px">Cada uno (hasta 4) rebaja el impuesto.</div>
+              <select id="depSel">
+                <option value="0">No tiene</option>
+                <option value="1">1 dependiente</option>
+                <option value="2">2 dependientes</option>
+                <option value="3">3 dependientes</option>
+                <option value="4">4 o más</option>
+              </select>
+              <span id="depAhorro" style="font-size:.82rem;color:var(--verde);font-weight:700;margin-left:8px"></span>
+            </div>
+            <div class="ed-fila" style="border-top:1px solid var(--borde);margin-top:12px;padding-top:12px">
+              <div style="font-size:.86rem;font-weight:700">🏠 Ajustar patrimonio (opcional)</div>
+              <div style="font-size:.74rem;color:var(--suave);margin:3px 0 8px">Lo que tenía al 31 de diciembre y sus deudas. La DIAN no siempre lo trae completo.</div>
+              <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end">
+                <label style="font-size:.72rem;color:var(--suave)">Patrimonio bruto<br>
+                  <input id="patBruto" inputmode="numeric" autocomplete="off"></label>
+                <label style="font-size:.72rem;color:var(--suave)">Deudas<br>
+                  <input id="patDeudas" inputmode="numeric" autocomplete="off"></label>
+                <button id="patAplicar" type="button">Actualizar</button>
+              </div>
+              <div id="patOk" style="font-size:.78rem;color:var(--verde);font-weight:700;margin-top:6px"></div>
+            </div>
+          </div>
+
           <div id="dzAcc" hidden style="text-align:center;margin-top:18px">
             <button class="btn-hero" id="btnMuestra">📄 Descargar el 210 de muestra (gratis)</button>
             <p style="font-size:.75rem;color:var(--tenue);margin-top:10px">El PDF va con marca "MUESTRA".
@@ -331,10 +364,12 @@
           b.textContent = "Arrastra aquí la exógena (.xlsx) de tu cliente"; return; }
         tok = j.token;
         document.getElementById("rNit").textContent = j.nit_final || "—";
-        document.getElementById("rVal").textContent = j.valor_a_pagar
-          ? "$" + Number(j.valor_a_pagar).toLocaleString("es-CO") : "$0";
+        pintarValor(j.valor_a_pagar, j.saldo_a_favor);
         document.getElementById("rFecha").textContent = j.fecha_limite || "—";
+        if (j.patrimonio_bruto != null) document.getElementById("patBruto").value = Number(j.patrimonio_bruto).toLocaleString("es-CO");
+        if (j.deudas != null) document.getElementById("patDeudas").value = Number(j.deudas).toLocaleString("es-CO");
         document.getElementById("dzRes").hidden = false;
+        document.getElementById("dzEdit").hidden = false;
         document.getElementById("dzAcc").hidden = false;
         b.textContent = "✔ " + file.name + " — sube otra para reemplazar";
       } catch(e) {
@@ -342,6 +377,45 @@
         b.textContent = "Arrastra aquí la exógena (.xlsx) de tu cliente";
       }
     }
+    function pintarValor(pagar, favor){
+      var el = document.getElementById("rVal");
+      var lbl = el.previousElementSibling;
+      if (favor && Number(favor) > 0) {
+        lbl.textContent = "Saldo a favor"; el.style.color = "var(--verde)";
+        el.textContent = "$" + Number(favor).toLocaleString("es-CO");
+      } else {
+        lbl.textContent = "Valor estimado a pagar"; el.style.color = "";
+        el.textContent = "$" + Number(pagar || 0).toLocaleString("es-CO");
+      }
+    }
+    function nMoneda(v){ return Number(String(v).replace(/\D/g, "")) || 0; }
+    async function recalc(payload, cb){
+      if (!tok) return;
+      payload.token = tok;
+      try {
+        var r = await fetch("/api/recalcular-landing", {method:"POST",
+          headers:{"Content-Type":"application/json"}, body: JSON.stringify(payload)});
+        var j = await r.json();
+        if (!r.ok) { alert(j.error || "No pudimos recalcular."); return; }
+        pintarValor(j.valor_a_pagar, j.saldo_a_favor);
+        if (cb) cb(j);
+      } catch(e) { alert("Problema de conexión al recalcular."); }
+    }
+    var depSel = document.getElementById("depSel");
+    if (depSel) depSel.onchange = function(){
+      recalc({dependientes: parseInt(depSel.value, 10)}, function(j){
+        var a = document.getElementById("depAhorro");
+        a.textContent = (j.ahorro && j.ahorro > 0) ? "Ahorro: $" + Number(j.ahorro).toLocaleString("es-CO") : "";
+      });
+    };
+    var patAplicar = document.getElementById("patAplicar");
+    if (patAplicar) patAplicar.onclick = function(){
+      recalc({patrimonio_bruto: nMoneda(document.getElementById("patBruto").value),
+              deudas: nMoneda(document.getElementById("patDeudas").value)}, function(){
+        document.getElementById("patOk").textContent = "✓ Patrimonio actualizado";
+      });
+    };
+
     var btnM = document.getElementById("btnMuestra");
     if (btnM) btnM.onclick = async function(){
       if (!tok) return;
