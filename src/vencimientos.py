@@ -669,33 +669,63 @@ def analizar_rut(texto: str) -> dict:
     import re
 
     plano = " ".join(texto.split())
+
+    def solo_digitos(t):
+        return "".join(c for c in t if c.isdigit())
+
+    # En el RUT oficial pypdf saca primero TODAS las etiquetas del formulario y
+    # después los VALORES (con los dígitos sueltos: "7 2 2 2 1 6 3"). Por eso el
+    # NIT se ancla a los valores, no a la etiqueta "(NIT)".
     nit = ""
-    # sin las etiquetas de casilla ("6. DV", "35. Razón...") que ensucian el NIT
-    sin_casillas = re.sub(r"\b\d{1,2}\.\s", " ", plano)
-    m = re.search(r"Identificaci[oó]n Tributaria \(NIT\)[^0-9]{0,40}"
-                  r"(\d[\d .]{4,20}\d)", sin_casillas)
+    # 1) persona natural: la cédula va tras "Cédula de Ciudadanía" + código 13
+    m = re.search(r"C[eé]dula de Ciudadan[ií]a\s+1\s+3\s+((?:\d\s+){4,10}\d)",
+                  plano)
     if m:
-        nit = "".join(c for c in m.group(1) if c.isdigit())
-        # el RUT trae NIT + DV pegados en algunas versiones; el DV llega aparte
-        m_dv = re.search(r"DV[^0-9]{0,10}(\d)\b", plano)
-        if m_dv and nit.endswith(m_dv.group(1)) and len(nit) >= 9:
-            nit = nit[:-1]
+        nit = solo_digitos(m.group(1))
+    # 2) tras el número de formulario (contiguo, 10-14 dígitos) viene el NIT
+    if not nit:
+        m = re.search(r"\b\d{10,14}\b\s+((?:\d\s+){4,10}\d)", plano)
+        if m:
+            nit = solo_digitos(m.group(1))
+            if len(nit) == 10 and nit[0] in "89":
+                nit = nit[:-1]                  # venía con el DV pegado
+    # 3) respaldo: PDFs que sí traen dígitos junto a la etiqueta "(NIT)"
+    if not nit:
+        sin_casillas = re.sub(r"\b\d{1,2}\.\s", " ", plano)
+        m = re.search(r"Identificaci[oó]n Tributaria \(NIT\)[^0-9]{0,40}"
+                      r"(\d[\d .]{4,20}\d)", sin_casillas)
+        if m:
+            nit = solo_digitos(m.group(1))
+            m_dv = re.search(r"DV[^0-9]{0,10}(\d)\b", plano)
+            if m_dv and nit.endswith(m_dv.group(1)) and len(nit) >= 9:
+                nit = nit[:-1]
 
     juridica = bool(re.search(r"Persona jur[ií]dica", plano, re.I))
     natural = bool(re.search(r"Persona natural", plano, re.I))
 
     nombre = ""
-    m = re.search(r"raz[oó]n social:?\s*(.{3,90}?)\s*(?:3[67]\.|Nombre comercial|"
-                  r"Sigla|$)", plano, re.I)
-    if m and m.group(1).strip("- ").strip():
-        nombre = m.group(1).strip("- ").strip()
+    # En el RUT oficial el nombre en MAYÚSCULAS va justo antes de la calidad
+    # con la que firma ("... ROJAS ACERO GUILLERMO ADOLFO CONTRIBUYENTE")
+    m = re.search(r"([A-ZÁÉÍÓÚÑ][A-ZÁÉÍÓÚÑ ]{6,70})\s+"
+                  r"(?:CONTRIBUYENTE|REPRESENTANTE LEGAL|APODERADO)", plano)
+    if m:
+        palabras = [p for p in m.group(1).split()
+                    if p not in ("AM", "PM", "X", "SI", "NO") and len(p) > 1]
+        nombre = " ".join(palabras)
     if not nombre:
-        m = re.search(r"Primer apellido\s+(.+?)\s+3\d\.", plano)
+        # RUT sin firma (actuación de oficio): el nombre en mayúsculas va justo
+        # antes del país de la dirección ("... EDISON ANDRES COLOMBIA 1 6 9")
+        m = re.search(r"([A-ZÁÉÍÓÚÑ][A-ZÁÉÍÓÚÑ ]{6,70})\s+COLOMBIA\s+1\s+6\s+9",
+                      plano)
         if m:
-            nombre = " ".join(m.group(1).split()[:6])
-    # En muchos RUT el texto extraído trae las ETIQUETAS de las casillas pegadas
-    # ("32. Segundo apellido", "33. Primer nombre"...) en vez de los valores.
-    # Antes que llenar el campo con basura, mejor dejarlo vacío.
+            nombre = " ".join(m.group(1).split())
+    if not nombre:
+        m = re.search(r"raz[oó]n social:?\s*(.{3,90}?)\s*(?:3[67]\.|Nombre "
+                      r"comercial|Sigla|$)", plano, re.I)
+        if m and m.group(1).strip("- ").strip():
+            nombre = m.group(1).strip("- ").strip()
+    # Antes que llenar el campo con etiquetas del formulario ("32. Segundo
+    # apellido"...), mejor dejarlo vacío.
     if nombre and (re.match(r"^\d", nombre) or
                    re.search(r"apellido|nombre|raz[oó]n social|sigla", nombre, re.I)):
         nombre = ""

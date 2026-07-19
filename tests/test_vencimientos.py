@@ -306,6 +306,41 @@ def test_analizar_rut_tipo_por_nit_cedula():
     assert "renta_pn" in d["obligaciones"]
 
 
+def test_analizar_rut_formato_oficial_dian():
+    # Estructura real del PDF oficial: primero TODAS las etiquetas, después los
+    # valores con dígitos sueltos, y el nombre antes de la calidad de la firma.
+    texto = """
+        5. Número de Identificación Tributaria (NIT) 6. DV 984. Nombre
+        53. Código 59. Anexos SI NO 2. Concepto
+        Persona natural o sucesión ilíquida 2 Cédula de Ciudadanía 1 3
+        7 2 2 2 1 6 3 COLOMBIA 1 6 9 Boyacá 1 5 Duitama 2 3 8
+        ROJAS ACERO GUILLERMO ADOLFO DISTRIBUIDORA ROJAS ACERO. COLOMBIA 1 6 9
+        Antioquia 0 5 Santa Rosa de Osos 6 8 6 CL 25 A 31 43 correo@ejemplo.com
+        05- Impto. renta y compl. régimen ordinar 5
+        07- Retención en la fuente a título de rent 7
+        14- Informante de exogena 1 4 48 - Impuesto sobre las ventas - IVA 4 8
+        X 0 2023-11-21 / 04:35:28PM ROJAS ACERO GUILLERMO ADOLFO CONTRIBUYENTE
+    """
+    d = analizar_rut(texto)
+    assert d["nit"] == "7222163"                # cédula anclada al tipo de doc
+    assert d["nombre"] == "ROJAS ACERO GUILLERMO ADOLFO"
+    assert d["tipo"] == "natural"
+    assert set(d["obligaciones"]) == {"renta_pn", "retefuente", "exogena",
+                                      "iva_bimestral"}
+
+
+def test_analizar_rut_actuacion_de_oficio_sin_firma():
+    texto = ("Cédula de Ciudadanía 1 3 3 3 6 2 0 5 8 COLOMBIA 1 6 9 "
+             "Antioquia 0 5 Bello 0 8 8 MONSALVE LOAIZA EDISON ANDRES "
+             "COLOMBIA 1 6 9 Antioquia 0 5 Bello CL 53 47 80 "
+             "05- Impto. renta y compl. régimen ordinar 5 "
+             "49 - No responsable de IVA 4 9 X 0 ACTUACIÓN DE OFICIO AUTOMÁTICA")
+    d = analizar_rut(texto)
+    assert d["nit"] == "3362058"
+    assert d["nombre"] == "MONSALVE LOAIZA EDISON ANDRES"
+    assert d["obligaciones"] == ["renta_pn"]
+
+
 def test_analizar_rut_regimen_simple():
     d = analizar_rut("Persona jurídica 47- Régimen simple de tributación")
     assert d["tipo"] == "rst"
