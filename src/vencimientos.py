@@ -689,6 +689,12 @@ def analizar_rut(texto: str) -> dict:
         m = re.search(r"Primer apellido\s+(.+?)\s+3\d\.", plano)
         if m:
             nombre = " ".join(m.group(1).split()[:6])
+    # En muchos RUT el texto extraído trae las ETIQUETAS de las casillas pegadas
+    # ("32. Segundo apellido", "33. Primer nombre"...) en vez de los valores.
+    # Antes que llenar el campo con basura, mejor dejarlo vacío.
+    if nombre and (re.match(r"^\d", nombre) or
+                   re.search(r"apellido|nombre|raz[oó]n social|sigla", nombre, re.I)):
+        nombre = ""
 
     codigos = set()
     # forma "05- Impto. renta..." o "48 Impuesto sobre las ventas"
@@ -711,7 +717,13 @@ def analizar_rut(texto: str) -> dict:
         if re.search(patron, plano, re.I):
             codigos.add(codigo)
 
-    tipo = "juridica" if juridica else "natural"
+    # El formulario del RUT trae impresas AMBAS frases ("Persona natural" y
+    # "Persona jurídica") como etiquetas, así que el NIT decide primero: los de
+    # sociedades tienen 9 dígitos y empiezan por 8 o 9.
+    if nit:
+        tipo = "juridica" if (len(nit) == 9 and nit[0] in "89") else "natural"
+    else:
+        tipo = "juridica" if (juridica and not natural) else "natural"
     if "13" in codigos:
         tipo = "gran"
     elif "47" in codigos:

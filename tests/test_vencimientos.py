@@ -282,6 +282,30 @@ def test_analizar_rut_persona_juridica():
                                       "iva_bimestral"}
 
 
+def test_analizar_rut_no_confunde_etiquetas_con_nombre():
+    # Caso real: el texto extraído trae las etiquetas de casilla, no los valores
+    texto = """
+        5. Número de Identificación Tributaria (NIT) 9 0 0 1 2 3 4 5 6
+        Persona natural Persona jurídica
+        31. Primer apellido 32. Segundo apellido 33. Primer nombre 34. Otros nombres
+        05- Impto. renta y compl. régimen ordinario 07- Retención en la fuente
+        14- Informante de exogena 48- Impuesto sobre las ventas
+    """
+    d = analizar_rut(texto)
+    assert d["nombre"] == ""                    # mejor vacío que "32. Segundo apellido"
+    assert d["nit"] == "900123456"
+    assert d["tipo"] == "juridica"              # NIT de 9 dígitos que empieza por 9
+    assert "renta_pj" in d["obligaciones"]
+
+
+def test_analizar_rut_tipo_por_nit_cedula():
+    d = analizar_rut("Identificación Tributaria (NIT) 1 0 3 0 6 0 1 2 3 4 "
+                     "Persona natural Persona jurídica "
+                     "05- Impto. renta y compl. régimen ordinario")
+    assert d["tipo"] == "natural"               # cédula de 10 dígitos, no 9
+    assert "renta_pn" in d["obligaciones"]
+
+
 def test_analizar_rut_regimen_simple():
     d = analizar_rut("Persona jurídica 47- Régimen simple de tributación")
     assert d["tipo"] == "rst"
