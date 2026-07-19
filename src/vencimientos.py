@@ -785,11 +785,18 @@ def api_leer_rut():
     try:
         import pypdf
         lector = pypdf.PdfReader(io.BytesIO(archivo.read()))
-        texto = "\n".join((p.extract_text() or "") for p in lector.pages[:3])
+        # Los datos (NIT, nombre, casilla 53) viven en la hoja 1; extraer texto
+        # es lo caro en la CPU del servidor, así que solo seguimos a las hojas
+        # siguientes si la primera no alcanzó.
+        texto, datos = "", None
+        for pagina in lector.pages[:3]:
+            texto += "\n" + (pagina.extract_text() or "")
+            datos = analizar_rut(texto)
+            if datos["nit"] and datos["codigos"]:
+                break
     except Exception:
         return jsonify({"error": "No pude leer ese PDF."}), 400
-    datos = analizar_rut(texto)
-    if not datos["nit"] and not datos["codigos"]:
+    if datos is None or (not datos["nit"] and not datos["codigos"]):
         return jsonify({"error": "Ese PDF no parece un RUT con texto legible "
                         "(¿es un escaneo?). Ingresa los datos a mano."}), 422
     return jsonify({"ok": True, **datos})
