@@ -239,7 +239,11 @@ def _agenda_usuario(u) -> List[dict]:
 @venc_bp.route("/vencimientos")
 @login_requerido
 def pagina_vencimientos():
-    return render_template("vencimientos.html", ano=cargar_calendario().get("ano", 2026))
+    resp = Response(render_template("vencimientos.html",
+                                    ano=cargar_calendario().get("ano", 2026)))
+    # Safari sirve versiones viejas de la página tras un despliegue; que no cachee
+    resp.headers["Cache-Control"] = "no-store"
+    return resp
 
 
 # ---------------------------------------------------------------- rutas API

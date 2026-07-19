@@ -57,11 +57,12 @@
       border-radius:10px; font-size:.95rem; font-family:inherit; }
   .dos { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
   .oblig-lista { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
-  .oblig-lista label { display:flex; gap:8px; align-items:center; font-size:.82rem; font-weight:400;
-      color:var(--navy); background:var(--crema); border-radius:8px; padding:8px 10px; cursor:pointer; }
-  /* Safari: sin estos anchos explícitos el texto (ítem flex anónimo) se desborda */
-  .oblig-lista label input { flex:0 0 auto; margin:0; }
-  .oblig-lista label span { flex:1 1 auto; min-width:0; text-align:left; }
+  /* Layout de bloque (sin flex): Safari desbordaba el texto fuera del modal */
+  .oblig-lista label { display:block; position:relative; font-size:.82rem; font-weight:400;
+      color:var(--navy); background:var(--crema); border-radius:8px; cursor:pointer;
+      padding:8px 10px 8px 32px; overflow:hidden; text-align:left; }
+  .oblig-lista label input { position:absolute; left:9px; top:50%; transform:translateY(-50%); margin:0; }
+  .oblig-lista label span { display:inline; }
   .acciones-modal { display:flex; gap:10px; justify-content:flex-end; margin-top:16px; }
   .error-msg { color:var(--rojo); font-size:.82rem; min-height:1.1em; margin-top:6px; }
   /* calendario */
