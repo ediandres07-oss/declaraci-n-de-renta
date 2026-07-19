@@ -65,6 +65,14 @@
     background:#fff; padding:8px 18px; border-radius:22px; text-decoration:none; font-size:.85rem;
     font-weight:700; min-height:38px; }
   .barra-sup .btn-cuenta img { width:22px; height:22px; border-radius:50%; }
+  .menu-sup { display:flex; gap:20px; margin-left:auto; margin-right:18px; }
+  .menu-sup a { color:#d7dbe4; text-decoration:none; font-size:.86rem; font-weight:600; white-space:nowrap; }
+  .menu-sup a:hover { color:var(--dorado); }
+  @media (max-width:560px){ .menu-sup { gap:12px; margin-right:10px; }
+    .menu-sup a { font-size:.78rem; } .menu-sup .solo-ancho { display:none; }
+    /* deja solo el logo redondo: el nombre no cabe junto al menú */
+    .barra-sup .marca { font-size:0; gap:0; }
+    .barra-sup .btn-cuenta { padding:7px 13px; font-size:.78rem; min-height:32px; } }
 
   /* ------------------------------ Hero ------------------------------ */
   header.hero { position:relative; overflow:hidden; color:#fff; text-align:center;
@@ -316,6 +324,11 @@
 <div class="barra-sup">
   <div class="contenedor">
     <span class="marca"><img src="/static/img/logo-tributando.png" alt="Tributando">Tributando<b style="color:var(--dorado)">.co</b></span>
+    <nav class="menu-sup">
+      <a href="/vencimientos">📅 Vencimientos</a>
+      <a href="/contadores">👔 Contadores</a>
+      <a href="/contabilidad" class="solo-ancho">Contabilidad</a>
+    </nav>
     {% if usuario %}
       <a class="btn-cuenta" href="/mi-cuenta">
         {% if usuario.foto %}<img src="{{ usuario.foto }}" alt="">{% endif %}
