@@ -14,7 +14,7 @@ import threading
 import time
 import uuid
 import warnings
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 
 import yaml
@@ -30,6 +30,7 @@ from src.auth import (AccesoAutorizado, ArchivoExogena, LeadEspera, MuestraConta
                       OrdenRegistro, Usuario, auth_bp, autorizado_requerido, db,
                       init_auth, login_requerido, pro_requerido, usuario_actual)
 from src.calendario import fecha_limite
+from src.vencimientos import venc_bp
 from src.documentos import generar_checklist_pdf
 from src.guia_dian import generar_guia_dian_pdf
 
@@ -53,6 +54,34 @@ app.config["MAX_CONTENT_LENGTH"] = 25 * 1024 * 1024  # 25 MB
 # Autenticación social (Google/Microsoft) + BD de usuarios
 _OAUTH_CFG = init_auth(app)
 app.register_blueprint(auth_bp)
+
+# Gestor de vencimientos para contadores (gratis con login)
+app.register_blueprint(venc_bp)
+
+
+def _bucle_avisos_vencimientos():
+    """Avisos diarios a contadores (7 y 3 días antes) sin cron externo: cada
+    media hora mira si son las 8-9 a.m. de Bogotá y, con el candado en BD,
+    un solo worker envía el lote del día."""
+    from zoneinfo import ZoneInfo
+    from src.vencimientos import correr_avisos_diarios
+
+    time.sleep(120)                                # deja arrancar la app (y a pytest)
+    while True:
+        try:
+            if not app.config.get("TESTING"):
+                ahora = datetime.now(ZoneInfo("America/Bogota"))
+                if 8 <= ahora.hour < 9:
+                    with app.app_context():
+                        n = correr_avisos_diarios(ahora.date())
+                        if n:
+                            print(f"[avisos-vencimientos] {n} correo(s) enviados")
+        except Exception as exc:  # noqa: BLE001  — el hilo nunca debe morir
+            print(f"[avisos-vencimientos] error: {exc}")
+        time.sleep(1800)
+
+
+threading.Thread(target=_bucle_avisos_vencimientos, daemon=True).start()
 
 
 @app.context_processor

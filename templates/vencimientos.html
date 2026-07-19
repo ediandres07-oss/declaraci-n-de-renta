@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Vencimientos tributarios — Tributando.co</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root { --navy:#1e2432; --navy2:#2a3245; --dorado:#cdab7e; --dorado2:#b8945f;
+          --crema:#f7f4ee; --borde:#e3ddd2; --gris:#5a6b7f; --verde:#1e7d43;
+          --rojo:#c0392b; --ambar:#b7791f; }
+  * { box-sizing:border-box; margin:0; }
+  body { font-family:-apple-system,'Segoe UI',Roboto,sans-serif; background:var(--crema); color:var(--navy); }
+  a { color:inherit; }
+  .topbar { background:var(--navy); color:#fff; padding:14px 0; }
+  .contenedor { max-width:1060px; margin:0 auto; padding:0 20px; }
+  .topbar .contenedor { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .marca { font-weight:800; font-size:1.05rem; text-decoration:none; }
+  .marca span { color:var(--dorado); }
+  .topbar a.salir { color:#c9cfdd; text-decoration:none; font-size:.85rem; }
+  .encabezado { padding:26px 0 6px; }
+  .encabezado h1 { font-size:1.5rem; }
+  .encabezado p { color:var(--gris); font-size:.9rem; margin-top:4px; }
+  .tabs { display:flex; gap:8px; margin:18px 0; flex-wrap:wrap; }
+  .tabs button { border:1px solid var(--borde); background:#fff; border-radius:999px;
+                 padding:9px 18px; font-weight:700; cursor:pointer; font-size:.88rem; color:var(--gris); }
+  .tabs button.activa { background:var(--navy); color:var(--dorado); border-color:var(--navy); }
+  .tarjeta { background:#fff; border:1px solid var(--borde); border-radius:14px; padding:20px;
+             margin-bottom:16px; box-shadow:0 4px 14px rgba(30,36,50,.05); }
+  .fila-encabezado { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+  .fila-encabezado h2 { font-size:1.05rem; }
+  .btn { border:0; border-radius:10px; padding:10px 18px; font-weight:700; cursor:pointer; font-size:.9rem;
+         background:var(--dorado); color:var(--navy); transition:transform .15s ease, box-shadow .15s ease; }
+  .btn:hover { transform:translateY(-2px); box-shadow:0 8px 18px rgba(30,36,50,.18); }
+  .btn.sec { background:var(--navy); color:#fff; }
+  .btn.mini { padding:6px 12px; font-size:.8rem; border-radius:8px; }
+  .btn.peligro { background:#fdf0ee; color:var(--rojo); }
+  table { width:100%; border-collapse:collapse; font-size:.88rem; }
+  th { text-align:left; font-size:.72rem; text-transform:uppercase; letter-spacing:.05em;
+       color:var(--gris); padding:8px 10px; border-bottom:2px solid var(--borde); }
+  td { padding:10px; border-bottom:1px solid var(--borde); vertical-align:middle; }
+  tr:hover td { background:var(--crema); }
+  .pill { display:inline-block; padding:3px 10px; border-radius:999px; font-size:.72rem; font-weight:700; }
+  .pill.pendiente { background:#fdf6e8; color:var(--ambar); }
+  .pill.presentada { background:#e8f1fb; color:#1e5a8a; }
+  .pill.pagada { background:#e9f6ee; color:var(--verde); }
+  .pill.vencido { background:#fdf0ee; color:var(--rojo); }
+  .vacio { text-align:center; color:var(--gris); padding:34px 10px; font-size:.92rem; }
+  /* formulario cliente */
+  .modal-fondo { position:fixed; inset:0; background:rgba(20,24,34,.55); display:none;
+                 align-items:flex-start; justify-content:center; padding:30px 16px; overflow:auto; z-index:50; }
+  .modal-fondo.abierto { display:flex; }
+  .modal { background:#fff; border-radius:16px; padding:24px; width:100%; max-width:560px; }
+  .modal h3 { margin-bottom:14px; }
+  .campo { margin-bottom:12px; }
+  .campo label { display:block; font-size:.78rem; font-weight:700; color:var(--gris); margin-bottom:5px; }
+  .campo input, .campo select, .campo textarea { width:100%; padding:10px; border:1px solid var(--borde);
+      border-radius:10px; font-size:.95rem; font-family:inherit; }
+  .dos { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .oblig-lista { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+  .oblig-lista label { display:flex; gap:8px; align-items:center; font-size:.82rem; font-weight:400;
+      color:var(--navy); background:var(--crema); border-radius:8px; padding:8px 10px; cursor:pointer; }
+  .acciones-modal { display:flex; gap:10px; justify-content:flex-end; margin-top:16px; }
+  .error-msg { color:var(--rojo); font-size:.82rem; min-height:1.1em; margin-top:6px; }
+  /* calendario */
+  .cal-nav { display:flex; align-items:center; gap:14px; }
+  .cal-nav b { min-width:170px; text-align:center; font-size:1rem; text-transform:capitalize; }
+  .cal-nav button { border:1px solid var(--borde); background:#fff; border-radius:8px; padding:6px 12px; cursor:pointer; font-weight:700; }
+  .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:5px; margin-top:14px; }
+  .cal-dia-nombre { font-size:.68rem; text-transform:uppercase; color:var(--gris); text-align:center; padding:4px 0; }
+  .cal-celda { min-height:84px; background:#fff; border:1px solid var(--borde); border-radius:8px; padding:5px; font-size:.75rem; }
+  .cal-celda.fuera { background:transparent; border-color:transparent; }
+  .cal-celda .num { font-weight:700; color:var(--gris); font-size:.72rem; }
+  .cal-celda.hoy { border-color:var(--dorado); border-width:2px; }
+  .cal-ev { background:var(--navy); color:var(--dorado); border-radius:5px; padding:2px 5px; margin-top:3px;
+            cursor:pointer; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .cal-ev.listo { background:#e9f6ee; color:var(--verde); text-decoration:line-through; }
+  /* filtros */
+  .filtros { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+  .filtros select { padding:8px 12px; border:1px solid var(--borde); border-radius:10px; font-size:.85rem; background:#fff; }
+  .banner-pase { background:var(--navy); color:#fff; border-radius:14px; padding:18px 20px; margin:8px 0 26px;
+                 display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; }
+  .banner-pase b { color:var(--dorado); }
+  .banner-pase a { background:var(--dorado); color:var(--navy); text-decoration:none; font-weight:800;
+                   border-radius:10px; padding:10px 16px; font-size:.88rem; white-space:nowrap; }
+  footer { text-align:center; font-size:.74rem; color:#9a938a; padding:26px; }
+  @media (max-width:640px){ .dos{grid-template-columns:1fr} .oblig-lista{grid-template-columns:1fr}
+    .cal-celda{min-height:60px} }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="contenedor">
+    <a class="marca" href="/">Tributando<span>.co</span></a>
+    <div style="display:flex;gap:16px;align-items:center">
+      {% if usuario %}<span style="font-size:.82rem;color:#c9cfdd">{{ usuario.nombre or usuario.email }}</span>{% endif %}
+      <a class="salir" href="/logout">Cerrar sesión →</a>
+    </div>
+  </div>
+</div>
+
+<div class="contenedor">
+  <div class="encabezado">
+    <h1>📅 Vencimientos tributarios {{ ano }}</h1>
+    <p>Tus clientes, sus obligaciones y todas las fechas límite DIAN en un solo lugar. Gratis para contadores.</p>
+  </div>
+
+  <div class="tabs">
+    <button data-tab="clientes" class="activa">👥 Clientes</button>
+    <button data-tab="calendario">🗓️ Calendario</button>
+    <button data-tab="obligaciones">📋 Obligaciones</button>
+    <button data-tab="informe">📄 Informe</button>
+  </div>
+
+  <!-- ······················· CLIENTES ······················· -->
+  <section id="tab-clientes">
+    <div class="tarjeta">
+      <div class="fila-encabezado">
+        <h2>Tus clientes</h2>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn sec" onclick="exportarICS()">⬇️ Exportar a mi calendario</button>
+          <button class="btn sec" onclick="$('archivo-importar').click()">⬆️ Importar Excel</button>
+          <button class="btn" onclick="abrirModal()">＋ Crear cliente</button>
+        </div>
+        <input type="file" id="archivo-importar" accept=".xlsx,.csv" style="display:none"
+               onchange="importarArchivo(this)">
+      </div>
+      <div id="lista-clientes"><div class="vacio">Cargando…</div></div>
+      <p style="font-size:.78rem;color:var(--gris);margin-top:10px">
+        ¿Muchos clientes? <a href="/api/vencimientos/plantilla.xlsx">Descarga la plantilla
+        Excel</a>, llénala y súbela con "Importar Excel".</p>
+    </div>
+  </section>
+
+  <!-- ······················· CALENDARIO ······················· -->
+  <section id="tab-calendario" style="display:none">
+    <div class="tarjeta">
+      <div class="fila-encabezado">
+        <h2>Calendario</h2>
+        <div class="cal-nav">
+          <button onclick="moverMes(-1)">‹</button><b id="cal-titulo"></b><button onclick="moverMes(1)">›</button>
+        </div>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+    </div>
+  </section>
+
+  <!-- ······················· OBLIGACIONES ······················· -->
+  <section id="tab-obligaciones" style="display:none">
+    <div class="tarjeta">
+      <div class="fila-encabezado"><h2>Todas las obligaciones</h2></div>
+      <div class="filtros">
+        <select id="f-cliente" onchange="pintarObligaciones()"><option value="">Todos los clientes</option></select>
+        <select id="f-estado" onchange="pintarObligaciones()">
+          <option value="">Todos los estados</option>
+          <option value="pendiente">Pendientes</option>
+          <option value="presentada">Presentadas</option>
+          <option value="pagada">Pagadas</option>
+        </select>
+        <select id="f-horizonte" onchange="pintarObligaciones()">
+          <option value="proximos">Próximos</option>
+          <option value="todos">Todo el año</option>
+          <option value="vencidos">Vencidos sin gestionar</option>
+        </select>
+      </div>
+      <div id="lista-obligaciones"><div class="vacio">Cargando…</div></div>
+    </div>
+  </section>
+
+  <!-- ······················· INFORME ······················· -->
+  <section id="tab-informe" style="display:none">
+    <div class="tarjeta">
+      <h2>Informe de vencimientos</h2>
+      <p style="color:var(--gris);font-size:.88rem;margin:8px 0 16px">
+        Descarga un PDF con los vencimientos pendientes de todos tus clientes, listo para imprimir o enviar.</p>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <select id="informe-dias" style="padding:9px 12px;border:1px solid var(--borde);border-radius:10px">
+          <option value="7">Próximos 7 días</option>
+          <option value="15">Próximos 15 días</option>
+          <option value="30" selected>Próximos 30 días</option>
+          <option value="60">Próximos 60 días</option>
+          <option value="180">Próximos 6 meses</option>
+        </select>
+        <button class="btn" onclick="descargarInforme()">📄 Descargar PDF</button>
+      </div>
+    </div>
+    <div class="tarjeta">
+      <h2>Tu marca en el informe</h2>
+      <p style="color:var(--gris);font-size:.88rem;margin:8px 0 14px">
+        Sube tu logo y el nombre de tu estudio contable: el informe PDF sale con tu marca,
+        listo para enviarlo a tus clientes.</p>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <input id="perfil-estudio" placeholder="Estudio Contable Pérez & Asociados"
+               style="flex:1;min-width:220px;padding:10px;border:1px solid var(--borde);border-radius:10px">
+        <button class="btn sec" onclick="$('perfil-logo').click()">🖼️ Subir logo</button>
+        <input type="file" id="perfil-logo" accept="image/png,image/jpeg" style="display:none">
+        <img id="perfil-logo-vista" style="height:38px;display:none;border-radius:6px">
+        <button class="btn" onclick="guardarPerfil()">Guardar</button>
+      </div>
+      <div id="perfil-msg" style="font-size:.82rem;color:var(--verde);min-height:1.1em;margin-top:8px"></div>
+    </div>
+  </section>
+
+  <div class="banner-pase">
+    <div style="font-size:.92rem">¿Temporada de renta? Con el <b>pase de temporada</b> liquidas el Formulario 210
+      de cada cliente en 5 minutos desde su exógena.</div>
+    <a href="/contadores">Conocer el pase →</a>
+  </div>
+</div>
+
+<!-- ······················· MODAL CLIENTE ······················· -->
+<div class="modal-fondo" id="modal">
+  <div class="modal">
+    <h3 id="modal-titulo">Crear cliente</h3>
+    <div style="margin-bottom:12px">
+      <button class="btn mini sec" onclick="$('archivo-rut').click()">📄 Leer datos del RUT (PDF)</button>
+      <span id="rut-aviso" style="font-size:.78rem;color:var(--gris);margin-left:8px"></span>
+      <input type="file" id="archivo-rut" accept=".pdf" style="display:none" onchange="leerRut(this)">
+    </div>
+    <div class="dos">
+      <div class="campo"><label>Nombre o razón social *</label><input id="c-nombre" placeholder="Comercial XYZ SAS"></div>
+      <div class="campo"><label>NIT o cédula (sin DV) *</label><input id="c-nit" placeholder="900123456" inputmode="numeric"></div>
+    </div>
+    <div class="dos">
+      <div class="campo"><label>Tipo de contribuyente</label>
+        <select id="c-tipo" onchange="sugerirObligaciones()">
+          <option value="natural">Persona natural</option>
+          <option value="juridica">Persona jurídica</option>
+          <option value="gran">Gran contribuyente</option>
+          <option value="rst">Régimen Simple (RST)</option>
+        </select></div>
+      <div class="campo"><label>Correo (opcional)</label><input id="c-correo" type="email"></div>
+    </div>
+    <div class="dos">
+      <div class="campo"><label>Teléfono (opcional)</label><input id="c-telefono"></div>
+      <div class="campo"><label>Notas (opcional)</label><input id="c-notas"></div>
+    </div>
+    <div class="campo"><label>Obligaciones que le aplican</label>
+      <div class="oblig-lista" id="c-obligaciones"></div>
+    </div>
+    <div class="error-msg" id="modal-error"></div>
+    <div class="acciones-modal">
+      <button class="btn peligro" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn" id="modal-guardar" onclick="guardarCliente()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<footer>Fechas según el Calendario Tributario DIAN {{ ano }} y resoluciones de exógena vigentes.
+  Verifica siempre ante cambios normativos. · tributando.co</footer>
+
+<script>
+let CATALOGO = {obligaciones: [], sugerencias: {}};
+let CLIENTES = [];
+let AGENDA = [];
+let HOY = new Date().toISOString().slice(0, 10);
+let editandoId = null;
+let calAno, calMes;   // mes visible del calendario
+
+const $ = id => document.getElementById(id);
+const fmtFecha = iso => new Date(iso + "T12:00:00")
+  .toLocaleDateString("es-CO", {day: "numeric", month: "short", year: "numeric"});
+
+// ---------------------------------------------------------------- tabs
+document.querySelectorAll(".tabs button").forEach(b => b.onclick = () => {
+  document.querySelectorAll(".tabs button").forEach(x => x.classList.remove("activa"));
+  b.classList.add("activa");
+  ["clientes", "calendario", "obligaciones", "informe"].forEach(t =>
+    $("tab-" + t).style.display = (t === b.dataset.tab ? "" : "none"));
+});
+
+// ---------------------------------------------------------------- carga
+async function cargarTodo() {
+  const [cat, cli, ag] = await Promise.all([
+    fetch("/api/vencimientos/catalogo").then(r => r.json()),
+    fetch("/api/vencimientos/clientes").then(r => r.json()),
+    fetch("/api/vencimientos/agenda").then(r => r.json()),
+  ]);
+  CATALOGO = cat; CLIENTES = cli.clientes || []; AGENDA = ag.eventos || [];
+  HOY = ag.hoy || HOY;
+  pintarClientes(); pintarCalendario(); pintarObligaciones(); pintarFiltroClientes();
+}
+
+async function recargarDatos() {
+  const [cli, ag] = await Promise.all([
+    fetch("/api/vencimientos/clientes").then(r => r.json()),
+    fetch("/api/vencimientos/agenda").then(r => r.json()),
+  ]);
+  CLIENTES = cli.clientes || []; AGENDA = ag.eventos || [];
+  pintarClientes(); pintarCalendario(); pintarObligaciones(); pintarFiltroClientes();
+}
+
+// ---------------------------------------------------------------- clientes
+function pintarClientes() {
+  const cont = $("lista-clientes");
+  if (!CLIENTES.length) {
+    cont.innerHTML = '<div class="vacio">Aún no tienes clientes. Crea el primero y ' +
+      'te calculamos todas sus fechas DIAN al instante. 👆</div>';
+    return;
+  }
+  let html = '<table><thead><tr><th>Cliente</th><th>NIT</th><th>Tipo</th>' +
+             '<th>Próximo vencimiento</th><th></th></tr></thead><tbody>';
+  const tipos = {natural: "Natural", juridica: "Jurídica", gran: "Gran contribuyente", rst: "RST"};
+  for (const c of CLIENTES) {
+    const prox = c.proximo
+      ? `<b>${fmtFecha(c.proximo.fecha)}</b><br><span style="color:var(--gris);font-size:.78rem">${c.proximo.nombre}${c.proximo.etiqueta ? " · " + c.proximo.etiqueta : ""}</span>`
+      : '<span style="color:var(--gris)">Sin pendientes este año</span>';
+    html += `<tr>
+      <td><b>${esc(c.nombre)}</b></td><td>${esc(c.nit)}</td><td>${tipos[c.tipo] || c.tipo}</td>
+      <td>${prox}</td>
+      <td style="white-space:nowrap;text-align:right">
+        <button class="btn mini sec" onclick="verCliente(${c.id})">Ver</button>
+        <button class="btn mini" onclick="editarCliente(${c.id})">Editar</button>
+        <button class="btn mini sec" onclick="exportarICS(${c.id})" title="Exportar este cliente a tu calendario">📆</button>
+        <button class="btn mini peligro" onclick="borrarCliente(${c.id})">✕</button>
+      </td></tr>`;
+  }
+  cont.innerHTML = html + "</tbody></table>";
+}
+
+function esc(t) { const d = document.createElement("div"); d.textContent = t || ""; return d.innerHTML; }
+
+function verCliente(id) {
+  $("f-cliente").value = String(id);
+  $("f-estado").value = ""; $("f-horizonte").value = "todos";
+  document.querySelector('[data-tab="obligaciones"]').click();
+  pintarObligaciones();
+}
+
+// ---------------------------------------------------------------- modal
+function pintarChecksObligaciones(seleccion) {
+  $("c-obligaciones").innerHTML = CATALOGO.obligaciones.map(o =>
+    `<label><input type="checkbox" value="${o.clave}" ${seleccion.includes(o.clave) ? "checked" : ""}> ${esc(o.nombre)}</label>`
+  ).join("");
+}
+
+function sugerirObligaciones() {
+  pintarChecksObligaciones(CATALOGO.sugerencias[$("c-tipo").value] || []);
+}
+
+function abrirModal() {
+  editandoId = null;
+  $("modal-titulo").textContent = "Crear cliente";
+  ["c-nombre", "c-nit", "c-correo", "c-telefono", "c-notas"].forEach(i => $(i).value = "");
+  $("c-tipo").value = "natural";
+  sugerirObligaciones();
+  $("modal-error").textContent = "";
+  $("modal").classList.add("abierto");
+  $("c-nombre").focus();
+}
+
+function editarCliente(id) {
+  const c = CLIENTES.find(x => x.id === id);
+  if (!c) return;
+  editandoId = id;
+  $("modal-titulo").textContent = "Editar cliente";
+  $("c-nombre").value = c.nombre; $("c-nit").value = c.nit;
+  $("c-tipo").value = c.tipo || "natural";
+  $("c-correo").value = c.correo || ""; $("c-telefono").value = c.telefono || "";
+  $("c-notas").value = c.notas || "";
+  pintarChecksObligaciones(c.obligaciones || []);
+  $("modal-error").textContent = "";
+  $("modal").classList.add("abierto");
+}
+
+function cerrarModal() { $("modal").classList.remove("abierto"); }
+
+async function guardarCliente() {
+  const obligaciones = [...document.querySelectorAll("#c-obligaciones input:checked")].map(i => i.value);
+  const cuerpo = {
+    nombre: $("c-nombre").value, nit: $("c-nit").value, tipo: $("c-tipo").value,
+    correo: $("c-correo").value, telefono: $("c-telefono").value,
+    notas: $("c-notas").value, obligaciones,
+  };
+  const url = editandoId ? "/api/vencimientos/clientes/" + editandoId : "/api/vencimientos/clientes";
+  const r = await fetch(url, {method: editandoId ? "PUT" : "POST",
+    headers: {"Content-Type": "application/json"}, body: JSON.stringify(cuerpo)});
+  const datos = await r.json();
+  if (!r.ok) { $("modal-error").textContent = datos.error || "Error al guardar."; return; }
+  cerrarModal();
+  await recargarDatos();
+}
+
+async function borrarCliente(id) {
+  const c = CLIENTES.find(x => x.id === id);
+  if (!confirm(`¿Eliminar a "${c ? c.nombre : id}" y su seguimiento?`)) return;
+  await fetch("/api/vencimientos/clientes/" + id, {method: "DELETE"});
+  await recargarDatos();
+}
+
+// ---------------------------------------------------------------- calendario
+function pintarCalendario() {
+  if (calAno === undefined) {
+    const h = new Date(HOY + "T12:00:00");
+    calAno = h.getFullYear(); calMes = h.getMonth();
+  }
+  const primero = new Date(calAno, calMes, 1);
+  $("cal-titulo").textContent = primero.toLocaleDateString("es-CO", {month: "long", year: "numeric"});
+  const nombres = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+  let html = nombres.map(n => `<div class="cal-dia-nombre">${n}</div>`).join("");
+  const inicioSemana = (primero.getDay() + 6) % 7;    // lunes = 0
+  const diasMes = new Date(calAno, calMes + 1, 0).getDate();
+  const porDia = {};
+  for (const e of AGENDA) {
+    (porDia[e.fecha] = porDia[e.fecha] || []).push(e);
+  }
+  for (let i = 0; i < inicioSemana; i++) html += '<div class="cal-celda fuera"></div>';
+  for (let d = 1; d <= diasMes; d++) {
+    const iso = `${calAno}-${String(calMes + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+    const evs = porDia[iso] || [];
+    html += `<div class="cal-celda${iso === HOY ? " hoy" : ""}"><div class="num">${d}</div>` +
+      evs.map(e => `<div class="cal-ev${e.estado !== "pendiente" ? " listo" : ""}" ` +
+        `title="${esc(e.cliente)} — ${esc(e.nombre)}${e.etiqueta ? " · " + esc(e.etiqueta) : ""}" ` +
+        `onclick="verCliente(${e.cliente_id})">${esc(e.cliente)}</div>`).join("") + "</div>";
+  }
+  $("cal-grid").innerHTML = html;
+}
+
+function moverMes(paso) {
+  calMes += paso;
+  if (calMes < 0) { calMes = 11; calAno--; }
+  if (calMes > 11) { calMes = 0; calAno++; }
+  pintarCalendario();
+}
+
+// ---------------------------------------------------------------- obligaciones
+function pintarFiltroClientes() {
+  const sel = $("f-cliente");
+  const actual = sel.value;
+  sel.innerHTML = '<option value="">Todos los clientes</option>' +
+    CLIENTES.map(c => `<option value="${c.id}">${esc(c.nombre)}</option>`).join("");
+  sel.value = actual;
+}
+
+function pintarObligaciones() {
+  const fc = $("f-cliente").value, fe = $("f-estado").value, fh = $("f-horizonte").value;
+  let eventos = AGENDA.slice();
+  if (fc) eventos = eventos.filter(e => String(e.cliente_id) === fc);
+  if (fe) eventos = eventos.filter(e => e.estado === fe);
+  if (fh === "proximos") eventos = eventos.filter(e => e.fecha >= HOY);
+  if (fh === "vencidos") eventos = eventos.filter(e => e.fecha < HOY && e.estado === "pendiente");
+  const cont = $("lista-obligaciones");
+  if (!eventos.length) {
+    cont.innerHTML = '<div class="vacio">Nada por aquí con esos filtros. 🙌</div>'; return;
+  }
+  let html = '<table><thead><tr><th>Fecha</th><th>Cliente</th><th>Obligación</th>' +
+             '<th>Estado</th><th></th></tr></thead><tbody>';
+  for (const e of eventos) {
+    const vencido = e.fecha < HOY && e.estado === "pendiente";
+    html += `<tr>
+      <td style="white-space:nowrap"><b>${fmtFecha(e.fecha)}</b>${vencido ? ' <span class="pill vencido">vencido</span>' : ""}</td>
+      <td>${esc(e.cliente)}</td>
+      <td>${esc(e.nombre)}${e.etiqueta ? `<br><span style="color:var(--gris);font-size:.78rem">${esc(e.etiqueta)}</span>` : ""}</td>
+      <td><span class="pill ${e.estado}">${e.estado}</span></td>
+      <td style="white-space:nowrap;text-align:right">
+        ${e.estado === "pendiente"
+          ? `<button class="btn mini sec" onclick="marcar(${e.cliente_id},'${e.clave}','presentada')">✓ Presentada</button>
+             <button class="btn mini" onclick="marcar(${e.cliente_id},'${e.clave}','pagada')">💰 Pagada</button>`
+          : `<button class="btn mini peligro" onclick="marcar(${e.cliente_id},'${e.clave}','pendiente')">↺ Pendiente</button>`}
+      </td></tr>`;
+  }
+  cont.innerHTML = html + "</tbody></table>";
+}
+
+async function marcar(clienteId, clave, estado) {
+  await fetch("/api/vencimientos/estado", {method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({cliente_id: clienteId, clave, estado})});
+  const ev = AGENDA.find(e => e.cliente_id === clienteId && e.clave === clave);
+  if (ev) ev.estado = estado;
+  pintarObligaciones(); pintarCalendario();
+}
+
+// ---------------------------------------------------------------- exportar
+async function exportarICS(clienteId) {
+  const sufijo = clienteId ? "?cliente=" + clienteId : "";
+  window.location = "/api/vencimientos/ical" + sufijo;
+  if (!clienteId) {
+    try {
+      const r = await fetch("/api/vencimientos/ical?url=1").then(x => x.json());
+      setTimeout(() => {
+        if (confirm("📆 Archivo .ics descargado (ábrelo para importar los eventos).\n\n" +
+          "¿Prefieres SUSCRIBIRTE para que tu calendario se actualice solo?\n" +
+          "Copia la URL de suscripción con Aceptar y pégala en Google/Apple/Outlook " +
+          "Calendar → 'Agregar calendario desde URL'.")) {
+          navigator.clipboard.writeText(r.url);
+          alert("URL copiada ✅\n\n" + r.url);
+        }
+      }, 600);
+    } catch (e) {}
+  }
+}
+
+function descargarInforme() {
+  window.location = "/api/vencimientos/informe.pdf?dias=" + $("informe-dias").value;
+}
+
+// ---------------------------------------------------------------- importar Excel
+async function importarArchivo(input) {
+  if (!input.files.length) return;
+  const fd = new FormData();
+  fd.append("archivo", input.files[0]);
+  input.value = "";
+  const r = await fetch("/api/vencimientos/importar", {method: "POST", body: fd});
+  const j = await r.json();
+  if (!r.ok) { alert(j.error || "No pude importar el archivo."); return; }
+  let msg = `✅ ${j.creados} cliente(s) importado(s).`;
+  if (j.errores && j.errores.length) msg += "\n\nAvisos:\n· " + j.errores.join("\n· ");
+  alert(msg);
+  await recargarDatos();
+}
+
+// ---------------------------------------------------------------- leer RUT
+async function leerRut(input) {
+  if (!input.files.length) return;
+  $("rut-aviso").textContent = "Leyendo RUT…";
+  const fd = new FormData();
+  fd.append("archivo", input.files[0]);
+  input.value = "";
+  const r = await fetch("/api/vencimientos/rut", {method: "POST", body: fd});
+  const j = await r.json();
+  if (!r.ok) { $("rut-aviso").textContent = j.error || "No pude leer el RUT."; return; }
+  if (j.nombre) $("c-nombre").value = j.nombre;
+  if (j.nit) $("c-nit").value = j.nit;
+  $("c-tipo").value = j.tipo || "natural";
+  pintarChecksObligaciones(j.obligaciones || []);
+  $("rut-aviso").textContent = `✅ RUT leído (responsabilidades: ${
+    (j.codigos || []).join(", ") || "—"}). Revisa y ajusta.`;
+}
+
+// ---------------------------------------------------------------- perfil
+async function cargarPerfil() {
+  try {
+    const j = await fetch("/api/vencimientos/perfil").then(r => r.json());
+    $("perfil-estudio").value = j.estudio || "";
+    if (j.tiene_logo) {
+      $("perfil-logo-vista").src = "/api/vencimientos/perfil/logo?v=" + Date.now();
+      $("perfil-logo-vista").style.display = "";
+    }
+  } catch (e) {}
+}
+
+async function guardarPerfil() {
+  const fd = new FormData();
+  fd.append("estudio", $("perfil-estudio").value);
+  const archivo = $("perfil-logo").files[0];
+  if (archivo) fd.append("logo", archivo);
+  const r = await fetch("/api/vencimientos/perfil", {method: "POST", body: fd});
+  const j = await r.json();
+  if (!r.ok) { $("perfil-msg").style.color = "var(--rojo)"; $("perfil-msg").textContent = j.error; return; }
+  $("perfil-msg").style.color = "var(--verde)";
+  $("perfil-msg").textContent = "Guardado ✅ — tu próximo informe saldrá con tu marca.";
+  if (j.tiene_logo) {
+    $("perfil-logo-vista").src = "/api/vencimientos/perfil/logo?v=" + Date.now();
+    $("perfil-logo-vista").style.display = "";
+  }
+  $("perfil-logo").value = "";
+}
+
+cargarTodo();
+cargarPerfil();
+</script>
+</body>
+</html>

@@ -51,11 +51,10 @@ def main() -> int:
         pendientes = recordatorios_pendientes(usuarios, hoy)
 
         if not pendientes:
-            print(f"[{hoy}] Sin recordatorios para enviar hoy "
+            print(f"[{hoy}] Sin recordatorios de renta para enviar hoy "
                   f"({len(usuarios)} usuarios con recordatorios activos).")
-            return 0
-
-        print(f"[{hoy}] {len(pendientes)} recordatorio(s) por enviar:")
+        else:
+            print(f"[{hoy}] {len(pendientes)} recordatorio(s) por enviar:")
         enviados, fallidos = 0, 0
         for p in pendientes:
             tipo = "URGENTE 7d" if p.urgente else "aviso 30d"
@@ -82,6 +81,12 @@ def main() -> int:
         elif not habilitado and not seco:
             print("\n⚠ Correo deshabilitado: no se envió nada. "
                   "Activa config/email.yaml → habilitado: true.")
+
+        # Avisos del gestor de vencimientos (clientes de contadores, 7 y 3 días)
+        from src.vencimientos import enviar_avisos_vencimientos
+        n = enviar_avisos_vencimientos(hoy, seco=seco or not habilitado)
+        if n:
+            print(f"[{hoy}] Avisos de vencimientos a contadores: {n}")
     return 0
 
 
