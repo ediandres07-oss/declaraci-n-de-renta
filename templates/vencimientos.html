@@ -126,8 +126,13 @@
       <div class="fila-encabezado">
         <h2>Tus clientes</h2>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn sec" onclick="exportarICS()">⬇️ Exportar a mi calendario</button>
-          <button class="btn sec" onclick="$('archivo-importar').click()">⬆️ Importar Excel</button>
+          <select id="orden-clientes" onchange="pintarClientes()" style="padding:8px 12px;border:1px solid var(--borde);border-radius:10px;font-size:.85rem;background:#fff">
+            <option value="vencimiento">Por próximo vencimiento</option>
+            <option value="nombre">Por nombre</option>
+          </select>
+          <button class="btn sec" onclick="window.location='/api/vencimientos/exportar.xlsx'">⬇️ Excel</button>
+          <button class="btn sec" onclick="exportarICS()">📆 A mi calendario</button>
+          <button class="btn sec" onclick="$('archivo-importar').click()">⬆️ Importar</button>
           <button class="btn" onclick="abrirModal()">＋ Crear cliente</button>
         </div>
         <input type="file" id="archivo-importar" accept=".xlsx,.csv" style="display:none"
@@ -256,7 +261,8 @@
 </div>
 
 <footer>Fechas según el Calendario Tributario DIAN {{ ano }} y resoluciones de exógena vigentes.
-  Verifica siempre ante cambios normativos. · tributando.co</footer>
+  Verifica siempre ante cambios normativos. · Los datos de tus clientes se usan solo para
+  calcular sus vencimientos — <a href="/privacidad">política de tratamiento de datos</a> · tributando.co</footer>
 
 <script>
 let CATALOGO = {obligaciones: [], sugerencias: {}};
@@ -310,7 +316,11 @@ function pintarClientes() {
   let html = '<table><thead><tr><th>Cliente</th><th>NIT</th><th>Tipo</th>' +
              '<th>Próximo vencimiento</th><th></th></tr></thead><tbody>';
   const tipos = {natural: "Natural", juridica: "Jurídica", gran: "Gran contribuyente", rst: "RST"};
-  for (const c of CLIENTES) {
+  const lista = CLIENTES.slice();
+  if (($("orden-clientes") || {}).value !== "nombre")
+    lista.sort((a, b) => (a.proximo ? a.proximo.fecha : "9999")
+      .localeCompare(b.proximo ? b.proximo.fecha : "9999"));
+  for (const c of lista) {
     const prox = c.proximo
       ? `<b>${fmtFecha(c.proximo.fecha)}</b><br><span style="color:var(--gris);font-size:.78rem">${c.proximo.nombre}${c.proximo.etiqueta ? " · " + c.proximo.etiqueta : ""}</span>`
       : '<span style="color:var(--gris)">Sin pendientes este año</span>';

@@ -647,6 +647,63 @@ def api_importar():
     return jsonify({"ok": True, "creados": creados, "errores": errores[:20]})
 
 
+@venc_bp.route("/api/vencimientos/exportar.xlsx")
+@login_requerido
+def api_exportar_excel():
+    """Cartera completa a Excel: clientes (ordenados por próximo vencimiento)
+    + hoja con todos los vencimientos del año."""
+    import openpyxl
+    from openpyxl.styles import Font, PatternFill
+
+    u = usuario_actual()
+    agenda = _agenda_usuario(u)
+    hoy = date.today().isoformat()
+    proximo = {}
+    for e in agenda:
+        if e["fecha"] >= hoy and e["estado"] == "pendiente":
+            proximo.setdefault(e["cliente_id"], e)
+    nombres_ob = {o["clave"]: o["nombre"] for o in catalogo_obligaciones()}
+    clientes = ClienteContador.query.filter_by(usuario_id=u.id).all()
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Clientes"
+    encabezado = ["Cliente", "NIT", "Tipo", "Correo", "Teléfono",
+                  "Próximo vencimiento", "Qué vence", "Obligaciones"]
+    ws.append(encabezado)
+    for c in sorted(clientes,
+                    key=lambda c: proximo.get(c.id, {}).get("fecha", "9999")):
+        e = proximo.get(c.id)
+        ws.append([c.nombre, c.nit, c.tipo, c.correo or "", c.telefono or "",
+                   e["fecha"] if e else "",
+                   (e["nombre"] + (f" — {e['etiqueta']}" if e["etiqueta"] else ""))
+                   if e else "Sin pendientes",
+                   ", ".join(nombres_ob.get(o, o)
+                             for o in c.lista_obligaciones())])
+    ws2 = wb.create_sheet("Vencimientos")
+    ws2.append(["Fecha", "Cliente", "NIT", "Obligación", "Periodo", "Estado"])
+    for e in agenda:
+        ws2.append([e["fecha"], e["cliente"], e["nit"], e["nombre"],
+                    e["etiqueta"], e["estado"]])
+    for hoja, anchos in ((ws, (30, 14, 10, 26, 14, 18, 34, 50)),
+                         (ws2, (12, 30, 14, 34, 16, 12))):
+        for celda in hoja[1]:
+            celda.font = Font(bold=True, color="CDAB7E")
+            celda.fill = PatternFill("solid", fgColor="1E2432")
+        for col, ancho in zip("ABCDEFGH", anchos):
+            hoja.column_dimensions[col].width = ancho
+        hoja.freeze_panes = "A2"
+        hoja.auto_filter.ref = hoja.dimensions
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+    return send_file(buf, as_attachment=True,
+                     download_name=f"clientes-vencimientos-{hoy}.xlsx",
+                     mimetype="application/vnd.openxmlformats-officedocument"
+                              ".spreadsheetml.sheet")
+
+
 # ---------------------------------------------------------------- leer RUT
 # Responsabilidades del RUT (casilla 53) → obligaciones del calendario.
 RUT_CODIGOS = {

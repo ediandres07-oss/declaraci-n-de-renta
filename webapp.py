@@ -373,6 +373,12 @@ def contabilidad():
                            ia_whatsapp=IA_CFG.get("negocio", {}).get("whatsapp", ""))
 
 
+@app.get("/privacidad")
+def privacidad():
+    """Política de tratamiento de datos personales (Ley 1581 de 2012)."""
+    return render_template("privacidad.html")
+
+
 @app.get("/links")
 @app.get("/enlaces")
 def enlaces():

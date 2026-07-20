@@ -206,6 +206,15 @@ def test_informe_pdf(cliente, contador):
     assert r.data[:5] == b"%PDF-"
 
 
+def test_exportar_excel_y_privacidad(cliente, contador):
+    cliente.post("/api/vencimientos/clientes", json={
+        "nombre": "Ana", "nit": "1030601", "obligaciones": ["renta_pn"]})
+    r = cliente.get("/api/vencimientos/exportar.xlsx")
+    assert r.status_code == 200 and r.data[:2] == b"PK"
+    r = cliente.get("/privacidad")
+    assert r.status_code == 200 and "1581" in r.data.decode()
+
+
 def test_pagina_carga_con_login(cliente, contador):
     r = cliente.get("/vencimientos")
     assert r.status_code == 200
