@@ -560,6 +560,113 @@ def _hoja_anexo(wb, datos, liq: Liquidacion, exogena: Optional[ResultadoExogena]
         ws.column_dimensions[col].width = ancho
 
 
+def _hoja_exogena_2025(wb, exogena: Optional[ResultadoExogena]) -> None:
+    """Llena la hoja 'EXOGENA 2025' de la plantilla con la exógena cruda
+    reportada por terceros (informante, NIT, concepto, valor). En la plantilla
+    venía vacía."""
+    nombre = "EXOGENA 2025"
+    if nombre not in wb.sheetnames or exogena is None or not exogena.partidas:
+        return
+    ws = wb[nombre]
+    _limpiar_constantes(ws, "A1:Z400")
+    ws.sheet_view.showGridLines = False
+
+    ws.merge_cells("A1:F1")
+    c = ws["A1"]
+    c.value = "  EXÓGENA 2025 — información reportada por terceros ante la DIAN"
+    c.fill = _FILL_NAVY
+    c.font = Font(bold=True, size=13, color=DORADO)
+    c.alignment = Alignment(vertical="center")
+    ws.row_dimensions[1].height = 28
+    ws.merge_cells("A2:F2")
+    c = ws["A2"]
+    c.value = (f"  {exogena.nombre or ''} · NIT {exogena.identificacion or '—'} · "
+               f"año {exogena.anio or ''} · generado por Tributando.co")
+    c.fill = _FILL_NAVY
+    c.font = Font(size=9, color="FFFFFF")
+    ws.row_dimensions[2].height = 16
+
+    cabeceras = ["Fila", "Informante", "NIT informante", "Concepto reportado",
+                 "Valor reportado", "Uso sugerido DIAN"]
+    for j, texto in enumerate(cabeceras, start=1):
+        c = ws.cell(row=4, column=j, value=texto)
+        c.fill = _FILL_GRIS
+        c.font = Font(bold=True, size=9, color=NAVY)
+        c.border = Border(bottom=Side(style="medium", color=DORADO))
+        c.alignment = Alignment(vertical="center", wrap_text=True)
+
+    fila = 5
+    total = 0.0
+    for p in sorted(exogena.partidas, key=lambda q: q.fila):
+        reportado = p.valor_reportado if p.valor_reportado is not None else p.valor
+        total += reportado or 0
+        valores = [p.fila, (p.informante_nombre or "").strip(),
+                   (p.informante_nit or "").strip(), p.detalle.strip(),
+                   reportado, (p.uso_sugerido or "").strip()]
+        for j, v in enumerate(valores, start=1):
+            c = ws.cell(row=fila, column=j, value=v)
+            c.border = _BORDE_FINO
+            c.font = Font(size=9, color=NAVY)
+            if j == 5:
+                c.number_format = "#,##0"
+            if j in (4, 6):
+                c.alignment = Alignment(wrap_text=True, vertical="top")
+        fila += 1
+
+    c = ws.cell(row=fila, column=4, value="TOTAL REPORTADO")
+    c.font = Font(bold=True, size=9, color=NAVY)
+    c = ws.cell(row=fila, column=5, value=total)
+    c.font = Font(bold=True, size=10, color=DORADO_OSCURO)
+    c.number_format = "#,##0"
+
+    ws.auto_filter.ref = f"A4:F{4 + len(exogena.partidas)}"
+    ws.freeze_panes = "A5"
+    for col, ancho in {"A": 6, "B": 30, "C": 16, "D": 54, "E": 16, "F": 40}.items():
+        ws.column_dimensions[col].width = ancho
+
+
+# Ejemplos que la plantilla ITGS trae pegados como CONSTANTES o FÓRMULAS DE PURO
+# NÚMERO (=64000000, =8000*7670, =67000000*1%…). El motor no las sobrescribe
+# todas, así que se limpian ANTES de llenar: si una celda lleva dato real (p.ej.
+# retefuente D7), el motor la reescribe después; si no, queda en blanco.
+# NO se tocan las constantes legales (tope 240 UVT en Fac. Elctrónicas!D28), las
+# tasas ni los factores de reajuste.
+_EJEMPLOS_PLANTILLA = {
+    "Pat bruto": ["D8", "D64"],                  # otros activos / acciones de ejemplo
+    "R.no laboral y R gravables": ["F39"],       # costo de ejemplo (64M)
+    "retefuente": ["D7"],                        # retención de ejemplo (el motor la reescribe si hay real)
+    "rta x comp patr": ["C15"],                  # impuestos exterior de ejemplo (45M)
+    "Fac. Elctrónicas": ["C4"],                  # factura de ejemplo (180M)
+    "tabl int presunt": ["D12", "D15", "E17"],   # préstamos a socios de ejemplo
+}
+
+
+def _limpiar_ejemplos_plantilla(wb) -> None:
+    """Borra los montos de ejemplo de la plantilla ITGS en hojas que el motor no
+    llena por completo. Conserva constantes legales, tasas, factores y fórmulas
+    con referencias."""
+    for hoja, celdas in _EJEMPLOS_PLANTILLA.items():
+        if hoja in wb.sheetnames:
+            for coord in celdas:
+                wb[hoja][coord] = None
+
+
+def _ajustes_finales(wb, liq: Liquidacion) -> None:
+    """Ajustes al cierre: patrimonio real en renta presuntiva (evita comparación
+    patrimonial con datos ajenos), evita descuentos negativos por fórmula con
+    datos vacíos, y oculta hojas auxiliares técnicas."""
+    if "renta presunt" in wb.sheetnames:
+        wb["renta presunt"]["E4"] = round(liq.r(29))   # patrimonio bruto
+        wb["renta presunt"]["E5"] = round(liq.r(30))   # deudas
+    if "dtos tribut" in wb.sheetnames:                 # descuento dividendos no puede ser negativo
+        f = wb["dtos tribut"]["E15"].value
+        if isinstance(f, str) and f.startswith("=") and not f.startswith("=MAX(0,"):
+            wb["dtos tribut"]["E15"] = "=MAX(0," + f[1:] + ")"
+    for hoja in ("Hoja1", "Sheet1"):                   # auxiliares técnicas (con #REF!) -> ocultas
+        if hoja in wb.sheetnames:
+            wb[hoja].sheet_state = "hidden"
+
+
 def _hoja_indice(wb) -> None:
     """Portada Índice: navegación con un clic a cada hoja, con la marca."""
     nombre = "Índice"
@@ -585,6 +692,7 @@ def _hoja_indice(wb) -> None:
     secciones = [
         ("FORMULARIO 210", "🧾  Formulario 210 (autoritativo)"),
         ("Anexo Exógena", "📋  Anexo Exógena — cruce completo y advertencias"),
+        ("EXOGENA 2025", "📄  Exógena 2025 — reportada por terceros"),
         ("Pat bruto", "🏠  Patrimonio bruto"),
         ("Deudas", "💳  Deudas"),
         ("R.trabajo y honorarios", "💼  Rentas de trabajo y honorarios"),
@@ -646,6 +754,7 @@ def llenar_hojas_detalle(wb, datos: DatosDeclaracion, liq: Liquidacion,
                          parametros: Optional[Parametros] = None) -> None:
     """Punto de entrada: llena todas las hojas de soporte y borra ejemplos."""
     p = parametros or Parametros.cargar(2025)
+    _limpiar_ejemplos_plantilla(wb)     # antes de llenar: borra ejemplos de la plantilla
     _hoja_deudas(wb, datos, exogena)
     _hoja_pat_bruto(wb, datos, exogena)
     _hoja_retefuente(wb, datos, exogena)
@@ -659,4 +768,6 @@ def llenar_hojas_detalle(wb, datos: DatosDeclaracion, liq: Liquidacion,
     _hoja_gocas(wb, datos, liq, p)
     _actualizar_uvt(wb, p)
     _hoja_anexo(wb, datos, liq, exogena)
+    _hoja_exogena_2025(wb, exogena)     # llena la hoja EXOGENA 2025 (venía vacía)
+    _ajustes_finales(wb, liq)           # renta presuntiva real, sin negativos, oculta auxiliares
     _hoja_indice(wb)                    # al final, para enlazar el anexo
