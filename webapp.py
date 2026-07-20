@@ -7,6 +7,7 @@ Ejecutar:  .venv/bin/python webapp.py   →  http://127.0.0.1:5210
 """
 import io
 import json
+import os
 import re
 import shutil
 import tempfile
