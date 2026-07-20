@@ -194,6 +194,7 @@ class SuscripcionLector(db.Model):
     empresas_max = db.Column(db.Integer, default=3)         # 0 = ilimitado
     activa = db.Column(db.Boolean, default=True)
     vence = db.Column(db.Date)
+    equipo = db.Column(db.String(64))                       # máquina amarrada (1 sola)
     creado = db.Column(db.DateTime, default=datetime.utcnow)
 
 
@@ -234,12 +235,23 @@ def crear_suscripcion(email: str, plan: str, dias: int | None = None) -> "Suscri
     return sus
 
 
-def estado_licencia(licencia: str) -> dict:
-    """Estado de una licencia para el Lector local (validación)."""
+def estado_licencia(licencia: str, equipo: str | None = None) -> dict:
+    """Estado de una licencia. Si se pasa `equipo`, amarra la licencia a esa
+    máquina en la primera activación; si ya está amarrada a OTRA, la rechaza
+    (evita reenviar la clave y usarla en varios equipos)."""
     sus = SuscripcionLector.query.filter_by(licencia=(licencia or "").strip()).first()
     if not sus:
         return {"valida": False, "error": "Licencia no encontrada"}
     vencida = bool(sus.vence and date.today() > sus.vence)
+    equipo = (equipo or "").strip()
+    if equipo:
+        if not sus.equipo:                     # primera activación → amarra
+            sus.equipo = equipo
+            db.session.commit()
+        elif sus.equipo != equipo:             # ya está en otro equipo
+            return {"valida": False, "otro_equipo": True,
+                    "error": "Esta licencia ya está activa en otro equipo. "
+                             "Escríbenos para trasladarla."}
     usadas = EmpresaLector.query.filter_by(licencia=sus.licencia).count()
     return {
         "valida": bool(sus.activa) and not vencida,
@@ -530,6 +542,12 @@ def _migrar_columnas_faltantes():
         for nombre, tipo in nuevas.items():
             if nombre not in existentes:
                 con.execute(text(f"ALTER TABLE usuarios ADD COLUMN {nombre} {tipo}"))
+    # Columna 'equipo' en suscripciones_lector (amarre a una máquina).
+    if "suscripciones_lector" in insp.get_table_names():
+        cols = {c["name"] for c in insp.get_columns("suscripciones_lector")}
+        if "equipo" not in cols:
+            with db.engine.begin() as con:
+                con.execute(text("ALTER TABLE suscripciones_lector ADD COLUMN equipo VARCHAR(64)"))
 
 
 auth_bp = Blueprint("auth", __name__)

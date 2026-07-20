@@ -1891,8 +1891,8 @@ def sin_cache(resp):
 @app.route("/api/lector/licencia", methods=["POST"])
 def api_lector_licencia():
     """El Lector XML local valida su clave de licencia contra el servidor."""
-    lic = (request.get_json(silent=True) or {}).get("licencia", "")
-    return jsonify(estado_licencia(lic))
+    b = request.get_json(silent=True) or {}
+    return jsonify(estado_licencia(b.get("licencia", ""), b.get("equipo", "")))
 
 
 @app.route("/api/lector/empresa", methods=["POST"])
