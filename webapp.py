@@ -28,7 +28,9 @@ from src.asistente import cargar_config as cargar_config_ia
 from src.asistente import responder as responder_ia
 from src.auth import (AccesoAutorizado, ArchivoExogena, LeadEspera, MuestraContador,
                       OrdenRegistro, Usuario, auth_bp, autorizado_requerido, db,
-                      init_auth, login_requerido, pro_requerido, usuario_actual)
+                      init_auth, login_requerido, pro_requerido, usuario_actual,
+                      PLANES_LECTOR, SuscripcionLector, EmpresaLector,
+                      crear_suscripcion, estado_licencia, registrar_empresa_lector)
 from src.calendario import fecha_limite
 from src.vencimientos import venc_bp
 from src.documentos import generar_checklist_pdf
@@ -379,6 +381,26 @@ def enlaces():
                            ia_whatsapp=IA_CFG.get("negocio", {}).get("whatsapp", ""))
 
 
+@app.get("/contadores/lector")
+def contadores_lector():
+    """Landing del Lector XML (Tributando Contadores): planes por empresa + pago.
+    Al confirmar el pago se crea la suscripción y se entrega la clave de licencia."""
+    u = usuario_actual()
+    planes = []
+    for clave in ("mensual", "anual"):
+        info = PLANES_LECTOR.get(clave, {})
+        planes.append({
+            "clave": clave, "nombre": info.get("nombre", clave.title()),
+            "periodo": "mes" if clave == "mensual" else "año",
+            "precio": PRECIOS_LECTOR.get(clave, 0),
+        })
+    return render_template("contadores_lector.html",
+                           planes=planes,
+                           logueado=u is not None,
+                           pago=_CFG_PRECIOS.get("pago", {}),
+                           whatsapp=re.sub(r"\D", "", str(_CONTACTO.get("whatsapp", ""))))
+
+
 @app.get("/contadores")
 def contadores():
     """Página mayorista para contadores: pase de temporada (venta por WhatsApp)
@@ -418,6 +440,43 @@ def crear_pase_contador():
     }
     _guardar_ordenes(ordenes)
     return jsonify({"orden_id": orden_id, "precio": cont.get("precio", 249000)})
+
+
+# Precios de la suscripción al Lector XML (Tributando Contadores). Plana,
+# empresas ILIMITADAS, por debajo de Kontalid ($297.700/año). Editable;
+# idealmente mover a config/precios.yaml bloque `lector`.
+PRECIOS_LECTOR = {
+    "mensual": 29900,
+    "anual":   249900,   # bajo Kontalid ($297.700/año), lejísimos de Cifrato (por CUFE)
+}
+
+
+@app.post("/api/lector-suscripcion/crear")
+@login_requerido
+def crear_suscripcion_lector():
+    """Crea la orden de suscripción al Lector XML. Al confirmar el pago se crea
+    la suscripción y se entrega la clave de licencia al correo del contador."""
+    u = usuario_actual()
+    cuerpo = request.get_json(silent=True) or {}
+    plan = (cuerpo.get("plan") or "independiente").lower()
+    if plan not in PRECIOS_LECTOR:
+        return jsonify({"error": "Plan inválido."}), 400
+    email = (u.email or "").strip()
+    if not email:
+        return jsonify({"error": "Tu cuenta no tiene correo."}), 400
+    precio = PRECIOS_LECTOR[plan]
+    orden_id = uuid.uuid4().hex[:12]
+    ordenes = _leer_ordenes()
+    ordenes[orden_id] = {
+        "tipo": "orden", "plan": "lector", "plan_lector": plan,
+        "precio": precio,
+        "contacto": {"email": email, "nombre": (u.nombre or "").strip(),
+                     "telefono": str(cuerpo.get("telefono", "")).strip()},
+        "estado": "pendiente_pago", "fecha": str(date.today()),
+        "nit": "", "nombre": (u.nombre or "Contador"),
+    }
+    _guardar_ordenes(ordenes)
+    return jsonify({"orden_id": orden_id, "precio": precio, "plan": plan})
 
 
 @app.get("/api/muestra-contador/<token>.pdf")
@@ -989,11 +1048,72 @@ def _entregar_pase_contador(orden_id: str, orden: dict) -> None:
         pass
 
 
+def _entregar_licencia_lector(orden_id: str, orden: dict) -> None:
+    """Al confirmar el pago del Lector: crea la suscripción y envía la CLAVE DE
+    LICENCIA al correo del contador. Idempotente (licencia_lector_enviada)."""
+    if orden.get("plan") != "lector" or orden.get("licencia_lector_enviada"):
+        return
+    email = (orden.get("contacto") or {}).get("email", "").strip()
+    plan = orden.get("plan_lector", "independiente")
+    if not email:
+        return
+    try:
+        sus = crear_suscripcion(email, plan)   # el período (30/365) sale del plan
+        orden["licencia_lector"] = sus.licencia
+        from src.correo import cargar_config_email, enviar_email
+        cfg = cargar_config_email()
+        if not cfg.get("habilitado"):
+            orden["licencia_lector_enviada"] = True   # generada; correo deshabilitado
+            return
+        info = PLANES_LECTOR.get(plan, {})
+        limite = info.get("empresas_max") or 0
+        cupo = "empresas ilimitadas" if not limite else f"hasta {limite} empresas"
+        nombre = ((orden.get("contacto") or {}).get("nombre", "") or orden.get("nombre", ""))
+        primer = nombre.split()[0].title() if nombre else ""
+        saludo = f"Hola {primer}," if primer else "Hola,"
+        navy, dorado = "#1e2432", "#b8955f"
+        sitio = (_CONTACTO.get("sitio") or "https://tributando.co").rstrip("/")
+        html = f"""<!DOCTYPE html><html><body style="margin:0;background:#f5f7fa;
+          font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:#1e2b3a">
+          <div style="max-width:560px;margin:0 auto;padding:24px">
+            <div style="background:#fff;border-radius:16px;overflow:hidden">
+              <div style="background:{navy};color:#fff;padding:24px 26px">
+                <div style="font-size:1.5rem">🔑</div>
+                <div style="font-size:1.2rem;font-weight:800;margin-top:6px">
+                  Tu licencia de <span style="color:{dorado}">Tributando Contadores</span> está activa</div>
+              </div>
+              <div style="padding:24px 26px;font-size:.95rem;line-height:1.65">
+                <p>{saludo}</p>
+                <p>Confirmamos tu pago del plan <b>{info.get('nombre', plan).upper()}</b>
+                   ({cupo}). Esta es tu clave de licencia para el <b>Lector XML</b>:</p>
+                <div style="background:#f5f7fa;border:2px dashed {dorado};border-radius:12px;
+                  padding:18px;margin:18px 0;text-align:center">
+                  <div style="font-family:monospace;font-size:1.4rem;font-weight:800;
+                    letter-spacing:1px;color:{navy}">{sus.licencia}</div>
+                </div>
+                <p><b>Cómo usarla:</b> abre el Lector XML, pega esta clave en el panel
+                   «Licencia» y listo. Vence el {sus.vence.isoformat() if sus.vence else '—'};
+                   renovamos con tu próximo pago.</p>
+                <p style="color:#6b7280;font-size:.85rem">Orden <code>{orden_id}</code> ·
+                   <a href="{sitio}/contadores" style="color:{dorado}">{sitio}/contadores</a></p>
+              </div>
+            </div>
+          </div></body></html>"""
+        enviar_email(email, "Tu licencia de Tributando Contadores 🔑", html)
+        orden["licencia_lector_enviada"] = True
+    except Exception:
+        pass
+
+
 def _finalizar_pago_orden(orden_id: str, orden: dict, ordenes: dict) -> None:
     """Marca la orden como pagada y, si es plan de presentación, conserva la
     exógena y genera el checklist para el trámite. Idempotente."""
-    orden["estado"] = ("pagada" if orden["plan"] in ("pdf", "contadores")
+    orden["estado"] = ("pagada" if orden["plan"] in ("pdf", "contadores", "lector")
                        else "pagada_en_tramite")
+
+    # Suscripción al Lector XML: crea la suscripción y entrega la clave. Idempotente.
+    if orden["plan"] == "lector":
+        _entregar_licencia_lector(orden_id, orden)
 
     # Pase de contadores: al confirmar el pago se habilita SOLO el acceso al
     # liquidador (usando el correo con que el contador entró y compró el pase).
@@ -1746,6 +1866,42 @@ def firmar_formulario_pdf():
 def sin_cache(resp):
     resp.headers["Cache-Control"] = "no-store"
     return resp
+
+
+# ============ Tributando Contadores — Lector XML (candado de suscripción) ============
+
+@app.route("/api/lector/licencia", methods=["POST"])
+def api_lector_licencia():
+    """El Lector XML local valida su clave de licencia contra el servidor."""
+    lic = (request.get_json(silent=True) or {}).get("licencia", "")
+    return jsonify(estado_licencia(lic))
+
+
+@app.route("/api/lector/empresa", methods=["POST"])
+def api_lector_empresa():
+    """Registra una empresa contra la licencia (respeta el límite del plan)."""
+    b = request.get_json(silent=True) or {}
+    if not b.get("licencia"):
+        return jsonify({"ok": False, "error": "Falta la clave de licencia."}), 400
+    res = registrar_empresa_lector(b.get("licencia"), b.get("nit"),
+                                   b.get("nombre"), b.get("sistema"))
+    return jsonify(res), (200 if res.get("ok") else 400)
+
+
+@app.route("/api/lector/suscripcion", methods=["POST"])
+@autorizado_requerido
+def api_lector_suscripcion():
+    """Admin: crea/renueva la suscripción de un contador y devuelve su licencia."""
+    b = request.get_json(silent=True) or {}
+    email = (b.get("email") or "").strip()
+    plan = (b.get("plan") or "independiente").lower()
+    if not email or plan not in PLANES_LECTOR:
+        return jsonify({"ok": False, "error": "Email o plan inválido."}), 400
+    dias = int(b.get("dias") or 30)
+    sus = crear_suscripcion(email, plan, dias=dias)
+    return jsonify({"ok": True, "licencia": sus.licencia, "plan": sus.plan,
+                    "empresas_max": sus.empresas_max,
+                    "vence": sus.vence.isoformat() if sus.vence else None})
 
 
 if __name__ == "__main__":

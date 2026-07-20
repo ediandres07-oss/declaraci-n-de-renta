@@ -173,6 +173,110 @@ class AccesoAutorizado(db.Model):
     creado = db.Column(db.DateTime, default=datetime.utcnow)
 
 
+# -------------------------------------------- Tributando Contadores: Lector XML
+# Suscripción por número de empresas. La CLAVE DE LICENCIA autentica al Lector
+# XML local (corre en la máquina del contador por el captcha de la DIAN) contra
+# el servidor; el candado es contar empresas registradas vs el límite del plan.
+# Suscripción PLANA con empresas ILIMITADAS (como el mercado: Kontalid no cobra
+# por cliente). Solo cambia el período de facturación (mensual/anual).
+PLANES_LECTOR = {
+    "mensual": {"empresas_max": 0, "nombre": "Mensual", "dias": 30},
+    "anual":   {"empresas_max": 0, "nombre": "Anual",   "dias": 365},
+}
+
+
+class SuscripcionLector(db.Model):
+    """Suscripción de un contador al Lector XML (Tributando Contadores)."""
+    __tablename__ = "suscripciones_lector"
+    licencia = db.Column(db.String(40), primary_key=True)   # clave que pega en el Lector
+    email = db.Column(db.String(200), index=True)           # correo del contador (login)
+    plan = db.Column(db.String(30))                         # independiente|estudio|pro|ilimitado
+    empresas_max = db.Column(db.Integer, default=3)         # 0 = ilimitado
+    activa = db.Column(db.Boolean, default=True)
+    vence = db.Column(db.Date)
+    creado = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class EmpresaLector(db.Model):
+    """Empresa registrada por un contador; cuenta contra el límite del plan."""
+    __tablename__ = "empresas_lector"
+    id = db.Column(db.Integer, primary_key=True)
+    licencia = db.Column(db.String(40), index=True)
+    nit = db.Column(db.String(30))
+    nombre = db.Column(db.String(200))
+    sistema = db.Column(db.String(20))                      # siigo|contai
+    creado = db.Column(db.DateTime, default=datetime.utcnow)
+    __table_args__ = (db.UniqueConstraint("licencia", "nit", name="uq_licencia_nit"),)
+
+
+def generar_licencia() -> str:
+    """Clave de licencia legible, ej. TC-9F3A-7C21-B4E8."""
+    bloques = "-".join(secrets.token_hex(2).upper() for _ in range(3))
+    return f"TC-{bloques}"
+
+
+def crear_suscripcion(email: str, plan: str, dias: int | None = None) -> "SuscripcionLector":
+    """Crea (o renueva) la suscripción de un contador y devuelve la fila."""
+    plan = (plan or "").lower()
+    info = PLANES_LECTOR.get(plan) or PLANES_LECTOR["mensual"]
+    if dias is None:
+        dias = info.get("dias", 30)
+    email = (email or "").strip().lower()
+    sus = SuscripcionLector.query.filter_by(email=email).first()
+    if sus is None:
+        sus = SuscripcionLector(licencia=generar_licencia(), email=email)
+        db.session.add(sus)
+    sus.plan = plan
+    sus.empresas_max = info["empresas_max"]
+    sus.activa = True
+    sus.vence = date.today() + timedelta(days=dias)
+    db.session.commit()
+    return sus
+
+
+def estado_licencia(licencia: str) -> dict:
+    """Estado de una licencia para el Lector local (validación)."""
+    sus = SuscripcionLector.query.filter_by(licencia=(licencia or "").strip()).first()
+    if not sus:
+        return {"valida": False, "error": "Licencia no encontrada"}
+    vencida = bool(sus.vence and date.today() > sus.vence)
+    usadas = EmpresaLector.query.filter_by(licencia=sus.licencia).count()
+    return {
+        "valida": bool(sus.activa) and not vencida,
+        "activa": bool(sus.activa),
+        "vencida": vencida,
+        "plan": sus.plan,
+        "empresas_max": sus.empresas_max,      # 0 = ilimitado
+        "empresas_usadas": usadas,
+        "vence": sus.vence.isoformat() if sus.vence else None,
+    }
+
+
+def registrar_empresa_lector(licencia: str, nit: str, nombre: str, sistema: str) -> dict:
+    """Registra una empresa contra la licencia, respetando el límite del plan."""
+    sus = SuscripcionLector.query.filter_by(licencia=(licencia or "").strip()).first()
+    if not sus:
+        return {"ok": False, "error": "Licencia no encontrada"}
+    if not sus.activa or (sus.vence and date.today() > sus.vence):
+        return {"ok": False, "error": "Suscripción vencida o inactiva"}
+    nit = "".join(ch for ch in str(nit or "") if ch.isdigit())
+    if not nit:
+        return {"ok": False, "error": "NIT inválido"}
+    ya = EmpresaLector.query.filter_by(licencia=sus.licencia, nit=nit).first()
+    if ya:
+        return {"ok": True, "nueva": False, "empresa": nit}
+    usadas = EmpresaLector.query.filter_by(licencia=sus.licencia).count()
+    if sus.empresas_max and usadas >= sus.empresas_max:
+        return {"ok": False, "limite": True,
+                "error": f"Llegaste al límite del plan ({sus.empresas_max} empresas). "
+                         f"Sube de plan para agregar más."}
+    db.session.add(EmpresaLector(licencia=sus.licencia, nit=nit,
+                                 nombre=(nombre or "").strip(), sistema=(sistema or "").lower()))
+    db.session.commit()
+    return {"ok": True, "nueva": True, "empresa": nit,
+            "empresas_usadas": usadas + 1, "empresas_max": sus.empresas_max}
+
+
 # --------------------------------------------------------------- segundo factor
 MAX_INTENTOS_MFA = 5
 BLOQUEO_MINUTOS = 15
