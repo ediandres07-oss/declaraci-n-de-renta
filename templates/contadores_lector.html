@@ -122,6 +122,10 @@
       <h3>Suscripción <span id="mPlan"></span></h3>
       <p>Consigna <b id="mPrecio"></b> y reporta el pago. Te enviamos tu clave de licencia al confirmar.</p>
       <div class="ref" id="mRef"></div>
+      <div style="text-align:center;margin:12px 0">
+        <img src="/static/img/qr-bre-b.png?v=2" alt="QR Bre-B" style="width:180px;height:180px;border-radius:12px">
+        <div style="color:var(--suave);font-size:.82rem;margin-top:4px">Escanea con tu app bancaria (Bre-B)</div>
+      </div>
       <div class="datos">
         {% if pago.get('banco') %}<div><b>{{ pago.banco }}</b> {{ pago.get('tipo','') }} {{ pago.get('numero','') }}</div>{% endif %}
         {% if pago.get('nequi') %}<div>Nequi: <b>{{ pago.nequi }}</b></div>{% endif %}
