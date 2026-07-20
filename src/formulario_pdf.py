@@ -131,15 +131,154 @@ def _alinear_campos_derecha(ruta: Path) -> None:
         escritor.write(fh)
 
 
-def generar_formulario_pdf(
+# ================= modo oficial (overlay sobre el formato de la DIAN) =================
+# Fondo: página 1 del Formulario_210_2025.pdf oficial, limpiada de las capas
+# "NO DILIGENCIABLE"/diagonal y rasterizada una sola vez a static/img/form210_base.png.
+# En runtime solo se pinta ese PNG y se superponen los valores, así que NO se
+# necesita PyMuPDF en producción (basta reportlab, ya instalado).
+BASE_IMG = Path(__file__).resolve().parent.parent / "static" / "img" / "form210_base.png"
+
+
+def _mapa_oficial() -> dict:
+    """num de renglón -> (x, y, w, h) en puntos, origen inferior-izquierdo (reportlab).
+
+    Coordenadas medidas y verificadas contra las casillas vectoriales del PDF
+    oficial de la DIAN (carta, 612×792). y se convierte desde el origen superior
+    del formato: y_reportlab = 792 - y_top - h.
+    """
+    top = {}  # se arma con origen superior y luego se voltea
+    def put(n, x, ytop, w, h=12): top[n] = (x, ytop, w, h)
+    # Patrimonio
+    put(29, 145, 192, 95); put(30, 302, 192, 108); put(31, 482, 192, 110)
+    # Cédula general (17 filas × 4 columnas; None = casilla bloqueada)
+    filas = [[32,43,58,74],[None,None,None,75],[33,44,59,76],[None,45,60,77],[34,46,61,78],
+             [None,None,62,79],[35,47,63,80],[36,48,64,81],[37,49,65,82],[38,50,66,83],
+             [39,51,67,84],[40,52,68,85],[41,53,69,86],[None,54,70,87],[None,55,71,88],
+             [None,56,72,89],[42,57,73,90]]
+    cols = [125, 245, 365, 485]
+    for i, fila in enumerate(filas):
+        for j, n in enumerate(fila):
+            if n: put(n, cols[j], 216 + i*12, 108)
+    # Totales cédula general 91-98
+    for k, n in enumerate([91,92,93,94]): put(n, [86,224,362,506][k], 420, 87)
+    for k, n in enumerate([95,96,97,98]): put(n, [86,224,362,506][k], 432, 87)
+    # Bloque izquierdo: pensiones (99-103) + dividendos (104-110) + 111 + GO (112-115)
+    for i, n in enumerate(range(99, 116)): put(n, 199, 444 + i*12, 115)
+    # Liquidación privada
+    for i, n in enumerate(range(116, 122)): put(n, 478, 444 + i*12, 115)   # 116-121
+    put(122, 381, 516, 82); put(123, 511, 516, 82)                          # sub-grilla
+    put(124, 381, 528, 82); put(125, 511, 528, 82)
+    for i, n in enumerate(range(126, 134)): put(n, 478, 540 + i*12, 115)    # 126-133
+    # Saldos y dependientes
+    for k, n in enumerate([134,135,136,137]): put(n, [78,222,363,505][k], 649, [65,80,88,87][k])
+    for k, n in enumerate([138,139,140,141]): put(n, [115,215,348,527][k], 661, [28,88,16,63][k])
+    return {n: (x, H - ytop - h, w, h) for n, (x, ytop, w, h) in top.items()}
+
+
+def _generar_oficial_pdf(
     ruta: Path,
     datos: DatosDeclaracion,
     liq: Liquidacion,
     p: Parametros,
     rellenable: bool = True,
-    marca: str = "BORRADOR",
+    marca: str = "SUGERIDA",
 ) -> Path:
-    """`marca` es el texto de la marca de agua. Con "BORRADOR" (defecto) se
+    """Dibuja el fondo oficial de la DIAN y superpone los valores.
+
+    Con `rellenable` los valores van en campos AcroForm editables (como el modo
+    réplica); sin él, texto estático. `marca` es la marca de agua: "SUGERIDA"
+    (defecto) va tenue al fondo, detrás de las cifras; una "MUESTRA" (canal de
+    contadores) va tejida y más visible para que no pase como declaración real."""
+    ruta = Path(ruta)
+    ruta.parent.mkdir(parents=True, exist_ok=True)
+    c = canvas.Canvas(str(ruta), pagesize=letter)
+    con = datos.contribuyente
+    R = liq.r
+
+    # fondo: formato oficial ya limpio
+    c.drawImage(str(BASE_IMG), 0, 0, width=W, height=H,
+                preserveAspectRatio=False, mask=None)
+
+    # marca de agua (se pinta ANTES de las cifras -> queda al fondo)
+    c.saveState()
+    c.translate(W / 2, H / 2)
+    c.rotate(45)
+    if "MUESTRA" in marca.upper():
+        c.setFont("Helvetica-Bold", 42)
+        c.setFillColor(HexColor("#efe1cb"))
+        for fila in (-1, 0, 1):
+            c.drawCentredString(0, fila * 260, marca)
+    else:
+        # "agua cristal": casi transparente, para no tapar los renglones
+        c.setFont("Helvetica-Bold", 70)
+        c.setFillColor(HexColor("#9aa6bd"))
+        c.setFillAlpha(0.06)
+        c.drawCentredString(0, 0, marca)
+        c.setFillAlpha(1)
+    c.restoreState()
+    c.setFillColor(black)
+
+    # ---- encabezado (texto estático) ----
+    # nota en el "Espacio reservado para la DIAN" (queda en blanco)
+    c.setFont("Helvetica-Bold", 6)
+    c.setFillColor(HexColor("#b3372f"))
+    c.drawString(35, H - 96, "DECLARACIÓN SUGERIDA — No válido para presentación ante la DIAN.")
+    c.setFont("Helvetica", 5.6)
+    c.setFillColor(black)
+    c.drawString(35, H - 106, f"Año gravable {p.anio_gravable} · UVT ${p.uvt:,.0f} · "
+                 f"Generado {date.today().strftime('%d/%m/%Y')}")
+    c.setFont("Helvetica-Bold", 8)
+    for i, digito in enumerate(str(p.anio_gravable)):     # 1. Año
+        c.drawString(64 + i*10, H - 73, digito)
+    c.setFont("Helvetica", 8)
+    def _txt(x, ytop, valor, tam=7.5):
+        if not valor:
+            return
+        c.setFont("Helvetica", tam)
+        c.drawString(x, H - ytop, str(valor))
+    _txt(28, 181, " ".join(con.nit or "") if con.nit else "", 8)
+    _txt(180, 181, con.dv, 8)
+    _txt(218, 181, con.primer_apellido)
+    _txt(305, 181, con.segundo_apellido)
+    _txt(388, 181, con.primer_nombre)
+    _txt(472, 181, con.otros_nombres)
+    pago = R(136)                                          # 980. Pago total
+    if pago > 0:
+        c.setFont("Helvetica", 8)
+        c.drawString(458, H - 746, _mil(pago))
+
+    # ---- valores por renglón ----
+    mapa = _mapa_oficial()
+    for num, (x, y, w, h) in sorted(mapa.items()):
+        valor = _mil(R(num))
+        if rellenable:
+            c.acroForm.textfield(
+                name=f"R{num}", value=valor, tooltip=f"Renglón {num}",
+                x=x + 1, y=y + 1, width=w - 2, height=h - 2,
+                fontName="Helvetica", fontSize=7, textColor=black,
+                fillColor=None, borderColor=None, borderWidth=0,
+                maxlen=24, annotationFlags="print",
+            )
+        else:
+            c.setFont("Helvetica", 7)
+            c.drawRightString(x + w - 3, y + 3, valor)
+
+    c.showPage()
+    c.save()
+    if rellenable:
+        _alinear_campos_derecha(ruta)
+    return ruta
+
+
+def _generar_replica_pdf(
+    ruta: Path,
+    datos: DatosDeclaracion,
+    liq: Liquidacion,
+    p: Parametros,
+    rellenable: bool = True,
+    marca: str = "SUGERIDA",
+) -> Path:
+    """`marca` es el texto de la marca de agua. Con "SUGERIDA" (defecto) se
     imprime una sola diagonal tenue. Con cualquier otro valor (ej. "MUESTRA")
     se tejen varias diagonales más visibles: así una muestra gratis para
     contadores no puede pasar como declaración real."""
@@ -151,13 +290,13 @@ def generar_formulario_pdf(
     con = datos.contribuyente
 
     # ================= marca de agua =================
-    if marca == "BORRADOR":
+    if "MUESTRA" not in marca.upper():
         c.saveState()
         c.translate(W / 2, H / 2)
         c.rotate(45)
         c.setFont("Helvetica-Bold", 64)
         c.setFillColor(HexColor("#d8dee6"))
-        c.drawCentredString(0, 0, "BORRADOR")
+        c.drawCentredString(0, 0, marca)
         c.restoreState()
     else:
         # marca de muestra: tres diagonales tenues, sin invadir la lectura
@@ -474,6 +613,28 @@ def generar_formulario_pdf(
     if rellenable:
         _alinear_campos_derecha(ruta)
     return ruta
+
+
+def generar_formulario_pdf(
+    ruta: Path,
+    datos: DatosDeclaracion,
+    liq: Liquidacion,
+    p: Parametros,
+    rellenable: bool = True,
+    marca: str = "SUGERIDA",
+    oficial: bool = True,
+) -> Path:
+    """Genera el Formulario 210 en PDF.
+
+    Con `oficial=True` (defecto) superpone los valores sobre el formato oficial
+    de la DIAN (fondo `static/img/form210_base.png`); con `oficial=False` usa la
+    réplica dibujada. Ambos conservan la misma interfaz: campos AcroForm cuando
+    `rellenable`, marca de agua SUGERIDA/MUESTRA, y funcionan con
+    `sellar_formulario_pdf`. Si el fondo oficial no está disponible, cae a la
+    réplica para no dejar sin PDF al usuario."""
+    if oficial and BASE_IMG.exists():
+        return _generar_oficial_pdf(ruta, datos, liq, p, rellenable, marca)
+    return _generar_replica_pdf(ruta, datos, liq, p, rellenable, marca)
 
 
 def sellar_formulario_pdf(ruta: Path) -> str:

@@ -57,7 +57,7 @@ def test_pdf_resumen_generado(tmp_path, exogena_elizabeth, parametros):
 
 
 def test_formulario_210_pdf_oficial(tmp_path, exogena_elizabeth, parametros):
-    """El PDF estilo oficial trae las casillas, los valores en miles y la marca BORRADOR."""
+    """El PDF estilo oficial trae las casillas, los valores en miles y la marca SUGERIDA."""
     from src.formulario_pdf import generar_formulario_pdf
     datos = mapear_exogena_a_datos(exogena_elizabeth, parametros)
     datos.numero_anio_declaracion = 3
@@ -66,11 +66,10 @@ def test_formulario_210_pdf_oficial(tmp_path, exogena_elizabeth, parametros):
     from pypdf import PdfReader
     lector = PdfReader(str(ruta))
     texto = "".join(pg.extract_text() for pg in lector.pages)
-    assert "BORRADOR" in texto
-    # encabezado con el layout oficial: caja "210" y título en tres líneas
-    assert "210" in texto
-    assert "Declaración de renta y complementario" in texto
-    assert "sucesiones ilíquidas de causantes residentes" in texto
+    # El chrome del formato (título, caja "210", cuadrícula) va en la imagen de
+    # fondo oficial de la DIAN, así que NO está en la capa de texto. Lo que el
+    # motor superpone como texto sí: marca, nota de borrador, nombre y NIT.
+    assert "SUGERIDA" in texto
     assert "GIRALDO" in texto and "ELIZABETH" in texto
     assert "No válido para presentación" in texto
     # Los importes viven en los campos AcroForm (el PDF es rellenable), no en la
