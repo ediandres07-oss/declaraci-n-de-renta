@@ -398,6 +398,7 @@ def contadores_lector():
                            planes=planes,
                            logueado=u is not None,
                            pago=_CFG_PRECIOS.get("pago", {}),
+                           descarga_url=DESCARGA_LECTOR_URL,
                            whatsapp=re.sub(r"\D", "", str(_CONTACTO.get("whatsapp", ""))))
 
 
@@ -449,6 +450,11 @@ PRECIOS_LECTOR = {
     "mensual": 29900,
     "anual":   249900,   # bajo Kontalid ($297.700/año), lejísimos de Cifrato (por CUFE)
 }
+# URL de descarga del instalador (LectorXML-Setup.exe). Subir el Setup a Drive/
+# tributando y poner el link acá (o en env DESCARGA_LECTOR).
+DESCARGA_LECTOR_URL = os.environ.get(
+    "DESCARGA_LECTOR",
+    "https://github.com/ediandres07-oss/declaraci-n-de-renta/releases/download/v1.0/LectorXML-Setup.exe")
 
 
 @app.post("/api/lector-suscripcion/crear")
@@ -1091,9 +1097,14 @@ def _entregar_licencia_lector(orden_id: str, orden: dict) -> None:
                   <div style="font-family:monospace;font-size:1.4rem;font-weight:800;
                     letter-spacing:1px;color:{navy}">{sus.licencia}</div>
                 </div>
-                <p><b>Cómo usarla:</b> abre el Lector XML, pega esta clave en el panel
-                   «Licencia» y listo. Vence el {sus.vence.isoformat() if sus.vence else '—'};
-                   renovamos con tu próximo pago.</p>
+                <div style="text-align:center;margin:18px 0">
+                  <a href="{DESCARGA_LECTOR_URL}" style="display:inline-block;background:{navy};
+                     color:#fff;text-decoration:none;font-weight:800;padding:14px 28px;border-radius:26px">
+                     ⬇ Descargar el programa</a>
+                </div>
+                <p><b>Cómo usarla:</b> descarga e instala el programa (doble clic al
+                   instalador), ábrelo, pega esta clave en el panel «Licencia» y listo.
+                   Vence el {sus.vence.isoformat() if sus.vence else '—'}; renovamos con tu próximo pago.</p>
                 <p style="color:#6b7280;font-size:.85rem">Orden <code>{orden_id}</code> ·
                    <a href="{sitio}/contadores" style="color:{dorado}">{sitio}/contadores</a></p>
               </div>

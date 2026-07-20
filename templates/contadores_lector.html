@@ -69,6 +69,13 @@
     <h1>De la DIAN a tu contabilidad,<br><span>sin digitar nada</span></h1>
     <p>Descarga las facturas de tus clientes desde la DIAN por rango de fechas,
        con el IVA discriminado, y arma el plano para <b>Siigo</b> o <b>Contai</b> en un clic.</p>
+    {% if descarga_url %}
+    <div style="margin-top:26px">
+      <a href="{{ descarga_url }}" style="display:inline-block;background:var(--dorado);color:var(--navy);
+         font-weight:800;padding:14px 30px;border-radius:30px;text-decoration:none">⬇ Descargar para Windows</a>
+      <div style="color:#9aa3b0;font-size:.82rem;margin-top:8px">Necesitas una licencia activa para usarlo · requiere Google Chrome</div>
+    </div>
+    {% endif %}
   </div>
 </div>
 
