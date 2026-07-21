@@ -408,7 +408,7 @@ def admin_lector():
         empresas = EmpresaLector.query.filter_by(licencia=s.licencia).count()
         filas.append({"email": s.email, "plan": s.plan, "vence": s.vence,
                       "estado": estado, "color": color, "empresas": empresas,
-                      "equipo": "sí" if s.equipo else "—"})
+                      "equipo": "sí" if s.equipo else "—", "licencia": s.licencia})
     html = """<!doctype html><html><head><meta charset="utf-8">
     <title>Suscripciones Lector</title><meta name="viewport" content="width=device-width,initial-scale=1">
     <style>body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;background:#f5f7fa;margin:0;padding:24px;color:#1e2432}
@@ -417,12 +417,28 @@ def admin_lector():
     .est{font-weight:700}a{color:#b8955f}</style></head><body>
     <h1>🔑 Suscripciones — Lector XML ({{filas|length}})</h1>
     <p><a href="/admin">← Volver a /admin</a></p>
-    <table><tr><th>Correo</th><th>Plan</th><th>Vence</th><th>Estado</th><th>Empresas</th><th>Equipo</th></tr>
+    <table><tr><th>Correo</th><th>Plan</th><th>Vence</th><th>Estado</th><th>Empresas</th><th>Equipo</th><th></th></tr>
     {% for f in filas %}<tr><td>{{f.email}}</td><td>{{f.plan}}</td><td>{{f.vence or '—'}}</td>
-    <td class="est" style="color:{{f.color}}">{{f.estado}}</td><td>{{f.empresas}}</td><td>{{f.equipo}}</td></tr>{% endfor %}
-    {% if not filas %}<tr><td colspan="6" style="color:#8a919c">Aún no hay suscripciones.</td></tr>{% endif %}
-    </table></body></html>"""
+    <td class="est" style="color:{{f.color}}">{{f.estado}}</td><td>{{f.empresas}}</td><td>{{f.equipo}}</td>
+    <td><button onclick="borrar('{{f.licencia}}')" style="border:0;background:none;cursor:pointer;color:#b91c1c">🗑</button></td></tr>{% endfor %}
+    {% if not filas %}<tr><td colspan="7" style="color:#8a919c">Aún no hay suscripciones.</td></tr>{% endif %}
+    </table>
+    <script>async function borrar(lic){ if(!confirm('¿Borrar esta suscripción de prueba?'))return;
+      await fetch('/admin/lector/borrar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({licencia:lic})});
+      location.reload();}</script></body></html>"""
     return render_template_string(html, filas=filas)
+
+
+@app.post("/admin/lector/borrar")
+@autorizado_requerido
+def admin_lector_borrar():
+    lic = (request.get_json(silent=True) or {}).get("licencia", "")
+    sus = SuscripcionLector.query.filter_by(licencia=lic).first()
+    if sus:
+        EmpresaLector.query.filter_by(licencia=lic).delete()
+        db.session.delete(sus)
+        db.session.commit()
+    return jsonify({"ok": True})
 
 
 @app.get("/contadores/lector")
