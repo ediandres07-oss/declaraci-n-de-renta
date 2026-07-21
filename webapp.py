@@ -1253,6 +1253,28 @@ def confirmar_pago():
     return jsonify({"estado": orden["estado"], "orden_id": orden_id})
 
 
+@app.post("/api/orden/eliminar")
+@autorizado_requerido
+def eliminar_orden():
+    """Elimina una orden del panel admin y su Excel de exógena asociado.
+    Solo personal autorizado. Acción irreversible."""
+    cuerpo = request.get_json(silent=True) or {}
+    orden_id = cuerpo.get("orden_id", "")
+    ordenes = _leer_ordenes()
+    if orden_id not in ordenes:
+        return jsonify({"error": "Orden no encontrada."}), 404
+    ordenes.pop(orden_id)
+    _guardar_ordenes(ordenes)          # el sync borra la fila de la BD
+    try:                                # borra el Excel de exógena atado a la orden
+        fila = db.session.get(ArchivoExogena, f"orden:{orden_id}")
+        if fila is not None:
+            db.session.delete(fila)
+            db.session.commit()
+    except Exception:
+        db.session.rollback()
+    return jsonify({"ok": True})
+
+
 @app.post("/api/realmy-webhook")
 def realmy_webhook():
     """Webhook de Realmy: confirma un pago completado.
@@ -1586,6 +1608,9 @@ def admin():
             acciones = (f"<a href='/api/orden/{oid}/formulario.pdf'>F210 PDF</a> · "
                         f"<a href='/api/orden/{oid}/documentos.pdf'>Checklist</a> · "
                         f"<a href='/api/orden/{oid}/exogena.xlsx'>Exógena</a>")
+        acciones += (f"<br><button onclick=\"borrarOrden('{oid}')\" "
+                     f"style='margin-top:4px;background:none;border:0;color:#b3372f;"
+                     f"cursor:pointer;font-size:12px'>🗑 Eliminar</button>")
         filas.append(
             f"<tr><td>{o.get('fecha','')}</td><td><code>{oid}</code></td>"
             f"<td>{o.get('nombre','')}<br><small>{o.get('nit','')}</small></td>"
@@ -1719,6 +1744,12 @@ async function confirmar(oid) {{
   const r = await fetch('/api/confirmar-pago', {{method:'POST',
     headers:{{'Content-Type':'application/json'}}, body: JSON.stringify({{orden_id: oid}})}});
   if (r.ok) location.reload(); else alert('Error confirmando');
+}}
+async function borrarOrden(oid) {{
+  if (!confirm('¿Eliminar la orden ' + oid + '? Borra la orden y su Excel de exógena. No se puede deshacer.')) return;
+  const r = await fetch('/api/orden/eliminar', {{method:'POST',
+    headers:{{'Content-Type':'application/json'}}, body: JSON.stringify({{orden_id: oid}})}});
+  if (r.ok) location.reload(); else alert('Error eliminando');
 }}
 async function reiniciar(uid) {{
   if (!confirm('¿Devolverle su prueba gratis a este contador?')) return;
