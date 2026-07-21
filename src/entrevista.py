@@ -105,6 +105,15 @@ def mapear_exogena_a_datos(exogena: ResultadoExogena,
         objetivo = getattr(datos, sub) if sub else datos
         setattr(objetivo, attr, getattr(objetivo, attr) + total)
 
+    # Donaciones (renglón 123): la exógena reporta el VALOR donado, pero la
+    # casilla 123 es el DESCUENTO tributario = un % de ese valor (Art. 257 E.T.:
+    # 25% general). Por eso no va por _MAPA_RENGLONES (que pondría el valor
+    # crudo) sino que se aplica el porcentaje aquí.
+    donado = exogena.total_por_renglon().get(123, 0.0)
+    if donado > 0:
+        pct = parametros.descuento_donaciones_pct if parametros is not None else 0.25
+        datos.descuento_donaciones += round(donado * pct)
+
     if parametros is not None and parametros.componente_inflacionario > 0:
         rendimientos = sum(
             p.valor for p in exogena.partidas_activas()

@@ -39,6 +39,14 @@ deduccion_dependientes:
   uvt_por_dependiente: 72
   maximo_dependientes: 4
 
+# Deducción por dependientes (Art. 387 E.T.): 10% de los ingresos brutos por
+# relación laboral (asalariados), tope 32 UVT/mes = 384 UVT/año. Requiere ≥1
+# dependiente. SÍ está sujeta al límite del 40% / 1340 UVT. Es COMPATIBLE con
+# la adición del Art. 336 num. 3 (van en casillas distintas: 39 vs 139).
+deduccion_dependientes_387:
+  porcentaje: 0.10
+  tope_uvt: 384
+
 # Deducción 1% compras con factura electrónica (Art. 336 num. 5):
 # 1% del valor de las adquisiciones, sin exceder 240 UVT. NO sujeta al 40%.
 deduccion_factura_electronica:
@@ -139,3 +147,12 @@ anticipo:
 # VERIFICAR el decreto definitivo antes de declarar (el de AG 2024 fue el
 # Decreto 0771 del 7 de julio de 2025, con 50,88%).
 componente_inflacionario: 0.5543
+
+# Descuento tributario por donaciones (Art. 257 E.T.): 25% del valor donado a
+# ESAL del Régimen Tributario Especial. (Donaciones de alimentos/aseo a bancos
+# de alimentos: 37%, Ley 2380/2024, desde AG2025.) La exógena reporta el VALOR
+# donado (renglón 123); el motor aplica este % para el descuento de la casilla
+# 123. OJO límite Art. 258: los descuentos no exceden el 25% del impuesto.
+descuento_donaciones:
+  porcentaje: 0.25
+  tope_pct_impuesto: 0.25       # Art. 258: el descuento no excede 25% del impuesto a cargo

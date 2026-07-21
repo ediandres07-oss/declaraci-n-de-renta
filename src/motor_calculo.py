@@ -146,8 +146,20 @@ def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
     r37 = t.rentas_exentas_afc_fvp + r36
     liq.set(37, r37, "total rentas exentas trabajo")
     liq.set(38, t.intereses_vivienda, "intereses de vivienda")
-    liq.set(39, t.otras_deducciones, "otras deducciones imputables")
-    r40 = t.intereses_vivienda + t.otras_deducciones
+    # Deducción por dependientes Art. 387 E.T.: 10% de los ingresos brutos por
+    # relación laboral (asalariados), tope 32 UVT/mes = 384 UVT/año, si hay ≥1
+    # dependiente. SÍ entra al límite del 40%; es aparte de la adición del Art.
+    # 336 num. 3 (esa va sin límite en R139).
+    ded_dep_387 = 0.0
+    if d.dependientes >= 1 and t.ingresos_brutos > 0:
+        ded_dep_387 = min(t.ingresos_brutos * p.dependientes_387_pct,
+                          p.a_pesos(p.dependientes_387_tope_uvt))
+    r39 = t.otras_deducciones + ded_dep_387
+    nota39 = "otras deducciones imputables"
+    if ded_dep_387:
+        nota39 += f" + dependientes Art.387 ({ded_dep_387:,.0f})"
+    liq.set(39, r39, nota39)
+    r40 = t.intereses_vivienda + r39
     liq.set(40, r40, "total deducciones imputables trabajo")
 
     # --- honorarios (R43-R57) ---
@@ -365,9 +377,20 @@ def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
 
     # ==================== Descuentos e impuesto a cargo ==================
     liq.set(122, d.descuento_impuestos_exterior, "descuento impuestos pagados en el exterior")
-    liq.set(123, d.descuento_donaciones, "descuento donaciones")
+    # Límite del Art. 258 E.T.: el descuento por donaciones (Art. 257), junto con
+    # los de Arts. 255/256, no puede exceder el 25% del impuesto sobre la renta a
+    # cargo (R121). Se capa aquí el de donaciones.
+    tope_don = _round_mil(r121 * p.descuento_258_tope_pct)
+    descuento_donaciones = d.descuento_donaciones
+    if descuento_donaciones > tope_don:
+        liq.advertencias.append(
+            f"El descuento por donaciones ({descuento_donaciones:,.0f}) superó el tope "
+            f"del Art. 258 (25% del impuesto {r121:,.0f} = {tope_don:,.0f}); se limitó a ese tope."
+        )
+        descuento_donaciones = tope_don
+    liq.set(123, descuento_donaciones, "descuento donaciones (tope 25% impuesto, Art. 258)")
     liq.set(124, d.descuento_dividendos_otros, "descuento dividendos y otros")
-    r125 = d.descuento_impuestos_exterior + d.descuento_donaciones + d.descuento_dividendos_otros
+    r125 = d.descuento_impuestos_exterior + descuento_donaciones + d.descuento_dividendos_otros
     if r125 > r121:
         liq.advertencias.append(
             f"Los descuentos tributarios ({r125:,.0f}) superan el impuesto "

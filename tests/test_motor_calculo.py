@@ -315,15 +315,29 @@ def test_saldo_a_favor(parametros):
 
 
 def test_descuentos_limitados_al_impuesto(parametros):
+    # Donación enorme: el descuento por donaciones se capa al 25% del impuesto
+    # a cargo (Art. 258 E.T.), no al 100%.
     d = DatosDeclaracion(
         trabajo=SubcedulaGeneral(ingresos_brutos=100_000_000),
         descuento_donaciones=999_000_000,
         aplicar_renta_exenta_25=False, patrimonio_bruto=1,
     )
     liq = calcular(d, parametros)
-    assert liq.r(125) == liq.r(121)
-    assert liq.r(126) == 0
-    assert any("descuentos" in a.lower() for a in liq.advertencias)
+    tope258 = round(liq.r(121) * 0.25 / 1000) * 1000
+    assert liq.r(123) == tope258
+    assert liq.r(126) == liq.r(121) - tope258
+    assert any("258" in a for a in liq.advertencias)
+
+    # Otros descuentos enormes (no donaciones): se capan al impuesto (Art. 259).
+    d2 = DatosDeclaracion(
+        trabajo=SubcedulaGeneral(ingresos_brutos=100_000_000),
+        descuento_dividendos_otros=999_000_000,
+        aplicar_renta_exenta_25=False, patrimonio_bruto=1,
+    )
+    liq2 = calcular(d2, parametros)
+    assert liq2.r(125) == liq2.r(121)
+    assert liq2.r(126) == 0
+    assert any("descuentos" in a.lower() for a in liq2.advertencias)
 
 
 # ------------------- caso Elizabeth (fixture real, verificado a mano) ------

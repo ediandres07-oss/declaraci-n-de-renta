@@ -106,12 +106,15 @@ def test_landing_html_sirve(cliente):
 
 def test_recalcular_con_dependientes_rebaja_el_pago(cliente):
     j = _cargar(cliente).get_json()
-    base = j["valor_a_pagar"]
+    # neto = a pagar menos saldo a favor (los dependientes pueden generar saldo
+    # a favor, no solo bajar el pago), que es como el API calcula el ahorro.
+    base_neto = j["valor_a_pagar"] - j["saldo_a_favor"]
     r = cliente.post("/api/recalcular-landing", json={"token": j["token"], "dependientes": 2})
     assert r.status_code == 200
     k = r.get_json()
-    assert k["valor_a_pagar"] < base            # 2 dependientes rebajan el pago
-    assert k["ahorro"] == pytest.approx(base - k["valor_a_pagar"], abs=1)
+    nuevo_neto = k["valor_a_pagar"] - k["saldo_a_favor"]
+    assert nuevo_neto < base_neto               # 2 dependientes mejoran el resultado
+    assert k["ahorro"] == pytest.approx(base_neto - nuevo_neto, abs=1)
 
     # la elección queda guardada: el PDF pagado sale con la deducción
     orden = cliente.post("/api/checkout", json={

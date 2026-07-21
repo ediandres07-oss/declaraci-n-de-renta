@@ -77,6 +77,22 @@ class Parametros:
         return int(self._data["deduccion_dependientes"]["maximo_dependientes"])
 
     @property
+    def dependientes_387_pct(self) -> float:
+        return float(self._data["deduccion_dependientes_387"]["porcentaje"])
+
+    @property
+    def dependientes_387_tope_uvt(self) -> float:
+        return float(self._data["deduccion_dependientes_387"]["tope_uvt"])
+
+    @property
+    def descuento_donaciones_pct(self) -> float:
+        return float(self._data.get("descuento_donaciones", {}).get("porcentaje", 0.25))
+
+    @property
+    def descuento_258_tope_pct(self) -> float:
+        return float(self._data.get("descuento_donaciones", {}).get("tope_pct_impuesto", 0.25))
+
+    @property
     def factura_electronica_pct(self) -> float:
         return float(self._data["deduccion_factura_electronica"]["porcentaje"])
 
