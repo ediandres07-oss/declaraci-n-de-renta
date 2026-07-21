@@ -230,6 +230,15 @@ def _hoja_anticipo(wb, datos) -> None:
     _set(ws, "E4", datos.anticipo_anterior)
     _set(ws, "E5", datos.impuesto_neto_anio_anterior)
     _set(ws, "E6", min(max(datos.numero_anio_declaracion, 1), 3))
+    # La plantilla ITGS trae mal numeradas (+1) las casillas en los textos guía:
+    # impuesto neto de renta es la 126 (no 127), anticipo año siguiente 133 (no
+    # 134) y total saldo a favor 137 (no 138). Se corrigen los rótulos.
+    _set(ws, "C3", "Registre el valor del saldo a favor no solicitado en devolución "
+                   "casilla 137 declaración renta 2024")
+    _set(ws, "C4", "Registre el valor del anticipo para la renta 2025, registrado en la "
+                   "casilla 133 declaración renta año 2024")
+    _set(ws, "C5", "Registre el valor del impuesto neto de renta registrado en la "
+                   "casilla 126 declaración renta año 2024")
 
 
 def _hoja_dtos_tribut(wb, datos) -> None:
