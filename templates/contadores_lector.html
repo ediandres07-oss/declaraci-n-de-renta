@@ -59,7 +59,11 @@
 </head>
 <body>
 <div class="barra">
-  <b>Tributando<span class="co">.co</span></b> · Contadores
+  <a href="/" style="display:flex;align-items:center;gap:8px;text-decoration:none;color:#fff">
+    <img src="/static/img/logo-tributando.png" alt="Tributando" style="height:30px;width:auto">
+    <b>Tributando<span class="co">.co</span></b>
+  </a>
+  <span style="color:#9aa3b0;font-size:.85rem">· Contadores</span>
   <a class="volver" href="/contadores">← Volver a herramientas</a>
 </div>
 
@@ -132,7 +136,29 @@
   </div>
 </section>
 
-<footer>Tributando.co · Herramientas para contadores · {% if whatsapp %}<a href="https://wa.me/{{ whatsapp }}">WhatsApp</a>{% endif %}</footer>
+<section style="background:var(--navy);color:#fff;padding:40px 0">
+  <div class="wrap">
+    <h2 class="titulo" style="color:#fff">Seguro y confiable</h2>
+    <div class="pasos" style="grid-template-columns:repeat(3,1fr)">
+      <div class="paso" style="background:rgba(255,255,255,.06);color:#d7dde6">🔒 <b style="color:#fff;display:block">Tus datos no salen</b>
+        Todo se procesa en tu computador. La DIAN se conecta con tu token o certificado.</div>
+      <div class="paso" style="background:rgba(255,255,255,.06);color:#d7dde6">📅 <b style="color:#fff;display:block">Dos herramientas</b>
+        Lector XML + gestor de vencimientos, en una sola suscripción.</div>
+      <div class="paso" style="background:rgba(255,255,255,.06);color:#d7dde6">💬 <b style="color:#fff;display:block">Soporte directo</b>
+        Te acompañamos por WhatsApp para que arranques sin enredos.</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <img src="/static/img/logo-tributando.png" alt="Tributando" style="height:26px;opacity:.85;margin-bottom:8px"><br>
+  <b>Tributando.co</b> · Herramientas para contadores en Colombia<br>
+  <span style="opacity:.8">
+    {% if whatsapp %}<a href="https://wa.me/{{ whatsapp }}" style="color:var(--dorado)">WhatsApp</a> · {% endif %}
+    <a href="/contadores" style="color:var(--dorado)">Renta</a> ·
+    <a href="/vencimientos" style="color:var(--dorado)">Vencimientos</a>
+  </span>
+</footer>
 
 <!-- Modal de pago -->
 <div class="modal" id="modal" hidden>
