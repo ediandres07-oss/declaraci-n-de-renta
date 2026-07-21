@@ -388,6 +388,43 @@ def enlaces():
                            ia_whatsapp=IA_CFG.get("negocio", {}).get("whatsapp", ""))
 
 
+@app.get("/admin/lector")
+@autorizado_requerido
+def admin_lector():
+    """Panel de suscripciones del Lector XML: quién vence, para controlar renovaciones."""
+    subs = SuscripcionLector.query.order_by(SuscripcionLector.vence).all()
+    hoy = date.today()
+    filas = []
+    for s in subs:
+        dias = (s.vence - hoy).days if s.vence else None
+        if not s.activa:
+            estado, color = "Inactiva", "#8a919c"
+        elif dias is not None and dias < 0:
+            estado, color = f"Vencida ({-dias}d)", "#b91c1c"
+        elif dias is not None and dias <= 7:
+            estado, color = f"Vence en {dias}d", "#c47f0a"
+        else:
+            estado, color = f"Activa ({dias}d)", "#1f8a5f"
+        empresas = EmpresaLector.query.filter_by(licencia=s.licencia).count()
+        filas.append({"email": s.email, "plan": s.plan, "vence": s.vence,
+                      "estado": estado, "color": color, "empresas": empresas,
+                      "equipo": "sí" if s.equipo else "—"})
+    html = """<!doctype html><html><head><meta charset="utf-8">
+    <title>Suscripciones Lector</title><meta name="viewport" content="width=device-width,initial-scale=1">
+    <style>body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;background:#f5f7fa;margin:0;padding:24px;color:#1e2432}
+    h1{font-size:1.3rem}table{border-collapse:collapse;width:100%;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+    th,td{padding:10px 12px;text-align:left;border-bottom:1px solid #eee;font-size:.9rem}th{background:#1e2432;color:#fff}
+    .est{font-weight:700}a{color:#b8955f}</style></head><body>
+    <h1>🔑 Suscripciones — Lector XML ({{filas|length}})</h1>
+    <p><a href="/admin">← Volver a /admin</a></p>
+    <table><tr><th>Correo</th><th>Plan</th><th>Vence</th><th>Estado</th><th>Empresas</th><th>Equipo</th></tr>
+    {% for f in filas %}<tr><td>{{f.email}}</td><td>{{f.plan}}</td><td>{{f.vence or '—'}}</td>
+    <td class="est" style="color:{{f.color}}">{{f.estado}}</td><td>{{f.empresas}}</td><td>{{f.equipo}}</td></tr>{% endfor %}
+    {% if not filas %}<tr><td colspan="6" style="color:#8a919c">Aún no hay suscripciones.</td></tr>{% endif %}
+    </table></body></html>"""
+    return render_template_string(html, filas=filas)
+
+
 @app.get("/contadores/lector")
 def contadores_lector():
     """Landing del Lector XML (Tributando Contadores): planes por empresa + pago.
