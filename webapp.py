@@ -1275,6 +1275,21 @@ def eliminar_orden():
     return jsonify({"ok": True})
 
 
+@app.post("/api/asesor/atender")
+@autorizado_requerido
+def atender_asesor():
+    """Quita la marca 'pidió asesor' de un usuario (ya se le contactó, o es una
+    prueba). Solo personal autorizado, desde /admin."""
+    cuerpo = request.get_json(silent=True) or {}
+    uid = cuerpo.get("usuario_id")
+    u = db.session.get(Usuario, uid) if uid is not None else None
+    if u is None:
+        return jsonify({"error": "Usuario no encontrado."}), 404
+    u.quiere_asesor = False
+    db.session.commit()
+    return jsonify({"ok": True})
+
+
 @app.post("/api/realmy-webhook")
 def realmy_webhook():
     """Webhook de Realmy: confirma un pago completado.
@@ -1634,7 +1649,10 @@ def admin():
         rec = "🔔 sí" if d["acepta_recordatorios"] else "🔕 no"
         if d["quiere_asesor"]:
             n_asesor += 1
-            asesor = "<b style='color:#b3372f'>⚑ PIDIÓ ASESOR</b>"
+            asesor = ("<b style='color:#b3372f'>⚑ PIDIÓ ASESOR</b><br>"
+                      f"<button onclick=\"atender({u.id})\" "
+                      f"style='margin-top:4px;background:none;border:0;color:#1e7d43;"
+                      f"cursor:pointer;font-size:12px'>✓ Atendido / quitar</button>")
             fila_bg = " style='background:#fff6f5'"
         else:
             asesor = "<span style='color:#9db0c4'>—</span>"
@@ -1750,6 +1768,12 @@ async function borrarOrden(oid) {{
   const r = await fetch('/api/orden/eliminar', {{method:'POST',
     headers:{{'Content-Type':'application/json'}}, body: JSON.stringify({{orden_id: oid}})}});
   if (r.ok) location.reload(); else alert('Error eliminando');
+}}
+async function atender(uid) {{
+  if (!confirm('¿Quitar la marca de "pidió asesor" de este usuario?')) return;
+  const r = await fetch('/api/asesor/atender', {{method:'POST',
+    headers:{{'Content-Type':'application/json'}}, body: JSON.stringify({{usuario_id: uid}})}});
+  if (r.ok) location.reload(); else alert('Error');
 }}
 async function reiniciar(uid) {{
   if (!confirm('¿Devolverle su prueba gratis a este contador?')) return;
