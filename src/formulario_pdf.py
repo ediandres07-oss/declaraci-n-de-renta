@@ -199,22 +199,23 @@ def _generar_oficial_pdf(
     c.drawImage(str(BASE_IMG), 0, 0, width=W, height=H,
                 preserveAspectRatio=False, mask=None)
 
-    # marca de agua (se pinta ANTES de las cifras -> queda al fondo)
+    # marca de agua: UNA sola palabra centrada al fondo (sin franjas/líneas que
+    # crucen el formulario). "MUESTRA" va en dorado, tenue pero visible, para el
+    # canal de contadores; el resto ("SUGERIDA") va casi transparente.
+    es_muestra = "MUESTRA" in marca.upper()
     c.saveState()
     c.translate(W / 2, H / 2)
     c.rotate(45)
-    if "MUESTRA" in marca.upper():
-        c.setFont("Helvetica-Bold", 42)
-        c.setFillColor(HexColor("#efe1cb"))
-        for fila in (-1, 0, 1):
-            c.drawCentredString(0, fila * 260, marca)
+    c.setFont("Helvetica-Bold", 90)
+    if es_muestra:
+        c.setFillColor(HexColor("#cdab7e"))          # dorado de marca
+        c.setFillAlpha(0.16)
+        c.drawCentredString(0, 0, "MUESTRA")
     else:
-        # "agua cristal": casi transparente, para no tapar los renglones
-        c.setFont("Helvetica-Bold", 70)
-        c.setFillColor(HexColor("#9aa6bd"))
+        c.setFillColor(HexColor("#9aa6bd"))          # "agua cristal"
         c.setFillAlpha(0.06)
         c.drawCentredString(0, 0, marca)
-        c.setFillAlpha(1)
+    c.setFillAlpha(1)
     c.restoreState()
     c.setFillColor(black)
 
@@ -222,7 +223,10 @@ def _generar_oficial_pdf(
     # nota en el "Espacio reservado para la DIAN" (queda en blanco)
     c.setFont("Helvetica-Bold", 6)
     c.setFillColor(HexColor("#b3372f"))
-    c.drawString(35, H - 96, "DECLARACIÓN SUGERIDA — No válido para presentación ante la DIAN.")
+    nota = ("MUESTRA GRATIS · TRIBUTANDO.CO — No válido para presentación ante la DIAN."
+            if es_muestra else
+            "DECLARACIÓN SUGERIDA — No válido para presentación ante la DIAN.")
+    c.drawString(35, H - 96, nota)
     c.setFont("Helvetica", 5.6)
     c.setFillColor(black)
     c.drawString(35, H - 106, f"Año gravable {p.anio_gravable} · UVT ${p.uvt:,.0f} · "
