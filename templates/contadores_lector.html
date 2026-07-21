@@ -100,7 +100,8 @@
       {% for p in planes %}
       <div class="plan {% if p.clave == 'anual' %}destacado{% endif %}">
         <h3>{{ p.nombre }}</h3>
-        <div class="emp">Todos tus clientes, sin límite de empresas</div>
+        <div class="emp">Todos tus clientes, sin límite de empresas<br>
+          <span style="color:var(--dorado2);font-weight:700">+ Calendario tributario incluido</span></div>
         <div class="precio">${{ "{:,}".format(p.precio).replace(",", ".") }}<small>/{{ p.periodo }}</small></div>
         {% if p.clave == 'anual' %}<div style="color:var(--verde);font-weight:800;font-size:.85rem;margin-bottom:8px">≈ 2 meses gratis</div>{% endif %}
         <button onclick="suscribir('{{ p.clave }}','{{ p.nombre }}',{{ p.precio }})">Suscribirme</button>
@@ -109,6 +110,18 @@
     </div>
     <p class="nota">No cobramos por cliente — procesa todas las empresas que quieras.
        Prueba gratis · Cancela cuando quieras.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap" style="text-align:center;max-width:720px">
+    <h2 class="titulo">📅 Y de una vez, el <span style="color:var(--dorado2)">calendario tributario</span></h2>
+    <p style="color:var(--suave);margin-bottom:20px">Con tu misma cuenta tienes el gestor de
+      vencimientos: registra tus clientes (o sube su RUT), y te calcula todas las fechas DIAN 2026
+      — renta, IVA, retefuente, exógena, ICA — con avisos al correo, exportación a tu calendario
+      e informe en PDF con tu logo. <b>Gratis.</b></p>
+    <a href="/vencimientos" style="display:inline-block;background:var(--navy);color:var(--dorado);
+       font-weight:800;padding:13px 28px;border-radius:28px;text-decoration:none">Abrir mi calendario tributario →</a>
   </div>
 </section>
 
