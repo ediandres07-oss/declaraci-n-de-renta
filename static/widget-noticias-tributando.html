@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Al día con tributando.co</title>
+<style>
+  :root{
+    --navy:#1e2432; --navy2:#2a3346; --oro:#cdab7e; --oro2:#8a6d3b;
+    --gris:#f7f5f1; --linea:#e6e2d8; --tx:#2b3242; --tx2:#5b6473;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--tx);background:#fff;line-height:1.45}
+  .wrap{max-width:780px;margin:0 auto}
+  /* encabezado */
+  .hero{background:var(--navy);color:#fff;padding:18px 22px;border-radius:14px 14px 0 0}
+  .marca{font-weight:800;font-size:15px;letter-spacing:.2px}
+  .marca .co{color:var(--oro)}
+  .hero h1{font-size:20px;font-weight:800;margin-top:4px}
+  .hero p{color:#c9d0dc;font-size:12.5px;margin-top:3px}
+  .badge{display:inline-block;background:var(--oro);color:var(--navy);font-weight:800;
+    font-size:11px;padding:3px 9px;border-radius:999px;margin-top:8px}
+  .cuerpo{border:1px solid var(--linea);border-top:0;border-radius:0 0 14px 14px;
+    padding:16px 18px;background:#fff}
+  h2{font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--oro2);
+    margin:14px 0 8px;font-weight:800}
+  h2:first-child{margin-top:2px}
+  /* novedades */
+  .nota{border-left:3px solid var(--oro);background:var(--gris);border-radius:0 8px 8px 0;
+    padding:9px 12px;margin-bottom:8px}
+  .nota .fecha{font-size:10.5px;color:var(--tx2);font-weight:700;text-transform:uppercase}
+  .nota .tit{font-weight:700;font-size:13.5px;color:var(--navy);margin:1px 0 2px}
+  .nota .txt{font-size:12.5px;color:var(--tx2)}
+  /* vencimientos */
+  .venc{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .mes{background:var(--navy);color:#fff;border-radius:10px;padding:10px 8px;text-align:center}
+  .mes .m{font-weight:800;font-size:13px;color:var(--oro)}
+  .mes .r{font-size:11px;color:#cfd6e2;margin-top:2px}
+  .mes .d{font-size:19px;font-weight:800;margin-top:6px}
+  .mes .d small{font-size:10px;font-weight:600;color:#aeb7c6;display:block}
+  .pie-venc{font-size:11px;color:var(--tx2);margin-top:8px}
+  /* cta */
+  .cta{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+  .btn{flex:1 1 200px;text-align:center;text-decoration:none;font-weight:800;font-size:13.5px;
+    padding:11px 12px;border-radius:10px}
+  .btn.p{background:var(--oro);color:var(--navy)}
+  .btn.s{background:#fff;color:var(--navy);border:1.5px solid var(--navy)}
+  .legal{font-size:10.5px;color:#9aa2b0;margin-top:12px;text-align:center}
+  @media(max-width:520px){.venc{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div class="marca">tributando<span class="co">.co</span></div>
+    <h1>Al día · Declaración de Renta AG 2025</h1>
+    <p>Novedades y fechas clave para personas naturales. Actualizado jul-2026.</p>
+    <span class="badge">Temporada abierta · ago–oct 2026</span>
+  </div>
+
+  <div class="cuerpo">
+    <h2>Novedades <span id="nfecha" style="font-weight:400;color:var(--tx2);text-transform:none;letter-spacing:0"></span></h2>
+    <div id="novedades">
+      <!-- Se cargan desde noticias.json; si no hay, quedan estas fijas. -->
+      <div class="nota">
+        <div class="fecha">UVT 2025</div>
+        <div class="tit">La UVT para el año gravable 2025 es $49.799</div>
+        <div class="txt">Es el valor con el que se calculan topes, sanciones y rangos del impuesto.</div>
+      </div>
+      <div class="nota">
+        <div class="fecha">¿Te toca declarar?</div>
+        <div class="tit">Revisa tus topes de 2025</div>
+        <div class="txt">Declaras si superaste patrimonio de 4.500 UVT ($224.095.500) o ingresos,
+          consumos, compras o consignaciones de 1.400 UVT ($69.718.600), o si fuiste responsable de IVA.</div>
+      </div>
+      <div class="nota">
+        <div class="fecha">Deducciones</div>
+        <div class="tit">Dependientes: doble beneficio</div>
+        <div class="txt">Por tus dependientes puedes tomar la deducción del 10% (Art. 387, hasta 384 UVT)
+          y, además, 72 UVT por dependiente (hasta 4), que van en casillas distintas.</div>
+      </div>
+    </div>
+
+    <h2>Vencimientos por los 2 últimos dígitos de la cédula</h2>
+    <div class="venc">
+      <div class="mes"><div class="m">Agosto</div><div class="r">2026</div>
+        <div class="d">01–26<small>últimos 2 dígitos</small></div></div>
+      <div class="mes"><div class="m">Septiembre</div><div class="r">2026</div>
+        <div class="d">27–66<small>últimos 2 dígitos</small></div></div>
+      <div class="mes"><div class="m">Octubre</div><div class="r">2026</div>
+        <div class="d">67–99<small>últimos 2 dígitos</small></div></div>
+    </div>
+    <div class="pie-venc">Rango indicativo. Cada día del calendario DIAN corresponde a dos dígitos:
+      consulta tu fecha exacta con tu cédula.</div>
+
+    <div class="cta">
+      <a class="btn p" href="https://tributando.co" target="_blank" rel="noopener">Calcula tu declaración</a>
+      <a class="btn s" href="https://tributando.co/contadores" target="_blank" rel="noopener">¿Eres contador?</a>
+    </div>
+
+    <div class="legal">Información de apoyo, no es asesoría oficial. Verifica con tu contador
+      y el calendario DIAN vigente.</div>
+  </div>
+</div>
+<script>
+  // Carga las novedades del día desde noticias.json (lo actualiza la rutina de
+  // las 7am). Si falla o no hay, quedan las novedades fijas del HTML.
+  (function(){
+    var esc = function(s){ var d=document.createElement("div"); d.textContent=String(s==null?"":s); return d.innerHTML; };
+    fetch("noticias.json?_=" + Date.now(), {cache:"no-store"})
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(j){
+        if(!j || !Array.isArray(j.items) || !j.items.length) return;
+        var cont = document.getElementById("novedades");
+        cont.innerHTML = j.items.slice(0,4).map(function(n){
+          var link = n.url ? ' · <a href="'+esc(n.url)+'" target="_blank" rel="noopener" style="color:var(--oro2);font-weight:700">fuente</a>' : "";
+          return '<div class="nota"><div class="fecha">'+esc(n.fecha||"")+'</div>'
+               + '<div class="tit">'+esc(n.titulo||"")+'</div>'
+               + '<div class="txt">'+esc(n.texto||"")+link+'</div></div>';
+        }).join("");
+        if(j.actualizado){ document.getElementById("nfecha").textContent = "· al " + esc(j.actualizado); }
+      })
+      .catch(function(){});
+  })();
+</script>
+</body>
+</html>

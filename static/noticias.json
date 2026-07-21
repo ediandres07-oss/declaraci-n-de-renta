@@ -1,0 +1,23 @@
+{
+  "actualizado": "2026-07-21",
+  "items": [
+    {
+      "fecha": "UVT 2025",
+      "titulo": "La UVT para el año gravable 2025 es $49.799",
+      "texto": "Es el valor con el que se calculan topes, sanciones y rangos del impuesto.",
+      "url": ""
+    },
+    {
+      "fecha": "¿Te toca declarar?",
+      "titulo": "Revisa tus topes de 2025",
+      "texto": "Declaras si superaste patrimonio de 4.500 UVT ($224.095.500) o ingresos, consumos, compras o consignaciones de 1.400 UVT ($69.718.600), o si fuiste responsable de IVA.",
+      "url": ""
+    },
+    {
+      "fecha": "Deducciones",
+      "titulo": "Dependientes: doble beneficio",
+      "texto": "Por tus dependientes puedes tomar la deducción del 10% (Art. 387, hasta 384 UVT) y, además, 72 UVT por dependiente (hasta 4), que van en casillas distintas.",
+      "url": ""
+    }
+  ]
+}
