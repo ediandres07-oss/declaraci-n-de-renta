@@ -476,12 +476,14 @@ def contadores_lector():
     Al confirmar el pago se crea la suscripción y se entrega la clave de licencia."""
     u = usuario_actual()
     planes = []
-    for clave in ("mensual", "anual"):
-        info = PLANES_LECTOR.get(clave, {})
+    for t in TIERS_LECTOR:
+        c = t["clave"]
         planes.append({
-            "clave": clave, "nombre": info.get("nombre", clave.title()),
-            "periodo": "mes" if clave == "mensual" else "año",
-            "precio": PRECIOS_LECTOR.get(clave, 0),
+            "clave": c, "nombre": t["nombre"], "empresas_max": t["empresas_max"],
+            "empresas": "Empresas ilimitadas" if not t["empresas_max"] else f"Hasta {t['empresas_max']} empresas",
+            "mensual": PRECIOS_LECTOR[f"{c}_mensual"],
+            "anual": PRECIOS_LECTOR[f"{c}_anual"],
+            "destacado": c == "contador",
         })
     return render_template("contadores_lector.html",
                            planes=planes,
@@ -536,9 +538,21 @@ def crear_pase_contador():
 # empresas ILIMITADAS, por debajo de Kontalid ($297.700/año). Editable;
 # idealmente mover a config/precios.yaml bloque `lector`.
 PRECIOS_LECTOR = {
-    "mensual": 29900,
-    "anual":   249900,   # bajo Kontalid ($297.700/año), lejísimos de Cifrato (por CUFE)
+    "independiente_mensual": 19900,  "independiente_anual": 199000,
+    "contador_mensual":      34900,  "contador_anual":      349000,
+    "estudio_mensual":       69900,  "estudio_anual":       699000,
+    "ilimitado_mensual":    109900,  "ilimitado_anual":    1099000,
+    # Compat (suscripciones antiguas / enlaces viejos).
+    "mensual": 29900, "anual": 249900,
 }
+
+# Paquetes por # de empresas (para la página de precios).
+TIERS_LECTOR = [
+    {"clave": "independiente", "nombre": "Independiente", "empresas_max": 3},
+    {"clave": "contador",      "nombre": "Contador",      "empresas_max": 10},
+    {"clave": "estudio",       "nombre": "Estudio",       "empresas_max": 30},
+    {"clave": "ilimitado",     "nombre": "Ilimitado",     "empresas_max": 0},
+]
 # URL de descarga del instalador (LectorXML-Setup.exe). Subir el Setup a Drive/
 # tributando y poner el link acá (o en env DESCARGA_LECTOR).
 DESCARGA_LECTOR_URL = os.environ.get(

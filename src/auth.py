@@ -180,8 +180,18 @@ class AccesoAutorizado(db.Model):
 # Suscripción PLANA con empresas ILIMITADAS (como el mercado: Kontalid no cobra
 # por cliente). Solo cambia el período de facturación (mensual/anual).
 PLANES_LECTOR = {
-    "mensual": {"empresas_max": 0, "nombre": "Mensual", "dias": 30},
-    "anual":   {"empresas_max": 0, "nombre": "Anual",   "dias": 365},
+    # Paquetes por # de empresas (empresas_max = 0 → ilimitado).
+    "independiente_mensual": {"empresas_max": 3,  "nombre": "Independiente", "dias": 30},
+    "independiente_anual":   {"empresas_max": 3,  "nombre": "Independiente", "dias": 365},
+    "contador_mensual":      {"empresas_max": 10, "nombre": "Contador",      "dias": 30},
+    "contador_anual":        {"empresas_max": 10, "nombre": "Contador",      "dias": 365},
+    "estudio_mensual":       {"empresas_max": 30, "nombre": "Estudio",       "dias": 30},
+    "estudio_anual":         {"empresas_max": 30, "nombre": "Estudio",       "dias": 365},
+    "ilimitado_mensual":     {"empresas_max": 0,  "nombre": "Ilimitado",     "dias": 30},
+    "ilimitado_anual":       {"empresas_max": 0,  "nombre": "Ilimitado",     "dias": 365},
+    # Compatibilidad con suscripciones antiguas (eran ilimitadas).
+    "mensual": {"empresas_max": 0, "nombre": "Ilimitado", "dias": 30},
+    "anual":   {"empresas_max": 0, "nombre": "Ilimitado", "dias": 365},
 }
 
 

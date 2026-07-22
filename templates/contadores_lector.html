@@ -28,7 +28,11 @@
   .paso .n{width:36px;height:36px;border-radius:50%;background:var(--dorado);color:var(--navy);
     font-weight:800;display:flex;align-items:center;justify-content:center;margin-bottom:12px;}
   .paso b{display:block;margin-bottom:4px;}
-  .planes{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;max-width:640px;margin:0 auto;}
+  .planes{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;max-width:1000px;margin:0 auto;}
+  .toggle-per{display:inline-flex;background:#f1f2f4;border-radius:30px;padding:4px;margin:0 auto 22px;gap:2px;}
+  .toggle-per button{border:0;background:none;padding:9px 20px;border-radius:26px;font-weight:700;cursor:pointer;font-size:.9rem;color:var(--suave);}
+  .toggle-per button.on{background:var(--navy);color:#fff;}
+  .toggle-per .ahorro{color:var(--verde);font-size:.72rem;font-weight:800;}
   .plan{border:1.5px solid var(--borde);border-radius:var(--radio);padding:26px 20px;text-align:center;
     display:flex;flex-direction:column;}
   .plan.destacado{border-color:var(--dorado);box-shadow:0 12px 30px rgba(184,149,95,.18);position:relative;}
@@ -99,20 +103,26 @@
 
 <section style="background:var(--gris)">
   <div class="wrap">
-    <h2 class="titulo">Un solo precio, <span style="color:var(--dorado2)">empresas ilimitadas</span></h2>
+    <h2 class="titulo">Elige tu paquete <span style="color:var(--dorado2)">por número de empresas</span></h2>
+    <div style="text-align:center">
+      <div class="toggle-per">
+        <button id="perMes" onclick="setPeriodo('mensual')">Mensual</button>
+        <button id="perAno" class="on" onclick="setPeriodo('anual')">Anual <span class="ahorro">2 meses gratis</span></button>
+      </div>
+    </div>
     <div class="planes">
       {% for p in planes %}
-      <div class="plan {% if p.clave == 'anual' %}destacado{% endif %}">
+      <div class="plan {% if p.destacado %}destacado{% endif %}">
         <h3>{{ p.nombre }}</h3>
-        <div class="emp">Todos tus clientes, sin límite de empresas<br>
-          <span style="color:var(--dorado2);font-weight:700">+ Calendario tributario incluido</span></div>
-        <div class="precio">${{ "{:,}".format(p.precio).replace(",", ".") }}<small>/{{ p.periodo }}</small></div>
-        {% if p.clave == 'anual' %}<div style="color:var(--verde);font-weight:800;font-size:.85rem;margin-bottom:8px">≈ 2 meses gratis</div>{% endif %}
-        <button onclick="suscribir('{{ p.clave }}','{{ p.nombre }}',{{ p.precio }})">Suscribirme</button>
+        <div class="emp"><b>{{ p.empresas }}</b><br>
+          <span style="color:var(--dorado2);font-weight:700">+ Calendario tributario</span></div>
+        <div class="precio"><span class="valor" data-mensual="{{ p.mensual }}" data-anual="{{ p.anual }}">${{ "{:,}".format(p.anual).replace(",", ".") }}</span><small class="per">/año</small></div>
+        <div class="ahorro-lbl" style="color:var(--verde);font-weight:800;font-size:.8rem;margin-bottom:8px">≈ 2 meses gratis</div>
+        <button onclick="suscribir('{{ p.clave }}','{{ p.nombre }}', this)">Suscribirme</button>
       </div>
       {% endfor %}
     </div>
-    <p class="nota">No cobramos por cliente — procesa todas las empresas que quieras.
+    <p class="nota">Cada cliente (NIT) cuenta como una empresa. Sube de plan cuando crezcas ·
        Prueba gratis · Cancela cuando quieras.</p>
     <div style="max-width:640px;margin:26px auto 0;background:#fff;border:1.5px solid var(--dorado);
       border-radius:var(--radio);padding:22px;text-align:center">
@@ -193,16 +203,32 @@
 <script>
   var logueado = {{ 'true' if logueado else 'false' }};
   var ordenActual = null;
+  var _periodo = "anual";
   function fmt(n){ return "$" + n.toLocaleString("es-CO"); }
-  async function suscribir(clave, nombre, precio){
+  function setPeriodo(p){
+    _periodo = p;
+    document.getElementById("perMes").classList.toggle("on", p === "mensual");
+    document.getElementById("perAno").classList.toggle("on", p === "anual");
+    document.querySelectorAll(".plan").forEach(function(card){
+      var v = card.querySelector(".valor");
+      var precio = +v.getAttribute(p === "mensual" ? "data-mensual" : "data-anual");
+      v.textContent = fmt(precio);
+      card.querySelector(".per").textContent = p === "mensual" ? "/mes" : "/año";
+      card.querySelector(".ahorro-lbl").style.display = p === "anual" ? "block" : "none";
+    });
+  }
+  async function suscribir(clave, nombre, boton){
     if (!logueado){ location.href = "/login?next=/contadores/lector"; return; }
+    var plan = clave + "_" + _periodo;
+    var v = boton.closest(".plan").querySelector(".valor");
+    var precio = +v.getAttribute(_periodo === "mensual" ? "data-mensual" : "data-anual");
     try{
       var r = await fetch("/api/lector-suscripcion/crear", {method:"POST",
-        headers:{"Content-Type":"application/json"}, body: JSON.stringify({plan: clave})});
+        headers:{"Content-Type":"application/json"}, body: JSON.stringify({plan: plan})});
       var j = await r.json();
       if (!r.ok){ alert(j.error || "No pudimos crear la orden."); return; }
       ordenActual = j.orden_id;
-      document.getElementById("mPlan").textContent = nombre;
+      document.getElementById("mPlan").textContent = nombre + " · " + (_periodo === "mensual" ? "mensual" : "anual");
       document.getElementById("mPrecio").textContent = fmt(precio);
       document.getElementById("mRef").textContent = "LECTOR " + String(j.orden_id).toUpperCase();
       document.getElementById("paso1").hidden = false;
