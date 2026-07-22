@@ -1,29 +1,29 @@
 {
-  "actualizado": "2026-07-21",
+  "actualizado": "2026-07-22",
   "items": [
     {
-      "fecha": "Plazos AG2025",
-      "titulo": "La temporada de renta va del 12 de agosto al 26 de octubre",
-      "texto": "La DIAN fijó el calendario para personas naturales por los dos últimos dígitos de la cédula: arranca el 12 de agosto (dígitos 01–02) y cierra el 26 de octubre de 2026.",
-      "url": "https://micrositios.dian.gov.co/renta-personas-naturales-ag-2025/"
-    },
-    {
       "fecha": "DIAN",
-      "titulo": "Se esperan cerca de 7 millones de declarantes",
-      "texto": "La DIAN proyecta que unos 7 millones de personas naturales presenten su declaración del año gravable 2025 entre agosto y octubre, con un recaudo estimado de $6,1 billones.",
-      "url": "https://www.elcolombiano.com/negocios/fecha-para-declarar-renta-dian-LJ38311390"
+      "titulo": "La exógena para prellenar la renta aún no está lista",
+      "texto": "A pocas semanas del primer vencimiento, la DIAN todavía no ha publicado la información exógena que ayuda a prellenar la declaración; se espera para el último día hábil de julio. Mientras tanto puedes avanzar con la herramienta Ayuda Renta.",
+      "url": "https://www.elcolombiano.com/negocios/declaracion-renta-2025-dian-no-entrega-informacion-exogena-vencimientos-JN28258346"
     },
     {
-      "fecha": "Oficial",
-      "titulo": "La temporada quedó abierta por comunicado de la DIAN",
-      "texto": "Mediante el Comunicado de Prensa No. 090 del 30 de junio de 2026, la DIAN anunció el inicio de la presentación del impuesto de renta de personas naturales del año gravable 2025.",
+      "fecha": "Sanciones",
+      "titulo": "Declarar tarde cuesta desde 10 UVT",
+      "texto": "Con la UVT 2026 en $52.374, la sanción mínima por declarar fuera de plazo o no declarar ronda los $524.000. La sanción por extemporaneidad crece por cada mes de retraso, así que conviene no dejarlo para última hora.",
+      "url": "https://www.eltiempo.com/economia/finanzas-personales/definen-las-multas-por-no-declarar-renta-ante-la-dian-en-2026-costos-y-sanciones-subieron-3547146"
+    },
+    {
+      "fecha": "Plazos AG2025",
+      "titulo": "La temporada corre del 12 de agosto al 26 de octubre",
+      "texto": "El calendario de personas naturales por el año gravable 2025 arranca el 12 de agosto (cédulas terminadas en 01–02) y cierra el 26 de octubre de 2026. Revisa con anticipación qué día te corresponde.",
       "url": "https://www.larepublica.co/economia/dian-dio-a-conocer-el-calendario-de-fechas-para-hacer-la-declaracion-de-renta-4425790"
     },
     {
       "fecha": "¿Te toca?",
-      "titulo": "Revisa tus topes antes de declarar",
-      "texto": "Debes declarar si en 2025 superaste patrimonio de 4.500 UVT ($224.095.500) o ingresos, consumos, compras o consignaciones de 1.400 UVT ($69.718.600), o si fuiste responsable de IVA.",
-      "url": ""
+      "titulo": "Verifica tus topes antes de declarar",
+      "texto": "Debes declarar si en 2025 superaste patrimonio de 4.500 UVT (unos $224 millones) o ingresos, compras, consumos o consignaciones de 1.400 UVT (unos $69,7 millones), o si fuiste responsable de IVA.",
+      "url": "https://www.elcolombiano.com/negocios/declaracion-de-renta-2026-declarar-exentos-sanciones-economia-KE38966396"
     }
   ]
 }
