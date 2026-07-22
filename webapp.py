@@ -414,17 +414,32 @@ def admin_lector():
     <style>body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;background:#f5f7fa;margin:0;padding:24px;color:#1e2432}
     h1{font-size:1.3rem}table{border-collapse:collapse;width:100%;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.05)}
     th,td{padding:10px 12px;text-align:left;border-bottom:1px solid #eee;font-size:.9rem}th{background:#1e2432;color:#fff}
-    .est{font-weight:700}a{color:#b8955f}</style></head><body>
+    .est{font-weight:700}a{color:#b8955f}
+    .nav-admin{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 20px}
+    .nav-admin a{display:inline-flex;align-items:center;gap:6px;background:#1e2432;color:#fff;
+      text-decoration:none;padding:9px 16px;border-radius:8px;font-size:.9rem;font-weight:600}
+    .nav-admin a.actual{background:#e8eef5;color:#1e2432;cursor:default;pointer-events:none}</style></head><body>
     <h1>🔑 Suscripciones — Lector XML ({{filas|length}})</h1>
-    <p><a href="/admin">← Volver a /admin</a></p>
+    <div class="nav-admin">
+      <a href="/admin">🏠 Órdenes y usuarios</a>
+      <a class="actual">🔑 Suscripciones Lector XML</a>
+      <a href="/vencimientos">📅 Gestor de vencimientos</a>
+    </div>
     <table><tr><th>Correo</th><th>Plan</th><th>Vence</th><th>Estado</th><th>Empresas</th><th>Equipo</th><th></th></tr>
     {% for f in filas %}<tr><td>{{f.email}}</td><td>{{f.plan}}</td><td>{{f.vence or '—'}}</td>
     <td class="est" style="color:{{f.color}}">{{f.estado}}</td><td>{{f.empresas}}</td><td>{{f.equipo}}</td>
-    <td><button onclick="borrar('{{f.licencia}}')" style="border:0;background:none;cursor:pointer;color:#b91c1c">🗑</button></td></tr>{% endfor %}
+    <td style="white-space:nowrap">
+    {% if f.equipo == 'sí' %}<button onclick="liberar('{{f.licencia}}','{{f.email}}')" title="Liberar el equipo amarrado para que el contador active en otra máquina" style="border:0;background:none;cursor:pointer;font-size:1rem">🔓</button>{% endif %}
+    <button onclick="borrar('{{f.licencia}}')" title="Borrar suscripción" style="border:0;background:none;cursor:pointer;color:#b91c1c">🗑</button></td></tr>{% endfor %}
     {% if not filas %}<tr><td colspan="7" style="color:#8a919c">Aún no hay suscripciones.</td></tr>{% endif %}
     </table>
+    <p style="color:#8a919c;font-size:.82rem;margin-top:10px">🔓 Liberar equipo = desamarra la licencia de su máquina actual; el contador la puede reactivar en otra (se re-amarra sola en la próxima activación).</p>
     <script>async function borrar(lic){ if(!confirm('¿Borrar esta suscripción de prueba?'))return;
       await fetch('/admin/lector/borrar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({licencia:lic})});
+      location.reload();}
+    async function liberar(lic,email){ if(!confirm('¿Liberar el equipo de '+email+'?\\nQuedará libre para activarse en otra máquina.'))return;
+      const r=await fetch('/admin/lector/liberar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({licencia:lic})});
+      const d=await r.json(); if(!d.ok) alert(d.error||'No se pudo liberar.');
       location.reload();}</script></body></html>"""
     return render_template_string(html, filas=filas)
 
@@ -438,6 +453,20 @@ def admin_lector_borrar():
         EmpresaLector.query.filter_by(licencia=lic).delete()
         db.session.delete(sus)
         db.session.commit()
+    return jsonify({"ok": True})
+
+
+@app.post("/admin/lector/liberar")
+@autorizado_requerido
+def admin_lector_liberar():
+    """Desamarra la licencia de su equipo actual: la próxima activación (en la
+    máquina que sea) la vuelve a amarrar. Para trasladar sin tocar la base."""
+    lic = (request.get_json(silent=True) or {}).get("licencia", "")
+    sus = SuscripcionLector.query.filter_by(licencia=lic).first()
+    if not sus:
+        return jsonify({"ok": False, "error": "Licencia no encontrada."}), 404
+    sus.equipo = None
+    db.session.commit()
     return jsonify({"ok": True})
 
 
@@ -1704,7 +1733,18 @@ th{{background:#123f6b;color:#fff}}
 h2{{margin-top:10px}}
 button{{transition:transform .15s ease, box-shadow .15s ease; cursor:pointer}}
 button:hover:not(:disabled){{transform:translateY(-2px); box-shadow:0 8px 18px rgba(10,25,45,.18)}}
+.nav-admin{{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 22px}}
+.nav-admin a{{display:inline-flex;align-items:center;gap:6px;background:#123f6b;color:#fff;
+  text-decoration:none;padding:9px 16px;border-radius:8px;font-size:.9rem;font-weight:600;
+  transition:transform .15s ease, box-shadow .15s ease}}
+.nav-admin a:hover{{transform:translateY(-2px);box-shadow:0 8px 18px rgba(10,25,45,.18)}}
+.nav-admin a.actual{{background:#e8eef5;color:#123f6b;cursor:default;pointer-events:none}}
 </style></head><body>
+<div class="nav-admin">
+  <a class="actual">🏠 Órdenes y usuarios</a>
+  <a href="/admin/lector">🔑 Suscripciones Lector XML</a>
+  <a href="/vencimientos">📅 Gestor de vencimientos</a>
+</div>
 <h2>👥 Usuarios registrados ({len(filas_u)})</h2>
 <p>Personas que ingresaron con Google/Microsoft (o demo) y dejaron sus datos.</p>
 {aviso_asesor}
