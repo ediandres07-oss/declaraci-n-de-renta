@@ -1,29 +1,29 @@
 {
-  "actualizado": "2026-07-22",
+  "actualizado": "2026-07-23",
   "items": [
     {
       "fecha": "DIAN",
-      "titulo": "La exógena para prellenar la renta aún no está lista",
-      "texto": "A pocas semanas del primer vencimiento, la DIAN todavía no ha publicado la información exógena que ayuda a prellenar la declaración; se espera para el último día hábil de julio. Mientras tanto puedes avanzar con la herramienta Ayuda Renta.",
-      "url": "https://www.elcolombiano.com/negocios/declaracion-renta-2025-dian-no-entrega-informacion-exogena-vencimientos-JN28258346"
+      "titulo": "Ya puedes consultar tu información exógena",
+      "texto": "Desde el 21 de julio la DIAN habilitó la consulta de la información que bancos, empleadores y otras entidades reportaron sobre tus movimientos de 2025. Revísala antes de declarar para detectar datos faltantes o errados.",
+      "url": "https://www.larepublica.co/economia/dian-habilito-consulta-de-informacion-exogena-para-preparar-declaracion-de-renta-4440789"
     },
     {
-      "fecha": "Sanciones",
-      "titulo": "Declarar tarde cuesta desde 10 UVT",
-      "texto": "Con la UVT 2026 en $52.374, la sanción mínima por declarar fuera de plazo o no declarar ronda los $524.000. La sanción por extemporaneidad crece por cada mes de retraso, así que conviene no dejarlo para última hora.",
-      "url": "https://www.eltiempo.com/economia/finanzas-personales/definen-las-multas-por-no-declarar-renta-ante-la-dian-en-2026-costos-y-sanciones-subieron-3547146"
+      "fecha": "Sugerida",
+      "titulo": "Verifica si tienes declaración sugerida",
+      "texto": "Con la exógena disponible, la DIAN arma borradores prellenados. Ingresa con tu cédula en 'Consulte si debe declarar renta' para ver si hay una propuesta a tu nombre; recuerda revisarla, no aceptarla a ciegas.",
+      "url": "https://www.vanguardia.com/economia/nacional/2026/07/23/donde-consultar-si-debe-declarar-renta-en-2026-asi-puede-verificarlo-en-la-dian/"
     },
     {
       "fecha": "Plazos AG2025",
       "titulo": "La temporada corre del 12 de agosto al 26 de octubre",
-      "texto": "El calendario de personas naturales por el año gravable 2025 arranca el 12 de agosto (cédulas terminadas en 01–02) y cierra el 26 de octubre de 2026. Revisa con anticipación qué día te corresponde.",
-      "url": "https://www.larepublica.co/economia/dian-dio-a-conocer-el-calendario-de-fechas-para-hacer-la-declaracion-de-renta-4425790"
+      "texto": "El calendario de personas naturales por el año gravable 2025 arranca el 12 de agosto y cierra el 26 de octubre de 2026, según los dos últimos dígitos de tu documento. Se esperan más de 6,5 millones de declarantes.",
+      "url": "https://www.eltiempo.com/amp/economia/finanzas-personales/declaracion-de-renta-2026-estas-seran-las-fechas-y-consejos-que-debe-tener-en-cuenta-para-presentar-el-tramite-ante-la-dian-3568155"
     },
     {
       "fecha": "¿Te toca?",
-      "titulo": "Verifica tus topes antes de declarar",
-      "texto": "Debes declarar si en 2025 superaste patrimonio de 4.500 UVT (unos $224 millones) o ingresos, compras, consumos o consignaciones de 1.400 UVT (unos $69,7 millones), o si fuiste responsable de IVA.",
-      "url": "https://www.elcolombiano.com/negocios/declaracion-de-renta-2026-declarar-exentos-sanciones-economia-KE38966396"
+      "titulo": "Repasa tus topes antes de declarar",
+      "texto": "No solo el salario define la obligación: también cuentan patrimonio, ingresos, consignaciones, compras y uso de tarjetas de crédito. Si dudas, consúltalo directamente en los canales de la DIAN.",
+      "url": "https://www.elpais.com.co/economia/declaracion-de-renta-2025-requisitos-para-no-declarar-ante-la-dian-en-2026-1700.html"
     }
   ]
 }
