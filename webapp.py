@@ -553,11 +553,11 @@ TIERS_LECTOR = [
     {"clave": "estudio",       "nombre": "Estudio",       "empresas_max": 30},
     {"clave": "ilimitado",     "nombre": "Ilimitado",     "empresas_max": 0},
 ]
-# URL de descarga del instalador (LectorXML-Setup.exe). Subir el Setup a Drive/
-# tributando y poner el link acá (o en env DESCARGA_LECTOR).
+# URL de descarga del instalador (tributando.co-Setup.exe). Subir el Setup al
+# release de GitHub y poner el link acá (o en env DESCARGA_LECTOR).
 DESCARGA_LECTOR_URL = os.environ.get(
     "DESCARGA_LECTOR",
-    "https://github.com/ediandres07-oss/declaraci-n-de-renta/releases/download/v1.0/LectorXML-Setup.exe")
+    "https://github.com/ediandres07-oss/declaraci-n-de-renta/releases/download/v1.0/tributando.co-Setup.exe")
 
 
 @app.post("/api/lector-suscripcion/crear")
