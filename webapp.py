@@ -1739,48 +1739,78 @@ def admin():
             f"style='background:#b3372f;color:#fff;border:0;border-radius:6px;"
             f"padding:6px 10px;cursor:pointer'>✕ Quitar acceso</button></td></tr>")
 
+    # ---- resumen (tarjetas) ----
+    n_pend = sum(1 for o in ordenes.values() if o.get("tipo") == "orden"
+                 and o.get("estado") in ("pendiente_pago", "pago_reportado"))
+    try:
+        n_susc = SuscripcionLector.query.filter_by(activa=True).count()
+    except Exception:
+        n_susc = 0
+    def _card(valor, etiqueta, ancla, urgente=False):
+        bg = "#fff6f5" if urgente and valor else "#fff"
+        bd = "#f0c8c4" if urgente and valor else "#dbe3ec"
+        col = "#b3372f" if urgente and valor else "#123f6b"
+        return (f"<a href='{ancla}' class='card' style='background:{bg};border-color:{bd}'>"
+                f"<div class='n' style='color:{col}'>{valor}</div>"
+                f"<div class='l'>{etiqueta}</div></a>")
+    resumen = (
+        _card(n_pend, "💳 Pagos por confirmar", "#ordenes", urgente=True) +
+        _card(n_asesor, "⚑ Piden asesor", "#usuarios", urgente=True) +
+        _card(len(filas_u), "👥 Usuarios", "#usuarios") +
+        _card(n_susc, "🔑 Suscripciones Lector", "/admin/lector") +
+        _card(len(filas_a), "👔 Pases activos", "#acceso") +
+        _card(len(filas_m), "🧪 Probaron gratis", "#prueba"))
+
     return f"""<!DOCTYPE html><html lang="es"><head><meta charset="utf-8">
 <title>Admin — Panel</title>
 <style>body{{font-family:-apple-system,sans-serif;margin:24px;color:#1e2b3a}}
 table{{border-collapse:collapse;width:100%;font-size:.85rem;margin-bottom:34px}}
 th,td{{border-bottom:1px solid #dbe3ec;padding:8px;text-align:left;vertical-align:top}}
 th{{background:#123f6b;color:#fff}}
-h2{{margin-top:10px}}
+h2{{margin-top:10px;scroll-margin-top:16px;border-top:2px solid #eef2f7;padding-top:18px}}
 button{{transition:transform .15s ease, box-shadow .15s ease; cursor:pointer}}
 button:hover:not(:disabled){{transform:translateY(-2px); box-shadow:0 8px 18px rgba(10,25,45,.18)}}
-.nav-admin{{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 22px}}
+.nav-admin{{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 18px}}
 .nav-admin a{{display:inline-flex;align-items:center;gap:6px;background:#123f6b;color:#fff;
   text-decoration:none;padding:9px 16px;border-radius:8px;font-size:.9rem;font-weight:600;
   transition:transform .15s ease, box-shadow .15s ease}}
 .nav-admin a:hover{{transform:translateY(-2px);box-shadow:0 8px 18px rgba(10,25,45,.18)}}
 .nav-admin a.actual{{background:#e8eef5;color:#123f6b;cursor:default;pointer-events:none}}
+.resumen{{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:0 0 28px}}
+.card{{border:1px solid #dbe3ec;border-radius:12px;padding:14px 16px;text-decoration:none;
+  display:block;transition:transform .15s ease, box-shadow .15s ease}}
+.card:hover{{transform:translateY(-2px);box-shadow:0 8px 18px rgba(10,25,45,.14)}}
+.card .n{{font-size:1.7rem;font-weight:800;line-height:1}}
+.card .l{{font-size:.8rem;color:#5a6b7d;margin-top:4px}}
 </style></head><body>
 <div class="nav-admin">
   <a class="actual">🏠 Órdenes y usuarios</a>
   <a href="/admin/lector">🔑 Suscripciones Lector XML</a>
   <a href="/vencimientos">📅 Gestor de vencimientos</a>
 </div>
-<h2>👥 Usuarios registrados ({len(filas_u)})</h2>
-<p>Personas que ingresaron con Google/Microsoft (o demo) y dejaron sus datos.</p>
-{aviso_asesor}
-<table><tr><th>Nombre</th><th>Correo</th><th>Cédula/NIT</th><th>Vencimiento</th>
-<th>Recordatorios</th><th>Asesor</th></tr>{''.join(filas_u) or
-'<tr><td colspan=6>Aún no hay usuarios registrados.</td></tr>'}</table>
+<div class="resumen">{resumen}</div>
 
-<h2>💳 Órdenes — verificación de consignaciones</h2>
+<h2 id="ordenes">💳 Órdenes — verificación de consignaciones</h2>
 <p>Cuenta de recaudo: <b>{cuenta}</b>. Verifique en su app Bancolombia que la
 consignación llegó (valor y referencia) antes de confirmar.</p>
 <table><tr><th>Fecha</th><th>Orden</th><th>Cliente</th><th>Plan</th><th>Valor</th>
 <th>Contacto</th><th>Estado</th><th>Acciones</th></tr>{''.join(filas) or
 '<tr><td colspan=8>Sin órdenes todavía.</td></tr>'}</table>
 
-<h2>👔 Contadores que probaron gratis ({len(filas_m)})</h2>
+<h2 id="usuarios">👥 Usuarios registrados ({len(filas_u)})</h2>
+<p>Personas que ingresaron con Google/Microsoft (o demo) y dejaron sus datos.</p>
+{aviso_asesor}
+<table><tr><th>Nombre</th><th>Correo</th><th>Cédula/NIT</th><th>Vencimiento</th>
+<th>Recordatorios</th><th>Asesor</th></tr>{''.join(filas_u) or
+'<tr><td colspan=6>Aún no hay usuarios registrados.</td></tr>'}</table>
+
+<h2 id="prueba">👔 Contadores que probaron gratis ({len(filas_m)})</h2>
 <p>Cada uno ya usó su declaración de muestra (termómetro de interés).
 "Reiniciar" le devuelve su prueba gratis — útil para demos.</p>
 <table><tr><th>Fecha</th><th>Contador</th><th>NIT muestra</th><th>Acción</th></tr>{''.join(filas_m) or
 '<tr><td colspan=4>Ningún contador ha probado todavía.</td></tr>'}</table>
 
-<h2>🔑 Acceso al liquidador — contadores con pase ({len(filas_a)})</h2>
+<h2 id="acceso">🔑 Acceso al liquidador — contadores con pase ({len(filas_a)})</h2>
 <p>Habilita a un contador que pagó el pase de temporada. Usa el <b>mismo correo</b>
 con el que él entra por Google o Microsoft. Le da acceso a <code>/liquidador</code>
 (declaraciones ilimitadas), <b>NO</b> a este panel de pagos.</p>
