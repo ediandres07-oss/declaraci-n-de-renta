@@ -538,10 +538,11 @@ def crear_pase_contador():
 # empresas ILIMITADAS, por debajo de Kontalid ($297.700/año). Editable;
 # idealmente mover a config/precios.yaml bloque `lector`.
 PRECIOS_LECTOR = {
-    "independiente_mensual": 19900,  "independiente_anual": 199000,
-    "contador_mensual":      34900,  "contador_anual":      349000,
-    "estudio_mensual":       69900,  "estudio_anual":       699000,
-    "ilimitado_mensual":    109900,  "ilimitado_anual":    1099000,
+    # Anual = 10× el mensual (2 meses gratis).
+    "independiente_mensual": 29900,  "independiente_anual":  299000,
+    "contador_mensual":      59900,  "contador_anual":       599000,
+    "estudio_mensual":      119900,  "estudio_anual":       1199000,
+    "ilimitado_mensual":    199900,  "ilimitado_anual":     1999000,
     # Compat (suscripciones antiguas / enlaces viejos).
     "mensual": 29900, "anual": 249900,
 }
