@@ -595,7 +595,9 @@ def crear_suscripcion_lector():
     }
     _guardar_ordenes(ordenes)
     from src import payu as _payu_mod
-    pago_url = f"/pagar/lector/{orden_id}" if _payu_mod.activo() else ""
+    from src import epayco as _epayco_mod
+    hay_pago = _epayco_mod.activo(EPAYCO) or _payu_mod.activo()
+    pago_url = f"/pagar/lector/{orden_id}" if hay_pago else ""
     return jsonify({"orden_id": orden_id, "precio": precio, "plan": plan, "pago_url": pago_url})
 
 
@@ -610,17 +612,30 @@ def _base_url_publica() -> str:
 
 @app.get("/pagar/lector/<orden_id>")
 def pagar_lector(orden_id):
-    """Autoenvía el formulario firmado a PayU WebCheckout para esta orden."""
+    """Abre el pago en línea para esta orden (ePayco si está activo; si no, PayU)."""
     from src import payu as _payu_mod
-    cfg = _payu_mod.cargar_config()
-    if not _payu_mod.activo(cfg):
-        return "El pago en línea no está configurado. Escríbenos para activarte.", 503
+    from src import epayco as _epayco_mod
     orden = _leer_ordenes().get(orden_id)
     if not orden or orden.get("plan") != "lector":
         return "Orden no encontrada.", 404
+    plan = orden.get("plan_lector", "")
+
+    # --- ePayco (Checkout Standard con checkout.js) ---
+    if _epayco_mod.activo(EPAYCO):
+        if orden.get("estado") == "pagada":
+            return redirect("/epayco/respuesta?ref=" + orden_id + "&ya=1")
+        d = _epayco_mod.datos_checkout(
+            EPAYCO, orden_id, orden.get("precio", 0),
+            f"Suscripción Lector tributando.co — plan {plan}",
+            (orden.get("contacto") or {}).get("email", ""), _base_url_publica())
+        return render_template_string(_EPAYCO_CHECKOUT_HTML, d=d)
+
+    # --- PayU (WebCheckout) ---
+    cfg = _payu_mod.cargar_config()
+    if not _payu_mod.activo(cfg):
+        return "El pago en línea no está configurado. Escríbenos para activarte.", 503
     if orden.get("estado") == "pagada":
         return redirect("/payu/respuesta?ref=" + orden_id + "&ya=1")
-    plan = orden.get("plan_lector", "")
     p = _payu_mod.parametros_checkout(
         orden_id, orden.get("precio", 0),
         f"Suscripción Lector tributando.co — plan {plan}",
@@ -708,6 +723,77 @@ def _enviar_licencia_lector(email: str, plan: str, licencia: str):
         f"<p style='color:#7b7568;font-size:.9rem'>Clave de respaldo (por si la necesitas): "
         f"<b>{licencia}</b></p></div>")
     enviar_email(email, "Tu suscripción al Lector de tributando.co está activa", html)
+
+
+_EPAYCO_CHECKOUT_HTML = """<!doctype html><html><head><meta charset="utf-8">
+<title>Pago seguro — ePayco</title></head>
+<body style="font-family:sans-serif;text-align:center;margin-top:60px;color:#1e2432">
+<p>Abriendo el pago seguro de ePayco…</p>
+<script src="https://checkout.epayco.co/checkout.js"></script>
+<script>
+  var handler = ePayco.checkout.configure({ key: "{{ d.public_key }}", test: {{ d.test }} });
+  handler.open({
+    name: "{{ d.name }}", description: "{{ d.description }}", invoice: "{{ d.invoice }}",
+    currency: "{{ d.currency }}", amount: "{{ d.amount }}", country: "{{ d.country }}",
+    external: "false", email_billing: "{{ d.email_billing }}",
+    response: "{{ d.response }}", confirmation: "{{ d.confirmation }}"
+  });
+</script></body></html>"""
+
+
+@app.route("/epayco/confirmacion", methods=["GET", "POST"])
+def epayco_confirmacion():
+    """Webhook de ePayco. Si el pago fue Aceptado, crea la suscripción y entrega
+    la licencia por correo. Siempre responde 200."""
+    from src import epayco as _epayco_mod
+    try:
+        params = request.form.to_dict() or request.args.to_dict() or {}
+        if not _epayco_mod.verificar_firma(params, EPAYCO):
+            app.logger.warning("ePayco: firma inválida (%s)", params.get("x_id_invoice"))
+            return "ok", 200
+        orden_id = params.get("x_id_invoice") or params.get("x_extra1", "")
+        ordenes = _leer_ordenes()
+        orden = ordenes.get(orden_id)
+        if not orden or orden.get("plan") != "lector":
+            return "ok", 200
+        if _epayco_mod.aprobada(params) and orden.get("estado") != "pagada":
+            email = (orden.get("contacto") or {}).get("email", "")
+            plan = orden.get("plan_lector", "independiente")
+            sus = crear_suscripcion(email, plan)
+            orden["estado"] = "pagada"; orden["licencia"] = sus.licencia
+            _guardar_ordenes(ordenes)
+            try:
+                _enviar_licencia_lector(email, plan, sus.licencia)
+            except Exception as e:
+                app.logger.warning("ePayco: no se pudo enviar la licencia: %s", e)
+        elif not _epayco_mod.aprobada(params):
+            orden["estado"] = "pago_" + _epayco_mod.estado_texto(params)
+            _guardar_ordenes(ordenes)
+    except Exception as e:
+        app.logger.warning("ePayco confirmación: %s", e)
+    return "ok", 200
+
+
+@app.route("/epayco/respuesta")
+def epayco_respuesta():
+    """Página que ve el contador al volver de ePayco."""
+    ref = request.args.get("ref") or request.args.get("x_id_invoice", "")
+    ok = request.args.get("ya") == "1"
+    orden = _leer_ordenes().get(ref, {})
+    pagada = ok or orden.get("estado") == "pagada"
+    titulo = "¡Pago confirmado!" if pagada else "Pago en proceso"
+    msg = ("Tu suscripción quedó activa. Te enviamos la clave y el enlace de descarga a tu correo. "
+           "También puedes entrar al Lector con tu correo (te llega un código)."
+           if pagada else
+           "Si el pago se completó, en unos minutos recibirás la activación por correo.")
+    return render_template_string(
+        "<!doctype html><html><head><meta charset='utf-8'><title>{{t}}</title></head>"
+        "<body style='font-family:sans-serif;max-width:520px;margin:60px auto;text-align:center;color:#1e2432'>"
+        "<div style='font-size:52px'>{{ '✅' if pagada else '⏳' }}</div>"
+        "<h1 style='color:#1e2432'>{{t}}</h1><p style='color:#5a6b7f'>{{m}}</p>"
+        "<a href='/contadores/lector' style='display:inline-block;margin-top:16px;background:#c8991f;color:#fff;"
+        "padding:12px 22px;border-radius:10px;text-decoration:none;font-weight:600'>Volver</a></body></html>",
+        t=titulo, m=msg, pagada=pagada)
 
 
 @app.get("/api/muestra-contador/<token>.pdf")
