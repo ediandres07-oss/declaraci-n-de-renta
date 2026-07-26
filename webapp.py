@@ -2133,6 +2133,47 @@ def api_lector_entrar():
     return jsonify(res), (200 if res.get("valida") or res.get("ok") else 400)
 
 
+_IA_CONTADOR = (
+    "\n\nMODO CONTADOR: Respondes a un CONTADOR PÚBLICO dentro del programa Lector "
+    "de tributando.co. Sé técnico, preciso y breve sobre retención en la fuente, "
+    "IVA, exógena, plazos DIAN, UVT y procedimiento tributario colombiano 2026. "
+    "Cita el artículo o la norma cuando aplique. NO vendas planes ni hables como si "
+    "fuera un cliente persona natural. Si no estás seguro de una tarifa vigente, dilo "
+    "y sugiere confirmarla en la DIAN."
+)
+
+
+@app.route("/api/lector/ia", methods=["POST"])
+def api_lector_ia():
+    """Buscador IA del Lector: el contador pregunta (retención, IVA, plazos) y la
+    IA responde. Requiere licencia válida (protege la cuota de la API)."""
+    if not asistente_ia_activo(IA_CFG):
+        return jsonify({"error": "El buscador IA no está disponible."}), 503
+    b = request.get_json(silent=True) or {}
+    est = estado_licencia(b.get("licencia", ""))
+    if not est.get("valida"):
+        return jsonify({"error": "Necesitas una licencia activa para usar el buscador IA."}), 402
+    if not _chat_permitido(_ip_cliente()):
+        return jsonify({"error": "Muchas consultas seguidas. Espera un momento. 🙏"}), 429
+    mensajes = b.get("mensajes")
+    if not isinstance(mensajes, list) or not mensajes:
+        pregunta = (b.get("pregunta") or "").strip()
+        if not pregunta:
+            return jsonify({"error": "Escribe tu pregunta."}), 400
+        mensajes = [{"rol": "user", "texto": pregunta}]
+    try:
+        respuesta = responder_ia(mensajes, IA_CFG, system_extra=_IA_CONTADOR)
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        msg = str(e)
+        if "RESOURCE_EXHAUSTED" in msg or "429" in msg:
+            return jsonify({"error": "Muchas consultas en este momento. Reintenta en unos segundos. 🙏"}), 429
+        app.logger.warning("Fallo del buscador IA del Lector: %s", e)
+        return jsonify({"error": "No pude responder ahora. Intenta de nuevo."}), 502
+    return jsonify({"respuesta": respuesta})
+
+
 @app.route("/api/lector/empresa", methods=["POST"])
 def api_lector_empresa():
     """Registra una empresa contra la licencia (respeta el límite del plan)."""

@@ -194,11 +194,12 @@ def _contexto_usuario(usuario=None, liq=None) -> str:
 
 
 def responder(mensajes: list[dict], cfg: dict | None = None,
-              usuario=None, liq=None) -> str:
+              usuario=None, liq=None, system_extra: str = "") -> str:
     """Recibe el historial [{rol, texto}] y devuelve la respuesta del asistente.
 
     'rol' es "user" o "assistant". `usuario` y `liq` son opcionales: si vienen,
     el asistente responde conociendo a quién atiende y cómo quedó su liquidación.
+    `system_extra` añade contexto al prompt (p.ej. modo contador profesional).
     Lanza RuntimeError si el asistente no está activo.
     """
     cfg = cfg if cfg is not None else cargar_config()
@@ -221,7 +222,7 @@ def responder(mensajes: list[dict], cfg: dict | None = None,
 
     cliente = genai.Client(api_key=cfg["api_key"])
     config = types.GenerateContentConfig(
-        system_instruction=_prompt_sistema(cfg) + _contexto_usuario(usuario, liq),
+        system_instruction=_prompt_sistema(cfg) + _contexto_usuario(usuario, liq) + (system_extra or ""),
         max_output_tokens=_MAX_TOKENS,
         temperature=0.4,
     )
