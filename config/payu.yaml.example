@@ -1,0 +1,13 @@
+# PayU Latam (Colombia) — WebCheckout.
+# Copia este archivo a config/payu.yaml (o súbelo como Secret File en Render con
+# el nombre payu.yaml, se monta en /etc/secrets/payu.yaml) y pon tus datos reales
+# del panel de PayU (Configuración → Datos técnicos / Cuentas).
+
+merchant_id: "TU_MERCHANT_ID"     # ID del comercio (numérico)
+account_id: "TU_ACCOUNT_ID"       # ID de la CUENTA de Colombia (numérico)
+api_key: "TU_API_KEY"             # Llave API (Configuración → Datos técnicos)
+moneda: "COP"
+test: true                        # true = sandbox de pruebas; false = producción real
+
+# Opcional: URL pública para las callbacks (si no, se usa el host de la petición).
+# base_url: "https://tributando.co"

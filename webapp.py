@@ -594,7 +594,120 @@ def crear_suscripcion_lector():
         "nit": "", "nombre": (u.nombre or "Contador"),
     }
     _guardar_ordenes(ordenes)
-    return jsonify({"orden_id": orden_id, "precio": precio, "plan": plan})
+    from src import payu as _payu_mod
+    pago_url = f"/pagar/lector/{orden_id}" if _payu_mod.activo() else ""
+    return jsonify({"orden_id": orden_id, "precio": precio, "plan": plan, "pago_url": pago_url})
+
+
+def _base_url_publica() -> str:
+    """URL pública (https) para las callbacks de PayU."""
+    from src import payu as _payu_mod
+    cfg = _payu_mod.cargar_config()
+    if cfg.get("base_url"):
+        return str(cfg["base_url"]).rstrip("/")
+    return request.host_url.rstrip("/").replace("http://", "https://")
+
+
+@app.get("/pagar/lector/<orden_id>")
+def pagar_lector(orden_id):
+    """Autoenvía el formulario firmado a PayU WebCheckout para esta orden."""
+    from src import payu as _payu_mod
+    cfg = _payu_mod.cargar_config()
+    if not _payu_mod.activo(cfg):
+        return "El pago en línea no está configurado. Escríbenos para activarte.", 503
+    orden = _leer_ordenes().get(orden_id)
+    if not orden or orden.get("plan") != "lector":
+        return "Orden no encontrada.", 404
+    if orden.get("estado") == "pagada":
+        return redirect("/payu/respuesta?ref=" + orden_id + "&ya=1")
+    plan = orden.get("plan_lector", "")
+    p = _payu_mod.parametros_checkout(
+        orden_id, orden.get("precio", 0),
+        f"Suscripción Lector tributando.co — plan {plan}",
+        (orden.get("contacto") or {}).get("email", ""),
+        _base_url_publica(), cfg)
+    campos = "".join(
+        f'<input type="hidden" name="{k}" value="{str(v).replace(chr(34), "&quot;")}">'
+        for k, v in p["campos"].items())
+    return (f'<!doctype html><html><body onload="document.forms[0].submit()">'
+            f'<p style="font-family:sans-serif;text-align:center;margin-top:40px">'
+            f'Redirigiéndote al pago seguro de PayU…</p>'
+            f'<form method="post" action="{p["url"]}">{campos}</form></body></html>')
+
+
+@app.post("/payu/confirmacion")
+def payu_confirmacion():
+    """Webhook servidor-a-servidor de PayU. Si el pago aprobó, crea la suscripción
+    y entrega la licencia por correo. Siempre responde 200 (PayU reintenta si no)."""
+    from src import payu as _payu_mod
+    try:
+        params = request.form.to_dict() or {}
+        cfg = _payu_mod.cargar_config()
+        if not _payu_mod.confirmacion_valida(params, cfg):
+            app.logger.warning("PayU: firma de confirmación inválida (%s)", params.get("reference_sale"))
+            return "ok", 200
+        orden_id = params.get("reference_sale", "")
+        ordenes = _leer_ordenes()
+        orden = ordenes.get(orden_id)
+        if not orden or orden.get("plan") != "lector":
+            return "ok", 200
+        if _payu_mod.aprobada(params) and orden.get("estado") != "pagada":
+            email = (orden.get("contacto") or {}).get("email", "")
+            plan = orden.get("plan_lector", "independiente")
+            sus = crear_suscripcion(email, plan)
+            orden["estado"] = "pagada"; orden["licencia"] = sus.licencia
+            _guardar_ordenes(ordenes)
+            try:
+                _enviar_licencia_lector(email, plan, sus.licencia)
+            except Exception as e:
+                app.logger.warning("PayU: no se pudo enviar la licencia: %s", e)
+        elif not _payu_mod.aprobada(params):
+            orden["estado"] = "pago_" + _payu_mod.estado_texto(params)
+            _guardar_ordenes(ordenes)
+    except Exception as e:
+        app.logger.warning("PayU confirmación: %s", e)
+    return "ok", 200
+
+
+@app.route("/payu/respuesta")
+def payu_respuesta():
+    """Página que ve el contador al volver de PayU (el estado real lo fija el
+    webhook; aquí solo mostramos un mensaje)."""
+    ref = request.args.get("ref") or request.args.get("referenceCode", "")
+    estado = (request.args.get("lapTransactionState") or "").upper()
+    ok = request.args.get("ya") == "1" or estado == "APPROVED"
+    orden = _leer_ordenes().get(ref, {})
+    pagada = ok or orden.get("estado") == "pagada"
+    titulo = "¡Pago confirmado!" if pagada else ("Pago " + (estado.lower() or "en proceso"))
+    msg = ("Tu suscripción quedó activa. Te enviamos la clave y el enlace de descarga a tu correo. "
+           "También puedes entrar al Lector con tu correo (te llega un código)."
+           if pagada else
+           "Si el pago se completó, en unos minutos recibirás la activación por correo. "
+           "Si fue rechazado, puedes intentar de nuevo.")
+    return render_template_string(
+        "<!doctype html><html><head><meta charset='utf-8'><title>{{t}}</title></head>"
+        "<body style='font-family:sans-serif;max-width:520px;margin:60px auto;text-align:center;color:#1e2432'>"
+        "<div style='font-size:52px'>{{ '✅' if pagada else '⏳' }}</div>"
+        "<h1 style='color:#1e2432'>{{t}}</h1><p style='color:#5a6b7f'>{{m}}</p>"
+        "<a href='/contadores/lector' style='display:inline-block;margin-top:16px;background:#c8991f;color:#fff;"
+        "padding:12px 22px;border-radius:10px;text-decoration:none;font-weight:600'>Volver</a></body></html>",
+        t=titulo, m=msg, pagada=pagada)
+
+
+def _enviar_licencia_lector(email: str, plan: str, licencia: str):
+    """Correo de bienvenida con la licencia y el enlace de descarga."""
+    from src.correo import enviar_email
+    html = (
+        "<div style='font-family:sans-serif;max-width:520px;margin:auto'>"
+        "<h2 style='color:#1e2432'>¡Bienvenido al Lector de tributando.co!</h2>"
+        f"<p>Tu suscripción <b>{plan.upper()}</b> quedó activa. 🎉</p>"
+        "<p><b>1.</b> Descarga e instala el Lector:</p>"
+        f"<p><a href='{DESCARGA_LECTOR_URL}' style='background:#1e2432;color:#fff;padding:10px 18px;"
+        "border-radius:8px;text-decoration:none'>Descargar el Lector</a></p>"
+        "<p><b>2.</b> Ábrelo y entra con <b>este mismo correo</b> — te llegará un código de 6 dígitos.</p>"
+        f"<p style='color:#7b7568;font-size:.9rem'>Clave de respaldo (por si la necesitas): "
+        f"<b>{licencia}</b></p></div>")
+    enviar_email(email, "Tu suscripción al Lector de tributando.co está activa", html)
 
 
 @app.get("/api/muestra-contador/<token>.pdf")
