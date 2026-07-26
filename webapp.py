@@ -484,7 +484,7 @@ def contadores_lector():
             "empresas": "Empresas ilimitadas" if not t["empresas_max"] else f"Hasta {t['empresas_max']} empresas",
             "mensual": PRECIOS_LECTOR[f"{c}_mensual"],
             "anual": PRECIOS_LECTOR[f"{c}_anual"],
-            "destacado": c == "contador",
+            "destacado": c == "pro",
         })
     return render_template("contadores_lector.html",
                            planes=planes,
@@ -539,21 +539,24 @@ def crear_pase_contador():
 # empresas ILIMITADAS, por debajo de Kontalid ($297.700/año). Editable;
 # idealmente mover a config/precios.yaml bloque `lector`.
 PRECIOS_LECTOR = {
-    # Anual = 10× el mensual (2 meses gratis).
-    "independiente_mensual": 29900,  "independiente_anual":  299000,
-    "contador_mensual":      59900,  "contador_anual":       599000,
-    "estudio_mensual":      119900,  "estudio_anual":       1199000,
-    "ilimitado_mensual":    199900,  "ilimitado_anual":     1999000,
-    # Compat (suscripciones antiguas / enlaces viejos).
-    "mensual": 29900, "anual": 249900,
+    # 3 planes. Anual = 10× el mensual (2 meses gratis). Precios alineados al
+    # mercado (Kontalid Premium ~$297.700/año), con premium por generar planos
+    # Siigo/Contai y llenar los formularios 300/350 oficiales.
+    "independiente_mensual": 19900,  "independiente_anual":  199000,
+    "pro_mensual":           34900,  "pro_anual":            349000,
+    "max_mensual":           59900,  "max_anual":            599000,
+    # Compat (suscripciones antiguas / enlaces viejos → equivalente más cercano).
+    "contador_mensual":      34900,  "contador_anual":       349000,
+    "estudio_mensual":       34900,  "estudio_anual":        349000,
+    "ilimitado_mensual":     59900,  "ilimitado_anual":      599000,
+    "mensual": 19900, "anual": 199000,
 }
 
 # Paquetes por # de empresas (para la página de precios).
 TIERS_LECTOR = [
-    {"clave": "independiente", "nombre": "Independiente", "empresas_max": 3},
-    {"clave": "contador",      "nombre": "Contador",      "empresas_max": 10},
-    {"clave": "estudio",       "nombre": "Estudio",       "empresas_max": 30},
-    {"clave": "ilimitado",     "nombre": "Ilimitado",     "empresas_max": 0},
+    {"clave": "independiente", "nombre": "Independiente", "empresas_max": 10},
+    {"clave": "pro",           "nombre": "Pro",           "empresas_max": 30},
+    {"clave": "max",           "nombre": "Max",           "empresas_max": 0},
 ]
 # URL de descarga del instalador (tributando.co-Setup.exe). Subir el Setup al
 # release de GitHub y poner el link acá (o en env DESCARGA_LECTOR).

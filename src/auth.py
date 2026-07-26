@@ -181,8 +181,14 @@ class AccesoAutorizado(db.Model):
 # por cliente). Solo cambia el período de facturación (mensual/anual).
 PLANES_LECTOR = {
     # Paquetes por # de empresas (empresas_max = 0 → ilimitado).
-    "independiente_mensual": {"empresas_max": 3,  "nombre": "Independiente", "dias": 30},
-    "independiente_anual":   {"empresas_max": 3,  "nombre": "Independiente", "dias": 365},
+    # 3 planes vigentes.
+    "independiente_mensual": {"empresas_max": 10, "nombre": "Independiente", "dias": 30},
+    "independiente_anual":   {"empresas_max": 10, "nombre": "Independiente", "dias": 365},
+    "pro_mensual":           {"empresas_max": 30, "nombre": "Pro",           "dias": 30},
+    "pro_anual":             {"empresas_max": 30, "nombre": "Pro",           "dias": 365},
+    "max_mensual":           {"empresas_max": 0,  "nombre": "Max",           "dias": 30},
+    "max_anual":             {"empresas_max": 0,  "nombre": "Max",           "dias": 365},
+    # Compat con planes/suscripciones anteriores (no romper las ya vendidas).
     "contador_mensual":      {"empresas_max": 10, "nombre": "Contador",      "dias": 30},
     "contador_anual":        {"empresas_max": 10, "nombre": "Contador",      "dias": 365},
     "estudio_mensual":       {"empresas_max": 30, "nombre": "Estudio",       "dias": 30},
