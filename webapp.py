@@ -121,11 +121,14 @@ with open(BASE / "config" / "precios.yaml", "r", encoding="utf-8") as _fh:
     _CONTACTO = _CFG_PRECIOS.get("contacto", {})
     URL_PUBLICA = str(_CONTACTO.get("sitio", "https://tributando.co")).rstrip("/")
 
-_EPAYCO_PATH = BASE / "config" / "epayco.yaml"
+# El Secret File de Render se monta en /etc/secrets/epayco.yaml; en local está
+# en config/epayco.yaml. Se busca en ambos.
 EPAYCO = {"habilitado": False}
-if _EPAYCO_PATH.exists():
-    with open(_EPAYCO_PATH, "r", encoding="utf-8") as _fh:
-        EPAYCO = yaml.safe_load(_fh) or EPAYCO
+for _ep in (BASE / "config" / "epayco.yaml", Path("/etc/secrets/epayco.yaml")):
+    if _ep.exists():
+        with open(_ep, "r", encoding="utf-8") as _fh:
+            EPAYCO = yaml.safe_load(_fh) or EPAYCO
+        break
 
 _REALMY_PATH = BASE / "config" / "realmy.yaml"
 REALMY = {"habilitado": False}
