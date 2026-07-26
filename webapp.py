@@ -565,7 +565,7 @@ TIERS_LECTOR = [
 # release de GitHub y poner el link acá (o en env DESCARGA_LECTOR).
 DESCARGA_LECTOR_URL = os.environ.get(
     "DESCARGA_LECTOR",
-    "https://github.com/ediandres07-oss/declaraci-n-de-renta/releases/download/v1.0/tributando.co-Setup.exe")
+    "https://github.com/ediandres07-oss/declaraci-n-de-renta/releases/download/v1.0/tributando.co.zip")
 
 # Última versión publicada del Lector. Súbela cada vez que recompiles y publiques
 # un instalador nuevo; el Lector la consulta y avisa al contador si está atrasado.
@@ -719,10 +719,12 @@ def _enviar_licencia_lector(email: str, plan: str, licencia: str):
         "<div style='font-family:sans-serif;max-width:520px;margin:auto'>"
         "<h2 style='color:#1e2432'>¡Bienvenido al Lector de tributando.co!</h2>"
         f"<p>Tu suscripción <b>{plan.upper()}</b> quedó activa. 🎉</p>"
-        "<p><b>1.</b> Descarga e instala el Lector:</p>"
+        "<p><b>1.</b> Descarga el Lector (Windows):</p>"
         f"<p><a href='{DESCARGA_LECTOR_URL}' style='background:#1e2432;color:#fff;padding:10px 18px;"
-        "border-radius:8px;text-decoration:none'>Descargar el Lector</a></p>"
-        "<p><b>2.</b> Ábrelo y entra con <b>este mismo correo</b> — te llegará un código de 6 dígitos.</p>"
+        "border-radius:8px;text-decoration:none'>Descargar el Lector (ZIP)</a></p>"
+        "<p><b>2.</b> <b>Descomprime</b> el ZIP (clic derecho → Extraer todo) y abre "
+        "<b>tributando.co.exe</b> (dentro de la carpeta).</p>"
+        "<p><b>3.</b> Entra con <b>este mismo correo</b> — te llegará un código de 6 dígitos.</p>"
         f"<p style='color:#7b7568;font-size:.9rem'>Clave de respaldo (por si la necesitas): "
         f"<b>{licencia}</b></p></div>")
     enviar_email(email, "Tu suscripción al Lector de tributando.co está activa", html)
