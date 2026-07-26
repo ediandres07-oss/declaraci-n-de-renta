@@ -69,6 +69,12 @@
   </a>
   <span style="color:#9aa3b0;font-size:.85rem">· Contadores</span>
   <a class="volver" href="/contadores">← Volver a herramientas</a>
+  {% if usuario %}
+  <span style="color:#9aa3b0;font-size:.82rem;margin-left:14px">👤 {{ usuario.nombre or usuario.email }}</span>
+  <a href="/logout" style="color:#e0b53a;font-size:.82rem;margin-left:10px;text-decoration:none">Cerrar sesión</a>
+  {% else %}
+  <a href="/login?next=/contadores/lector" style="color:#e0b53a;font-size:.82rem;margin-left:14px;text-decoration:none">Iniciar sesión</a>
+  {% endif %}
 </div>
 
 <div class="hero">

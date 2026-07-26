@@ -162,6 +162,12 @@
     <div class="contenedor">
       <a class="marca" href="/"><img src="/static/img/logo-tributando.png" alt="">Tributando<b style="color:var(--dorado)">.co</b></a>
       <a class="volver" href="/">← Declaración de renta</a>
+      {% if usuario %}
+      <span style="margin-left:14px;font-size:.82rem;opacity:.75">👤 {{ usuario.nombre or usuario.email }}</span>
+      <a href="/logout" style="margin-left:10px;font-size:.82rem;color:var(--dorado);text-decoration:none">Cerrar sesión</a>
+      {% else %}
+      <a href="/login?next=/contadores" style="margin-left:14px;font-size:.82rem;color:var(--dorado);text-decoration:none">Iniciar sesión</a>
+      {% endif %}
     </div>
   </div>
 
