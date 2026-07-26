@@ -564,6 +564,10 @@ DESCARGA_LECTOR_URL = os.environ.get(
     "DESCARGA_LECTOR",
     "https://github.com/ediandres07-oss/declaraci-n-de-renta/releases/download/v1.0/tributando.co-Setup.exe")
 
+# Última versión publicada del Lector. Súbela cada vez que recompiles y publiques
+# un instalador nuevo; el Lector la consulta y avisa al contador si está atrasado.
+LECTOR_VERSION_LATEST = os.environ.get("LECTOR_VERSION", "1.1.0")
+
 
 @app.post("/api/lector-suscripcion/crear")
 @login_requerido
@@ -2172,6 +2176,51 @@ def api_lector_ia():
         app.logger.warning("Fallo del buscador IA del Lector: %s", e)
         return jsonify({"error": "No pude responder ahora. Intenta de nuevo."}), 502
     return jsonify({"respuesta": respuesta})
+
+
+@app.route("/api/lector/version", methods=["GET", "POST"])
+def api_lector_version():
+    """Última versión del Lector, para que avise si hay una nueva."""
+    return jsonify({"version": LECTOR_VERSION_LATEST, "url": DESCARGA_LECTOR_URL})
+
+
+@app.route("/api/lector/recordatorio-tareas", methods=["POST"])
+def api_lector_recordatorio_tareas():
+    """Envía al correo del contador un recordatorio con sus tareas pendientes."""
+    b = request.get_json(silent=True) or {}
+    est = estado_licencia(b.get("licencia", ""))
+    if not est.get("valida"):
+        return jsonify({"ok": False, "error": "Necesitas una licencia activa."}), 402
+    email = est.get("email") or (SuscripcionLector.query
+                                 .filter_by(licencia=b.get("licencia", "")).first() or SuscripcionLector()).email
+    if not email:
+        return jsonify({"ok": False, "error": "No hay correo asociado a la licencia."}), 400
+    tareas = b.get("tareas") or []
+    if not tareas:
+        return jsonify({"ok": False, "error": "No hay tareas para recordar."}), 400
+    filas = "".join(
+        f"<tr><td style='padding:6px 10px;border-bottom:1px solid #eee'>{t.get('titulo','')}</td>"
+        f"<td style='padding:6px 10px;border-bottom:1px solid #eee;color:{'#b3372f' if t.get('vencida') else '#1e2432'}'>"
+        f"{t.get('fecha','sin fecha')}{' · VENCIDA' if t.get('vencida') else ''}</td>"
+        f"<td style='padding:6px 10px;border-bottom:1px solid #eee;color:#7b7568'>{t.get('empresa','')}</td></tr>"
+        for t in tareas)
+    html = (
+        "<div style='font-family:sans-serif;max-width:560px;margin:auto'>"
+        "<h2 style='color:#1e2432'>Tus tareas pendientes</h2>"
+        "<p>Recordatorio del <b>Lector de tributando.co</b>:</p>"
+        "<table style='border-collapse:collapse;width:100%'>"
+        "<tr style='text-align:left;color:#7b7568'><th style='padding:6px 10px'>Tarea</th>"
+        "<th style='padding:6px 10px'>Vence</th><th style='padding:6px 10px'>Empresa</th></tr>"
+        f"{filas}</table>"
+        "<p style='color:#7b7568;font-size:.85rem;margin-top:16px'>Enviado desde tu Lector. "
+        "Info de apoyo — verifica los plazos oficiales.</p></div>")
+    try:
+        from src.correo import enviar_email
+        enviar_email(email, "Recordatorio de tareas — Lector tributando.co", html)
+    except Exception as e:
+        app.logger.warning("No se pudo enviar el recordatorio de tareas: %s", e)
+        return jsonify({"ok": False, "error": "No se pudo enviar el correo."}), 502
+    return jsonify({"ok": True, "email": email, "n": len(tareas)})
 
 
 @app.route("/api/lector/empresa", methods=["POST"])
