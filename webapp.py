@@ -2431,6 +2431,27 @@ def api_lector_recordatorio_tareas():
     return jsonify({"ok": True, "email": email, "n": len(tareas)})
 
 
+@app.route("/api/lector/vencimientos", methods=["POST"])
+def api_lector_vencimientos():
+    """Obligaciones DIAN del cliente por NIT (calendario 2026), para llenar las
+    Tareas del Lector solas. tipo: natural|juridica|gran|rst."""
+    from src.vencimientos import vencimientos_de, SUGERENCIAS
+    b = request.get_json(silent=True) or {}
+    est = estado_licencia(b.get("licencia", ""))
+    if not est.get("valida"):
+        return jsonify({"ok": False, "error": "Necesitas una licencia activa."}), 402
+    nit = b.get("nit", "")
+    if not "".join(c for c in str(nit) if c.isdigit()):
+        return jsonify({"ok": False, "error": "Falta el NIT del cliente."}), 400
+    tipo = (b.get("tipo") or "juridica").lower()
+    obligaciones = b.get("obligaciones") or SUGERENCIAS.get(tipo) or SUGERENCIAS["juridica"]
+    eventos = vencimientos_de(nit, obligaciones)
+    return jsonify({"ok": True, "tipo": tipo, "vencimientos": [
+        {"obligacion": e["obligacion"], "nombre": e["nombre"],
+         "etiqueta": e["etiqueta"], "fecha": e["fecha"].isoformat()}
+        for e in eventos]})
+
+
 @app.route("/api/lector/empresa", methods=["POST"])
 def api_lector_empresa():
     """Registra una empresa contra la licencia (respeta el límite del plan)."""
