@@ -31,7 +31,8 @@ from src.auth import (AccesoAutorizado, ArchivoExogena, LeadEspera, MuestraConta
                       OrdenRegistro, Usuario, auth_bp, autorizado_requerido, db,
                       init_auth, login_requerido, pro_requerido, usuario_actual,
                       PLANES_LECTOR, SuscripcionLector, EmpresaLector,
-                      crear_suscripcion, estado_licencia, registrar_empresa_lector)
+                      crear_suscripcion, estado_licencia, registrar_empresa_lector,
+                      generar_codigo_lector, entrar_con_codigo)
 from src.calendario import fecha_limite
 from src.vencimientos import venc_bp
 from src.documentos import generar_checklist_pdf
@@ -2086,6 +2087,47 @@ def api_lector_licencia():
     """El Lector XML local valida su clave de licencia contra el servidor."""
     b = request.get_json(silent=True) or {}
     return jsonify(estado_licencia(b.get("licencia", ""), b.get("equipo", "")))
+
+
+@app.route("/api/lector/codigo", methods=["POST"])
+def api_lector_codigo():
+    """Acceso por correo ("como Claude"): el Lector pide un código de 6 dígitos
+    para el correo del contador. Si hay suscripción, se envía por email. Por
+    seguridad la respuesta es la misma exista o no (no revela correos)."""
+    b = request.get_json(silent=True) or {}
+    email = (b.get("email") or "").strip().lower()
+    if not _EMAIL_RE.match(email):
+        return jsonify({"ok": False, "error": "Escribe un correo válido."}), 400
+    sus = generar_codigo_lector(email)
+    if sus is not None:
+        codigo = sus._codigo
+        html = (
+            "<div style='font-family:sans-serif;max-width:460px;margin:auto'>"
+            "<h2 style='color:#1e2432'>Tu código de acceso</h2>"
+            "<p>Usa este código para entrar al <b>Lector de tributando.co</b>:</p>"
+            f"<p style='font-size:34px;font-weight:700;letter-spacing:6px;"
+            f"color:#c8991f;margin:18px 0'>{codigo}</p>"
+            "<p style='color:#7b7568;font-size:.9rem'>Vence en 15 minutos. "
+            "Si no lo pediste, ignora este correo.</p></div>"
+        )
+        try:
+            from src.correo import enviar_email
+            enviar_email(email, "Código de acceso — Lector tributando.co", html)
+        except Exception as e:
+            app.logger.warning("No se pudo enviar el código del Lector: %s", e)
+            return jsonify({"ok": False,
+                            "error": "No se pudo enviar el correo. Intenta de nuevo."}), 502
+    return jsonify({"ok": True,
+                    "mensaje": "Si hay una suscripción con ese correo, te llegó un código."})
+
+
+@app.route("/api/lector/entrar", methods=["POST"])
+def api_lector_entrar():
+    """Valida el código del correo y devuelve la licencia + estado para que el
+    Lector la guarde y opere igual que con la clave pegada a mano."""
+    b = request.get_json(silent=True) or {}
+    res = entrar_con_codigo(b.get("email", ""), b.get("codigo", ""), b.get("equipo", ""))
+    return jsonify(res), (200 if res.get("valida") or res.get("ok") else 400)
 
 
 @app.route("/api/lector/empresa", methods=["POST"])

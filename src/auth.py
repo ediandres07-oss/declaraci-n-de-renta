@@ -206,6 +206,12 @@ class SuscripcionLector(db.Model):
     vence = db.Column(db.Date)
     equipo = db.Column(db.String(64))                       # máquina amarrada (1 sola)
     creado = db.Column(db.DateTime, default=datetime.utcnow)
+    # Acceso por correo (código temporal, "como Claude"): en vez de pegar la
+    # clave, el contador entra con su correo y un código de 6 dígitos que llega
+    # a ese correo. El código se guarda hasheado, nunca en claro.
+    otp_hash = db.Column(db.String(64))
+    otp_expira = db.Column(db.DateTime)
+    otp_intentos = db.Column(db.Integer, default=0)
 
 
 class EmpresaLector(db.Model):
@@ -243,6 +249,57 @@ def crear_suscripcion(email: str, plan: str, dias: int | None = None) -> "Suscri
     sus.vence = date.today() + timedelta(days=dias)
     db.session.commit()
     return sus
+
+
+def _hash_codigo(codigo: str) -> str:
+    return hashlib.sha256((codigo or "").strip().encode()).hexdigest()
+
+
+def generar_codigo_lector(email: str) -> "SuscripcionLector | None":
+    """Genera un código de 6 dígitos para entrar por correo y lo guarda hasheado
+    con 15 min de vigencia. Devuelve la fila (con `._codigo` en claro para
+    enviarlo por correo) o None si no hay suscripción para ese correo."""
+    email = (email or "").strip().lower()
+    sus = (SuscripcionLector.query.filter_by(email=email)
+           .order_by(SuscripcionLector.creado.desc()).first())
+    if sus is None:
+        return None
+    codigo = f"{secrets.randbelow(1000000):06d}"
+    sus.otp_hash = _hash_codigo(codigo)
+    sus.otp_expira = datetime.utcnow() + timedelta(minutes=15)
+    sus.otp_intentos = 0
+    db.session.commit()
+    sus._codigo = codigo   # solo en memoria, para el correo
+    return sus
+
+
+def entrar_con_codigo(email: str, codigo: str, equipo: str | None = None) -> dict:
+    """Valida el código enviado al correo y, si es correcto, amarra el equipo y
+    devuelve la licencia + estado (para que el Lector la guarde y opere igual)."""
+    email = (email or "").strip().lower()
+    sus = (SuscripcionLector.query.filter_by(email=email)
+           .order_by(SuscripcionLector.creado.desc()).first())
+    if sus is None:
+        return {"ok": False, "error": "No hay una suscripción con ese correo."}
+    if not sus.otp_hash or not sus.otp_expira:
+        return {"ok": False, "error": "Pide un código primero."}
+    if datetime.utcnow() > sus.otp_expira:
+        return {"ok": False, "error": "El código expiró. Pide uno nuevo."}
+    if (sus.otp_intentos or 0) >= 5:
+        return {"ok": False, "error": "Demasiados intentos. Pide un código nuevo."}
+    if _hash_codigo(codigo) != sus.otp_hash:
+        sus.otp_intentos = (sus.otp_intentos or 0) + 1
+        db.session.commit()
+        return {"ok": False, "error": "Código incorrecto."}
+    # Correcto: consumir el código y amarrar el equipo con la lógica existente.
+    sus.otp_hash = None
+    sus.otp_expira = None
+    sus.otp_intentos = 0
+    db.session.commit()
+    est = estado_licencia(sus.licencia, equipo)
+    est["licencia"] = sus.licencia
+    est["email"] = sus.email
+    return est
 
 
 def estado_licencia(licencia: str, equipo: str | None = None) -> dict:
@@ -558,6 +615,13 @@ def _migrar_columnas_faltantes():
         if "equipo" not in cols:
             with db.engine.begin() as con:
                 con.execute(text("ALTER TABLE suscripciones_lector ADD COLUMN equipo VARCHAR(64)"))
+        # Acceso por correo (código temporal): otp_hash / otp_expira / otp_intentos.
+        otp_cols = {"otp_hash": "VARCHAR(64)", "otp_expira": marca_tiempo,
+                    "otp_intentos": "INTEGER DEFAULT 0"}
+        with db.engine.begin() as con:
+            for nombre, tipo in otp_cols.items():
+                if nombre not in cols:
+                    con.execute(text(f"ALTER TABLE suscripciones_lector ADD COLUMN {nombre} {tipo}"))
 
 
 auth_bp = Blueprint("auth", __name__)
