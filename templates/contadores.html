@@ -437,6 +437,7 @@
             headers:{"Content-Type":"application/json"}, body:"{}"});
           var j = await r.json();
           if (!r.ok) { alert(j.error || "No pudimos crear la orden."); return; }
+          if (j.pago_url) { window.location.href = j.pago_url; return; }   // pago en línea (ePayco)
           document.getElementById("paseRef").textContent = "PASE " + String(j.orden_id).toUpperCase();
           document.getElementById("paseRef2").textContent = j.orden_id;
           var m = document.getElementById("modalPase");

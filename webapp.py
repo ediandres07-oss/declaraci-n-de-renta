@@ -530,12 +530,15 @@ def crear_pase_contador():
     ordenes = _leer_ordenes()
     ordenes[orden_id] = {
         "tipo": "orden", "plan": "contadores",
-        "precio": cont.get("precio", 249000), "contacto": contacto,
+        "precio": cont.get("precio", 149900), "contacto": contacto,
         "estado": "pendiente_pago", "fecha": str(date.today()),
         "nit": "", "nombre": (u.nombre or "Contador"),
     }
     _guardar_ordenes(ordenes)
-    return jsonify({"orden_id": orden_id, "precio": cont.get("precio", 249000)})
+    from src import payu as _payu_mod
+    from src import epayco as _epayco_mod
+    pago_url = f"/pagar/{orden_id}" if (_epayco_mod.activo(EPAYCO) or _payu_mod.activo()) else ""
+    return jsonify({"orden_id": orden_id, "precio": cont.get("precio", 149900), "pago_url": pago_url})
 
 
 # Precios de la suscripción al Lector XML (Tributando Contadores). Plana,
@@ -600,7 +603,7 @@ def crear_suscripcion_lector():
     from src import payu as _payu_mod
     from src import epayco as _epayco_mod
     hay_pago = _epayco_mod.activo(EPAYCO) or _payu_mod.activo()
-    pago_url = f"/pagar/lector/{orden_id}" if hay_pago else ""
+    pago_url = f"/pagar/{orden_id}" if hay_pago else ""
     return jsonify({"orden_id": orden_id, "precio": precio, "plan": plan, "pago_url": pago_url})
 
 
@@ -613,23 +616,33 @@ def _base_url_publica() -> str:
     return request.host_url.rstrip("/").replace("http://", "https://")
 
 
-@app.get("/pagar/lector/<orden_id>")
-def pagar_lector(orden_id):
-    """Abre el pago en línea para esta orden (ePayco si está activo; si no, PayU)."""
+def _descripcion_orden(orden: dict) -> str:
+    """Texto para la pasarela según el producto de la orden."""
+    plan = orden.get("plan", "")
+    if plan == "lector":
+        return f"Suscripción Lector tributando.co — plan {orden.get('plan_lector', '')}"
+    if plan == "contadores":
+        return "Pase de temporada — tributando.co"
+    return "Declaración de renta — tributando.co"
+
+
+@app.get("/pagar/<orden_id>")
+def pagar_orden(orden_id):
+    """Abre el pago en línea de CUALQUIER orden (Lector, pase, renta).
+    Usa ePayco si está activo; si no, PayU."""
     from src import payu as _payu_mod
     from src import epayco as _epayco_mod
     orden = _leer_ordenes().get(orden_id)
-    if not orden or orden.get("plan") != "lector":
+    if not orden or orden.get("tipo") != "orden":
         return "Orden no encontrada.", 404
-    plan = orden.get("plan_lector", "")
+    desc = _descripcion_orden(orden)
 
     # --- ePayco (Checkout Standard con checkout.js) ---
     if _epayco_mod.activo(EPAYCO):
         if orden.get("estado") == "pagada":
             return redirect("/epayco/respuesta?ref=" + orden_id + "&ya=1")
         d = _epayco_mod.datos_checkout(
-            EPAYCO, orden_id, orden.get("precio", 0),
-            f"Suscripción Lector tributando.co — plan {plan}",
+            EPAYCO, orden_id, orden.get("precio", 0), desc,
             (orden.get("contacto") or {}).get("email", ""), _base_url_publica())
         return render_template_string(_EPAYCO_CHECKOUT_HTML, d=d)
 
@@ -640,8 +653,7 @@ def pagar_lector(orden_id):
     if orden.get("estado") == "pagada":
         return redirect("/payu/respuesta?ref=" + orden_id + "&ya=1")
     p = _payu_mod.parametros_checkout(
-        orden_id, orden.get("precio", 0),
-        f"Suscripción Lector tributando.co — plan {plan}",
+        orden_id, orden.get("precio", 0), desc,
         (orden.get("contacto") or {}).get("email", ""),
         _base_url_publica(), cfg)
     campos = "".join(
@@ -667,18 +679,11 @@ def payu_confirmacion():
         orden_id = params.get("reference_sale", "")
         ordenes = _leer_ordenes()
         orden = ordenes.get(orden_id)
-        if not orden or orden.get("plan") != "lector":
+        if not orden or orden.get("tipo") != "orden":
             return "ok", 200
         if _payu_mod.aprobada(params) and orden.get("estado") != "pagada":
-            email = (orden.get("contacto") or {}).get("email", "")
-            plan = orden.get("plan_lector", "independiente")
-            sus = crear_suscripcion(email, plan)
-            orden["estado"] = "pagada"; orden["licencia"] = sus.licencia
+            _finalizar_pago_orden(orden_id, orden, ordenes)   # activa el producto (lector/pase/renta)
             _guardar_ordenes(ordenes)
-            try:
-                _enviar_licencia_lector(email, plan, sus.licencia)
-            except Exception as e:
-                app.logger.warning("PayU: no se pudo enviar la licencia: %s", e)
         elif not _payu_mod.aprobada(params):
             orden["estado"] = "pago_" + _payu_mod.estado_texto(params)
             _guardar_ordenes(ordenes)
@@ -759,18 +764,11 @@ def epayco_confirmacion():
         orden_id = params.get("x_id_invoice") or params.get("x_extra1", "")
         ordenes = _leer_ordenes()
         orden = ordenes.get(orden_id)
-        if not orden or orden.get("plan") != "lector":
+        if not orden or orden.get("tipo") != "orden":
             return "ok", 200
         if _epayco_mod.aprobada(params) and orden.get("estado") != "pagada":
-            email = (orden.get("contacto") or {}).get("email", "")
-            plan = orden.get("plan_lector", "independiente")
-            sus = crear_suscripcion(email, plan)
-            orden["estado"] = "pagada"; orden["licencia"] = sus.licencia
+            _finalizar_pago_orden(orden_id, orden, ordenes)   # activa el producto (lector/pase/renta)
             _guardar_ordenes(ordenes)
-            try:
-                _enviar_licencia_lector(email, plan, sus.licencia)
-            except Exception as e:
-                app.logger.warning("ePayco: no se pudo enviar la licencia: %s", e)
         elif not _epayco_mod.aprobada(params):
             orden["estado"] = "pago_" + _epayco_mod.estado_texto(params)
             _guardar_ordenes(ordenes)
@@ -1621,9 +1619,9 @@ def _orden_id_desde_referencia(ref: str) -> str:
 @app.post("/api/checkout-wompi")
 @login_requerido
 def checkout_wompi():
-    """Devuelve la URL de Web Checkout de Wompi para una orden."""
-    if not wompi_mod.activo(WOMPI):
-        return jsonify({"error": "Wompi no está habilitado."}), 400
+    """Devuelve la URL del pago en línea de una orden. Prefiere ePayco (si está
+    activo); si no, Wompi. El nombre se conserva por el frontend que ya lo llama."""
+    from src import epayco as _epayco_mod
     cuerpo = request.get_json(silent=True) or {}
     orden_id = cuerpo.get("orden_id", "")
     ordenes = _leer_ordenes()
@@ -1631,6 +1629,12 @@ def checkout_wompi():
     if not orden or orden.get("tipo") != "orden":
         return jsonify({"error": "Orden no encontrada."}), 404
 
+    # ePayco activo → usamos el checkout genérico /pagar/<orden_id>.
+    if _epayco_mod.activo(EPAYCO):
+        return jsonify({"url": f"{_base_url_publica()}/pagar/{orden_id}"})
+
+    if not wompi_mod.activo(WOMPI):
+        return jsonify({"error": "El pago en línea no está habilitado."}), 400
     monto_centavos = int(round(float(orden.get("precio", 0)))) * 100
     referencia = f"RENTA-{orden_id}"
     email = (orden.get("contacto") or {}).get("email", "")

@@ -21,7 +21,7 @@ pago:
 # Se habilita agregando el correo del contador a config/acceso.yaml.
 contadores:
   nombre: "Pase de temporada"
-  precio: 249000
+  precio: 149900
   temporada: "agosto a octubre de 2026"
 
 planes:
