@@ -194,7 +194,8 @@ def _contexto_usuario(usuario=None, liq=None) -> str:
 
 
 def responder(mensajes: list[dict], cfg: dict | None = None,
-              usuario=None, liq=None, system_extra: str = "") -> str:
+              usuario=None, liq=None, system_extra: str = "",
+              max_tokens: int | None = None) -> str:
     """Recibe el historial [{rol, texto}] y devuelve la respuesta del asistente.
 
     'rol' es "user" o "assistant". `usuario` y `liq` son opcionales: si vienen,
@@ -223,7 +224,7 @@ def responder(mensajes: list[dict], cfg: dict | None = None,
     cliente = genai.Client(api_key=cfg["api_key"])
     config = types.GenerateContentConfig(
         system_instruction=_prompt_sistema(cfg) + _contexto_usuario(usuario, liq) + (system_extra or ""),
-        max_output_tokens=_MAX_TOKENS,
+        max_output_tokens=int(max_tokens or _MAX_TOKENS),
         temperature=0.4,
     )
     # Desactiva el "pensamiento" del modelo: respuestas más rápidas, más baratas

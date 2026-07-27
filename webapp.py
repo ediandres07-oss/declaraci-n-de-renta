@@ -526,15 +526,23 @@ def admin_lector_borrar():
 @app.post("/admin/gerente/probar")
 @autorizado_requerido
 def admin_gerente_probar():
-    """Dispara a demanda el informe diario y/o el contenido semanal (para probar)."""
+    """Dispara a demanda el informe diario y/o el contenido semanal (para probar).
+    Corre en segundo plano para no chocar con el timeout del worker (Gemini tarda)."""
     from src import gerente as _ger
     b = request.get_json(silent=True) or {}
-    hecho = {}
-    if b.get("informe", True):
-        hecho["informe"] = _ger.informe_diario()
-    if b.get("contenido"):
-        hecho["contenido"] = _ger.contenido_semanal(IA_CFG)
-    return jsonify({"ok": True, **hecho})
+
+    def _correr():
+        with app.app_context():
+            try:
+                if b.get("informe", True):
+                    _ger.informe_diario()
+                if b.get("contenido"):
+                    _ger.contenido_semanal(IA_CFG)
+            except Exception as exc:  # noqa: BLE001
+                app.logger.warning("gerente/probar falló: %s", exc)
+
+    threading.Thread(target=_correr, daemon=True).start()
+    return jsonify({"ok": True, "mensaje": "Generando… el correo llega en ~1 minuto."})
 
 
 @app.post("/admin/lector/cortesia")

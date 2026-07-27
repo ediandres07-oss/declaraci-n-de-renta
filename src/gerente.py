@@ -127,8 +127,11 @@ def contenido_semanal(ia_cfg: dict) -> bool:
     from src.correo import enviar_email
 
     fecha = date.today().strftime("%d de %B de %Y")
-    prompt = _PROMPT_MARKETING.format(fecha=fecha)
-    texto = responder([{"rol": "user", "texto": prompt}], ia_cfg)
+    brief = _PROMPT_MARKETING.format(fecha=fecha)
+    # El brief va como instrucción de sistema (no se recorta a 2.000 chars) y con
+    # techo de tokens amplio: el lote trae 5 piezas.
+    texto = responder([{"rol": "user", "texto": "Genera el lote de contenido de esta semana."}],
+                      ia_cfg, system_extra="\n\n" + brief, max_tokens=2500)
     cuerpo = (texto or "").replace("\n", "<br>")
     html = f"""
     <div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:640px">
