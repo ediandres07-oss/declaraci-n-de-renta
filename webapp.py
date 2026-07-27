@@ -64,11 +64,15 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(venc_bp)
 
 
+# Pre-carga zoneinfo al arranque: si dos hilos lo importan a la vez por primera
+# vez, uno ve el módulo "partially initialized" y el buscador IA da 502.
+from zoneinfo import ZoneInfo  # noqa: E402
+
+
 def _bucle_avisos_vencimientos():
     """Avisos diarios a contadores (7 y 3 días antes) sin cron externo: cada
     media hora mira si son las 8-9 a.m. de Bogotá y, con el candado en BD,
     un solo worker envía el lote del día."""
-    from zoneinfo import ZoneInfo
     from src.vencimientos import correr_avisos_diarios
 
     time.sleep(120)                                # deja arrancar la app (y a pytest)
