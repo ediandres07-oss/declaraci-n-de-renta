@@ -482,7 +482,7 @@
     };
 
     // ---- Prueba gratis: subir exógena -> resultado -> descargar 210 de muestra ----
-    var dz = document.getElementById("dz"), fx = document.getElementById("fx"), tok = null;
+    var dz = document.getElementById("dz"), fx = document.getElementById("fx"), tok = null, convLead = false;
     if (dz) {
       dz.onclick = function(){ fx.click(); };
       dz.ondragover = function(e){ e.preventDefault(); dz.classList.add("drag"); };
@@ -510,6 +510,15 @@
         document.getElementById("dzEdit").hidden = false;
         document.getElementById("dzAcc").hidden = false;
         b.textContent = "✔ " + file.name + " — sube otra para reemplazar";
+        // Conversión Google Ads: prospecto (contador que probó con una exógena real). Una vez por sesión.
+        if (!convLead && typeof gtag === "function") {
+          convLead = true;
+          gtag('event', 'conversion', {
+            'send_to': 'AW-18353583911/BrvcCLXeodccEKfu1a9E',
+            'value': 1.0,
+            'currency': 'COP'
+          });
+        }
       } catch(e) {
         err.textContent = "Problema de conexión. Intenta de nuevo."; err.hidden = false;
         b.textContent = "Arrastra aquí la exógena (.xlsx) de tu cliente";
