@@ -120,6 +120,13 @@
 <section style="background:var(--gris)">
   <div class="wrap">
     <h2 class="titulo">Elige tu paquete <span style="color:var(--dorado2)">por número de empresas</span></h2>
+    {% if promo_activa %}
+    <div style="max-width:580px;margin:0 auto 20px;background:linear-gradient(90deg,#b8955f,#d9b877);
+      color:#1e2432;border-radius:14px;padding:12px 18px;text-align:center;font-weight:800;font-size:1rem">
+      🔥 {{ promo_etiqueta }} — termina el {{ promo_vence_txt }}{% if promo_dias > 0 %}
+      <span style="opacity:.85">· quedan {{ promo_dias }} días</span>{% endif %}
+    </div>
+    {% endif %}
     <div style="text-align:center">
       <div class="toggle-per">
         <button id="perMes" onclick="setPeriodo('mensual')">Mensual</button>
@@ -132,8 +139,11 @@
         <h3>{{ p.nombre }}</h3>
         <div class="emp"><b>{{ p.empresas }}</b><br>
           <span style="color:var(--dorado2);font-weight:700">+ Calendario tributario</span></div>
-        <div class="precio"><span class="valor" data-mensual="{{ p.mensual }}" data-anual="{{ p.anual }}">${{ "{:,}".format(p.anual).replace(",", ".") }}</span><small class="per">/año</small></div>
+        <div class="precio">
+          {% if p.promo_anual %}<span class="tachado" data-anual-normal="{{ p.anual_normal }}" style="color:var(--suave);text-decoration:line-through;font-size:1rem;font-weight:600;display:block">${{ "{:,}".format(p.anual_normal).replace(",", ".") }}</span>{% endif %}
+          <span class="valor" data-mensual="{{ p.mensual }}" data-anual="{{ p.anual }}">${{ "{:,}".format(p.anual).replace(",", ".") }}</span><small class="per">/año</small></div>
         <div class="ahorro-lbl" style="color:var(--verde);font-weight:800;font-size:.8rem;margin-bottom:8px">≈ 2 meses gratis</div>
+        <div class="agente-lbl" data-agente-mensual="{{ 1 if p.agente_mensual else 0 }}" data-agente-anual="{{ 1 if p.agente_anual else 0 }}" style="color:var(--dorado2);font-weight:800;font-size:.82rem;margin-bottom:8px;display:{{ 'block' if p.agente_anual else 'none' }}">🤖 Agente IA incluido</div>
         <button onclick="suscribir('{{ p.clave }}','{{ p.nombre }}', this)">Suscribirme</button>
       </div>
       {% endfor %}
@@ -231,6 +241,12 @@
       v.textContent = fmt(precio);
       card.querySelector(".per").textContent = p === "mensual" ? "/mes" : "/año";
       card.querySelector(".ahorro-lbl").style.display = p === "anual" ? "block" : "none";
+      // Precio tachado (promo): solo en anual.
+      var tach = card.querySelector(".tachado");
+      if (tach) tach.style.display = p === "anual" ? "block" : "none";
+      // Sello "Agente IA incluido": según el período del plan.
+      var ag = card.querySelector(".agente-lbl");
+      if (ag) ag.style.display = ag.getAttribute(p === "mensual" ? "data-agente-mensual" : "data-agente-anual") === "1" ? "block" : "none";
     });
   }
   async function suscribir(clave, nombre, boton){

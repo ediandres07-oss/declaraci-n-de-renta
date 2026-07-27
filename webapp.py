@@ -620,17 +620,30 @@ def contadores_lector():
     Al confirmar el pago se crea la suscripción y se entrega la clave de licencia."""
     u = usuario_actual()
     planes = []
+    promo = _promo_lector_activa()
     for t in TIERS_LECTOR:
         c = t["clave"]
+        pm, pa = f"{c}_mensual", f"{c}_anual"
         planes.append({
             "clave": c, "nombre": t["nombre"], "empresas_max": t["empresas_max"],
             "empresas": "Empresas ilimitadas" if not t["empresas_max"] else f"Hasta {t['empresas_max']} empresas",
-            "mensual": PRECIOS_LECTOR[f"{c}_mensual"],
-            "anual": PRECIOS_LECTOR[f"{c}_anual"],
+            "mensual": precio_lector(pm),
+            "anual": precio_lector(pa),
+            "anual_normal": PRECIOS_LECTOR[pa],
+            "promo_anual": promo and pa in PROMO_LECTOR["precios"],
+            "agente_mensual": plan_incluye_agente(pm),
+            "agente_anual": plan_incluye_agente(pa),
             "destacado": c == "pro",
         })
+    _meses_es = ["", "enero", "febrero", "marzo", "abril", "mayo", "junio", "julio",
+                 "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
+    _v = PROMO_LECTOR["vence"]
     return render_template("contadores_lector.html",
                            planes=planes,
+                           promo_activa=promo,
+                           promo_etiqueta=PROMO_LECTOR["etiqueta"],
+                           promo_vence_txt=f"{_v.day} de {_meses_es[_v.month]}",
+                           promo_dias=max(0, (_v - date.today()).days),
                            logueado=u is not None,
                            pago=_CFG_PRECIOS.get("pago", {}),
                            descarga_url=DESCARGA_LECTOR_URL,
@@ -698,6 +711,45 @@ PRECIOS_LECTOR = {
     "mensual": 19900, "anual": 199000,
 }
 
+# --- Promo de lanzamiento (Temporada de Renta 2026) ---
+# Descuento por tiempo limitado en los planes ANUALES + agente IA de regalo en el
+# anual Independiente. Después de `vence` los precios vuelven solos al normal.
+PROMO_LECTOR = {
+    "activa": True,
+    "vence": date(2026, 8, 31),
+    "etiqueta": "Precio de lanzamiento",
+    "precios": {                       # solo anuales
+        "independiente_anual": 139000,
+        "pro_anual":           239000,
+        "max_anual":           399000,
+    },
+}
+
+# Planes que incluyen el agente IA sin costo extra.
+_PLANES_CON_AGENTE = {"pro_mensual", "pro_anual", "max_mensual", "max_anual"}
+
+
+def _promo_lector_activa() -> bool:
+    return bool(PROMO_LECTOR.get("activa")) and date.today() <= PROMO_LECTOR["vence"]
+
+
+def precio_lector(plan: str) -> int:
+    """Precio vigente del plan: promo si está activa, si no el normal."""
+    if _promo_lector_activa() and plan in PROMO_LECTOR["precios"]:
+        return PROMO_LECTOR["precios"][plan]
+    return PRECIOS_LECTOR.get(plan, 0)
+
+
+def plan_incluye_agente(plan: str) -> bool:
+    """Pro y Max incluyen el agente IA. Durante la promo, también el anual
+    Independiente (gancho de lanzamiento)."""
+    if plan in _PLANES_CON_AGENTE:
+        return True
+    if _promo_lector_activa() and plan == "independiente_anual":
+        return True
+    return False
+
+
 # Paquetes por # de empresas (para la página de precios).
 TIERS_LECTOR = [
     {"clave": "independiente", "nombre": "Independiente", "empresas_max": 10},
@@ -728,7 +780,7 @@ def crear_suscripcion_lector():
     email = (u.email or "").strip()
     if not email:
         return jsonify({"error": "Tu cuenta no tiene correo."}), 400
-    precio = PRECIOS_LECTOR[plan]
+    precio = precio_lector(plan)
     orden_id = uuid.uuid4().hex[:12]
     ordenes = _leer_ordenes()
     ordenes[orden_id] = {
@@ -1520,6 +1572,13 @@ def _entregar_licencia_lector(orden_id: str, orden: dict) -> None:
     try:
         sus = crear_suscripcion(email, plan)   # el período (30/365) sale del plan
         orden["licencia_lector"] = sus.licencia
+        # Add-on agente IA: se activa solo si el plan lo incluye (Pro/Max, o el
+        # anual Independiente durante la promo). Sin toque manual del admin.
+        if plan_incluye_agente(plan):
+            try:
+                agente_set(sus.licencia, True)
+            except Exception:
+                pass
         from src.correo import cargar_config_email, enviar_email
         cfg = cargar_config_email()
         if not cfg.get("habilitado"):
