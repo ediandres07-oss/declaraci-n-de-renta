@@ -15,9 +15,38 @@ from __future__ import annotations
 import json
 from datetime import date, datetime, timedelta
 
-from src.auth import db, OrdenRegistro, SuscripcionLector
+from src.auth import db, OrdenRegistro, SuscripcionLector, LeadEspera
 
 ADMIN_EMAIL = "ediandres07@gmail.com"
+
+
+# ---------- campaña a leads (manual, con preview antes de enviar) ----------
+
+def destinatarios_campana() -> list[str]:
+    """Correos únicos de leads en espera + contadores con licencia (Lector)."""
+    correos = set()
+    for l in LeadEspera.query.all():
+        if l.email:
+            correos.add(l.email.strip().lower())
+    for s in SuscripcionLector.query.all():
+        if s.email:
+            correos.add(s.email.strip().lower())
+    return sorted(correos)
+
+
+def enviar_campana(asunto: str, html: str, destinatarios: list[str]) -> dict:
+    """Envía la campaña 1 a 1 (no expone correos entre destinatarios). Devuelve
+    {enviados, fallidos}."""
+    from src.correo import enviar_email
+
+    enviados, fallidos = 0, []
+    for correo in destinatarios:
+        try:
+            enviar_email(correo, asunto, html)
+            enviados += 1
+        except Exception as exc:  # noqa: BLE001
+            fallidos.append(f"{correo}: {exc}")
+    return {"enviados": enviados, "fallidos": fallidos}
 
 
 # ---------- informe diario ----------
