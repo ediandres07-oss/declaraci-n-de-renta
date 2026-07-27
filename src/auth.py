@@ -297,10 +297,14 @@ def entrar_con_codigo(email: str, codigo: str, equipo: str | None = None) -> dic
         sus.otp_intentos = (sus.otp_intentos or 0) + 1
         db.session.commit()
         return {"ok": False, "error": "Código incorrecto."}
-    # Correcto: consumir el código y amarrar el equipo con la lógica existente.
+    # Correcto: consumir el código.
     sus.otp_hash = None
     sus.otp_expira = None
     sus.otp_intentos = 0
+    # El correo + código YA prueba que es el dueño → re-amarra a este equipo
+    # (permite cambiar de máquina sin quedar bloqueado por "otro equipo").
+    if (equipo or "").strip():
+        sus.equipo = (equipo or "").strip()
     db.session.commit()
     est = estado_licencia(sus.licencia, equipo)
     est["licencia"] = sus.licencia
