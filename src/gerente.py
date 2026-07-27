@@ -114,7 +114,10 @@ _PROMPT_MARKETING = (
     "3. 3 ESTADOS DE WHATSAPP (1-2 líneas cada uno, directos).\n"
     "4. GUION DE SHORT (30 seg, formato: GANCHO / 3 PUNTOS / CIERRE).\n"
     "5. CORREO CORTO para contadores (asunto + 80-120 palabras, tono útil, no vendedor).\n"
-    "Sin markdown decorativo excesivo; numera las secciones tal cual."
+    "ESTILO: directo y concreto, cero relleno. PROHIBIDO abrir con frases tipo "
+    "'esperamos que este correo te encuentre bien' o 'querido contador'; entra de una "
+    "con el dato o el dolor (horas digitando, sanciones, plazos). Cifras con separador "
+    "de miles. Sin markdown decorativo excesivo; numera las secciones tal cual."
 )
 
 
