@@ -73,7 +73,19 @@ def _bucle_avisos_vencimientos():
     """Avisos diarios a contadores (7 y 3 días antes) sin cron externo: cada
     media hora mira si son las 8-9 a.m. de Bogotá y, con el candado en BD,
     un solo worker envía el lote del día."""
-    from src.vencimientos import correr_avisos_diarios
+    from src.vencimientos import correr_avisos_diarios, VencimientoAviso
+    from src.auth import db as _db
+    from src import gerente as _ger
+
+    def _candado(clave: str) -> bool:
+        """True si ESTE worker ganó el turno de hoy para esa tarea."""
+        try:
+            _db.session.add(VencimientoAviso(usuario_id=0, clave=clave))
+            _db.session.commit()
+            return True
+        except Exception:
+            _db.session.rollback()
+            return False
 
     time.sleep(120)                                # deja arrancar la app (y a pytest)
     while True:
@@ -85,6 +97,17 @@ def _bucle_avisos_vencimientos():
                         n = correr_avisos_diarios(ahora.date())
                         if n:
                             print(f"[avisos-vencimientos] {n} correo(s) enviados")
+                if 7 <= ahora.hour < 9:
+                    hoy = ahora.date().isoformat()
+                    with app.app_context():
+                        # Gerente virtual: informe diario del negocio.
+                        if _candado(f"gerente|{hoy}"):
+                            _ger.informe_diario()
+                            print("[gerente] informe diario enviado")
+                        # Lunes: lote de contenido de marketing.
+                        if ahora.weekday() == 0 and _candado(f"mkt|{hoy}"):
+                            _ger.contenido_semanal(IA_CFG)
+                            print("[gerente] contenido semanal enviado")
         except Exception as exc:  # noqa: BLE001  — el hilo nunca debe morir
             print(f"[avisos-vencimientos] error: {exc}")
         time.sleep(1800)
@@ -498,6 +521,20 @@ def admin_lector_borrar():
         db.session.delete(sus)
         db.session.commit()
     return jsonify({"ok": True})
+
+
+@app.post("/admin/gerente/probar")
+@autorizado_requerido
+def admin_gerente_probar():
+    """Dispara a demanda el informe diario y/o el contenido semanal (para probar)."""
+    from src import gerente as _ger
+    b = request.get_json(silent=True) or {}
+    hecho = {}
+    if b.get("informe", True):
+        hecho["informe"] = _ger.informe_diario()
+    if b.get("contenido"):
+        hecho["contenido"] = _ger.contenido_semanal(IA_CFG)
+    return jsonify({"ok": True, **hecho})
 
 
 @app.post("/admin/lector/cortesia")
