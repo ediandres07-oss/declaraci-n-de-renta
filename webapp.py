@@ -431,6 +431,23 @@ def admin_lector():
       <a class="actual">🔑 Suscripciones Lector XML</a>
       <a href="/vencimientos">📅 Gestor de vencimientos</a>
     </div>
+    <div style="background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05);padding:14px 16px;margin-bottom:18px">
+      <b style="font-size:1rem">🎁 Regalar / activar licencia (gratis)</b>
+      <div style="color:#8a919c;font-size:.82rem;margin:4px 0 10px">Crea o renueva la licencia de un contador sin pago. Luego él entra con su <b>correo + código</b> (no necesita clave).</div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end">
+        <div><label style="font-size:.75rem;display:block;color:#5b6472">Correo del contador</label><input id="czEmail" type="email" placeholder="correo@ejemplo.com" style="padding:8px;border:1px solid #d7dbe2;border-radius:8px;min-width:220px"></div>
+        <div><label style="font-size:.75rem;display:block;color:#5b6472">Plan</label>
+          <select id="czPlan" style="padding:8px;border:1px solid #d7dbe2;border-radius:8px">
+            <option value="independiente_anual">Independiente (10 empresas)</option>
+            <option value="pro_anual">Pro (30 empresas)</option>
+            <option value="max_anual">Max (ilimitado)</option>
+          </select></div>
+        <div><label style="font-size:.75rem;display:block;color:#5b6472">Días</label><input id="czDias" type="number" value="365" style="padding:8px;border:1px solid #d7dbe2;border-radius:8px;width:90px"></div>
+        <label style="font-size:.82rem;display:flex;align-items:center;gap:5px;color:#1e2432"><input id="czAgente" type="checkbox"> con Agente 🤖</label>
+        <button onclick="cortesia()" style="background:#1f8a5f;color:#fff;border:0;padding:9px 16px;border-radius:8px;font-weight:600;cursor:pointer">Crear/activar gratis</button>
+      </div>
+      <div id="czMsg" style="font-size:.85rem;margin-top:8px"></div>
+    </div>
     <table><tr><th>Correo</th><th>Plan</th><th>Vence</th><th>Estado</th><th>Empresas</th><th>Equipo</th><th>Agente</th><th></th></tr>
     {% for f in filas %}<tr><td>{{f.email}}</td><td>{{f.plan}}</td><td>{{f.vence or '—'}}</td>
     <td class="est" style="color:{{f.color}}">{{f.estado}}</td><td>{{f.empresas}}</td><td>{{f.equipo}}</td>
@@ -451,7 +468,19 @@ def admin_lector():
     async function agente(lic,on){ if(!confirm(on?'¿Activar el Agente (add-on) para esta licencia?':'¿Desactivar el Agente para esta licencia?'))return;
       const r=await fetch('/admin/lector/agente',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({licencia:lic,activo:on})});
       const d=await r.json(); if(!d.ok) alert(d.error||'No se pudo.');
-      location.reload();}</script></body></html>"""
+      location.reload();}
+    async function cortesia(){
+      const email=document.getElementById('czEmail').value.trim();
+      const plan=document.getElementById('czPlan').value, dias=document.getElementById('czDias').value||365;
+      const agente=document.getElementById('czAgente').checked;
+      const msg=document.getElementById('czMsg');
+      if(!email||!email.includes('@')){ msg.style.color='#b91c1c'; msg.textContent='Escribe un correo válido.'; return; }
+      const r=await fetch('/admin/lector/cortesia',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,plan,dias,agente})});
+      const d=await r.json();
+      if(!d.ok){ msg.style.color='#b91c1c'; msg.textContent=d.error||'No se pudo.'; return; }
+      msg.style.color='#1f8a5f'; msg.textContent='✓ Licencia activa para '+d.email+' (vence '+d.vence+'). Que entre al Lector con su correo + código.';
+      setTimeout(()=>location.reload(),1800);
+    }</script></body></html>"""
     return render_template_string(html, filas=filas)
 
 
@@ -465,6 +494,26 @@ def admin_lector_borrar():
         db.session.delete(sus)
         db.session.commit()
     return jsonify({"ok": True})
+
+
+@app.post("/admin/lector/cortesia")
+@autorizado_requerido
+def admin_lector_cortesia():
+    """Crea/renueva una licencia GRATIS (cortesía) para el correo indicado."""
+    b = request.get_json(silent=True) or {}
+    email = (b.get("email") or "").strip().lower()
+    if "@" not in email:
+        return jsonify({"ok": False, "error": "Correo inválido."})
+    plan = (b.get("plan") or "independiente_anual").lower()
+    try:
+        dias = int(b.get("dias") or 365)
+    except (TypeError, ValueError):
+        dias = 365
+    sus = crear_suscripcion(email, plan, dias)
+    if b.get("agente"):
+        agente_set(sus.licencia, True)
+    return jsonify({"ok": True, "email": email, "licencia": sus.licencia,
+                    "vence": sus.vence.isoformat() if sus.vence else None})
 
 
 @app.post("/admin/lector/agente")
