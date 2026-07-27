@@ -92,6 +92,12 @@ def informe_diario() -> bool:
 _PROMPT_MARKETING = (
     "Eres el editor de contenidos de tributando.co (herramientas tributarias para "
     "contadores en Colombia: Lector XML DIAN, borradores 350/300, agente IA). "
+    "MENSAJE CENTRAL de la marca (úsalo siempre como promesa/llamado): "
+    "'Automatiza tu contabilidad: de la DIAN directo a tu programa contable' — el "
+    "Lector descarga las facturas electrónicas de la DIAN y las convierte en el "
+    "plano listo para Siigo, Contai o Helisa, y arma los borradores del 350 y el 300. "
+    "NO uses frases débiles tipo 'agiliza la revisión de tu exógena'; vende AUTOMATIZAR "
+    "(horas de digitación → minutos).\n"
     "Como hace Actualícese, el CALENDARIO tributario dicta el tema de la semana. "
     "Hoy es {fecha}. Piensa qué vencimientos u obligaciones DIAN vienen en los "
     "próximos 15-30 días (IVA bimestral/cuatrimestral, retención mensual, renta PJ/PN, "
