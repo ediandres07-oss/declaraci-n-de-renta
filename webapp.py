@@ -717,12 +717,10 @@ PRECIOS_LECTOR = {
 PROMO_LECTOR = {
     "activa": True,
     "vence": date(2026, 8, 31),
-    "etiqueta": "Precio de lanzamiento",
-    "precios": {                       # solo anuales
-        "independiente_anual": 139000,
-        "pro_anual":           239000,
-        "max_anual":           399000,
-    },
+    "etiqueta": "Promo de lanzamiento · Agente IA GRATIS",
+    # Sin descuento de precio: la promo es el agente IA de regalo por tiempo
+    # limitado. Los precios quedan en los normales (PRECIOS_LECTOR).
+    "precios": {},
 }
 
 # Planes que incluyen el agente IA sin costo extra.
