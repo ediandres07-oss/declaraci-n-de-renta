@@ -2355,10 +2355,31 @@ _IA_CONTADOR = (
 )
 
 
+_IA_AGENTE = (
+    "\n\nMODO AGENTE: Además de responder, puedes EJECUTAR acciones del Lector "
+    "mediante herramientas. Reglas:\n"
+    "1) Si el contador pide una ACCIÓN que una herramienta cubre, responde ÚNICAMENTE "
+    "con un bloque JSON (sin texto adicional, sin markdown), así:\n"
+    '   {"accion":"NOMBRE","args":{...}}\n'
+    "2) Si falta un dato para la acción (p.ej. el mes o el año), pídelo en texto normal.\n"
+    "3) Si es una pregunta de conocimiento (norma, tarifa, plazo), responde normal en texto.\n"
+    "4) Cuando el usuario te envíe un mensaje que empieza con 'RESULTADO:', es la salida "
+    "de la herramienta: redacta un resumen claro y breve para el contador (montos con "
+    "separador de miles, y aclara que es un BORRADOR para revisar). No inventes cifras.\n"
+    "Herramientas disponibles:\n"
+    "- retencion_mes(anio:int, mes:int): borrador del Formulario 350 del mes con los CUFEs leídos.\n"
+    "- iva_mes(periodicidad:'bimestral'|'cuatrimestral', numero:int, anio:int): borrador del Formulario 300.\n"
+    "- revisar_cliente(): qué le falta al cliente activo (vencimientos y pendientes).\n"
+    "- calcular_retencion(base:number, concepto:string, declarante:bool): cuánto retener en la fuente.\n"
+    "El cliente/empresa ya está fijo en el Lector; no pidas el NIT."
+)
+
+
 @app.route("/api/lector/ia", methods=["POST"])
 def api_lector_ia():
     """Buscador IA del Lector: el contador pregunta (retención, IVA, plazos) y la
-    IA responde. Requiere licencia válida (protege la cuota de la API)."""
+    IA responde. Con agente=true además puede devolver acciones (JSON) que el
+    Lector ejecuta. Requiere licencia válida (protege la cuota de la API)."""
     if not asistente_ia_activo(IA_CFG):
         return jsonify({"error": "El buscador IA no está disponible."}), 503
     b = request.get_json(silent=True) or {}
@@ -2373,8 +2394,9 @@ def api_lector_ia():
         if not pregunta:
             return jsonify({"error": "Escribe tu pregunta."}), 400
         mensajes = [{"rol": "user", "texto": pregunta}]
+    extra = _IA_CONTADOR + (_IA_AGENTE if b.get("agente") else "")
     try:
-        respuesta = responder_ia(mensajes, IA_CFG, system_extra=_IA_CONTADOR)
+        respuesta = responder_ia(mensajes, IA_CFG, system_extra=extra)
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
     except Exception as e:
