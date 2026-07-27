@@ -32,7 +32,8 @@ from src.auth import (AccesoAutorizado, ArchivoExogena, LeadEspera, MuestraConta
                       init_auth, login_requerido, pro_requerido, usuario_actual,
                       PLANES_LECTOR, SuscripcionLector, EmpresaLector,
                       crear_suscripcion, estado_licencia, registrar_empresa_lector,
-                      generar_codigo_lector, entrar_con_codigo)
+                      generar_codigo_lector, entrar_con_codigo,
+                      agente_consumir, agente_set)
 from src.calendario import fecha_limite
 from src.vencimientos import venc_bp
 from src.documentos import generar_checklist_pdf
@@ -412,7 +413,8 @@ def admin_lector():
         empresas = EmpresaLector.query.filter_by(licencia=s.licencia).count()
         filas.append({"email": s.email, "plan": s.plan, "vence": s.vence,
                       "estado": estado, "color": color, "empresas": empresas,
-                      "equipo": "sí" if s.equipo else "—", "licencia": s.licencia})
+                      "equipo": "sí" if s.equipo else "—", "licencia": s.licencia,
+                      "agente": bool(s.agente)})
     html = """<!doctype html><html><head><meta charset="utf-8">
     <title>Suscripciones Lector</title><meta name="viewport" content="width=device-width,initial-scale=1">
     <style>body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;background:#f5f7fa;margin:0;padding:24px;color:#1e2432}
@@ -429,21 +431,26 @@ def admin_lector():
       <a class="actual">🔑 Suscripciones Lector XML</a>
       <a href="/vencimientos">📅 Gestor de vencimientos</a>
     </div>
-    <table><tr><th>Correo</th><th>Plan</th><th>Vence</th><th>Estado</th><th>Empresas</th><th>Equipo</th><th></th></tr>
+    <table><tr><th>Correo</th><th>Plan</th><th>Vence</th><th>Estado</th><th>Empresas</th><th>Equipo</th><th>Agente</th><th></th></tr>
     {% for f in filas %}<tr><td>{{f.email}}</td><td>{{f.plan}}</td><td>{{f.vence or '—'}}</td>
     <td class="est" style="color:{{f.color}}">{{f.estado}}</td><td>{{f.empresas}}</td><td>{{f.equipo}}</td>
+    <td><button onclick="agente('{{f.licencia}}',{{ 'false' if f.agente else 'true' }})" title="Activar/desactivar el complemento Asistente IA (agente)" style="border:0;background:none;cursor:pointer;font-size:1rem">{{ '🤖✅' if f.agente else '➕' }}</button></td>
     <td style="white-space:nowrap">
     {% if f.equipo == 'sí' %}<button onclick="liberar('{{f.licencia}}','{{f.email}}')" title="Liberar el equipo amarrado para que el contador active en otra máquina" style="border:0;background:none;cursor:pointer;font-size:1rem">🔓</button>{% endif %}
     <button onclick="borrar('{{f.licencia}}')" title="Borrar suscripción" style="border:0;background:none;cursor:pointer;color:#b91c1c">🗑</button></td></tr>{% endfor %}
-    {% if not filas %}<tr><td colspan="7" style="color:#8a919c">Aún no hay suscripciones.</td></tr>{% endif %}
+    {% if not filas %}<tr><td colspan="8" style="color:#8a919c">Aún no hay suscripciones.</td></tr>{% endif %}
     </table>
-    <p style="color:#8a919c;font-size:.82rem;margin-top:10px">🔓 Liberar equipo = desamarra la licencia de su máquina actual; el contador la puede reactivar en otra (se re-amarra sola en la próxima activación).</p>
+    <p style="color:#8a919c;font-size:.82rem;margin-top:10px">🔓 Liberar equipo = desamarra la licencia de su máquina actual; el contador la puede reactivar en otra (se re-amarra sola en la próxima activación).<br>🤖 Agente = complemento de pago (Asistente IA que ejecuta 350/300, revisa clientes, calcula). Actívalo a quien pague el add-on; tope 150 acciones/mes por contador.</p>
     <script>async function borrar(lic){ if(!confirm('¿Borrar esta suscripción de prueba?'))return;
       await fetch('/admin/lector/borrar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({licencia:lic})});
       location.reload();}
     async function liberar(lic,email){ if(!confirm('¿Liberar el equipo de '+email+'?\\nQuedará libre para activarse en otra máquina.'))return;
       const r=await fetch('/admin/lector/liberar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({licencia:lic})});
       const d=await r.json(); if(!d.ok) alert(d.error||'No se pudo liberar.');
+      location.reload();}
+    async function agente(lic,on){ if(!confirm(on?'¿Activar el Agente (add-on) para esta licencia?':'¿Desactivar el Agente para esta licencia?'))return;
+      const r=await fetch('/admin/lector/agente',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({licencia:lic,activo:on})});
+      const d=await r.json(); if(!d.ok) alert(d.error||'No se pudo.');
       location.reload();}</script></body></html>"""
     return render_template_string(html, filas=filas)
 
@@ -458,6 +465,14 @@ def admin_lector_borrar():
         db.session.delete(sus)
         db.session.commit()
     return jsonify({"ok": True})
+
+
+@app.post("/admin/lector/agente")
+@autorizado_requerido
+def admin_lector_agente():
+    """Activa/desactiva el complemento Agente (add-on) de una licencia."""
+    b = request.get_json(silent=True) or {}
+    return jsonify(agente_set(b.get("licencia", ""), bool(b.get("activo"))))
 
 
 @app.post("/admin/lector/liberar")
@@ -2396,7 +2411,23 @@ def api_lector_ia():
         if not pregunta:
             return jsonify({"error": "Escribe tu pregunta."}), 400
         mensajes = [{"rol": "user", "texto": pregunta}]
-    extra = _IA_CONTADOR + (_IA_AGENTE if b.get("agente") else "")
+    # Complemento "agente": solo si el contador lo tiene activo y no superó el
+    # tope mensual. Si no, cae al buscador normal (responde, pero no ejecuta).
+    agente_ok, agente_nota = False, None
+    if b.get("agente"):
+        ultimo = (mensajes[-1] or {}).get("texto", "") if mensajes else ""
+        es_resumen = ultimo.strip().startswith("RESULTADO:")
+        if es_resumen:
+            agente_ok = True                       # 2ª llamada (resumen): no consume cupo
+        else:
+            uso = agente_consumir(b.get("licencia", ""))
+            if uso.get("permitido"):
+                agente_ok = True
+            elif not uso.get("activo"):
+                agente_nota = "agente_off"         # no tiene el complemento
+            elif uso.get("tope_alcanzado"):
+                agente_nota = "agente_tope"        # se acabó el cupo del mes
+    extra = _IA_CONTADOR + (_IA_AGENTE if agente_ok else "")
     try:
         respuesta = responder_ia(mensajes, IA_CFG, system_extra=extra)
     except ValueError as e:
@@ -2407,7 +2438,7 @@ def api_lector_ia():
             return jsonify({"error": "Muchas consultas en este momento. Reintenta en unos segundos. 🙏"}), 429
         app.logger.warning("Fallo del buscador IA del Lector: %s", e)
         return jsonify({"error": "No pude responder ahora. Intenta de nuevo."}), 502
-    return jsonify({"respuesta": respuesta})
+    return jsonify({"respuesta": respuesta, "agente": agente_ok, "nota": agente_nota})
 
 
 @app.route("/api/lector/version", methods=["GET", "POST"])

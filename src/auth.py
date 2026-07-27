@@ -218,6 +218,15 @@ class SuscripcionLector(db.Model):
     otp_hash = db.Column(db.String(64))
     otp_expira = db.Column(db.DateTime)
     otp_intentos = db.Column(db.Integer, default=0)
+    # Complemento "Asistente IA (agente)": add-on por contador. Con tope mensual
+    # para proteger la cuota de Gemini.
+    agente = db.Column(db.Boolean, default=False)           # ¿tiene el add-on activo?
+    agente_periodo = db.Column(db.String(7))                # "YYYY-MM" del contador de usos
+    agente_usos = db.Column(db.Integer, default=0)          # acciones usadas en el mes
+
+
+# Tope de acciones del agente por contador al mes (protege el saldo de Gemini).
+AGENTE_LIMITE_MES = 150
 
 
 class EmpresaLector(db.Model):
@@ -312,6 +321,44 @@ def entrar_con_codigo(email: str, codigo: str, equipo: str | None = None) -> dic
     return est
 
 
+def _periodo_actual() -> str:
+    return datetime.utcnow().strftime("%Y-%m")
+
+
+def agente_consumir(licencia: str) -> dict:
+    """Registra UNA acción del agente para esa licencia y aplica el tope mensual.
+    Devuelve {activo, permitido, usos, limite, restante, tope_alcanzado}."""
+    sus = SuscripcionLector.query.filter_by(licencia=(licencia or "").strip()).first()
+    if not sus:
+        return {"activo": False, "permitido": False, "error": "Licencia no encontrada"}
+    if not sus.agente:
+        return {"activo": False, "permitido": False, "usos": 0,
+                "limite": AGENTE_LIMITE_MES, "restante": 0}
+    per = _periodo_actual()
+    if sus.agente_periodo != per:                 # nuevo mes → reinicia el contador
+        sus.agente_periodo = per
+        sus.agente_usos = 0
+    usos = sus.agente_usos or 0
+    if usos >= AGENTE_LIMITE_MES:
+        db.session.commit()
+        return {"activo": True, "permitido": False, "usos": usos,
+                "limite": AGENTE_LIMITE_MES, "restante": 0, "tope_alcanzado": True}
+    sus.agente_usos = usos + 1
+    db.session.commit()
+    return {"activo": True, "permitido": True, "usos": sus.agente_usos,
+            "limite": AGENTE_LIMITE_MES, "restante": AGENTE_LIMITE_MES - sus.agente_usos}
+
+
+def agente_set(licencia: str, activo: bool) -> dict:
+    """Activa/desactiva el complemento agente para una licencia (admin/cobro)."""
+    sus = SuscripcionLector.query.filter_by(licencia=(licencia or "").strip()).first()
+    if not sus:
+        return {"ok": False, "error": "Licencia no encontrada"}
+    sus.agente = bool(activo)
+    db.session.commit()
+    return {"ok": True, "agente": sus.agente}
+
+
 def estado_licencia(licencia: str, equipo: str | None = None) -> dict:
     """Estado de una licencia. Si se pasa `equipo`, amarra la licencia a esa
     máquina en la primera activación; si ya está amarrada a OTRA, la rechaza
@@ -338,6 +385,8 @@ def estado_licencia(licencia: str, equipo: str | None = None) -> dict:
         "empresas_max": sus.empresas_max,      # 0 = ilimitado
         "empresas_usadas": usadas,
         "vence": sus.vence.isoformat() if sus.vence else None,
+        "agente": bool(sus.agente),                        # ¿tiene el complemento agente?
+        "agente_limite": AGENTE_LIMITE_MES,
     }
 
 
@@ -630,6 +679,13 @@ def _migrar_columnas_faltantes():
                     "otp_intentos": "INTEGER DEFAULT 0"}
         with db.engine.begin() as con:
             for nombre, tipo in otp_cols.items():
+                if nombre not in cols:
+                    con.execute(text(f"ALTER TABLE suscripciones_lector ADD COLUMN {nombre} {tipo}"))
+        # Complemento agente: agente / agente_periodo / agente_usos.
+        ag_cols = {"agente": f"BOOLEAN DEFAULT {falso}", "agente_periodo": "VARCHAR(7)",
+                   "agente_usos": "INTEGER DEFAULT 0"}
+        with db.engine.begin() as con:
+            for nombre, tipo in ag_cols.items():
                 if nombre not in cols:
                     con.execute(text(f"ALTER TABLE suscripciones_lector ADD COLUMN {nombre} {tipo}"))
 
