@@ -33,6 +33,7 @@ from src.auth import (AccesoAutorizado, ArchivoExogena, LeadEspera, MuestraConta
                       PLANES_LECTOR, SuscripcionLector, EmpresaLector,
                       crear_suscripcion, estado_licencia, registrar_empresa_lector,
                       generar_codigo_lector, entrar_con_codigo,
+                      esta_bloqueado, limpiar_intentos_fallidos,
                       agente_consumir, agente_set)
 from src.calendario import fecha_limite
 from src.vencimientos import venc_bp
@@ -762,7 +763,7 @@ DESCARGA_LECTOR_URL = os.environ.get(
 
 # Última versión publicada del Lector. Súbela cada vez que recompiles y publiques
 # un instalador nuevo; el Lector la consulta y avisa al contador si está atrasado.
-LECTOR_VERSION_LATEST = os.environ.get("LECTOR_VERSION", "1.2.2")
+LECTOR_VERSION_LATEST = os.environ.get("LECTOR_VERSION", "1.2.3")
 
 
 @app.post("/api/lector-suscripcion/crear")
@@ -2046,6 +2047,20 @@ def guardar_preferencias():
                     "aviso_enviado": aviso_enviado})
 
 
+@app.post("/api/pase/desbloquear")
+@autorizado_requerido
+def desbloquear_pase():
+    """Libera el bloqueo de login (códigos fallidos) de un contador con pase."""
+    correo = ((request.get_json(silent=True) or {}).get("email") or "").strip().lower()
+    if not correo:
+        return jsonify({"error": "Falta el correo"}), 400
+    u = Usuario.query.filter(db.func.lower(Usuario.email) == correo).first()
+    if u is None:
+        return jsonify({"error": "No hay usuario con ese correo"}), 404
+    limpiar_intentos_fallidos(u)
+    return jsonify({"ok": True})
+
+
 @app.get("/admin")
 @autorizado_requerido
 def admin():
@@ -2076,6 +2091,18 @@ def admin():
                                f"padding:5px 9px;cursor:pointer'>📧 Enviar correo de acceso</button>"))
             acciones = (f"<small style='color:#1e7d43'>✓ acceso al liquidador habilitado</small>"
                         f"<br>{correo_ok}")
+            # candado de login: si el contador se bloqueó por códigos fallidos,
+            # mostrarlo aquí con botón para liberarlo sin esperar los 15 min
+            correo_pase = (c.get("email") or "").strip().lower()
+            u_pase = (Usuario.query.filter(db.func.lower(Usuario.email) == correo_pase).first()
+                      if correo_pase else None)
+            if u_pase and esta_bloqueado(u_pase):
+                restante = int((u_pase.bloqueado_hasta - datetime.utcnow()).total_seconds() // 60) + 1
+                acciones += (f"<br><small style='color:#b3372f'>🔒 login bloqueado "
+                             f"{restante} min (códigos fallidos)</small> "
+                             f"<button onclick=\"desbloquear('{correo_pase}')\" "
+                             f"style='background:#b3372f;color:#fff;border:0;border-radius:6px;"
+                             f"padding:4px 8px;cursor:pointer;font-size:12px'>🔓 Desbloquear</button>")
         else:
             acciones = (f"<a href='/api/orden/{oid}/formulario.pdf'>F210 PDF</a> · "
                         f"<a href='/api/orden/{oid}/documentos.pdf'>Checklist</a> · "
@@ -2254,6 +2281,12 @@ async function revocar(email) {{
   const r = await fetch('/api/acceso/revocar', {{method:'POST',
     headers:{{'Content-Type':'application/json'}}, body: JSON.stringify({{email}})}});
   if (r.ok) location.reload(); else alert('Error');
+}}
+async function desbloquear(email) {{
+  if (!confirm('¿Liberar el bloqueo de login de ' + email + '?')) return;
+  const r = await fetch('/api/pase/desbloquear', {{method:'POST',
+    headers:{{'Content-Type':'application/json'}}, body: JSON.stringify({{email}})}});
+  if (r.ok) location.reload(); else alert('Error desbloqueando');
 }}
 async function confirmar(oid) {{
   if (!confirm('¿Confirmar que la consignación de la orden ' + oid + ' llegó a la cuenta?')) return;
@@ -2551,10 +2584,11 @@ _IA_CONTADOR = (
     "y sugiere confirmarla en la DIAN.\n"
     "DATOS VIGENTES 2026 (úsalos como ciertos, NO digas que no están definidos):\n"
     "- UVT 2026 = $52.374.\n"
-    "- Retención 2026 (residentes): compras 2,5% declarante / 3,5% no declarante (base ≥27 UVT); "
-    "servicios 4% / 6% (base ≥4 UVT); honorarios y comisiones 11% PJ y PN declarante / 10% no "
-    "declarante (sin base mínima); arrendamiento inmuebles 3,5% (≥27 UVT), muebles 4%; "
-    "transporte de carga 1% (≥4 UVT); rendimientos financieros 7%; otros ingresos 2,5%/3,5% (≥27 UVT).\n"
+    "- Retención 2026 con el Decreto 572 de 2025 (rige desde 1 jul 2026, bases más bajas): compras "
+    "2,5% declarante / 3,5% no declarante (base ≥10 UVT = $523.740); servicios 4% / 6% (base ≥2 UVT "
+    "= $104.748); honorarios y comisiones 11% PJ y PN declarante / 10% no declarante (sin base mínima); "
+    "arrendamiento inmuebles 3,5% (≥10 UVT), muebles 4%; transporte de carga 1% (≥2 UVT); rendimientos "
+    "financieros 7%; otros ingresos 2,5%/3,5% (≥10 UVT).\n"
     "- Autorretención especial (Decreto 572 de 2025, rige desde 1 jul 2026): tarifas por CIIU entre "
     "0,55% y 4,5% sobre ingresos brutos (comercio ≈1,2%; construcción 3,5%; hidrocarburos/carbón 4,5%).\n"
     "- Formulario 350: honorarios=casilla 54, comisiones=55, servicios=56, rendimientos=57, "
