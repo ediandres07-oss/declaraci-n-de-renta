@@ -1032,11 +1032,16 @@ def muestra_contador_pdf(token):
                      mimetype="application/pdf")
 
 
+_WM_MUESTRA = BASE / "static" / "img" / "wm_muestra.png"
+
+
 def _marcar_muestra_excel(ruta):
-    """Pone la marca 'MUESTRA' en el encabezado/pie de cada hoja del Excel de
-    papeles de trabajo (se ve al imprimir/exportar), sin mover los datos."""
+    """Marca de agua 'MUESTRA' en CADA hoja del Excel de papeles: imagen diagonal
+    sobre los datos + texto en encabezado/pie (se ve en pantalla e impresión).
+    No mueve los datos."""
     import openpyxl
     import warnings as _w
+    from openpyxl.drawing.image import Image as _XLImage
     with _w.catch_warnings():
         _w.simplefilter("ignore")
         wb = openpyxl.load_workbook(ruta)
@@ -1044,6 +1049,13 @@ def _marcar_muestra_excel(ruta):
         try:
             ws.oddHeader.center.text = "MUESTRA · TRIBUTANDO.CO — no válido para presentar en firme"
             ws.oddFooter.center.text = "Muestra gratuita · activa tu pase en tributando.co/contadores"
+        except Exception:
+            pass
+        try:
+            if _WM_MUESTRA.exists():
+                im = _XLImage(str(_WM_MUESTRA))   # una instancia por hoja
+                im.anchor = "B3"
+                ws.add_image(im)
         except Exception:
             pass
     wb.save(ruta)
@@ -1071,8 +1083,26 @@ def muestra_contador_zip(token):
                         "Pide tu pase de temporada a Tributando para ilimitadas."}), 402
 
     liq = calcular(datos, PARAMS)
-    exogena = _EXOGENAS.get(token)
     nit = carga.get("nit", "")
+
+    # La exógena para llenar su hoja de detalle: en memoria, y si se perdió (disco
+    # efímero de Render), se re-lee del archivo guardado en la BD.
+    exogena = _EXOGENAS.get(token)
+    if exogena is None:
+        try:
+            fila = _leer_archivo_bd(token)
+            if fila is not None and getattr(fila, "datos", None):
+                with tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False) as tex:
+                    ruta_ex = Path(tex.name)
+                ruta_ex.write_bytes(fila.datos)
+                try:
+                    with warnings.catch_warnings():
+                        warnings.simplefilter("ignore")
+                        exogena = parsear_exogena(ruta_ex)
+                finally:
+                    ruta_ex.unlink(missing_ok=True)
+        except Exception:
+            exogena = None
 
     with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as t1:
         ruta_pdf = Path(t1.name)
