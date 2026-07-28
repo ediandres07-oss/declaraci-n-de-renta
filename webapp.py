@@ -762,7 +762,7 @@ DESCARGA_LECTOR_URL = os.environ.get(
 
 # Última versión publicada del Lector. Súbela cada vez que recompiles y publiques
 # un instalador nuevo; el Lector la consulta y avisa al contador si está atrasado.
-LECTOR_VERSION_LATEST = os.environ.get("LECTOR_VERSION", "1.2.1")
+LECTOR_VERSION_LATEST = os.environ.get("LECTOR_VERSION", "1.2.2")
 
 
 @app.post("/api/lector-suscripcion/crear")
