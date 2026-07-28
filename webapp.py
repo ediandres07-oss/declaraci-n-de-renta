@@ -52,7 +52,7 @@ from src.formulario_pdf import generar_formulario_pdf, sellar_formulario_pdf
 from src.resumen_pdf import generar_resumen_pdf
 
 BASE = Path(__file__).resolve().parent
-PLANTILLA = BASE / "tests" / "fixtures" / "Plantilla renta naturales 2025 - ITGS.xlsx"
+PLANTILLA = BASE / "tests" / "fixtures" / "PapelesTrabajo-EnBlanco.xlsx"
 
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 25 * 1024 * 1024  # 25 MB
