@@ -718,16 +718,36 @@ def callback(proveedor):
     if proveedor not in ("google", "microsoft"):
         return "Proveedor no soportado", 404
     cliente = oauth.create_client(proveedor)
-    token = cliente.authorize_access_token()
+    try:
+        if proveedor == "microsoft":
+            # App multi-tenant ('common'): el 'iss' del id_token trae el GUID real
+            # del tenant, que NO coincide con el placeholder {tenantid} del documento
+            # de descubrimiento → authlib lanzaría invalid_claim y devolvería 500.
+            # Se relaja esa validación (el resto de la firma sí se verifica).
+            token = cliente.authorize_access_token(
+                claims_options={"iss": {"validate": lambda *a, **k: True}})
+        else:
+            token = cliente.authorize_access_token()
+    except Exception:
+        current_app.logger.exception("Fallo en el login OAuth de %s", proveedor)
+        return redirect(url_for("login_page", error="oauth"))
+
     info = token.get("userinfo") or {}
     if not info:
         # Microsoft a veces requiere consultar el endpoint de userinfo
-        info = cliente.userinfo()
+        try:
+            info = cliente.userinfo() or {}
+        except Exception:
+            current_app.logger.exception("Fallo userinfo OAuth de %s", proveedor)
+            info = {}
 
     proveedor_id = str(info.get("sub") or info.get("oid") or info.get("id") or "")
     email = (info.get("email") or info.get("preferred_username") or "").lower()
-    nombre = info.get("name") or email.split("@")[0]
+    nombre = info.get("name") or (email.split("@")[0] if email else "")
     foto = info.get("picture")
+    if not (proveedor_id or email):
+        current_app.logger.warning("OAuth %s sin email ni id; info=%s", proveedor, info)
+        return redirect(url_for("login_page", error="sin_datos"))
 
     usuario = None
     if proveedor_id:
