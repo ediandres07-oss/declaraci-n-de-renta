@@ -1032,6 +1032,81 @@ def muestra_contador_pdf(token):
                      mimetype="application/pdf")
 
 
+def _marcar_muestra_excel(ruta):
+    """Pone la marca 'MUESTRA' en el encabezado/pie de cada hoja del Excel de
+    papeles de trabajo (se ve al imprimir/exportar), sin mover los datos."""
+    import openpyxl
+    import warnings as _w
+    with _w.catch_warnings():
+        _w.simplefilter("ignore")
+        wb = openpyxl.load_workbook(ruta)
+    for ws in wb.worksheets:
+        try:
+            ws.oddHeader.center.text = "MUESTRA · TRIBUTANDO.CO — no válido para presentar en firme"
+            ws.oddFooter.center.text = "Muestra gratuita · activa tu pase en tributando.co/contadores"
+        except Exception:
+            pass
+    wb.save(ruta)
+
+
+@app.get("/api/muestra-contador/<token>.zip")
+@login_requerido
+def muestra_contador_zip(token):
+    """Entrega UNA vez, gratis, la MUESTRA COMPLETA: Formulario 210 (PDF con marca)
+    + papeles de trabajo (Excel con marca). El límite (1 por usuario) vive en la BD;
+    al pasar de 1 se bloquea y debe pedir el pase de temporada a Tributando."""
+    import zipfile
+    u = usuario_actual()
+    carga = _leer_ordenes().get(token)
+    if not carga or carga.get("tipo") != "carga":
+        return jsonify({"error": "Sube primero una exógena."}), 400
+    try:
+        datos = DatosDeclaracion.from_dict(carga.get("datos", {}))
+    except (TypeError, KeyError):
+        return jsonify({"error": "No hay datos válidos para la muestra."}), 410
+
+    previa = db.session.get(MuestraContador, u.id)
+    if previa is not None and previa.token != token:
+        return jsonify({"error": "Ya usaste tu declaración de muestra gratis. "
+                        "Pide tu pase de temporada a Tributando para ilimitadas."}), 402
+
+    liq = calcular(datos, PARAMS)
+    exogena = _EXOGENAS.get(token)
+    nit = carga.get("nit", "")
+
+    with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as t1:
+        ruta_pdf = Path(t1.name)
+    with tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False) as t2:
+        ruta_xlsx = Path(t2.name)
+    try:
+        generar_formulario_pdf(ruta_pdf, datos, liq, PARAMS, marca="MUESTRA · TRIBUTANDO.CO")
+        pdf_bytes = ruta_pdf.read_bytes()
+        escribir_formulario(PLANTILLA, ruta_xlsx, datos, liq, exogena)
+        _marcar_muestra_excel(ruta_xlsx)
+        xlsx_bytes = ruta_xlsx.read_bytes()
+    finally:
+        ruta_pdf.unlink(missing_ok=True)
+        ruta_xlsx.unlink(missing_ok=True)
+
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+        z.writestr(f"MUESTRA_Formulario210_{nit}.pdf", pdf_bytes)
+        z.writestr(f"MUESTRA_Papeles_de_trabajo_{nit}.xlsx", xlsx_bytes)
+    buf.seek(0)
+
+    if previa is None:
+        try:
+            db.session.add(MuestraContador(usuario_id=u.id, email=u.email,
+                                           token=token, nit_muestra=nit))
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+
+    return send_file(buf, as_attachment=True,
+                     download_name=f"MUESTRA_Declaracion_{nit}.zip",
+                     mimetype="application/zip")
+
+
 @app.get("/guia-dian")
 def guia_dian_web():
     """Versión web (HTML) de la guía para presentar el Formulario 210 en la DIAN.

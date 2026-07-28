@@ -309,7 +309,7 @@
           </div>
 
           <div id="dzAcc" hidden style="text-align:center;margin-top:18px">
-            <button class="btn-hero" id="btnMuestra">📄 Descargar el 210 de muestra (gratis)</button>
+            <button class="btn-hero" id="btnMuestra">📄 Descargar muestra: 210 + papeles de trabajo (gratis)</button>
             <p style="font-size:.75rem;color:var(--tenue);margin-top:10px">El PDF va con marca "MUESTRA".
               Con el pase de temporada los generas limpios e ilimitados.</p>
           </div>
@@ -568,20 +568,20 @@
       if (!tok) return;
       btnM.disabled = true; btnM.textContent = "Generando…";
       try {
-        var r = await fetch("/api/muestra-contador/" + tok + ".pdf");
+        var r = await fetch("/api/muestra-contador/" + tok + ".zip");
         if (r.ok) {
           var blob = await r.blob(), a = document.createElement("a");
-          a.href = URL.createObjectURL(blob); a.download = "MUESTRA_Formulario210.pdf"; a.click();
+          a.href = URL.createObjectURL(blob); a.download = "MUESTRA_Declaracion.zip"; a.click();
           URL.revokeObjectURL(a.href);
-          btnM.textContent = "✓ Descargado — ¿te convenció? Activa tu pase 👇";
+          btnM.textContent = "✓ Descargado (210 + papeles de trabajo) — ¿te convenció? Activa tu pase 👇";
         } else {
           var j = await r.json().catch(function(){ return {}; });
           alert(j.error || "No pudimos generar la muestra.");
-          btnM.disabled = false; btnM.textContent = "📄 Descargar el 210 de muestra (gratis)";
+          btnM.disabled = false; btnM.textContent = "📄 Descargar muestra: 210 + papeles de trabajo (gratis)";
         }
       } catch(e) {
         alert("Problema de conexión. Intenta de nuevo.");
-        btnM.disabled = false; btnM.textContent = "📄 Descargar el 210 de muestra (gratis)";
+        btnM.disabled = false; btnM.textContent = "📄 Descargar muestra: 210 + papeles de trabajo (gratis)";
       }
     };
   </script>
