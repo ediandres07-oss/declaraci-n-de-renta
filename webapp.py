@@ -2420,6 +2420,81 @@ async function reiniciar(uid) {{
 </script></body></html>"""
 
 
+_VENTAS_CSS = """<style>
+body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;max-width:860px;margin:0 auto;padding:22px;color:#1e2432}
+h1{font-size:1.35rem} .tot{font-size:2.1rem;font-weight:800;color:#1f8a5f}
+.cards{display:flex;gap:12px;flex-wrap:wrap;margin:16px 0}
+.c{border:1px solid #e2ddd2;border-radius:12px;padding:14px 18px;min-width:160px}
+.c .n{font-size:1.6rem;font-weight:800;color:#b8955f} .c .l{font-size:.85rem;color:#5c6470} .c .m{font-weight:700;margin-top:4px}
+table{width:100%;border-collapse:collapse;font-size:.9rem;margin-top:8px}
+th,td{padding:8px 10px;border-bottom:1px solid #eee;text-align:left} th{background:#1e2432;color:#fff}
+input,button{font-size:1rem;padding:7px 12px;border-radius:8px;border:1px solid #ccc} a{color:#b8955f;text-decoration:none}
+</style>"""
+
+
+@app.get("/admin/ventas")
+@autorizado_requerido
+def admin_ventas():
+    """Estadísticas de ventas de un mes: órdenes pagadas, total y desglose."""
+    from collections import defaultdict
+    hoy = date.today()
+    mes = (request.args.get("mes") or hoy.strftime("%Y-%m")).strip()[:7]
+    NOMBRE = {"lector": "Lector XML", "contadores": "Pase de temporada",
+              "pdf": "Declaración 210", "renta": "Declaración de renta"}
+    total = 0.0
+    ventas = []
+    por_prod = defaultdict(lambda: {"n": 0, "monto": 0.0})
+    for fila in OrdenRegistro.query.all():
+        try:
+            o = json.loads(fila.data)
+        except Exception:
+            continue
+        if o.get("tipo") != "orden" or not str(o.get("estado", "")).startswith("pagada"):
+            continue
+        f = fila.actualizado.date() if fila.actualizado else None
+        if f is None:
+            try:
+                f = date.fromisoformat((o.get("fecha") or "")[:10])
+            except Exception:
+                continue
+        if f.strftime("%Y-%m") != mes:
+            continue
+        precio = float(o.get("precio") or o.get("valor") or 0)
+        plan = o.get("plan", "otro")
+        nom = NOMBRE.get(plan, plan or "otro")
+        det = nom + (f" · {o.get('plan_lector','')}" if plan == "lector" and o.get("plan_lector") else "")
+        email = (o.get("contacto") or {}).get("email", "") or o.get("email", "")
+        ventas.append({"fecha": f.isoformat(), "producto": det, "email": email, "monto": precio})
+        total += precio
+        por_prod[nom]["n"] += 1
+        por_prod[nom]["monto"] += precio
+    ventas.sort(key=lambda v: v["fecha"], reverse=True)
+
+    def _p(n):
+        return "$" + f"{int(round(n)):,}".replace(",", ".")
+
+    cards = "".join(
+        f"<div class='c'><div class='n'>{d['n']}</div><div class='l'>{k}</div>"
+        f"<div class='m'>{_p(d['monto'])}</div></div>"
+        for k, d in sorted(por_prod.items(), key=lambda x: -x[1]['monto']))
+    filas = "".join(
+        f"<tr><td>{v['fecha']}</td><td>{v['producto']}</td><td>{v['email']}</td>"
+        f"<td style='text-align:right'>{_p(v['monto'])}</td></tr>" for v in ventas)
+    if not filas:
+        filas = "<tr><td colspan='4' style='color:#888;padding:14px'>Sin ventas pagadas en este mes.</td></tr>"
+    cuerpo = f"""<!doctype html><html lang="es"><head><meta charset="utf-8">
+    <title>Ventas — {mes}</title><meta name="viewport" content="width=device-width,initial-scale=1">{_VENTAS_CSS}</head>
+    <body><p><a href="/admin">← Panel de admin</a></p>
+    <h1>📊 Ventas del mes — <b>{mes}</b></h1>
+    <form method="get" style="margin:10px 0">Mes: <input type="month" name="mes" value="{mes}"> <button>Ver</button></form>
+    <div class="tot">{_p(total)} <span style="font-size:1rem;color:#5c6470;font-weight:400">· {len(ventas)} venta(s) pagada(s)</span></div>
+    <div class="cards">{cards}</div>
+    <table><tr><th>Fecha</th><th>Producto</th><th>Correo</th><th>Valor</th></tr>{filas}</table>
+    <p style="color:#8a919c;font-size:.82rem;margin-top:14px">Cuenta las órdenes en estado «pagada» por su fecha de pago.</p>
+    </body></html>"""
+    return cuerpo
+
+
 @app.post("/api/muestra-contador/reset")
 @autorizado_requerido
 def reset_muestra_contador():
