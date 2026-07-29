@@ -95,14 +95,18 @@ def _liquidar_ganancias_ocasionales(d: DatosDeclaracion, p: Parametros,
             f"{p.go_tarifa_loterias:.0%} loterías)")
 
 
-def calcular_renta_exenta_25(datos: DatosDeclaracion, p: Parametros) -> float:
+def calcular_renta_exenta_25(datos: DatosDeclaracion, p: Parametros,
+                             exenta_extra: float = 0.0) -> float:
     """Renta exenta laboral del 25% (Art. 206 num. 10 E.T.).
 
     Se calcula sobre el ingreso laboral depurado (ingresos - INCRNGO - demás
-    rentas exentas - deducciones imputables), con tope anual en UVT.
+    rentas exentas - deducciones imputables), con tope anual en UVT. `exenta_extra`
+    resta otras rentas exentas ya aplicadas (p. ej. el 50% de docentes públicos),
+    para que el 25% no recaiga sobre la parte ya exenta.
     """
     t = datos.trabajo
-    base = (t.ingresos_brutos - t.incrngo - t.total_rentas_exentas - t.total_deducciones)
+    base = (t.ingresos_brutos - t.incrngo - t.total_rentas_exentas
+            - t.total_deducciones - exenta_extra)
     if base <= 0:
         return 0.0
     exenta = base * p.exenta_25_porcentaje
@@ -126,10 +130,22 @@ def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
             f"{p.factura_electronica_tope_uvt:,.0f} UVT)")
 
     # ======================= Cédula general: subcédulas ==================
-    # Renta exenta 25% laboral automática (se agrega a 'otras rentas exentas')
+    # Docente/rector de universidad OFICIAL: 50% del salario exento (Art. 206-9).
+    # Se calcula sobre el ingreso de trabajo y se suma a las rentas exentas de esa
+    # subcédula (queda sujeto al límite del Art. 336). No muta 'datos' → el
+    # recálculo no lo acumula.
+    exenta_50 = 0.0
+    if getattr(d, "docente_publico", False):
+        exenta_50 = max(0.0, 0.5 * d.trabajo.ingresos_brutos)
+        if exenta_50 > 0:
+            liq.detalle.append(
+                f"Renta exenta 50% docente universidad oficial (Art. 206-9): {exenta_50:,.0f}")
+
+    # Renta exenta 25% laboral automática (se agrega a 'otras rentas exentas').
+    # Se le resta el 50% docente para no exentar dos veces la misma porción.
     exenta_25 = 0.0
     if d.aplicar_renta_exenta_25:
-        exenta_25 = calcular_renta_exenta_25(d, p)
+        exenta_25 = calcular_renta_exenta_25(d, p, exenta_extra=exenta_50)
         if exenta_25 > 0:
             liq.detalle.append(f"Renta exenta 25% laboral (Art. 206-10): {exenta_25:,.0f}")
 
@@ -141,8 +157,8 @@ def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
     r34 = max(0.0, t.ingresos_brutos - t.incrngo - t.costos_deducciones)
     liq.set(34, r34, "renta líquida rentas de trabajo")
     liq.set(35, t.rentas_exentas_afc_fvp, "aportes AFC/FVP/AVC")
-    r36 = t.otras_rentas_exentas + exenta_25
-    liq.set(36, r36, "otras rentas exentas (incluye 25% si aplica)")
+    r36 = t.otras_rentas_exentas + exenta_25 + exenta_50
+    liq.set(36, r36, "otras rentas exentas (incluye 25% y 50% docente si aplican)")
     r37 = t.rentas_exentas_afc_fvp + r36
     liq.set(37, r37, "total rentas exentas trabajo")
     liq.set(38, t.intereses_vivienda, "intereses de vivienda")

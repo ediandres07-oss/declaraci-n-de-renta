@@ -306,6 +306,12 @@
               </div>
               <div id="patOk" style="font-size:.78rem;color:var(--verde);font-weight:700;margin-top:6px"></div>
             </div>
+            <div class="ed-fila" style="border-top:1px solid var(--borde);margin-top:12px;padding-top:12px">
+              <label style="display:flex;align-items:center;gap:8px;font-size:.86rem;font-weight:700;cursor:pointer">
+                <input type="checkbox" id="docPublico" style="width:17px;height:17px;cursor:pointer"> 🎓 Docente / rector de universidad pública</label>
+              <div style="font-size:.74rem;color:var(--suave);margin:4px 0 0">Aplica el <b>50% del salario</b> como renta exenta (Art. 206 num. 9), con el tope del Art. 336.</div>
+              <span id="docOk" style="font-size:.82rem;color:var(--verde);font-weight:700"></span>
+            </div>
           </div>
 
           <div id="dzAcc" hidden style="text-align:center;margin-top:18px">
@@ -560,6 +566,13 @@
       recalc({patrimonio_bruto: nMoneda(document.getElementById("patBruto").value),
               deudas: nMoneda(document.getElementById("patDeudas").value)}, function(){
         document.getElementById("patOk").textContent = "✓ Patrimonio actualizado";
+      });
+    };
+    var docChk = document.getElementById("docPublico");
+    if (docChk) docChk.onchange = function(){
+      recalc({docente_publico: docChk.checked}, function(){
+        document.getElementById("docOk").textContent = docChk.checked
+          ? "✓ 50% de renta exenta aplicado" : "";
       });
     };
 

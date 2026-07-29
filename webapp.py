@@ -1393,6 +1393,8 @@ def recalcular_landing():
             datos.deudas = _monto_valido(cuerpo["deudas"])
         except (TypeError, ValueError):
             return jsonify({"error": "Valor de deudas inválido."}), 400
+    if "docente_publico" in cuerpo:
+        datos.docente_publico = bool(cuerpo["docente_publico"])
 
     # El "ahorro" por dependientes se calcula contra el mismo escenario sin ellos.
     dependientes_elegidos = datos.dependientes
@@ -1408,6 +1410,7 @@ def recalcular_landing():
         "dependientes": datos.dependientes,
         "patrimonio_bruto": datos.patrimonio_bruto,
         "deudas": datos.deudas,
+        "docente_publico": datos.docente_publico,
         "valor_a_pagar": liq.r(136),
         "saldo_a_favor": liq.r(137),
         "ahorro": max(0.0, (sin_dep.r(136) - sin_dep.r(137))

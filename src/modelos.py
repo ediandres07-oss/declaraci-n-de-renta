@@ -140,6 +140,8 @@ class DatosDeclaracion:
     no_laboral: SubcedulaGeneral = field(default_factory=SubcedulaGeneral)
 
     aplicar_renta_exenta_25: bool = True     # calcula automáticamente el 25% laboral
+    docente_publico: bool = False            # rector/profesor de universidad oficial:
+    #                                          50% del salario exento (Art. 206 num. 9)
 
     patrimonio_bruto: float = 0.0
     deudas: float = 0.0
