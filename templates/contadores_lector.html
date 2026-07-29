@@ -86,6 +86,28 @@
   footer{background:var(--navy);color:#aeb6c2;text-align:center;padding:26px;font-size:.85rem;}
   @media(max-width:820px){.planes,.pasos{grid-template-columns:1fr 1fr;}.hero h1{font-size:1.8rem;}}
   @media(max-width:520px){.planes,.pasos{grid-template-columns:1fr;}}
+  /* Todo lo que hace */
+  .funcs{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  .func{background:var(--gris);border:1px solid var(--borde);border-radius:14px;padding:20px;}
+  .func .ic{font-size:1.6rem;line-height:1;}
+  .func b{display:block;margin:9px 0 4px;font-size:1.02rem;}
+  .func span{color:var(--suave);font-size:.92rem;}
+  @media(max-width:820px){.funcs{grid-template-columns:1fr 1fr;}}
+  @media(max-width:520px){.funcs{grid-template-columns:1fr;}}
+  /* Lightbox: ampliar/reducir la imagen */
+  .hero-img img{cursor:zoom-in;}
+  .lightbox{position:fixed;inset:0;background:rgba(6,10,18,.93);z-index:200;
+    display:flex;align-items:center;justify-content:center;padding:20px;overflow:hidden;}
+  .lightbox[hidden]{display:none;}
+  .lb-img{max-width:94vw;max-height:84vh;transform-origin:center center;transition:transform .12s ease;
+    border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.6);user-select:none;}
+  .lb-ctrl{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);display:flex;gap:8px;
+    align-items:center;background:rgba(20,26,38,.92);padding:8px 12px;border-radius:32px;}
+  .lb-ctrl button{width:44px;height:44px;border-radius:50%;border:0;background:var(--dorado);
+    color:var(--navy);font-size:1.4rem;font-weight:800;cursor:pointer;line-height:1;}
+  .lb-ctrl .lb-pct{color:#fff;min-width:58px;text-align:center;font-weight:700;font-size:.9rem;}
+  .lb-close{position:fixed;top:16px;right:22px;background:none;border:0;color:#fff;
+    font-size:2.1rem;line-height:1;cursor:pointer;}
 </style>
 </head>
 <body>
@@ -122,8 +144,9 @@
         <b style="color:#cdab7e">1ª declaración de renta GRATIS</b></div>
     </div>
     <div class="hero-img">
-      <img src="/static/img/lector-hero.jpg" alt="Lector XML DIAN de Tributando.co en un portátil"
-           width="1200" height="675" loading="eager">
+      <img src="/static/img/lector-hero.jpg" alt="Lector XML DIAN de Tributando.co — clic para ampliar"
+           width="1200" height="675" loading="eager" onclick="lbOpen()" title="Clic para ampliar">
+      <div class="hero-nota" style="text-align:center;margin-top:8px">🔍 Toca la imagen para ampliarla</div>
     </div>
   </div>
 </div>
@@ -139,6 +162,33 @@
       <div class="paso"><div class="n">3</div><b>Genera el plano</b>
         Un clic y tienes el comprobante listo para Siigo (API o plano) o Contai.</div>
     </div>
+  </div>
+</section>
+
+<section style="padding-top:8px">
+  <div class="wrap">
+    <h2 class="titulo">Todo lo que hace el Lector <span style="color:var(--dorado2)">en una sola app</span></h2>
+    <div class="funcs">
+      <div class="func"><div class="ic">⬇️</div><b>Descarga masiva de la DIAN</b>
+        <span>Trae todas las facturas electrónicas por rango de fechas, con el IVA discriminado por tarifa.</span></div>
+      <div class="func"><div class="ic">📄</div><b>Plano para Siigo y Contai</b>
+        <span>Genera el comprobante listo para importar, con el concepto y la cuenta según la tarifa de cada factura.</span></div>
+      <div class="func"><div class="ic">🧮</div><b>Retenciones al día</b>
+        <span>Calcula la retefuente con las bases del Decreto 572 de 2025, más una calculadora de retención aparte.</span></div>
+      <div class="func"><div class="ic">📊</div><b>Declaración de IVA (300)</b>
+        <span>Arma el borrador del formulario 300 del período directamente desde las facturas descargadas.</span></div>
+      <div class="func"><div class="ic">🧾</div><b>Retención en la fuente (350)</b>
+        <span>Consolida el formulario 350 del mes con lo retenido a cada tercero, listo para declarar.</span></div>
+      <div class="func"><div class="ic">📇</div><b>Ficha del cliente + lector de RUT</b>
+        <span>Sube el PDF del RUT y detecta solo el NIT, el nombre y las responsabilidades del cliente.</span></div>
+      <div class="func"><div class="ic">📅</div><b>Tareas y vencimientos</b>
+        <span>Calendario DIAN 2026 por cliente, con recordatorios por cada fecha para no perder ninguna.</span></div>
+      <div class="func"><div class="ic">🔎</div><b>Buscador IA tributario</b>
+        <span>Pregunta en lenguaje natural y resuelve dudas de normatividad y retenciones al instante.</span></div>
+      <div class="func"><div class="ic">⚖️</div><b>Auditoría de acuses y de balance</b>
+        <span>Cruza los acuses de recibo de la DIAN y mapea el balance de prueba por tercero para cuadrar cuentas.</span></div>
+    </div>
+    <p class="nota" style="margin-top:22px">Y guarda la memoria de cada cliente: recuerda sus cuentas y consultas para la próxima vez.</p>
   </div>
 </section>
 
@@ -221,6 +271,17 @@
   </span>
 </footer>
 
+<!-- Lightbox: ampliar / reducir la imagen -->
+<div class="lightbox" id="lightbox" hidden>
+  <button class="lb-close" onclick="lbClose()" aria-label="Cerrar">×</button>
+  <img class="lb-img" id="lbImg" src="/static/img/lector-hero.jpg" alt="Lector XML DIAN — vista ampliada">
+  <div class="lb-ctrl">
+    <button onclick="lbZoom(-1)" aria-label="Reducir">−</button>
+    <span class="lb-pct" id="lbPct">100%</span>
+    <button onclick="lbZoom(1)" aria-label="Ampliar">+</button>
+  </div>
+</div>
+
 <!-- Modal de pago -->
 <div class="modal" id="modal" hidden>
   <div class="card" style="position:relative">
@@ -252,6 +313,27 @@
 </div>
 
 <script>
+  // Lightbox — ampliar / reducir la imagen del Lector
+  var _z = 1;
+  function lbApply(){
+    document.getElementById("lbImg").style.transform = "scale(" + _z + ")";
+    document.getElementById("lbPct").textContent = Math.round(_z * 100) + "%";
+  }
+  function lbOpen(){ _z = 1; lbApply(); document.getElementById("lightbox").hidden = false; document.body.style.overflow = "hidden"; }
+  function lbClose(){ document.getElementById("lightbox").hidden = true; document.body.style.overflow = ""; }
+  function lbZoom(d){ _z = Math.min(4, Math.max(0.5, +(_z + d * 0.25).toFixed(2))); lbApply(); }
+  (function(){
+    var lb = document.getElementById("lightbox");
+    lb.addEventListener("click", function(e){ if (e.target === lb) lbClose(); });
+    lb.addEventListener("wheel", function(e){ e.preventDefault(); lbZoom(e.deltaY < 0 ? 1 : -1); }, {passive:false});
+    document.addEventListener("keydown", function(e){
+      if (document.getElementById("lightbox").hidden) return;
+      if (e.key === "Escape") lbClose();
+      else if (e.key === "+" || e.key === "=") lbZoom(1);
+      else if (e.key === "-") lbZoom(-1);
+    });
+  })();
+
   var logueado = {{ 'true' if logueado else 'false' }};
   var ordenActual = null;
   var _periodo = "anual";
