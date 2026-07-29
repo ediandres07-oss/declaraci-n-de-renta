@@ -324,6 +324,25 @@ def api_chat():
     if not isinstance(mensajes, list) or not mensajes:
         return jsonify({"error": "Envía al menos un mensaje."}), 400
 
+    contexto = (cuerpo.get("contexto") or "").strip().lower()
+
+    # Modo CONTADOR: atiende sobre el pase de cortesía y el Lector, con los
+    # precios vigentes inyectados. No usa la liquidación del cliente.
+    if contexto == "contador":
+        try:
+            respuesta = responder_ia(mensajes, IA_CFG, contexto="contador",
+                                     system_extra=_info_contador_ia())
+        except ValueError as e:
+            return jsonify({"error": str(e)}), 400
+        except Exception as e:
+            msg = str(e)
+            if "RESOURCE_EXHAUSTED" in msg or "429" in msg:
+                return jsonify({"error": "Estoy atendiendo muchas consultas en este momento. "
+                                         "Espera unos segundos e inténtalo de nuevo. 🙏"}), 429
+            app.logger.warning("Fallo del asistente (contador): %s", e)
+            return jsonify({"error": "No pude responder ahora mismo. Intenta de nuevo en un momento."}), 502
+        return jsonify({"respuesta": respuesta})
+
     # Si el cliente ya tiene su declaración en pantalla, el asistente responde
     # conociendo cómo quedó la liquidación en vez de dar respuestas genéricas.
     liq = None
@@ -648,7 +667,40 @@ def contadores_lector():
                            logueado=u is not None,
                            pago=_CFG_PRECIOS.get("pago", {}),
                            descarga_url=DESCARGA_LECTOR_URL,
-                           whatsapp=re.sub(r"\D", "", str(_CONTACTO.get("whatsapp", ""))))
+                           whatsapp=re.sub(r"\D", "", str(_CONTACTO.get("whatsapp", ""))),
+                           chat_ia_contador=asistente_ia_activo(IA_CFG),
+                           chat_whatsapp=IA_CFG.get("negocio", {}).get("whatsapp", ""),
+                           chat_ia_nombre=IA_CFG.get("nombre_asistente", "Asistente Contadores"))
+
+
+def _info_contador_ia() -> str:
+    """Datos vigentes (precios del pase de temporada y planes del Lector) que el
+    asistente en modo contador puede citar, para no hardcodear cifras en el prompt."""
+    cont = _CFG_PRECIOS.get("contadores", {})
+    pase = cont.get("precio", 149900)
+    temporada = cont.get("temporada", "")
+    def _cop(n):
+        return ("$" + f"{int(n):,}").replace(",", ".")
+    lineas = ["\n\nDATOS VIGENTES QUE PUEDES CITAR (no inventes otros precios ni beneficios):"]
+    lineas.append(f"- Prueba gratis: 1 declaración de muestra por contador (Formulario 210 + papeles "
+                  f"de trabajo con marca de agua 'MUESTRA').")
+    lineas.append(f"- Pase de temporada del liquidador de renta: {_cop(pase)} COP, pago único por toda "
+                  f"la temporada {temporada}, con declaraciones ILIMITADAS.")
+    lineas.append("- Planes del Lector XML DIAN (suscripción; el anual equivale a 2 meses gratis):")
+    try:
+        promo = _promo_lector_activa()
+        for t in TIERS_LECTOR:
+            c = t["clave"]
+            pm = precio_lector(f"{c}_mensual")
+            pa = precio_lector(f"{c}_anual")
+            emp = "empresas ilimitadas" if not t["empresas_max"] else f"hasta {t['empresas_max']} empresas"
+            lineas.append(f"    · {t['nombre']} ({emp}): {_cop(pm)}/mes o {_cop(pa)}/año.")
+        if promo:
+            _v = PROMO_LECTOR["vence"]
+            lineas.append(f"- Promo vigente: {PROMO_LECTOR['etiqueta']} (hasta {_v.day}/{_v.month}/{_v.year}).")
+    except Exception:
+        lineas.append("    · Consulta los planes exactos en la página /contadores/lector.")
+    return "\n".join(lineas)
 
 
 @app.get("/contadores")
@@ -665,7 +717,10 @@ def contadores():
                            logueado=u is not None,
                            muestra_usada=muestra_usada,
                            pago=PAGO,
-                           ia_whatsapp=IA_CFG.get("negocio", {}).get("whatsapp", ""))
+                           ia_whatsapp=IA_CFG.get("negocio", {}).get("whatsapp", ""),
+                           chat_ia_contador=asistente_ia_activo(IA_CFG),
+                           chat_whatsapp=IA_CFG.get("negocio", {}).get("whatsapp", ""),
+                           chat_ia_nombre=IA_CFG.get("nombre_asistente", "Asistente Contadores"))
 
 
 @app.post("/api/pase-contador/crear")

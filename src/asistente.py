@@ -152,6 +152,55 @@ explicación genérica; si no queda claro qué necesita, pregunta en qué parte 
 redirige con amabilidad al tema."""
 
 
+def _prompt_contador(cfg: dict) -> str:
+    """Prompt del asistente que atiende a CONTADORES sobre el pase de cortesía
+    (prueba gratis + pase de temporada) y el Lector XML DIAN. Solo informa y
+    guía; nunca entrega accesos ni pide datos sensibles. Los precios vigentes se
+    inyectan aparte (system_extra) para no quedar hardcodeados."""
+    negocio = cfg.get("negocio", {})
+    correo = negocio.get("correo", "")
+    whatsapp = negocio.get("whatsapp", "")
+    contacto = []
+    if whatsapp:
+        contacto.append(f"WhatsApp {whatsapp}")
+    if correo:
+        contacto.append(f"correo {correo}")
+    contacto_txt = " o ".join(contacto) if contacto else "los canales de contacto del sitio"
+
+    return f"""Eres el asistente virtual de "Tributando.co Contadores". Atiendes a CONTADORES \
+colombianos (no a personas naturales del común). Hablas como un colega: cálido, práctico y breve.
+
+ATIENDES DOS COSAS:
+
+1) EL PASE DE CORTESÍA / PRUEBA GRATIS del liquidador de renta:
+   - Cada contador puede procesar GRATIS UNA (1) declaración de muestra de un cliente real: sube la \
+exógena (.xlsx) del cliente en la página /contadores y ve al instante si está obligado, su fecha límite \
+y el valor estimado; puede descargar el Formulario 210 + los papeles de trabajo (con marca de agua "MUESTRA").
+   - Para procesar TODAS las declaraciones que quiera durante la temporada, activa el "pase de temporada": \
+un solo pago, declaraciones ILIMITADAS. Se paga en línea con QR o se coordina por {contacto_txt}.
+   - TÚ NO entregas el pase ni desbloqueas nada: guías al contador a hacer su prueba gratis (botón en /contadores) \
+o a activar el pase (pago en línea o {contacto_txt}).
+
+2) EL LECTOR XML DIAN (app de escritorio para Windows, requiere Google Chrome):
+   - Descarga las facturas electrónicas de los clientes desde la DIAN por rango de fechas, con el IVA \
+discriminado, y arma el PLANO CONTABLE listo para importar en Siigo, Contai, World Office o Helisa.
+   - Además: cálculo de retenciones (bases del Decreto 572 de 2025) y calculadora, borrador de la declaración \
+de IVA (formulario 300) y de retención en la fuente (formulario 350), ficha del cliente con lector de RUT \
+(detecta NIT, nombre y responsabilidades), calendario de tareas y vencimientos DIAN 2026 por cliente, \
+buscador tributario con IA y auditorías de acuses y de balance.
+   - Se paga por suscripción según el número de empresas (planes en /contadores/lector), mensual o anual.
+
+REGLAS:
+- Solo INFORMAS y GUÍAS. No prometas descuentos ni accesos que no estén en los datos que te den.
+- Cotiza SIEMPRE con los precios vigentes que aparezcan en el contexto extra; si no tienes un dato, \
+di que lo confirmen en la página o por {contacto_txt}, sin inventar cifras.
+- Respuestas cortas (2-5 frases), en español, tono de colega contador. Usa **negritas** para lo clave.
+- Nunca pidas contraseñas, tokens, certificados ni datos sensibles del contador o de sus clientes.
+- Si el contador quiere comprar/activar, dirígelo al botón correspondiente de la página o a {contacto_txt}.
+- Responde solo temas de estos dos productos y de tributaria para contadores; si preguntan algo ajeno, \
+redirige con amabilidad."""
+
+
 def _contexto_usuario(usuario=None, liq=None) -> str:
     """Datos del usuario y de su liquidación que el asistente puede citar.
 
@@ -195,12 +244,14 @@ def _contexto_usuario(usuario=None, liq=None) -> str:
 
 def responder(mensajes: list[dict], cfg: dict | None = None,
               usuario=None, liq=None, system_extra: str = "",
-              max_tokens: int | None = None) -> str:
+              max_tokens: int | None = None, contexto: str = "cliente") -> str:
     """Recibe el historial [{rol, texto}] y devuelve la respuesta del asistente.
 
     'rol' es "user" o "assistant". `usuario` y `liq` son opcionales: si vienen,
     el asistente responde conociendo a quién atiende y cómo quedó su liquidación.
-    `system_extra` añade contexto al prompt (p.ej. modo contador profesional).
+    `system_extra` añade contexto al prompt (p.ej. precios vigentes).
+    `contexto`: "cliente" (renta personas naturales, por defecto) o "contador"
+    (atiende sobre el pase de cortesía y el Lector XML DIAN).
     Lanza RuntimeError si el asistente no está activo.
     """
     cfg = cfg if cfg is not None else cargar_config()
@@ -221,9 +272,14 @@ def responder(mensajes: list[dict], cfg: dict | None = None,
     from google import genai
     from google.genai import types
 
+    if contexto == "contador":
+        system_instruction = _prompt_contador(cfg) + (system_extra or "")
+    else:
+        system_instruction = _prompt_sistema(cfg) + _contexto_usuario(usuario, liq) + (system_extra or "")
+
     cliente = genai.Client(api_key=cfg["api_key"])
     config = types.GenerateContentConfig(
-        system_instruction=_prompt_sistema(cfg) + _contexto_usuario(usuario, liq) + (system_extra or ""),
+        system_instruction=system_instruction,
         max_output_tokens=int(max_tokens or _MAX_TOKENS),
         temperature=0.4,
     )

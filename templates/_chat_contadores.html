@@ -1,0 +1,159 @@
+<!-- ===== Asistente de IA para contadores (pase de cortesía + Lector) =====
+     Widget autónomo con IDs propios (cc-*). Postea a /api/chat con
+     contexto:"contador". Se incluye en /contadores y /contadores/lector. -->
+{% raw %}
+<style>
+  #cc-fab{position:fixed;right:20px;bottom:20px;z-index:1000;width:62px;height:62px;border-radius:50%;
+    border:none;cursor:pointer;color:#1e2432;display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,#dcc09a,#cdab7e 55%,#b8955f);box-shadow:0 6px 20px rgba(184,149,95,.45);
+    transition:transform .15s}
+  #cc-fab:hover{transform:scale(1.08)}
+  #cc-fab::after{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid rgba(205,171,126,.85);
+    animation:ccaro 2.6s ease-out infinite;pointer-events:none}
+  @keyframes ccaro{0%{transform:scale(1);opacity:.9}70%{transform:scale(1.55);opacity:0}100%{opacity:0}}
+  @media (prefers-reduced-motion:reduce){#cc-fab::after{display:none}}
+  #cc-fab svg{width:28px;height:28px}
+  #cc-panel{position:fixed;right:20px;bottom:92px;z-index:1000;width:370px;max-width:calc(100vw - 32px);
+    height:560px;max-height:calc(100vh - 120px);background:#fff;border-radius:18px;display:none;
+    flex-direction:column;overflow:hidden;box-shadow:0 22px 60px rgba(10,25,45,.38)}
+  #cc-panel.abierto{display:flex}
+  .cc-cab{background:#1e2432;color:#fff;padding:13px 15px;display:flex;align-items:center;gap:11px}
+  .cc-ava{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;
+    align-items:center;justify-content:center;flex-shrink:0;font-size:1.2rem}
+  .cc-cab .tit{flex:1;line-height:1.2}
+  .cc-cab .tit b{font-size:.98rem;display:block}
+  .cc-cab .tit small{opacity:.9;font-size:.72rem;display:flex;align-items:center;gap:5px}
+  .cc-punto{width:8px;height:8px;border-radius:50%;background:#7be0a6}
+  .cc-cab .icb{background:none;border:none;color:#fff;font-size:1.1rem;cursor:pointer;opacity:.85;padding:4px;line-height:1}
+  .cc-cab .icb:hover{opacity:1}
+  .cc-msgs{flex:1;min-height:110px;overflow-y:auto;padding:14px;background:#f7f5f1;display:flex;flex-direction:column;gap:9px}
+  .cc-row{display:flex;gap:8px;align-items:flex-end;max-width:90%}
+  .cc-row.yo{align-self:flex-end;flex-direction:row-reverse}
+  .cc-row.bot{align-self:flex-start}
+  .cc-mini{width:26px;height:26px;border-radius:50%;background:#ece4d6;color:#1e2432;display:flex;
+    align-items:center;justify-content:center;flex-shrink:0;font-size:.85rem}
+  .cc-b{padding:10px 13px;border-radius:15px;font-size:.9rem;line-height:1.5;word-wrap:break-word}
+  .cc-b.bot{background:#fff;border:1px solid #e2ebe8;border-bottom-left-radius:4px}
+  .cc-b.yo{background:#1e2432;color:#fff;border-bottom-right-radius:4px}
+  .cc-b strong{font-weight:700}
+  .cc-esc .cc-b{display:flex;gap:4px;padding:13px}
+  .cc-esc .pt{width:7px;height:7px;border-radius:50%;background:#9db0c4;animation:ccpt 1.3s infinite}
+  .cc-esc .pt:nth-child(2){animation-delay:.2s}.cc-esc .pt:nth-child(3){animation-delay:.4s}
+  @keyframes ccpt{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-4px);opacity:1}}
+  .cc-chips{display:flex;flex-wrap:nowrap;gap:7px;padding:8px 14px;background:#f7f5f1;overflow-x:auto;
+    scrollbar-width:none;flex-shrink:0}
+  .cc-chips::-webkit-scrollbar{display:none}
+  .cc-chip{flex:0 0 auto;white-space:nowrap;background:#fff;border:1px solid #e2ddd2;color:#1e2432;
+    font-size:.8rem;padding:7px 12px;border-radius:16px;cursor:pointer}
+  .cc-chip:hover{background:#f1ede5}
+  .cc-chip.accion{background:#1e8a5f;color:#fff;border-color:#1e8a5f}
+  .cc-form{display:flex;gap:8px;padding:11px;border-top:1px solid #e2ebe8;background:#fff;flex-shrink:0}
+  .cc-form input{flex:1;padding:11px 14px;border:1px solid #dbe3ec;border-radius:22px;font-size:.9rem;outline:none}
+  .cc-form input:focus{border-color:#1e2432}
+  .cc-form button{border:none;background:#1e2432;color:#fff;width:44px;height:44px;border-radius:50%;cursor:pointer;font-size:1.1rem;flex-shrink:0}
+  .cc-form button:disabled{opacity:.45;cursor:default}
+  .cc-pie{text-align:center;font-size:.66rem;color:#9db0c4;padding:0 0 6px;background:#fff;flex-shrink:0}
+  @media (max-height:640px){.cc-pie{display:none}}
+</style>
+{% endraw %}
+
+<button id="cc-fab" aria-label="Abrir el asistente para contadores" title="¿Dudas? Pregúntale al asistente">
+  <svg viewBox="0 0 24 24" fill="none" stroke="#1e2432" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.9 8.9 0 0 1-3.4-.7L3 21l1.8-4.4A8.4 8.4 0 1 1 21 11.5z"/><path d="M8 10.5h8M8 13.5h5"/></svg>
+</button>
+
+<div id="cc-panel" role="dialog" aria-label="Asistente para contadores">
+  <div class="cc-cab">
+    <div class="cc-ava">🤖</div>
+    <div class="tit"><b>{{ chat_ia_nombre | default('Asistente Contadores') }}</b>
+      <small><span class="cc-punto"></span> En línea · te responde al instante</small></div>
+    <button class="icb" id="cc-reset" title="Nueva conversación" aria-label="Nueva conversación">↻</button>
+    <button class="icb" id="cc-cerrar" title="Cerrar" aria-label="Cerrar">✕</button>
+  </div>
+  <div class="cc-msgs" id="cc-msgs"></div>
+  <div class="cc-chips" id="cc-chips"></div>
+  <form class="cc-form" id="cc-form" autocomplete="off">
+    <input id="cc-input" type="text" placeholder="Escribe tu pregunta..." maxlength="500" required>
+    <button type="submit" aria-label="Enviar">➤</button>
+  </form>
+  <div class="cc-pie">Asistente virtual · información general para contadores</div>
+</div>
+
+<script>
+(function(){
+  var WHATSAPP = {{ (chat_whatsapp | default('')) | tojson }};
+  var fab=document.getElementById('cc-fab'), panel=document.getElementById('cc-panel');
+  var cont=document.getElementById('cc-msgs'), chips=document.getElementById('cc-chips');
+  var form=document.getElementById('cc-form'), input=document.getElementById('cc-input');
+  var boton=form.querySelector('button');
+  var historial=[], ocupado=false, saludado=false;
+
+  var SUGERENCIAS=['🎁 ¿Qué es el pase de cortesía?','⚡ ¿Qué hace el Lector?','💰 Precios','📄 ¿Qué programas contables soporta?'];
+
+  function guardar(){try{localStorage.setItem('chatContadores',JSON.stringify(historial));}catch(e){}}
+  function cargar(){try{historial=JSON.parse(localStorage.getItem('chatContadores')||'[]');}catch(e){historial=[];}}
+  function fmt(t){var e=t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    e=e.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');return e.replace(/\n/g,'<br>');}
+
+  function burbuja(texto,clase){
+    var row=document.createElement('div');row.className='cc-row '+clase;
+    if(clase==='bot'){var m=document.createElement('div');m.className='cc-mini';m.textContent='🤖';row.appendChild(m);}
+    var b=document.createElement('div');b.className='cc-b '+clase;b.innerHTML=fmt(texto);
+    row.appendChild(b);cont.appendChild(row);cont.scrollTop=cont.scrollHeight;return row;
+  }
+  function escribiendo(){
+    var row=document.createElement('div');row.className='cc-row bot cc-esc';
+    var m=document.createElement('div');m.className='cc-mini';m.textContent='🤖';
+    var b=document.createElement('div');b.className='cc-b bot';
+    b.innerHTML='<span class="pt"></span><span class="pt"></span><span class="pt"></span>';
+    row.appendChild(m);row.appendChild(b);cont.appendChild(row);cont.scrollTop=cont.scrollHeight;return row;
+  }
+  function verChips(){
+    chips.innerHTML='';
+    SUGERENCIAS.forEach(function(txt){
+      var c=document.createElement('button');c.className='cc-chip';c.type='button';c.textContent=txt;
+      c.onclick=function(){enviar(txt.replace(/^[^\wáéíóúñ¿]+/i,'').trim()||txt);};
+      chips.appendChild(c);
+    });
+    if(WHATSAPP){
+      var w=document.createElement('button');w.className='cc-chip accion';w.type='button';w.textContent='💬 Hablar por WhatsApp';
+      w.onclick=function(){window.open('https://wa.me/'+WHATSAPP.replace(/\D/g,'')+'?text='+
+        encodeURIComponent('Hola, soy contador y quiero información del pase / el Lector.'),'_blank');};
+      chips.appendChild(w);
+    }
+  }
+  function pintarHistorial(){cont.innerHTML='';historial.forEach(function(m){burbuja(m.texto,m.rol==='assistant'?'bot':'yo');});verChips();}
+  function saludo(){
+    if(saludado) return; saludado=true;
+    burbuja('¡Hola, colega! 👋 Te ayudo con el **pase de cortesía** (tu prueba gratis) y con el **Lector XML DIAN**. '+
+            '¿Qué quieres saber?','bot');
+    verChips();
+  }
+  function enviar(texto){
+    texto=(texto||'').trim(); if(!texto||ocupado) return;
+    chips.innerHTML='';burbuja(texto,'yo');historial.push({rol:'user',texto:texto});guardar();
+    input.value='';ocupado=true;boton.disabled=true;input.disabled=true;
+    var esc=escribiendo();
+    fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({mensajes:historial,contexto:'contador'})})
+    .then(function(r){return r.json().then(function(j){return {ok:r.ok,j:j};});})
+    .then(function(res){
+      esc.remove();
+      if(res.j.respuesta){burbuja(res.j.respuesta,'bot');historial.push({rol:'assistant',texto:res.j.respuesta});guardar();}
+      else{burbuja(res.j.error||'No pude responder ahora mismo. Intenta de nuevo.','bot');}
+      verChips();
+    })
+    .catch(function(){esc.remove();burbuja('Hubo un problema de conexión. Revisa tu internet e intenta de nuevo.','bot');verChips();})
+    .finally(function(){ocupado=false;boton.disabled=false;input.disabled=false;input.focus();});
+  }
+  function abrir(){panel.classList.add('abierto');if(!saludado&&!historial.length)saludo();input.focus();}
+  function cerrar(){panel.classList.remove('abierto');}
+
+  fab.onclick=function(){panel.classList.contains('abierto')?cerrar():abrir();};
+  document.getElementById('cc-cerrar').onclick=cerrar;
+  document.getElementById('cc-reset').onclick=function(){historial=[];guardar();cont.innerHTML='';saludado=false;saludo();};
+  form.onsubmit=function(e){e.preventDefault();enviar(input.value);};
+
+  cargar();
+  if(historial.length){pintarHistorial();saludado=true;}
+})();
+</script>
