@@ -33,12 +33,13 @@
      ================================================================== */
   :root {
     /* Paleta tomada del logo: navy #1e2432 + dorado champán #cdab7e */
-    --marca:#1e2432; --marca-osc:#12161f;          /* navy de marca */
-    --azul:#1e2432;                                 /* tinta de títulos */
-    --azul2:#1e2432;                                /* acciones (antes azul) */
-    --dorado:#cdab7e; --dorado-osc:#b8955f; --verde:#1f8a5f; --rojo:#c0392b;
-    --gris:#f7f5f1; --gris2:#f1ede5; --borde:#e2ddd2;
-    --texto:#3a4250; --suave:#5c6470; --tenue:#8a919c;
+    --marca:#1e2432; --marca-osc:#12161f;          /* navy de marca (texto sobre dorado) */
+    --azul:#f3f5f8;                                 /* tinta de títulos → clara en oscuro */
+    --azul2:#e6c483;                                /* acciones → dorado */
+    --dorado:#e6c483; --dorado-osc:#c9a25a; --verde:#37d38f; --rojo:#ff8f8f;
+    --gris:rgba(255,255,255,.03); --gris2:rgba(255,255,255,.07); --borde:rgba(230,196,131,.24);
+    --vidrio:rgba(255,255,255,.06);
+    --texto:#dfe4ea; --suave:#c2c9d4; --tenue:#8b93a1;
     --sombra-1:0 1px 2px rgba(10,25,45,.06), 0 4px 12px rgba(10,25,45,.06);
     --sombra-2:0 2px 4px rgba(10,25,45,.08), 0 12px 28px rgba(10,25,45,.10);
     --sombra-3:0 4px 8px rgba(10,25,45,.10), 0 22px 48px rgba(10,25,45,.14);
@@ -62,8 +63,19 @@
   /* Anillo de foco accesible con el verde de marca, solo al navegar con teclado */
   :focus-visible { outline:3px solid rgba(205,171,126,.65); outline-offset:2px; border-radius:6px; }
 
-  body { font-family:-apple-system,'Segoe UI',Roboto,sans-serif; color:var(--azul);
-         background:#fff; -webkit-font-smoothing:antialiased; }
+  body { font-family:-apple-system,'Segoe UI',Roboto,sans-serif; color:var(--texto);
+         background:#05070c; -webkit-font-smoothing:antialiased; }
+  body::before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;background:linear-gradient(160deg,#070a12,#04060a);}
+  .fx-luz{position:fixed;border-radius:50%;filter:blur(70px);z-index:-1;opacity:.5;mix-blend-mode:screen;pointer-events:none;}
+  .fx-luz.l1{width:420px;height:420px;top:-6%;left:-8%;background:#3f74d6;animation:fxf1 14s ease-in-out infinite;}
+  .fx-luz.l2{width:360px;height:360px;bottom:-8%;right:-6%;background:#e6c483;animation:fxf2 18s ease-in-out infinite;}
+  .fx-luz.l3{width:300px;height:300px;top:42%;right:16%;background:#8a5cf0;animation:fxf3 22s ease-in-out infinite;}
+  @keyframes fxf1{0%,100%{transform:translate(0,0) scale(1);opacity:.4}50%{transform:translate(80px,60px) scale(1.25);opacity:.62}}
+  @keyframes fxf2{0%,100%{transform:translate(0,0) scale(1);opacity:.35}50%{transform:translate(-70px,-50px) scale(1.2);opacity:.58}}
+  @keyframes fxf3{0%,100%{transform:translate(0,0) scale(1);opacity:.26}50%{transform:translate(-60px,70px) scale(1.3);opacity:.48}}
+  @media(prefers-reduced-motion:reduce){.fx-luz{animation:none}}
+  @media(max-width:640px){.fx-luz{filter:blur(48px);opacity:.38}}
+  h1,h2,h3{color:#fff;}
   .contenedor { max-width:1020px; margin:0 auto; padding:0 20px; }
 
   .barra-sup { background:#1e2432; position:sticky; top:0; z-index:100;
@@ -116,7 +128,7 @@
   /* ------------------------- Pasos (1·2·3) -------------------------- */
   .pasos { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin:26px auto 0;
            position:relative; z-index:2; }
-  .paso { background:#fff; border:1px solid var(--borde); border-radius:var(--radio); padding:26px 20px 22px;
+  .paso { background:var(--vidrio); backdrop-filter:blur(12px); border:1px solid var(--borde); border-radius:var(--radio); padding:26px 20px 22px;
           box-shadow:var(--sombra-2); text-align:center; transition:transform .18s ease, box-shadow .18s ease; }
   .paso:hover { transform:translateY(-3px); box-shadow:var(--sombra-3); }
   .paso .num { width:40px; height:40px; border-radius:50%; color:#fff; font-weight:800; font-size:1.05rem;
@@ -128,7 +140,7 @@
 
   /* --------------------- Zona de carga (estrella) ------------------- */
   #dropzone { position:relative; border:2px dashed var(--marca); border-radius:20px;
-              background:linear-gradient(180deg, #fff 0%, var(--gris) 100%);
+              background:linear-gradient(160deg, rgba(255,255,255,.10), rgba(255,255,255,.03)); backdrop-filter:blur(14px);
               padding:clamp(40px, 7vw, 58px) 20px; text-align:center; cursor:pointer; margin:40px 0 10px;
               transition:border-color .18s ease, box-shadow .18s ease, transform .18s ease, background .18s ease; }
   #dropzone:hover { border-color:var(--marca-osc); box-shadow:var(--sombra-2); }
@@ -164,7 +176,7 @@
   .titulo-seccion { color:var(--azul); font-size:clamp(1.25rem, 1vw + 1rem, 1.55rem);
                     letter-spacing:-.01em; margin:6px 0 20px; }
   .planes { display:grid; grid-template-columns:1fr 1fr; gap:22px; margin:10px 0 48px; }
-  .plan { background:#fff; border:2px solid var(--borde); border-radius:20px; padding:30px 26px;
+  .plan { background:var(--vidrio); backdrop-filter:blur(14px); border:1.5px solid var(--borde); border-radius:20px; padding:30px 26px;
           position:relative; box-shadow:var(--sombra-1); transition:transform .18s ease, box-shadow .18s ease; }
   .plan:hover { transform:translateY(-3px); box-shadow:var(--sombra-2); }
   .plan.destacado { border-color:var(--dorado); box-shadow:0 4px 8px rgba(30,36,50,.08), 0 22px 48px rgba(30,36,50,.16); }
@@ -216,7 +228,7 @@
   /* ---------------------------- Confianza --------------------------- */
   .confianza { background:var(--gris); border-top:1px solid var(--gris2); padding:48px 0; }
   .confianza .contenedor { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; text-align:center; }
-  .confianza .tarjeta { background:#fff; border:1px solid var(--borde); border-radius:var(--radio);
+  .confianza .tarjeta { background:var(--vidrio); backdrop-filter:blur(12px); border:1px solid var(--borde); border-radius:var(--radio);
                         padding:26px 20px; box-shadow:var(--sombra-1); }
   .confianza .ic { width:46px; height:46px; margin:0 auto 12px; border-radius:50%;
                    background:var(--gris2); color:var(--marca-osc);
@@ -248,7 +260,7 @@
 
   /* ------------------ Obsequio: guía gratis (lead magnet) ----------- */
   .guia-obsequio { padding:34px 0 0; }
-  .go-card { position:relative; overflow:hidden; border-radius:22px; background:#fff;
+  .go-card { position:relative; overflow:hidden; border-radius:22px; background:var(--vidrio); backdrop-filter:blur(12px);
     border:2px solid var(--borde); box-shadow:var(--sombra-2); padding:28px 30px 28px 34px;
     display:grid; grid-template-columns:1.15fr 1fr; gap:26px; align-items:center; }
   .go-card::before { content:""; position:absolute; left:0; top:0; bottom:0; width:6px; background:var(--dorado); }
@@ -276,7 +288,7 @@
   #modal { position:fixed; inset:0; background:rgba(10,25,45,.55); backdrop-filter:blur(3px);
            -webkit-backdrop-filter:blur(3px); display:flex; align-items:center; justify-content:center;
            z-index:50; padding:16px; }
-  #modal .caja { background:#fff; border-radius:20px; max-width:440px; width:100%; padding:28px;
+  #modal .caja { background:#fff; color:#1e2432; border-radius:20px; max-width:440px; width:100%; padding:28px;
                  box-shadow:var(--sombra-3); }
   #modal h3 { color:var(--azul); margin-bottom:4px; letter-spacing:-.01em; }
   #modal .precio-m { font-size:1.55rem; font-weight:800; margin:6px 0 14px; letter-spacing:-.02em; }
@@ -331,7 +343,7 @@
 </style>
 </head>
 <body>
-
+<div class="fx-luz l1"></div><div class="fx-luz l2"></div><div class="fx-luz l3"></div>
 <div class="barra-sup">
   <div class="contenedor">
     <span class="marca"><img src="/static/img/logo-tributando.png" alt="Tributando">Tributando<b style="color:var(--dorado)">.co</b></span>
