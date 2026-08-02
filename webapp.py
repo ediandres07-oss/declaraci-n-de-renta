@@ -724,24 +724,27 @@ def contadores():
 
 
 @app.post("/api/pase-contador/crear")
-@login_requerido
 def crear_pase_contador():
-    """Crea la orden del pase de temporada de un contador (sin exógena). Usa el
-    correo del usuario logueado, que es con el que se le habilita al confirmar."""
+    """Crea la orden del pase de temporada de un contador (sin exógena y SIN
+    registro): el contador solo deja su correo, que es con el que se le habilita
+    al confirmar el pago."""
     u = usuario_actual()
     cont = _CFG_PRECIOS.get("contadores", {})
     cuerpo = request.get_json(silent=True) or {}
-    contacto = {"email": (u.email or "").strip(), "nombre": (u.nombre or "").strip(),
+    email = (cuerpo.get("email") or (getattr(u, "email", "") if u else "") or "").strip().lower()
+    if not _EMAIL_RE.match(email):
+        return jsonify({"error": "Escribe un correo válido para enviarte el pase."}), 400
+    nombre = (str(cuerpo.get("nombre", "")).strip()
+              or (getattr(u, "nombre", "") if u else "") or "Contador")
+    contacto = {"email": email, "nombre": nombre,
                 "telefono": str(cuerpo.get("telefono", "")).strip()}
-    if not contacto["email"]:
-        return jsonify({"error": "Tu cuenta no tiene correo; usa otra o escríbenos."}), 400
     orden_id = uuid.uuid4().hex[:12]
     ordenes = _leer_ordenes()
     ordenes[orden_id] = {
         "tipo": "orden", "plan": "contadores",
         "precio": cont.get("precio", 149900), "contacto": contacto,
         "estado": "pendiente_pago", "fecha": str(date.today()),
-        "nit": "", "nombre": (u.nombre or "Contador"),
+        "nit": "", "nombre": nombre,
     }
     _guardar_ordenes(ordenes)
     from src import payu as _payu_mod
@@ -1534,7 +1537,6 @@ def checkout_realmy():
 
 
 @app.post("/api/reportar-pago")
-@login_requerido
 def reportar_pago():
     """El cliente informa que ya hizo la consignación/transferencia."""
     cuerpo = request.get_json(silent=True) or {}

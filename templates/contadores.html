@@ -381,7 +381,10 @@
           Si atiendes <b>25 clientes</b>, te sale a <b>menos de $10.000</b> por declaración.
           Le cobras a cada uno lo de siempre.
         </div>
-        <button class="btn-pagar" id="btnPagarPase">💳 Pagar el pase en línea</button>
+        <input id="paseEmail" type="email" placeholder="Tu correo (para enviarte el pase)" autocomplete="email"
+          style="width:100%;margin-top:20px;padding:13px 15px;border-radius:12px;border:1px solid rgba(230,196,131,.4);background:rgba(255,255,255,.06);color:#fff;font-size:1rem;outline:none">
+        <button class="btn-pagar" id="btnPagarPase" style="margin-top:12px">💳 Pagar el pase en línea</button>
+        <div id="paseMsg" style="font-size:.85rem;margin-top:8px"></div>
         <button class="btn-wa" id="ctaWa" style="margin-top:12px">💬 O coordinar por WhatsApp</button>
       </div>
     </div>
@@ -498,13 +501,20 @@
       if (!btnPagar) return;
       var etiqueta = btnPagar.textContent;
       btnPagar.onclick = async function(){
-        if (!logueado) { window.location.href = "/login?next=/contadores"; return; }
+        var emEl = document.getElementById("paseEmail");
+        var em = ((emEl && emEl.value) || "").trim();
+        var pm = document.getElementById("paseMsg");
+        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) {
+          if (pm) { pm.style.color = "#ff9a9a"; pm.textContent = "Escribe tu correo para enviarte el pase (sin registrarte)."; }
+          if (emEl) emEl.focus(); return;
+        }
+        if (pm) pm.textContent = "";
         btnPagar.disabled = true; btnPagar.textContent = "Creando tu orden…";
         try {
           var r = await fetch("/api/pase-contador/crear", {method:"POST",
-            headers:{"Content-Type":"application/json"}, body:"{}"});
+            headers:{"Content-Type":"application/json"}, body: JSON.stringify({email: em})});
           var j = await r.json();
-          if (!r.ok) { alert(j.error || "No pudimos crear la orden."); return; }
+          if (!r.ok) { if (pm){ pm.style.color="#ff9a9a"; pm.textContent = j.error || "No pudimos crear la orden."; } return; }
           if (j.pago_url) { window.location.href = j.pago_url; return; }   // pago en línea (ePayco)
           document.getElementById("paseRef").textContent = "PASE " + String(j.orden_id).toUpperCase();
           document.getElementById("paseRef2").textContent = j.orden_id;
