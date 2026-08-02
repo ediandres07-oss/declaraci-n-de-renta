@@ -48,11 +48,17 @@
   .fx-luz.l1{width:420px;height:420px;top:-6%;left:-8%;background:#3f74d6;animation:fxf1 11s ease-in-out infinite;}
   .fx-luz.l2{width:360px;height:360px;bottom:-8%;right:-6%;background:#e6c483;animation:fxf2 14s ease-in-out infinite;}
   .fx-luz.l3{width:300px;height:300px;top:42%;right:16%;background:#8a5cf0;animation:fxf3 17s ease-in-out infinite;}
+  .fx-luz.l4{width:340px;height:340px;top:28%;left:34%;background:#37d3a0;animation:fxf4 16s ease-in-out infinite;}
   @keyframes fxf1{0%{transform:translate(0,0) scale(1);opacity:.4}33%{transform:translate(180px,90px) scale(1.45);opacity:.72}66%{transform:translate(70px,200px) scale(1.1);opacity:.5}100%{transform:translate(0,0) scale(1);opacity:.4}}
   @keyframes fxf2{0%{transform:translate(0,0) scale(1);opacity:.35}33%{transform:translate(-160px,-80px) scale(1.4);opacity:.66}66%{transform:translate(-60px,-180px) scale(1.1);opacity:.46}100%{transform:translate(0,0) scale(1);opacity:.35}}
   @keyframes fxf3{0%{transform:translate(0,0) scale(1);opacity:.3}33%{transform:translate(-140px,130px) scale(1.45);opacity:.62}66%{transform:translate(130px,60px) scale(1.15);opacity:.46}100%{transform:translate(0,0) scale(1);opacity:.3}}
+  @keyframes fxf4{0%{transform:translate(0,0) scale(1);opacity:.28}25%{transform:translate(220px,-130px) scale(1.3);opacity:.55}50%{transform:translate(-200px,150px) scale(1.15);opacity:.42}75%{transform:translate(130px,190px) scale(1.4);opacity:.5}100%{transform:translate(0,0) scale(1);opacity:.28}}
   @media(prefers-reduced-motion:reduce){.fx-luz{animation:none}}
   @media(max-width:640px){.fx-luz{filter:blur(48px);opacity:.38}}
+  @keyframes dzGlow{0%,100%{box-shadow:0 0 0 1px rgba(230,196,131,.45),0 0 34px rgba(230,196,131,.30),0 0 70px rgba(80,140,220,.18)}50%{box-shadow:0 0 0 1px rgba(230,196,131,.85),0 0 60px rgba(230,196,131,.58),0 0 115px rgba(120,90,240,.34)}}
+  #dz,#dropzone{position:relative;z-index:1;animation:dzGlow 2.6s ease-in-out infinite;}
+  #dz:hover,#dropzone:hover{animation-duration:1.5s;}
+
   a{color:inherit;}
   .contenedor{max-width:1000px;margin:0 auto;padding:0 20px;}
   section{padding:44px 0;}
@@ -210,7 +216,7 @@
 </style>
 </head>
 <body>
-  <div class="fx-luz l1"></div><div class="fx-luz l2"></div><div class="fx-luz l3"></div>
+  <div class="fx-luz l1"></div><div class="fx-luz l2"></div><div class="fx-luz l3"></div><div class="fx-luz l4"></div>
   <div class="barra-sup">
     <div class="contenedor">
       <a class="marca" href="/"><img src="/static/img/logo-tributando.png" alt="">Tributando<b style="color:var(--dorado)">.co</b></a>
