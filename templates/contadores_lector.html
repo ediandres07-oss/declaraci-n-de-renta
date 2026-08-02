@@ -298,8 +298,8 @@
     {% endif %}
     <div style="text-align:center">
       <div class="toggle-per">
-        <button id="perMes" onclick="setPeriodo('mensual')">Mensual</button>
-        <button id="perAno" class="on" onclick="setPeriodo('anual')">Anual <span class="ahorro">2 meses gratis</span></button>
+        <button id="perMes" class="on" onclick="setPeriodo('mensual')">Mensual</button>
+        <button id="perAno" onclick="setPeriodo('anual')">Anual <span class="ahorro">2 meses gratis</span></button>
       </div>
     </div>
     <div class="planes">
@@ -310,8 +310,8 @@
           <span style="color:var(--dorado2);font-weight:700">+ Calendario tributario</span></div>
         <div class="precio">
           {% if p.promo_anual %}<span class="tachado" data-anual-normal="{{ p.anual_normal }}" style="color:var(--suave);text-decoration:line-through;font-size:1rem;font-weight:600;display:block">${{ "{:,}".format(p.anual_normal).replace(",", ".") }}</span>{% endif %}
-          <span class="valor" data-mensual="{{ p.mensual }}" data-anual="{{ p.anual }}">${{ "{:,}".format(p.anual).replace(",", ".") }}</span><small class="per">/año</small></div>
-        <div class="ahorro-lbl" style="color:var(--verde);font-weight:800;font-size:.8rem;margin-bottom:8px">≈ 2 meses gratis</div>
+          <span class="valor" data-mensual="{{ p.mensual }}" data-anual="{{ p.anual }}">${{ "{:,}".format(p.mensual).replace(",", ".") }}</span><small class="per">/mes</small></div>
+        <div class="ahorro-lbl" style="display:none;color:var(--verde);font-weight:800;font-size:.8rem;margin-bottom:8px">≈ 2 meses gratis</div>
         <div class="agente-lbl" data-agente-mensual="{{ 1 if p.agente_mensual else 0 }}" data-agente-anual="{{ 1 if p.agente_anual else 0 }}" style="color:var(--dorado2);font-weight:800;font-size:.82rem;margin-bottom:8px;display:{{ 'block' if p.agente_anual else 'none' }}">🤖 Agente IA incluido</div>
         <button onclick="suscribir('{{ p.clave }}','{{ p.nombre }}', this)">Suscribirme</button>
       </div>
@@ -528,7 +528,7 @@
 
   var logueado = {{ 'true' if logueado else 'false' }};
   var ordenActual = null;
-  var _periodo = "anual";
+  var _periodo = "mensual";
   function fmt(n){ return "$" + n.toLocaleString("es-CO"); }
   function setPeriodo(p){
     _periodo = p;
@@ -548,6 +548,7 @@
       if (ag) ag.style.display = ag.getAttribute(p === "mensual" ? "data-agente-mensual" : "data-agente-anual") === "1" ? "block" : "none";
     });
   }
+  setPeriodo("mensual");   // por defecto se muestran los planes MENSUALES
   async function suscribir(clave, nombre, boton){
     if (!logueado){ location.href = "/login?next=/contadores/lector"; return; }
     var plan = clave + "_" + _periodo;
