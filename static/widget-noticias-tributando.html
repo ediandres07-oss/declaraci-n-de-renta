@@ -54,34 +54,12 @@
 <div class="wrap">
   <div class="hero">
     <div class="marca">tributando<span class="co">.co</span></div>
-    <h1>Al día · Declaración de Renta AG 2025</h1>
-    <p>Novedades y fechas clave para personas naturales. Actualizado jul-2026.</p>
+    <h1>Declaración de Renta AG 2025</h1>
+    <p>Fechas clave para personas naturales · temporada 2026.</p>
     <span class="badge">Temporada abierta · ago–oct 2026</span>
   </div>
 
   <div class="cuerpo">
-    <h2>Novedades <span id="nfecha" style="font-weight:400;color:var(--tx2);text-transform:none;letter-spacing:0"></span></h2>
-    <div id="novedades">
-      <!-- Se cargan desde noticias.json; si no hay, quedan estas fijas. -->
-      <div class="nota">
-        <div class="fecha">UVT 2025</div>
-        <div class="tit">La UVT para el año gravable 2025 es $49.799</div>
-        <div class="txt">Es el valor con el que se calculan topes, sanciones y rangos del impuesto.</div>
-      </div>
-      <div class="nota">
-        <div class="fecha">¿Te toca declarar?</div>
-        <div class="tit">Revisa tus topes de 2025</div>
-        <div class="txt">Declaras si superaste patrimonio de 4.500 UVT ($224.095.500) o ingresos,
-          consumos, compras o consignaciones de 1.400 UVT ($69.718.600), o si fuiste responsable de IVA.</div>
-      </div>
-      <div class="nota">
-        <div class="fecha">Deducciones</div>
-        <div class="tit">Dependientes: doble beneficio</div>
-        <div class="txt">Por tus dependientes puedes tomar la deducción del 10% (Art. 387, hasta 384 UVT)
-          y, además, 72 UVT por dependiente (hasta 4), que van en casillas distintas.</div>
-      </div>
-    </div>
-
     <h2>Vencimientos por los 2 últimos dígitos de la cédula</h2>
     <div class="venc">
       <div class="mes"><div class="m">Agosto</div><div class="r">2026</div>
@@ -103,26 +81,5 @@
       y el calendario DIAN vigente.</div>
   </div>
 </div>
-<script>
-  // Carga las novedades del día desde noticias.json (lo actualiza la rutina de
-  // las 7am). Si falla o no hay, quedan las novedades fijas del HTML.
-  (function(){
-    var esc = function(s){ var d=document.createElement("div"); d.textContent=String(s==null?"":s); return d.innerHTML; };
-    fetch("noticias.json?_=" + Date.now(), {cache:"no-store"})
-      .then(function(r){ return r.ok ? r.json() : null; })
-      .then(function(j){
-        if(!j || !Array.isArray(j.items) || !j.items.length) return;
-        var cont = document.getElementById("novedades");
-        cont.innerHTML = j.items.slice(0,4).map(function(n){
-          var link = n.url ? ' · <a href="'+esc(n.url)+'" target="_blank" rel="noopener" style="color:var(--oro2);font-weight:700">fuente</a>' : "";
-          return '<div class="nota"><div class="fecha">'+esc(n.fecha||"")+'</div>'
-               + '<div class="tit">'+esc(n.titulo||"")+'</div>'
-               + '<div class="txt">'+esc(n.texto||"")+link+'</div></div>';
-        }).join("");
-        if(j.actualizado){ document.getElementById("nfecha").textContent = "· al " + esc(j.actualizado); }
-      })
-      .catch(function(){});
-  })();
-</script>
 </body>
 </html>
