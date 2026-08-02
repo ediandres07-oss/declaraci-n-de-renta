@@ -26,20 +26,27 @@
 <meta name="twitter:card" content="summary_large_image">
 <style>
   :root{
-    --navy:#1e2432; --navy2:#12161f; --dorado:#cdab7e; --dorado2:#b8955f;
-    --gris:#f7f5f1; --gris2:#f1ede5; --borde:#e2ddd2;
-    --suave:#5c6470; --tenue:#8a919c; --verde:#1f8a5f;
-    --radio:16px;
-    --sombra-1:0 1px 2px rgba(10,25,45,.06), 0 4px 12px rgba(10,25,45,.06);
-    --sombra-2:0 2px 4px rgba(10,25,45,.08), 0 12px 28px rgba(10,25,45,.10);
+    --navy:#1e2432; --navy2:#12161f;
+    --oro:#e6c483; --dorado:#e6c483; --dorado2:#c9a25a;
+    /* superficies oscuras + vidrio */
+    --gris:rgba(255,255,255,.03); --gris2:rgba(255,255,255,.06); --borde:rgba(230,196,131,.28);
+    --vidrio:rgba(255,255,255,.055); --texto:#f3f5f8; --suave:#c2c9d4; --tenue:#8b93a1; --verde:#37d38f;
+    --radio:18px;
+    --sombra-1:0 8px 24px rgba(0,0,0,.35);
+    --sombra-2:0 16px 44px rgba(0,0,0,.45);
   }
   *{box-sizing:border-box;margin:0;padding:0;}
   html{scroll-behavior:smooth;}
-  body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;color:var(--navy);background:#fff;
-       -webkit-font-smoothing:antialiased;line-height:1.55;}
+  body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;color:var(--texto);
+       -webkit-font-smoothing:antialiased;line-height:1.55;background:#0a0c13;}
+  body::before{content:"";position:fixed;inset:0;z-index:-1;background:
+    radial-gradient(1100px 560px at 22% 8%,rgba(230,196,131,.13),transparent 60%),
+    radial-gradient(900px 520px at 88% 92%,rgba(120,90,200,.16),transparent 60%),
+    linear-gradient(160deg,#0e1220,#0a0c13);}
   a{color:inherit;}
-  .contenedor{max-width:1000px;margin:0 auto;padding:0 22px;}
-  section{padding:52px 0;}
+  .contenedor{max-width:1000px;margin:0 auto;padding:0 20px;}
+  section{padding:44px 0;}
+  b{color:#fff;}
 
   .barra-sup{background:var(--navy);position:sticky;top:0;z-index:50;box-shadow:0 2px 14px rgba(10,25,45,.16);}
   .barra-sup .contenedor{display:flex;align-items:center;justify-content:space-between;padding:11px 22px;}
@@ -58,9 +65,7 @@
   .volver{color:#fff;background:rgba(255,255,255,.10);border:1px solid rgba(205,171,126,.35);
     padding:8px 16px;border-radius:22px;text-decoration:none;font-size:.82rem;font-weight:700;}
 
-  header.hero{color:#fff;text-align:center;padding:74px 0 84px;
-    background:radial-gradient(700px 380px at 50% -10%, rgba(205,171,126,.16), transparent 60%),
-               linear-gradient(160deg,#12161f 0%,#1e2432 60%,#0a0d11 100%);}
+  header.hero{color:#fff;text-align:center;padding:46px 0 44px;}
   .tag{display:inline-block;background:rgba(205,171,126,.16);color:var(--dorado);font-weight:800;
     font-size:.76rem;letter-spacing:.10em;padding:8px 18px;border-radius:30px;text-transform:uppercase;}
   .hero h1{font-size:clamp(2.1rem,4.4vw+.7rem,3.2rem);line-height:1.08;margin-top:20px;
@@ -73,6 +78,13 @@
     transition:transform .15s ease;}
   .btn-hero:hover{transform:translateY(-2px);}
   .nota-hero{margin-top:14px;font-size:.82rem;opacity:.8;}
+  .hero .btn-hero{width:100%;max-width:360px;justify-content:center;}
+  .oferta-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:18px;}
+  .chip{background:rgba(255,255,255,.06);border:1px solid rgba(230,196,131,.38);color:var(--oro);
+    font-weight:700;font-size:.78rem;padding:7px 14px;border-radius:20px;backdrop-filter:blur(8px);}
+  .hero-precio{margin-top:18px;font-size:.95rem;color:#cdd3dd;}
+  .hero-precio b{color:var(--oro);font-size:1.08rem;}
+  .hero-wa{display:inline-block;margin-top:14px;color:#8fe3b6;font-weight:700;font-size:.9rem;text-decoration:none;}
   .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:center;text-align:left;}
   .hero-grid .sub{margin:16px 0 0;}
   .hero-foto img{width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;border-radius:18px;display:block;
@@ -85,9 +97,10 @@
 
   /* comparación */
   .comp{display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:780px;margin:0 auto;}
-  .caja{border:1px solid var(--borde);border-radius:var(--radio);padding:24px;background:#fff;box-shadow:var(--sombra-1);}
-  .caja.mal{background:var(--gris);}
-  .caja.bien{border:2px solid var(--dorado);box-shadow:var(--sombra-2);}
+  .caja{border:1px solid var(--borde);border-radius:var(--radio);padding:24px;
+    background:var(--vidrio);backdrop-filter:blur(12px);box-shadow:var(--sombra-1);}
+  .caja.mal{background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.10);}
+  .caja.bien{border:1.5px solid var(--dorado);box-shadow:0 16px 44px rgba(201,162,90,.22);}
   .caja h3{font-size:1.02rem;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
   .caja ul{list-style:none;}
   .caja li{font-size:.9rem;color:var(--suave);padding:6px 0 6px 22px;position:relative;line-height:1.5;}
@@ -96,8 +109,8 @@
 
   /* pasos */
   .pasos{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
-  .paso{background:#fff;border:1px solid var(--borde);border-radius:var(--radio);padding:26px 20px;
-    text-align:center;box-shadow:var(--sombra-1);}
+  .paso{background:var(--vidrio);backdrop-filter:blur(12px);border:1px solid var(--borde);
+    border-radius:var(--radio);padding:26px 20px;text-align:center;box-shadow:var(--sombra-1);}
   .paso .n{width:42px;height:42px;border-radius:50%;color:var(--navy);font-weight:800;
     background:linear-gradient(135deg,var(--dorado),var(--dorado2));display:inline-flex;
     align-items:center;justify-content:center;box-shadow:0 4px 10px rgba(205,171,126,.4);}
@@ -147,8 +160,9 @@
 
   /* faq */
   .faq{max-width:720px;margin:0 auto;}
-  .faq details{border:1px solid var(--borde);border-radius:12px;padding:14px 18px;margin-bottom:10px;background:#fff;}
-  .faq summary{font-weight:700;cursor:pointer;font-size:.96rem;}
+  .faq details{border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:14px 18px;margin-bottom:10px;
+    background:var(--vidrio);backdrop-filter:blur(10px);}
+  .faq summary{font-weight:700;cursor:pointer;font-size:.96rem;color:#fff;}
   .faq p{color:var(--suave);font-size:.9rem;margin-top:9px;line-height:1.6;}
 
   footer{background:var(--gris);border-top:1px solid var(--borde);padding:28px 0 44px;text-align:center;
@@ -156,8 +170,8 @@
   footer a{color:var(--dorado2);text-decoration:none;font-weight:700;}
 
   /* prueba gratis */
-  .prueba-caja{max-width:620px;margin:0 auto;background:#fff;border:1px solid var(--borde);
-    border-radius:var(--radio);padding:28px;box-shadow:var(--sombra-2);}
+  .prueba-caja{max-width:620px;margin:0 auto;background:var(--vidrio);backdrop-filter:blur(14px);
+    border:1px solid var(--borde);border-radius:var(--radio);padding:28px;box-shadow:var(--sombra-2);}
   .dz{border:2px dashed var(--dorado);border-radius:14px;background:var(--gris);padding:34px 18px;
     text-align:center;cursor:pointer;transition:background .15s ease, border-color .15s ease;}
   .dz:hover,.dz.drag{background:var(--gris2);border-color:var(--dorado2);}
@@ -172,8 +186,10 @@
   .res-body>div+div{border-left:1px solid var(--borde);}
   .res-lbl{display:block;font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tenue);}
   .res-val{display:block;font-size:1.5rem;font-weight:800;margin-top:6px;letter-spacing:-.01em;}
-  .dz-edit{margin-top:16px;background:var(--gris);border:1px solid var(--borde);border-radius:14px;padding:16px 18px;}
-  .dz-edit select,.dz-edit input{padding:8px 10px;border:1px solid var(--borde);border-radius:8px;font-size:.9rem;}
+  .dz-edit{margin-top:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:16px 18px;}
+  .dz-edit select,.dz-edit input{padding:8px 10px;border:1px solid rgba(230,196,131,.35);border-radius:8px;
+    font-size:.9rem;background:rgba(255,255,255,.06);color:#fff;}
+  .dz-edit option{color:#111;}
   .dz-edit #patBruto{width:150px;} .dz-edit #patDeudas{width:130px;}
   .dz-edit #patAplicar{border:0;border-radius:8px;padding:9px 16px;font-size:.85rem;font-weight:700;
     cursor:pointer;background:var(--navy);color:#fff;}
@@ -202,33 +218,22 @@
      <span class="pill">Ver el Lector <span>→</span></span></a>
 
   <header class="hero">
-    <div class="contenedor hero-grid">
-      <div>
-        <span class="tag">Para contadores</span>
-        <h1>Deja de digitar rentas.<br><span>Procésalas en minutos.</span></h1>
-        <p class="sub">Sube la exógena de tu cliente y recibe el <b>Formulario 210 diligenciado
-          renglón por renglón</b>. Tú lo revisas, lo firmas y lo presentas. Sin planillas, sin fórmulas.</p>
-        <a class="btn-hero" href="#prueba">Pruébalo gratis con un cliente</a>
-        <div class="nota-hero">Sin tarjeta · 1 declaración de prueba ·
-          <a href="#precio" style="color:var(--dorado);text-decoration:underline">o ver el pase</a></div>
+    <div class="contenedor">
+      <span class="tag">Para contadores · hecho por contadores</span>
+      <h1>Deja de digitar rentas.<br><span>Procésalas en minutos.</span></h1>
+      <p class="sub">Sube la exógena de tu cliente y recibe el <b>Formulario 210 diligenciado</b>.
+        Tú revisas, firmas y presentas.</p>
+      <a class="btn-hero" href="#prueba">⚡ Empieza gratis con 1 cliente</a>
+      <div class="oferta-chips">
+        <span class="chip">🎁 1ª declaración GRATIS</span>
+        <span class="chip">Sin tarjeta</span>
+        <span class="chip">Resultado en 2 min</span>
       </div>
-      <div class="hero-foto">
-        <img src="/static/img/lector-hero.jpg" alt="Tributando.co para contadores en un portátil"
-             width="1200" height="675" loading="eager">
-      </div>
+      <div class="hero-precio">Luego, pase de temporada
+        <b>${{ '{:,.0f}'.format(contadores.precio)|replace(',', '.') }}</b> · declaraciones ilimitadas</div>
+      {% if ia_whatsapp %}<a class="hero-wa" href="https://wa.me/{{ ia_whatsapp }}" target="_blank" rel="noopener">💬 ¿Dudas? Escríbenos por WhatsApp</a>{% endif %}
     </div>
   </header>
-
-  <!-- Al día con la DIAN (noticias tributarias) -->
-  <section style="background:var(--gris);padding:34px 16px">
-    <div class="contenedor" style="max-width:820px">
-      <h2 class="titulo" style="margin-bottom:6px">📰 Al día con la DIAN</h2>
-      <p class="sub-sec" style="margin-bottom:18px">Noticias y fechas clave del día, para que no te tome por sorpresa ningún vencimiento.</p>
-      <iframe src="/static/widget-noticias-tributando.html"
-              style="width:100%;max-width:820px;height:760px;border:0;border-radius:14px;background:#fff;display:block;margin:0 auto;box-shadow:0 8px 24px rgba(0,0,0,.06)"
-              title="Al día con tributando.co" loading="lazy"></iframe>
-    </div>
-  </section>
 
   <section>
     <div class="contenedor">
@@ -284,9 +289,10 @@
         <b>Una prueba gratis por contador.</b></p>
       {% if not logueado %}
         <div class="prueba-caja" style="text-align:center">
-          <div style="font-size:2rem">🔓</div>
-          <p style="margin:12px 0 18px">Inicia sesión con tu Google o Microsoft para hacer tu prueba gratis.</p>
-          <a class="btn-hero" href="/login?next=/contadores">Entrar y probar gratis</a>
+          <div style="font-size:2rem">🎁</div>
+          <p style="margin:12px 0 4px;font-size:1.1rem"><b style="color:#fff">Tu 1ª declaración es gratis.</b></p>
+          <p style="margin:0 0 18px;color:var(--suave);font-size:.9rem">Entra en 2 segundos con Google o Microsoft — sin clave nueva, sin tarjeta.</p>
+          <a class="btn-hero" href="/login?next=/contadores">Entrar y probar gratis →</a>
         </div>
       {% elif muestra_usada %}
         <div class="prueba-caja" style="text-align:center">
@@ -447,6 +453,17 @@
         <details><summary>¿Puedo probarlo antes de pagar?</summary>
           <p>Claro. Escríbenos y coordinamos una demostración con un caso real tuyo, sin compromiso.</p></details>
       </div>
+    </div>
+  </section>
+
+  <!-- Al día con la DIAN (noticias tributarias) -->
+  <section>
+    <div class="contenedor" style="max-width:820px">
+      <h2 class="titulo" style="margin-bottom:6px">📰 Al día con la DIAN</h2>
+      <p class="sub-sec" style="margin-bottom:18px">Noticias y fechas clave del día — un plus mientras decides.</p>
+      <iframe src="/static/widget-noticias-tributando.html"
+              style="width:100%;max-width:820px;height:760px;border:0;border-radius:14px;background:#fff;display:block;margin:0 auto;box-shadow:var(--sombra-1)"
+              title="Al día con tributando.co" loading="lazy"></iframe>
     </div>
   </section>
 
