@@ -2847,6 +2847,44 @@ def api_lector_prueba_gratis():
     return jsonify({"ok": True, "nueva": nueva, "mensaje": msg})
 
 
+@app.route("/api/lector/demo", methods=["POST"])
+def api_lector_demo():
+    """Solicitud de demostración del Lector: envía los datos del contador a
+    contacto@tributando.co para agendarle la cita, y le confirma por correo."""
+    b = request.get_json(silent=True) or {}
+    def esc(s):
+        return str(s or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").strip()
+    nombre = esc(b.get("nombre"))
+    email = (b.get("email") or "").strip().lower()
+    telefono = esc(b.get("telefono"))
+    pref = esc(b.get("preferencia"))
+    if not nombre or not _EMAIL_RE.match(email):
+        return jsonify({"ok": False, "error": "Escribe tu nombre y un correo válido."}), 400
+    from src.correo import enviar_email
+    destino = "contacto@tributando.co"
+    html_admin = (
+        "<div style='font-family:sans-serif;max-width:480px'>"
+        "<h3 style='color:#1e2432'>📅 Nueva solicitud de demostración del Lector</h3>"
+        f"<p><b>Nombre:</b> {nombre}<br>"
+        f"<b>Correo:</b> {esc(email)}<br>"
+        f"<b>Teléfono/WhatsApp:</b> {telefono or '—'}<br>"
+        f"<b>Prefiere (día/hora):</b> {pref or '—'}</p>"
+        f"<p style='color:#7b7568'>Responde a <b>{esc(email)}</b> para coordinar la cita.</p></div>"
+    )
+    try:
+        enviar_email(destino, f"Demo Lector — {nombre}", html_admin)
+    except Exception as e:
+        app.logger.warning("demo: no se pudo enviar a contacto@: %s", e)
+        return jsonify({"ok": False, "error": "No pudimos enviar la solicitud. Intenta de nuevo o escríbenos por WhatsApp."}), 502
+    try:  # confirmación al contador (best-effort)
+        enviar_email(email, "Recibimos tu solicitud de demostración — Tributando.co",
+                     f"<p>Hola {nombre}, recibimos tu solicitud de demostración del <b>Lector XML DIAN</b>. "
+                     "Te contactamos muy pronto desde <b>contacto@tributando.co</b> para coordinar la cita. 🙌</p>")
+    except Exception:
+        pass
+    return jsonify({"ok": True, "mensaje": "¡Solicitud enviada! Te contactamos pronto desde contacto@tributando.co para agendar tu demostración."})
+
+
 @app.route("/api/lector/entrar", methods=["POST"])
 def api_lector_entrar():
     """Valida el código del correo y devuelve la licencia + estado para que el

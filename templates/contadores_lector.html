@@ -138,6 +138,10 @@
   .demo-thumbs img:hover{transform:translateY(-2px);}
   .demo-thumbs img.on{border-color:var(--dorado);}
   @media(max-width:560px){.demo-thumbs{grid-template-columns:repeat(2,1fr);}}
+  #formDemo input{padding:12px 14px;border-radius:12px;border:1px solid rgba(230,196,131,.4);
+    background:rgba(255,255,255,.06);color:#fff;font-size:1rem;outline:none;width:100%;}
+  #formDemo input:focus{border-color:var(--dorado);}
+  #formDemo input::placeholder{color:#9aa3b0;}
 </style>
 </head>
 <body>
@@ -168,7 +172,7 @@
         {% if descarga_url %}
         <a class="btn-dorado" href="{{ descarga_url }}">⬇ Descargar para Windows</a>
         {% endif %}
-        {% if whatsapp %}<a class="btn-linea" href="https://wa.me/{{ whatsapp }}?text={{ 'Hola, quiero agendar una demostración del Lector XML'|urlencode }}" target="_blank" rel="noopener">📅 Agenda tu demostración</a>{% endif %}
+        <a class="btn-linea" href="#demo">📅 Agenda tu demostración</a>
         <a class="btn-linea" href="#planes">Ver planes</a>
       </div>
       <div class="hero-nota">Requiere Windows + Google Chrome ·
@@ -325,6 +329,26 @@
   </div>
 </section>
 
+<section id="demo" style="scroll-margin-top:70px">
+  <div class="wrap" style="max-width:560px">
+    <div style="background:var(--vidrio);backdrop-filter:blur(14px);border:1.5px solid var(--dorado);
+      border-radius:20px;padding:26px 22px;text-align:center;box-shadow:0 16px 44px rgba(201,162,90,.18)">
+      <div style="font-size:1.9rem">📅</div>
+      <h2 style="font-size:1.5rem;margin:8px 0 4px">Agenda una demostración</h2>
+      <p style="color:var(--suave);margin-bottom:16px">Te mostramos el Lector con un caso real, en vivo.
+        Déjanos tus datos y <b>te contactamos desde contacto@tributando.co</b> para coordinar la cita.</p>
+      <form id="formDemo" onsubmit="return agendarDemo(event)" style="display:grid;gap:10px;text-align:left">
+        <input id="demoNombre" placeholder="Tu nombre *" required autocomplete="name">
+        <input id="demoEmail" type="email" placeholder="Tu correo *" required autocomplete="email">
+        <input id="demoTel" placeholder="WhatsApp (opcional)" autocomplete="tel">
+        <input id="demoPref" placeholder="¿Qué día y hora te sirve? (opcional)">
+        <button type="submit" class="btn-dorado" style="justify-content:center">Solicitar demostración →</button>
+      </form>
+      <div id="demoMsg" style="margin-top:12px;font-size:.92rem;line-height:1.5"></div>
+    </div>
+  </div>
+</section>
+
 <section style="background:var(--navy);color:#fff;padding:40px 0">
   <div class="wrap">
     <h2 class="titulo" style="color:#fff">Seguro y confiable</h2>
@@ -466,6 +490,25 @@
       var j=await r.json();
       if(r.ok&&j.ok){ msg.style.color='#37d38f';
         msg.innerHTML='✓ '+j.mensaje+'<br><a href="{{ descarga_url }}" style="color:#e6c483;font-weight:800">⬇ Descargar el Lector para Windows</a>'; }
+      else { msg.style.color='#ff9a9a'; msg.textContent=(j&&j.error)||'No se pudo. Intenta de nuevo.'; }
+    }catch(_){ msg.style.color='#ff9a9a'; msg.textContent='Problema de conexión. Intenta de nuevo.'; }
+    btn.disabled=false; return false;
+  }
+
+  // Agendar demostración → llega a contacto@tributando.co
+  async function agendarDemo(e){
+    e.preventDefault();
+    var msg=document.getElementById('demoMsg'), btn=e.target.querySelector('button');
+    msg.style.color='#c2c9d4'; msg.textContent='Enviando tu solicitud…'; btn.disabled=true;
+    try{
+      var r=await fetch('/api/lector/demo',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          nombre:document.getElementById('demoNombre').value,
+          email:document.getElementById('demoEmail').value,
+          telefono:document.getElementById('demoTel').value,
+          preferencia:document.getElementById('demoPref').value})});
+      var j=await r.json();
+      if(r.ok&&j.ok){ msg.style.color='#37d38f'; msg.textContent='✓ '+j.mensaje; e.target.reset(); }
       else { msg.style.color='#ff9a9a'; msg.textContent=(j&&j.error)||'No se pudo. Intenta de nuevo.'; }
     }catch(_){ msg.style.color='#ff9a9a'; msg.textContent='Problema de conexión. Intenta de nuevo.'; }
     btn.disabled=false; return false;
