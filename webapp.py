@@ -2804,6 +2804,49 @@ def api_lector_codigo():
                     "mensaje": "Si hay una suscripción con ese correo, te llegó un código."})
 
 
+@app.route("/api/lector/prueba-gratis", methods=["POST"])
+def api_lector_prueba_gratis():
+    """Prueba gratis self-serve del Lector: 1 empresa, 30 días, SIN tarjeta.
+    Crea la suscripción de prueba para el correo (una por correo) y le envía el
+    código de acceso. El contador descarga el .exe y entra con correo + código.
+    Si el correo ya tiene suscripción (prueba en curso o plan pago) no re-otorga,
+    solo le reenvía un código para entrar."""
+    from src.auth import crear_suscripcion, SuscripcionLector
+    b = request.get_json(silent=True) or {}
+    email = (b.get("email") or "").strip().lower()
+    if not _EMAIL_RE.match(email):
+        return jsonify({"ok": False, "error": "Escribe un correo válido."}), 400
+    existente = SuscripcionLector.query.filter_by(email=email).first()
+    nueva = existente is None
+    if nueva:
+        try:
+            crear_suscripcion(email, "prueba", dias=30)
+        except Exception as e:
+            app.logger.warning("prueba-gratis: no se pudo crear la suscripción: %s", e)
+            return jsonify({"ok": False, "error": "No pudimos activar la prueba. Intenta de nuevo."}), 500
+    sus = generar_codigo_lector(email)
+    if sus is not None:
+        codigo = sus._codigo
+        html = (
+            "<div style='font-family:sans-serif;max-width:460px;margin:auto'>"
+            "<h2 style='color:#1e2432'>Tu prueba del Lector está lista 🎉</h2>"
+            "<p>Descarga el <b>Lector de tributando.co</b> y entra con tu correo y este código:</p>"
+            f"<p style='font-size:34px;font-weight:700;letter-spacing:6px;color:#c8991f;margin:18px 0'>{codigo}</p>"
+            "<p style='color:#7b7568;font-size:.9rem'>Tu prueba: <b>1 empresa · 30 días · sin tarjeta</b>. "
+            "El código vence en 15 minutos.</p></div>"
+        )
+        try:
+            from src.correo import enviar_email
+            enviar_email(email, "Tu prueba del Lector — código de acceso", html)
+        except Exception as e:
+            app.logger.warning("prueba-gratis: no se pudo enviar el código: %s", e)
+            return jsonify({"ok": False, "error": "Activamos la prueba pero no pudimos enviar el correo. Intenta pedir el código de nuevo."}), 502
+    msg = ("¡Prueba activada! Te enviamos un código a tu correo. Descarga el Lector y entra con tu correo + ese código."
+           if nueva else
+           "Ese correo ya tiene acceso. Te reenviamos un código para entrar.")
+    return jsonify({"ok": True, "nueva": nueva, "mensaje": msg})
+
+
 @app.route("/api/lector/entrar", methods=["POST"])
 def api_lector_entrar():
     """Valida el código del correo y devuelve la licencia + estado para que el

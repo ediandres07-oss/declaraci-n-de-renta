@@ -182,6 +182,27 @@
   </div>
 </div>
 
+<section id="prueba-gratis" style="padding-top:10px">
+  <div class="wrap" style="max-width:560px">
+    <div style="background:var(--vidrio);backdrop-filter:blur(14px);border:1.5px solid var(--dorado);
+      border-radius:20px;padding:26px 22px;text-align:center;box-shadow:0 16px 44px rgba(201,162,90,.18)">
+      <div style="font-size:1.9rem">🎁</div>
+      <h2 style="font-size:1.5rem;margin:8px 0 4px">Prueba gratis 1 mes · 1 cliente</h2>
+      <p style="color:var(--suave);margin-bottom:16px">Sin tarjeta. Pon tu correo → te llega un código →
+        descargas el Lector y entras. Así de fácil.</p>
+      <form id="formPrueba" onsubmit="return pruebaGratis(event)"
+        style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+        <input id="pruebaEmail" type="email" required placeholder="tu-correo@ejemplo.com" autocomplete="email"
+          style="flex:1;min-width:220px;padding:13px 15px;border-radius:14px;border:1px solid rgba(230,196,131,.4);
+          background:rgba(255,255,255,.06);color:#fff;font-size:1rem;outline:none">
+        <button type="submit" class="btn-dorado" style="padding:13px 22px">Activar mi prueba →</button>
+      </form>
+      <div id="pruebaMsg" style="margin-top:12px;font-size:.92rem;line-height:1.5"></div>
+      <div style="margin-top:6px;font-size:.76rem;color:var(--tenue)">1 empresa · 30 días · sin tarjeta · sin compromiso</div>
+    </div>
+  </div>
+</section>
+
 <section>
   <div class="wrap">
     <h2 class="titulo">Cómo funciona</h2>
@@ -431,6 +452,24 @@
 
     ir(0); play();
   })();
+
+  // Prueba gratis self-serve (1 empresa, 30 días, sin tarjeta)
+  async function pruebaGratis(e){
+    e.preventDefault();
+    var email=(document.getElementById('pruebaEmail').value||'').trim();
+    var msg=document.getElementById('pruebaMsg');
+    var btn=e.target.querySelector('button');
+    msg.style.color='#c2c9d4'; msg.textContent='Activando tu prueba…'; btn.disabled=true;
+    try{
+      var r=await fetch('/api/lector/prueba-gratis',{method:'POST',
+        headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email})});
+      var j=await r.json();
+      if(r.ok&&j.ok){ msg.style.color='#37d38f';
+        msg.innerHTML='✓ '+j.mensaje+'<br><a href="{{ descarga_url }}" style="color:#e6c483;font-weight:800">⬇ Descargar el Lector para Windows</a>'; }
+      else { msg.style.color='#ff9a9a'; msg.textContent=(j&&j.error)||'No se pudo. Intenta de nuevo.'; }
+    }catch(_){ msg.style.color='#ff9a9a'; msg.textContent='Problema de conexión. Intenta de nuevo.'; }
+    btn.disabled=false; return false;
+  }
 
   var logueado = {{ 'true' if logueado else 'false' }};
   var ordenActual = null;
