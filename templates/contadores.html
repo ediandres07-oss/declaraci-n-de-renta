@@ -354,11 +354,16 @@
           </div>
 
           <div id="dzAcc" hidden style="text-align:center;margin-top:18px">
-            <input id="muestraEmail" type="email" placeholder="Tu correo (para tu muestra)" autocomplete="email"
+            <input id="muestraEmail" type="email" placeholder="Tu correo" autocomplete="email"
               style="width:100%;max-width:340px;padding:12px 14px;border-radius:12px;border:1px solid rgba(230,196,131,.4);background:rgba(255,255,255,.06);color:#fff;font-size:1rem;outline:none;margin-bottom:12px"><br>
-            <button class="btn-hero" id="btnMuestra">📄 Descargar muestra: 210 + papeles de trabajo (gratis)</button>
+            <button class="btn-hero" id="btnEnviarCodigo">✉️ Enviarme el código</button>
+            <div id="muestraCodigoBox" hidden style="margin-top:14px">
+              <input id="muestraCodigo" inputmode="numeric" maxlength="6" placeholder="Código de 6 dígitos" autocomplete="one-time-code"
+                style="width:100%;max-width:260px;padding:12px 14px;border-radius:12px;border:1px solid rgba(230,196,131,.4);background:rgba(255,255,255,.06);color:#fff;font-size:1.2rem;letter-spacing:.2em;text-align:center;outline:none;margin-bottom:12px"><br>
+              <button class="btn-hero" id="btnMuestra">📄 Descargar muestra: 210 + papeles de trabajo</button>
+            </div>
             <div id="muestraMsg" style="font-size:.85rem;margin-top:8px"></div>
-            <p style="font-size:.75rem;color:var(--tenue);margin-top:8px">Sin registro — solo tu correo. El PDF va con marca "MUESTRA".
+            <p style="font-size:.75rem;color:var(--tenue);margin-top:8px">Sin registro — te enviamos un <b>código</b> a tu correo. El PDF va con marca "MUESTRA".
               Con el pase de temporada los generas limpios e ilimitados.</p>
           </div>
         </div>
@@ -638,34 +643,55 @@
       });
     };
 
+    var msgEl = function(){ return document.getElementById("muestraMsg"); };
+    var okEmail = function(e){ return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e); };
+
+    var btnCod = document.getElementById("btnEnviarCodigo");
+    if (btnCod) btnCod.onclick = async function(){
+      var emailEl = document.getElementById("muestraEmail");
+      var email = ((emailEl && emailEl.value) || "").trim();
+      var msg = msgEl();
+      if (!okEmail(email)) { if(msg){msg.style.color="#ff9a9a";msg.textContent="Escribe un correo válido.";} if(emailEl) emailEl.focus(); return; }
+      btnCod.disabled = true; btnCod.textContent = "Enviando…";
+      try {
+        var r = await fetch("/api/muestra/codigo", {method:"POST",
+          headers:{"Content-Type":"application/json"}, body: JSON.stringify({email: email})});
+        var j = await r.json();
+        if (r.ok && j.ok) {
+          document.getElementById("muestraCodigoBox").hidden = false;
+          if (msg) { msg.style.color = "#8fe3b6"; msg.textContent = "✓ " + (j.mensaje || "Te enviamos un código a tu correo."); }
+          var ci = document.getElementById("muestraCodigo"); if (ci) ci.focus();
+          btnCod.textContent = "Reenviar código";
+        } else if (msg) { msg.style.color = "#ff9a9a"; msg.textContent = j.error || "No pudimos enviar el código."; }
+      } catch(e){ if (msgEl()){ msgEl().style.color="#ff9a9a"; msgEl().textContent="Problema de conexión."; } }
+      btnCod.disabled = false;
+    };
+
     var btnM = document.getElementById("btnMuestra");
     if (btnM) btnM.onclick = async function(){
       if (!tok) return;
-      var emailEl = document.getElementById("muestraEmail");
-      var email = ((emailEl && emailEl.value) || "").trim();
-      var msg = document.getElementById("muestraMsg");
-      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
-        if (msg) { msg.style.color = "#ff9a9a"; msg.textContent = "Escribe tu correo para recibir la muestra (sin registrarte)."; }
-        if (emailEl) emailEl.focus();
-        return;
-      }
+      var email = ((document.getElementById("muestraEmail")||{}).value || "").trim();
+      var codigo = ((document.getElementById("muestraCodigo")||{}).value || "").trim();
+      var msg = msgEl();
+      if (!okEmail(email)) { if(msg){msg.style.color="#ff9a9a";msg.textContent="Escribe tu correo.";} return; }
+      if (!/^\d{6}$/.test(codigo)) { if(msg){msg.style.color="#ff9a9a";msg.textContent="Escribe el código de 6 dígitos que te llegó al correo.";} return; }
       if (msg) msg.textContent = "";
       btnM.disabled = true; btnM.textContent = "Generando…";
       try {
-        var r = await fetch("/api/muestra-contador/" + tok + ".zip?email=" + encodeURIComponent(email));
+        var r = await fetch("/api/muestra-contador/" + tok + ".zip?email=" + encodeURIComponent(email) + "&codigo=" + encodeURIComponent(codigo));
         if (r.ok) {
           var blob = await r.blob(), a = document.createElement("a");
           a.href = URL.createObjectURL(blob); a.download = "MUESTRA_Declaracion.zip"; a.click();
           URL.revokeObjectURL(a.href);
-          btnM.textContent = "✓ Descargado (210 + papeles de trabajo) — ¿te convenció? Activa tu pase 👇";
+          btnM.textContent = "✓ Descargado (210 + papeles) — ¿te convenció? Activa tu pase 👇";
         } else {
           var j = await r.json().catch(function(){ return {}; });
           if (msg) { msg.style.color = "#ff9a9a"; msg.textContent = j.error || "No pudimos generar la muestra."; }
-          btnM.disabled = false; btnM.textContent = "📄 Descargar muestra: 210 + papeles de trabajo (gratis)";
+          btnM.disabled = false; btnM.textContent = "📄 Descargar muestra: 210 + papeles de trabajo";
         }
       } catch(e) {
         if (msg) { msg.style.color = "#ff9a9a"; msg.textContent = "Problema de conexión. Intenta de nuevo."; }
-        btnM.disabled = false; btnM.textContent = "📄 Descargar muestra: 210 + papeles de trabajo (gratis)";
+        btnM.disabled = false; btnM.textContent = "📄 Descargar muestra: 210 + papeles de trabajo";
       }
     };
   </script>

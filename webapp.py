@@ -1048,6 +1048,35 @@ def epayco_respuesta():
         t=titulo, m=msg, pagada=pagada)
 
 
+@app.post("/api/muestra/codigo")
+def api_muestra_codigo():
+    """Envía un código de 6 dígitos al correo para verificarlo ANTES de descargar
+    la muestra (sin registro). Si ese correo ya usó su muestra, lo avisa."""
+    from src.auth import MuestraContadorEmail, generar_codigo_muestra
+    b = request.get_json(silent=True) or {}
+    email = (b.get("email") or "").strip().lower()
+    if not _EMAIL_RE.match(email):
+        return jsonify({"ok": False, "error": "Escribe un correo válido."}), 400
+    if db.session.get(MuestraContadorEmail, email) is not None:
+        return jsonify({"ok": False, "error": "Ese correo ya usó su muestra gratis. "
+                        "Activa tu pase de temporada para declaraciones ilimitadas."}), 402
+    codigo = generar_codigo_muestra(email)
+    html = (
+        "<div style='font-family:sans-serif;max-width:460px;margin:auto'>"
+        "<h2 style='color:#1e2432'>Tu código para la muestra</h2>"
+        "<p>Escríbelo en tributando.co/contadores para descargar tu muestra gratis:</p>"
+        f"<p style='font-size:34px;font-weight:700;letter-spacing:6px;color:#c8991f;margin:18px 0'>{codigo}</p>"
+        "<p style='color:#7b7568;font-size:.9rem'>Vence en 15 minutos.</p></div>"
+    )
+    try:
+        from src.correo import enviar_email
+        enviar_email(email, "Tu código de muestra — Tributando.co", html)
+    except Exception as e:
+        app.logger.warning("muestra código: no se pudo enviar: %s", e)
+        return jsonify({"ok": False, "error": "No pudimos enviar el correo. Intenta de nuevo."}), 502
+    return jsonify({"ok": True, "mensaje": "Te enviamos un código a tu correo."})
+
+
 @app.get("/api/muestra-contador/<token>.pdf")
 def muestra_contador_pdf(token):
     """Entrega UNA vez, gratis, el Formulario 210 de MUESTRA (con marca de agua)
@@ -1066,6 +1095,9 @@ def muestra_contador_pdf(token):
     email = (request.args.get("email") or (getattr(u, "email", "") if u else "") or "").strip().lower()
     if not _EMAIL_RE.match(email):
         return jsonify({"error": "Escribe un correo válido para descargar tu muestra."}), 400
+    from src.auth import verificar_codigo_muestra
+    if not verificar_codigo_muestra(email, (request.args.get("codigo") or "").strip()):
+        return jsonify({"error": "Verifica tu correo: pide y escribe el código de 6 dígitos."}), 401
     previa = db.session.get(MuestraContadorEmail, email)
     if previa is not None and (previa.token or "") != token:
         return jsonify({"error": "Ya usaste tu declaración de muestra gratis con ese correo. "
@@ -1136,6 +1168,9 @@ def muestra_contador_zip(token):
     email = (request.args.get("email") or (getattr(u, "email", "") if u else "") or "").strip().lower()
     if not _EMAIL_RE.match(email):
         return jsonify({"error": "Escribe un correo válido para descargar tu muestra."}), 400
+    from src.auth import verificar_codigo_muestra
+    if not verificar_codigo_muestra(email, (request.args.get("codigo") or "").strip()):
+        return jsonify({"error": "Verifica tu correo: pide y escribe el código de 6 dígitos."}), 401
     previa = db.session.get(MuestraContadorEmail, email)
     if previa is not None and (previa.token or "") != token:
         return jsonify({"error": "Ya usaste tu declaración de muestra gratis con ese correo. "

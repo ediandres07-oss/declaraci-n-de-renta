@@ -189,6 +189,50 @@ def registrar_muestra_email(email: str, token: str = "", nit: str = "", nombre: 
         db.session.rollback()
 
 
+class CodigoMuestra(db.Model):
+    """Código de 6 dígitos para verificar el correo ANTES de descargar la muestra
+    (sin registro): así 1 muestra = 1 correo verificado, y no basta con inventar
+    correos. Sobrevive a los redeploys de Render."""
+    __tablename__ = "codigos_muestra"
+    email = db.Column(db.String(200), primary_key=True)
+    codigo_hash = db.Column(db.String(64))
+    expira = db.Column(db.DateTime)
+    intentos = db.Column(db.Integer, default=0)
+
+
+def generar_codigo_muestra(email: str) -> "str | None":
+    """Genera y guarda (hasheado, 15 min) un código de 6 dígitos para ese correo.
+    Devuelve el código en claro para enviarlo por correo."""
+    email = (email or "").strip().lower()
+    if not email:
+        return None
+    codigo = f"{secrets.randbelow(1000000):06d}"
+    row = db.session.get(CodigoMuestra, email)
+    if row is None:
+        row = CodigoMuestra(email=email)
+        db.session.add(row)
+    row.codigo_hash = _hash_codigo(codigo)
+    row.expira = datetime.utcnow() + timedelta(minutes=15)
+    row.intentos = 0
+    db.session.commit()
+    return codigo
+
+
+def verificar_codigo_muestra(email: str, codigo: str) -> bool:
+    """True si el código coincide y no está vencido. Cuenta intentos (máx 6)."""
+    email = (email or "").strip().lower()
+    row = db.session.get(CodigoMuestra, email)
+    if row is None or not row.codigo_hash or not row.expira:
+        return False
+    if datetime.utcnow() > row.expira or (row.intentos or 0) >= 6:
+        return False
+    if _hash_codigo(codigo) != row.codigo_hash:
+        row.intentos = (row.intentos or 0) + 1
+        db.session.commit()
+        return False
+    return True
+
+
 class AccesoAutorizado(db.Model):
     """Contadores habilitados al liquidador profesional desde /admin (pase de
     temporada). Vive en la BD para poder otorgar/revocar con un botón, sin editar
