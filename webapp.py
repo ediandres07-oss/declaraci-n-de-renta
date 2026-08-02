@@ -1344,7 +1344,6 @@ def resumen_pdf():
 # ======================================================================
 
 @app.post("/api/cargar-landing")
-@login_requerido
 def cargar_landing():
     """Sube la exógena y devuelve SOLO el resultado comercial:
     obligación de declarar, fecha límite y valor a pagar estimado.
@@ -1416,7 +1415,6 @@ def _monto_valido(valor) -> float:
 
 
 @app.post("/api/recalcular-landing")
-@login_requerido
 def recalcular_landing():
     """Recalcula el estimado al ajustar dependientes y/o patrimonio (R29/R30).
     Cada campo es opcional y lo que no venga conserva su valor guardado, para
