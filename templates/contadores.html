@@ -297,24 +297,7 @@
     <div class="contenedor">
       <h2 class="titulo">Pruébalo gratis con un cliente real</h2>
       <p class="sub-sec">Sube la exógena de un cliente y mira el resultado y su Formulario 210.
-        <b>Una prueba gratis por contador.</b></p>
-      {% if not logueado %}
-        <div class="prueba-caja" style="text-align:center">
-          <div style="font-size:2rem">🎁</div>
-          <p style="margin:12px 0 4px;font-size:1.1rem"><b style="color:#fff">Tu 1ª declaración es gratis.</b></p>
-          <p style="margin:0 0 18px;color:var(--suave);font-size:.9rem">Entra en 2 segundos con Google o Microsoft — sin clave nueva, sin tarjeta.</p>
-          <a class="btn-hero" href="/login?next=/contadores">Entrar y probar gratis →</a>
-        </div>
-      {% elif muestra_usada %}
-        <div class="prueba-caja" style="text-align:center">
-          <div style="font-size:2rem">✅</div>
-          <h3 style="margin:8px 0">Ya usaste tu prueba gratis</h3>
-          <p style="color:var(--suave);margin-bottom:18px">Para procesar todas las declaraciones que
-            necesites, activa tu pase de temporada.</p>
-          <button class="btn-pagar" id="btnPagarPase2" style="width:auto;padding:15px 34px">💳 Pagar el pase en línea (QR)</button>
-          <div style="margin-top:10px"><button class="btn-wa" id="ctaWa3" style="margin-top:0">💬 O coordinar por WhatsApp</button></div>
-        </div>
-      {% else %}
+        <b>Sin registrarte</b> — subes la exógena, ves el resultado, y solo dejas tu correo al descargar.</p>
         <div class="prueba-caja">
           <div id="dz" class="dz">
             <div style="font-size:2rem">📄</div>
@@ -365,12 +348,14 @@
           </div>
 
           <div id="dzAcc" hidden style="text-align:center;margin-top:18px">
+            <input id="muestraEmail" type="email" placeholder="Tu correo (para tu muestra)" autocomplete="email"
+              style="width:100%;max-width:340px;padding:12px 14px;border-radius:12px;border:1px solid rgba(230,196,131,.4);background:rgba(255,255,255,.06);color:#fff;font-size:1rem;outline:none;margin-bottom:12px"><br>
             <button class="btn-hero" id="btnMuestra">📄 Descargar muestra: 210 + papeles de trabajo (gratis)</button>
-            <p style="font-size:.75rem;color:var(--tenue);margin-top:10px">El PDF va con marca "MUESTRA".
+            <div id="muestraMsg" style="font-size:.85rem;margin-top:8px"></div>
+            <p style="font-size:.75rem;color:var(--tenue);margin-top:8px">Sin registro — solo tu correo. El PDF va con marca "MUESTRA".
               Con el pase de temporada los generas limpios e ilimitados.</p>
           </div>
         </div>
-      {% endif %}
     </div>
   </section>
 
@@ -640,9 +625,18 @@
     var btnM = document.getElementById("btnMuestra");
     if (btnM) btnM.onclick = async function(){
       if (!tok) return;
+      var emailEl = document.getElementById("muestraEmail");
+      var email = ((emailEl && emailEl.value) || "").trim();
+      var msg = document.getElementById("muestraMsg");
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+        if (msg) { msg.style.color = "#ff9a9a"; msg.textContent = "Escribe tu correo para recibir la muestra (sin registrarte)."; }
+        if (emailEl) emailEl.focus();
+        return;
+      }
+      if (msg) msg.textContent = "";
       btnM.disabled = true; btnM.textContent = "Generando…";
       try {
-        var r = await fetch("/api/muestra-contador/" + tok + ".zip");
+        var r = await fetch("/api/muestra-contador/" + tok + ".zip?email=" + encodeURIComponent(email));
         if (r.ok) {
           var blob = await r.blob(), a = document.createElement("a");
           a.href = URL.createObjectURL(blob); a.download = "MUESTRA_Declaracion.zip"; a.click();
@@ -650,11 +644,11 @@
           btnM.textContent = "✓ Descargado (210 + papeles de trabajo) — ¿te convenció? Activa tu pase 👇";
         } else {
           var j = await r.json().catch(function(){ return {}; });
-          alert(j.error || "No pudimos generar la muestra.");
+          if (msg) { msg.style.color = "#ff9a9a"; msg.textContent = j.error || "No pudimos generar la muestra."; }
           btnM.disabled = false; btnM.textContent = "📄 Descargar muestra: 210 + papeles de trabajo (gratis)";
         }
       } catch(e) {
-        alert("Problema de conexión. Intenta de nuevo.");
+        if (msg) { msg.style.color = "#ff9a9a"; msg.textContent = "Problema de conexión. Intenta de nuevo."; }
         btnM.disabled = false; btnM.textContent = "📄 Descargar muestra: 210 + papeles de trabajo (gratis)";
       }
     };

@@ -161,6 +161,34 @@ class MuestraContador(db.Model):
     creado = db.Column(db.DateTime, default=datetime.utcnow)
 
 
+class MuestraContadorEmail(db.Model):
+    """Muestra gratis del liquidador SIN registro: 1 por CORREO (sin cuenta OAuth).
+    La sola existencia de la fila = prueba consumida por ese correo. Se usa para
+    que el contador no tenga que registrarse: solo deja su correo al descargar."""
+    __tablename__ = "muestras_contador_email"
+    email = db.Column(db.String(200), primary_key=True)   # en minúsculas
+    nombre = db.Column(db.String(200))
+    token = db.Column(db.String(80))                      # token de la carga usada
+    nit_muestra = db.Column(db.String(30))
+    creado = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+def muestra_email_usada(email: str) -> bool:
+    email = (email or "").strip().lower()
+    return bool(email) and db.session.get(MuestraContadorEmail, email) is not None
+
+
+def registrar_muestra_email(email: str, token: str = "", nit: str = "", nombre: str = "") -> None:
+    email = (email or "").strip().lower()
+    if not email or db.session.get(MuestraContadorEmail, email) is not None:
+        return
+    try:
+        db.session.add(MuestraContadorEmail(email=email, token=token, nit_muestra=nit, nombre=nombre))
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+
+
 class AccesoAutorizado(db.Model):
     """Contadores habilitados al liquidador profesional desde /admin (pase de
     temporada). Vive en la BD para poder otorgar/revocar con un botón, sin editar

@@ -1046,7 +1046,6 @@ def epayco_respuesta():
 
 
 @app.get("/api/muestra-contador/<token>.pdf")
-@login_requerido
 def muestra_contador_pdf(token):
     """Entrega UNA vez, gratis, el Formulario 210 de MUESTRA (con marca de agua)
     a un contador que se registró. El límite (1 por usuario) vive en la BD."""
@@ -1060,9 +1059,13 @@ def muestra_contador_pdf(token):
     except (TypeError, KeyError):
         return jsonify({"error": "No hay datos válidos para la muestra."}), 410
 
-    previa = db.session.get(MuestraContador, u.id)
-    if previa is not None and previa.token != token:
-        return jsonify({"error": "Ya usaste tu declaración de muestra gratis. "
+    from src.auth import MuestraContadorEmail, registrar_muestra_email
+    email = (request.args.get("email") or (getattr(u, "email", "") if u else "") or "").strip().lower()
+    if not _EMAIL_RE.match(email):
+        return jsonify({"error": "Escribe un correo válido para descargar tu muestra."}), 400
+    previa = db.session.get(MuestraContadorEmail, email)
+    if previa is not None and (previa.token or "") != token:
+        return jsonify({"error": "Ya usaste tu declaración de muestra gratis con ese correo. "
                         "Activa tu pase de temporada para ilimitadas."}), 402
 
     liq = calcular(datos, PARAMS)
@@ -1074,13 +1077,8 @@ def muestra_contador_pdf(token):
     finally:
         salida.unlink(missing_ok=True)
 
-    if previa is None:
-        try:
-            db.session.add(MuestraContador(usuario_id=u.id, email=u.email,
-                                           token=token, nit_muestra=carga.get("nit", "")))
-            db.session.commit()
-        except Exception:
-            db.session.rollback()   # si falla el registro, igual entregamos la muestra
+    registrar_muestra_email(email, token=token, nit=carga.get("nit", ""),
+                            nombre=(getattr(u, "nombre", "") if u else ""))
 
     return send_file(io.BytesIO(contenido), as_attachment=True,
                      download_name=f"MUESTRA_Formulario210_{carga.get('nit','')}.pdf",
@@ -1117,7 +1115,6 @@ def _marcar_muestra_excel(ruta):
 
 
 @app.get("/api/muestra-contador/<token>.zip")
-@login_requerido
 def muestra_contador_zip(token):
     """Entrega UNA vez, gratis, la MUESTRA COMPLETA: Formulario 210 (PDF con marca)
     + papeles de trabajo (Excel con marca). El límite (1 por usuario) vive en la BD;
@@ -1132,9 +1129,13 @@ def muestra_contador_zip(token):
     except (TypeError, KeyError):
         return jsonify({"error": "No hay datos válidos para la muestra."}), 410
 
-    previa = db.session.get(MuestraContador, u.id)
-    if previa is not None and previa.token != token:
-        return jsonify({"error": "Ya usaste tu declaración de muestra gratis. "
+    from src.auth import MuestraContadorEmail, registrar_muestra_email
+    email = (request.args.get("email") or (getattr(u, "email", "") if u else "") or "").strip().lower()
+    if not _EMAIL_RE.match(email):
+        return jsonify({"error": "Escribe un correo válido para descargar tu muestra."}), 400
+    previa = db.session.get(MuestraContadorEmail, email)
+    if previa is not None and (previa.token or "") != token:
+        return jsonify({"error": "Ya usaste tu declaración de muestra gratis con ese correo. "
                         "Pide tu pase de temporada a Tributando para ilimitadas."}), 402
 
     liq = calcular(datos, PARAMS)
@@ -1179,13 +1180,8 @@ def muestra_contador_zip(token):
         z.writestr(f"MUESTRA_Papeles_de_trabajo_{nit}.xlsx", xlsx_bytes)
     buf.seek(0)
 
-    if previa is None:
-        try:
-            db.session.add(MuestraContador(usuario_id=u.id, email=u.email,
-                                           token=token, nit_muestra=nit))
-            db.session.commit()
-        except Exception:
-            db.session.rollback()
+    registrar_muestra_email(email, token=token, nit=nit,
+                            nombre=(getattr(u, "nombre", "") if u else ""))
 
     return send_file(buf, as_attachment=True,
                      download_name=f"MUESTRA_Declaracion_{nit}.zip",
