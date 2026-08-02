@@ -757,14 +757,14 @@ PRECIOS_LECTOR = {
     # 3 planes. Anual = 10× el mensual (2 meses gratis). Precios alineados al
     # mercado (Kontalid Premium ~$297.700/año), con premium por generar planos
     # Siigo/Contai y llenar los formularios 300/350 oficiales.
-    "independiente_mensual": 19900,  "independiente_anual":  199000,
-    "pro_mensual":           34900,  "pro_anual":            349000,
-    "max_mensual":           59900,  "max_anual":            599000,
+    "independiente_mensual": 80000,   "independiente_anual":  800000,
+    "pro_mensual":          150000,   "pro_anual":           1500000,
+    "max_mensual":          200000,   "max_anual":           2000000,
     # Compat (suscripciones antiguas / enlaces viejos → equivalente más cercano).
-    "contador_mensual":      34900,  "contador_anual":       349000,
-    "estudio_mensual":       34900,  "estudio_anual":        349000,
-    "ilimitado_mensual":     59900,  "ilimitado_anual":      599000,
-    "mensual": 19900, "anual": 199000,
+    "contador_mensual":     150000,   "contador_anual":      1500000,
+    "estudio_mensual":      150000,   "estudio_anual":       1500000,
+    "ilimitado_mensual":    200000,   "ilimitado_anual":     2000000,
+    "mensual": 80000, "anual": 800000,
 }
 
 # --- Promo de lanzamiento (Temporada de Renta 2026) ---
@@ -807,7 +807,7 @@ def plan_incluye_agente(plan: str) -> bool:
 # Paquetes por # de empresas (para la página de precios).
 TIERS_LECTOR = [
     {"clave": "independiente", "nombre": "Independiente", "empresas_max": 10},
-    {"clave": "pro",           "nombre": "Pro",           "empresas_max": 30},
+    {"clave": "pro",           "nombre": "Pro",           "empresas_max": 25},
     {"clave": "max",           "nombre": "Max",           "empresas_max": 0},
 ]
 # URL de descarga del instalador (tributando.co-Setup.exe). Subir el Setup al
