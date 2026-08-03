@@ -7,7 +7,7 @@
 <style>
   :root{
     --navy:#1e2432; --navy2:#2a3346; --oro:#cdab7e; --oro2:#8a6d3b;
-    --gris:#f7f5f1; --linea:#e6e2d8; --tx:#2b3242; --tx2:#5b6473;
+    --gris:#f7f5f1; --linea:rgba(255,255,255,.09); --tx:#e7ecf4; --tx2:#a9b3c3;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%}
@@ -26,8 +26,8 @@
   .badge{display:inline-block;background:var(--oro);color:var(--navy);font-weight:800;
     font-size:11px;padding:3px 9px;border-radius:999px;margin-top:8px}
   .cuerpo{border:1px solid var(--linea);border-top:0;border-radius:0 0 14px 14px;
-    padding:16px 18px;background:#fff}
-  h2{font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--oro2);
+    padding:16px 18px;background:#131a26}
+  h2{font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--oro);
     margin:14px 0 8px;font-weight:800}
   h2:first-child{margin-top:2px}
   /* novedades */
@@ -38,7 +38,7 @@
   .nota .txt{font-size:12.5px;color:var(--tx2)}
   /* vencimientos */
   .venc{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-  .mes{background:var(--navy);color:#fff;border-radius:10px;padding:10px 8px;text-align:center}
+  .mes{background:#212a3c;border:1px solid rgba(255,255,255,.07);color:#fff;border-radius:10px;padding:10px 8px;text-align:center}
   .mes .m{font-weight:800;font-size:13px;color:var(--oro)}
   .mes .r{font-size:11px;color:#cfd6e2;margin-top:2px}
   .mes .d{font-size:19px;font-weight:800;margin-top:6px}
@@ -49,7 +49,7 @@
   .btn{flex:1 1 200px;text-align:center;text-decoration:none;font-weight:800;font-size:13.5px;
     padding:11px 12px;border-radius:10px}
   .btn.p{background:var(--oro);color:var(--navy)}
-  .btn.s{background:#fff;color:var(--navy);border:1.5px solid var(--navy)}
+  .btn.s{background:rgba(255,255,255,.05);color:#e7ecf4;border:1.5px solid rgba(205,171,126,.55)}
   .legal{font-size:10.5px;color:#9aa2b0;margin-top:12px;text-align:center}
   @media(max-width:520px){.venc{grid-template-columns:1fr}}
 </style>
