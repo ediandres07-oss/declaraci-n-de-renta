@@ -10,9 +10,13 @@
     --gris:#f7f5f1; --linea:#e6e2d8; --tx:#2b3242; --tx2:#5b6473;
   }
   *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
   body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    color:var(--tx);background:#fff;line-height:1.45}
-  .wrap{max-width:780px;margin:0 auto}
+    color:var(--tx);line-height:1.45;
+    background:linear-gradient(160deg,#0b1120 0%,#141c2e 100%);
+    min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+  .wrap{max-width:780px;width:100%;margin:0 auto;border-radius:14px;overflow:hidden;
+    box-shadow:0 24px 70px rgba(0,0,0,.5)}
   /* encabezado */
   .hero{background:var(--navy);color:#fff;padding:18px 22px;border-radius:14px 14px 0 0}
   .marca{font-weight:800;font-size:15px;letter-spacing:.2px}
