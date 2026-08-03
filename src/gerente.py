@@ -15,23 +15,37 @@ from __future__ import annotations
 import json
 from datetime import date, datetime, timedelta
 
-from src.auth import db, OrdenRegistro, SuscripcionLector, LeadEspera
+from src.auth import db, OrdenRegistro, SuscripcionLector, LeadEspera, Usuario
 
 ADMIN_EMAIL = "ediandres07@gmail.com"
 
 
 # ---------- campaña a leads (manual, con preview antes de enviar) ----------
 
-def destinatarios_campana() -> list[str]:
-    """Correos únicos de leads en espera + contadores con licencia (Lector)."""
+def _es_propio(email: str) -> bool:
+    """Correos del dueño / de prueba: nunca deben recibir campañas."""
+    e = (email or "").strip().lower()
+    return e.startswith("ediandres07") or e == "contacto@tributando.co"
+
+
+def destinatarios_campana(publico: str = "contadores") -> list[str]:
+    """Correos únicos para una campaña, según el público:
+      - 'personas': usuarios registrados (personas naturales de renta, tabla Usuario)
+      - cualquier otro: leads en espera (guía) + contadores con licencia (Lector)
+    Siempre excluye los correos propios/de prueba."""
     correos = set()
-    for l in LeadEspera.query.all():
-        if l.email:
-            correos.add(l.email.strip().lower())
-    for s in SuscripcionLector.query.all():
-        if s.email:
-            correos.add(s.email.strip().lower())
-    return sorted(correos)
+    if publico == "personas":
+        for u in Usuario.query.all():
+            if u.email:
+                correos.add(u.email.strip().lower())
+    else:
+        for l in LeadEspera.query.all():
+            if l.email:
+                correos.add(l.email.strip().lower())
+        for s in SuscripcionLector.query.all():
+            if s.email:
+                correos.add(s.email.strip().lower())
+    return sorted(c for c in correos if not _es_propio(c))
 
 
 def enviar_campana(asunto: str, html: str, destinatarios: list[str]) -> dict:

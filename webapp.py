@@ -546,10 +546,12 @@ def admin_lector_borrar():
 @app.get("/admin/campana/preview")
 @autorizado_requerido
 def admin_campana_preview():
-    """Cuántos destinatarios tendría la campaña (leads + contadores). No envía nada."""
+    """Cuántos destinatarios tendría la campaña. ?publico=personas → usuarios
+    registrados (renta); por defecto leads + contadores. No envía nada."""
     from src import gerente as _ger
-    dest = _ger.destinatarios_campana()
-    return jsonify({"ok": True, "total": len(dest), "muestra": dest[:5]})
+    publico = request.args.get("publico", "contadores")
+    dest = _ger.destinatarios_campana(publico)
+    return jsonify({"ok": True, "publico": publico, "total": len(dest), "muestra": dest[:5]})
 
 
 @app.post("/admin/campana/enviar")
@@ -561,7 +563,7 @@ def admin_campana_enviar():
     if not b.get("confirmar"):
         return jsonify({"ok": False, "error": "Falta confirmar:true"}), 400
     from src import gerente as _ger
-    dest = _ger.destinatarios_campana()
+    dest = _ger.destinatarios_campana(b.get("publico", "contadores"))
     asunto = (b.get("asunto") or "").strip()
     html = (b.get("html") or "").strip()
     if not asunto or not html:
