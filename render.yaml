@@ -13,7 +13,7 @@ databases:
   # cuentas, las cédulas y los secretos TOTP del 2FA tienen que vivir aquí.
   - name: declaracion-renta-db
     databaseName: declaracion_renta
-    plan: free                 # REVISE la vigencia del plan gratuito de Postgres
+    plan: basic_256mb          # plan pago (~$6/mes); el free se suspendía el 2026-08-09
     region: oregon
 
 services:
