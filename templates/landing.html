@@ -697,11 +697,11 @@ function requiereLogin() {
 }
 
 const dz = $("#dropzone"), selector = $("#selector");
-dz.addEventListener("click", () => { if (!requiereLogin()) selector.click(); });
+dz.addEventListener("click", () => selector.click());
 ["dragenter","dragover"].forEach(ev => dz.addEventListener(ev, e => {e.preventDefault(); dz.classList.add("arrastrando");}));
 ["dragleave","drop"].forEach(ev => dz.addEventListener(ev, e => {e.preventDefault(); dz.classList.remove("arrastrando");}));
-dz.addEventListener("drop", e => { if (requiereLogin()) return; if (e.dataTransfer.files.length) cargar(e.dataTransfer.files[0]); });
-selector.addEventListener("change", () => { if (requiereLogin()) return; if (selector.files.length) cargar(selector.files[0]); });
+dz.addEventListener("drop", e => { if (e.dataTransfer.files.length) cargar(e.dataTransfer.files[0]); });
+selector.addEventListener("change", () => { if (selector.files.length) cargar(selector.files[0]); });
 
 async function cargar(archivo) {
   $("#errorCarga").classList.add("oculto");
