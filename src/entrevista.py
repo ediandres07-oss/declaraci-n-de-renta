@@ -121,6 +121,14 @@ def mapear_exogena_a_datos(exogena: ResultadoExogena,
         )
         if rendimientos > 0:
             datos.capital.incrngo += round(rendimientos * parametros.componente_inflacionario)
+
+    # Regla: TODO "valor avalúo" (inmuebles/vehículos con avalúo catastral o
+    # comercial) debe sumar al patrimonio bruto (R29), aunque la exógena no lo
+    # haya marcado con R29. Se saltan los ya asignados a R29 para no duplicar.
+    for p in exogena.partidas_activas():
+        det = (p.detalle or "").lower()
+        if ("avalú" in det or "avaluo" in det) and p.renglon_asignado != 29:
+            datos.patrimonio_bruto += float(p.valor or 0)
     return datos
 
 
