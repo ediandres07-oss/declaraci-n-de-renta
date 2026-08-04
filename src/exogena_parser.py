@@ -168,6 +168,15 @@ def _clasificar(partida: PartidaExogena) -> None:
     quedan registrados en `renglones` como sugerencias secundarias que el
     usuario confirma en el resumen editable.
     """
+    # Filas de referencia que la DIAN etiqueta con un renglón pero NO son un
+    # valor a declarar (sumarían de más). Ej.: "ingreso laboral promedio de los
+    # últimos seis meses" viene marcado R36, pero solo sirve para calcular el
+    # tope de la renta exenta de cesantías — no es renta exenta en sí.
+    if "ingreso laboral promedio" in _norm(partida.detalle or ""):
+        partida.excluida = True
+        partida.nota = "Dato de referencia (ingreso promedio para el tope de cesantías): no suma."
+        return
+
     uso = partida.uso_sugerido or ""
     partida.renglones = [int(m) for m in RE_RENGLON.findall(uso)]
     partida.topes = sorted({int(m) for m in RE_TOPE.findall(uso)})
