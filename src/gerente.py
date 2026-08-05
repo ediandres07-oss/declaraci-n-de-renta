@@ -23,9 +23,17 @@ ADMIN_EMAIL = "ediandres07@gmail.com"
 # ---------- campaña a leads (manual, con preview antes de enviar) ----------
 
 def _es_propio(email: str) -> bool:
-    """Correos del dueño / de prueba: nunca deben recibir campañas."""
+    """Correos del dueño / de prueba / QA: nunca deben recibir campañas."""
     e = (email or "").strip().lower()
-    return e.startswith("ediandres07") or e == "contacto@tributando.co"
+    if not e or "@" not in e:
+        return True
+    if e.startswith("ediandres07") or e == "contacto@tributando.co":
+        return True
+    if e.split("@")[-1] in ("test.co", "test.com", "example.com", "qa.co"):
+        return True
+    if e.startswith(("prueba.qa", "nuevo.qa", "qa.", "test.")) or ".qa@" in e:
+        return True
+    return False
 
 
 def _emails_contadores() -> set:
