@@ -668,7 +668,7 @@ def contadores_lector():
                            promo_dias=max(0, (_v - date.today()).days),
                            logueado=u is not None,
                            pago=_CFG_PRECIOS.get("pago", {}),
-                           descarga_url=DESCARGA_LECTOR_URL,
+                           descarga_url=DESCARGA_LECTOR_PUBLICA,
                            whatsapp=re.sub(r"\D", "", str(_CONTACTO.get("whatsapp", ""))),
                            chat_ia_contador=asistente_ia_activo(IA_CFG),
                            chat_whatsapp=IA_CFG.get("negocio", {}).get("whatsapp", ""),
@@ -820,6 +820,20 @@ TIERS_LECTOR = [
 DESCARGA_LECTOR_URL = os.environ.get(
     "DESCARGA_LECTOR",
     "https://github.com/ediandres07-oss/declaraci-n-de-renta/releases/download/v1.0/tributando.co.zip")
+
+# URL pública y confiable que ve el contador (redirige al instalador real). Evita
+# mostrar la URL cruda de GitHub, que rompe la confianza en una app que pide
+# token/certificado de la DIAN. El día que montes descargas.tributando.co, solo
+# cambias esta base.
+_SITIO_PUB = (_CONTACTO.get("sitio") or "https://tributando.co").rstrip("/")
+DESCARGA_LECTOR_PUBLICA = _SITIO_PUB + "/descargar-lector"
+
+
+@app.get("/descargar-lector")
+@app.get("/descargar")
+def descargar_lector():
+    """Enlace limpio de descarga del Lector: redirige al instalador real."""
+    return redirect(DESCARGA_LECTOR_URL, code=302)
 
 # Última versión publicada del Lector. Súbela cada vez que recompiles y publiques
 # un instalador nuevo; el Lector la consulta y avisa al contador si está atrasado.
@@ -976,7 +990,7 @@ def _enviar_licencia_lector(email: str, plan: str, licencia: str):
         "<h2 style='color:#1e2432'>¡Bienvenido al Lector de tributando.co!</h2>"
         f"<p>Tu suscripción <b>{plan.upper()}</b> quedó activa. 🎉</p>"
         "<p><b>1.</b> Descarga el Lector (Windows):</p>"
-        f"<p><a href='{DESCARGA_LECTOR_URL}' style='background:#1e2432;color:#fff;padding:10px 18px;"
+        f"<p><a href='{DESCARGA_LECTOR_PUBLICA}' style='background:#1e2432;color:#fff;padding:10px 18px;"
         "border-radius:8px;text-decoration:none'>Descargar el Lector (ZIP)</a></p>"
         "<p><b>2.</b> <b>Descomprime</b> el ZIP (clic derecho → Extraer todo) y abre "
         "<b>tributando.co.exe</b> (dentro de la carpeta).</p>"
@@ -1806,7 +1820,7 @@ def _entregar_licencia_lector(orden_id: str, orden: dict) -> None:
                     letter-spacing:1px;color:{navy}">{sus.licencia}</div>
                 </div>
                 <div style="text-align:center;margin:18px 0">
-                  <a href="{DESCARGA_LECTOR_URL}" style="display:inline-block;background:{navy};
+                  <a href="{DESCARGA_LECTOR_PUBLICA}" style="display:inline-block;background:{navy};
                      color:#fff;text-decoration:none;font-weight:800;padding:14px 28px;border-radius:26px">
                      ⬇ Descargar el programa</a>
                 </div>

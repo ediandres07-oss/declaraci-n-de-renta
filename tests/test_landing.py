@@ -329,7 +329,7 @@ def test_pago_confirmado_avisa_una_sola_vez(cliente, monkeypatch, _sin_smtp_real
     cliente.post("/api/confirmar-pago", json={"orden_id": orden})
     confirmados = [a for a in _sin_smtp_real if "confirmado" in a["asunto"]]
     assert len(confirmados) == 1
-    assert "189.900" in confirmados[0]["html"]
+    assert "149.900" in confirmados[0]["html"]
 
     cliente.post("/api/confirmar-pago", json={"orden_id": orden})   # webhook repetido
     confirmados = [a for a in _sin_smtp_real if "confirmado" in a["asunto"]]
@@ -485,3 +485,33 @@ def test_demo_con_correo_admin_no_es_autorizado():
     assert es_autorizado(_U("demo", correo_admin)) is False       # demo NO
     assert es_autorizado(_U("google", correo_admin)) is True      # google SÍ
     assert es_autorizado(_U("google", "otro@test.com")) is False  # no está en la lista
+
+
+def test_desbloquear_pase(cliente):
+    """El admin puede liberar el bloqueo de login (códigos fallidos) de un
+    contador con pase, sin esperar los 15 minutos."""
+    from datetime import datetime, timedelta
+    from src.auth import Usuario, db, esta_bloqueado
+
+    with app.app_context():
+        u = Usuario.query.filter_by(email="olga@test.com").first()
+        if u is None:
+            u = Usuario(proveedor="demo", proveedor_id="olga", email="olga@test.com")
+            db.session.add(u)
+        u.intentos_fallidos = 5
+        u.bloqueado_hasta = datetime.utcnow() + timedelta(minutes=15)
+        db.session.commit()
+        uid = u.id
+
+    # el correo se normaliza a minúsculas
+    r = cliente.post("/api/pase/desbloquear", json={"email": "  OLGA@test.com "})
+    assert r.status_code == 200
+
+    with app.app_context():
+        u = db.session.get(Usuario, uid)
+        assert not esta_bloqueado(u)
+        assert u.intentos_fallidos == 0
+
+    # correo inexistente → 404
+    r = cliente.post("/api/pase/desbloquear", json={"email": "nadie@test.com"})
+    assert r.status_code == 404
