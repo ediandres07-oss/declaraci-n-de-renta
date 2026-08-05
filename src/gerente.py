@@ -306,6 +306,111 @@ def onboarding_lector() -> int:
     return enviados
 
 
+# ---------- recuperación de leads del cálculo gratis de renta ----------
+
+_MESES = ["", "enero", "febrero", "marzo", "abril", "mayo", "junio", "julio",
+          "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
+
+
+def _fecha_larga(d) -> str:
+    return f"{d.day} de {_MESES[d.month]} de {d.year}" if d else "por confirmar"
+
+
+def _correo_recuperacion(paso: str, lead) -> tuple[str, str]:
+    """(asunto, html) del correo de recuperación `paso` para el lead."""
+    nom = (lead.nombre or "").split()[0].title() if lead.nombre else ""
+    hola = f"Hola {nom} 👋" if nom else "Hola 👋"
+    fecha = _fecha_larga(lead.fecha_limite)
+    valor = f"${(lead.valor or 0):,.0f}".replace(",", ".")
+    faltan = (lead.fecha_limite - date.today()).days if lead.fecha_limite else None
+    servicio = ("Un <b>contador profesional</b> elabora tu declaración, la <b>presenta ante la "
+                "DIAN</b> y la deja <b>en firme</b>. Tú no haces nada.")
+
+    if paso == "d1":
+        cuerpo = f"""
+          <h1 style="font-size:20px;color:#1e2432;margin:0 0 8px">{hola}</h1>
+          <p style="font-size:15px;line-height:1.55">Guardamos tu resultado de renta. Tu <b>fecha límite es el {fecha}</b> y tu valor estimado a pagar es <b>{valor}</b>.</p>
+          <p style="font-size:15px;line-height:1.55">Cuando quieras, generamos tu <b>Formulario 210</b> listo — o lo <b>presentamos por ti</b>.</p>"""
+        return "📄 Guardamos tu resultado de renta", _wrap_correo(
+            "TU DECLARACIÓN", cuerpo, "Ver mi declaración →", SITIO)
+
+    if paso == "d3":
+        cuerpo = f"""
+          <h1 style="font-size:20px;color:#1e2432;margin:0 0 8px">{hola} ¿Prefieres que lo hagamos por ti?</h1>
+          <p style="font-size:15px;line-height:1.55">{servicio}</p>
+          <p style="font-size:15px;line-height:1.55">Tu plazo vence el <b>{fecha}</b>. Deja tu declaración en firme y olvídate del tema.</p>"""
+        return "🧾 Un profesional presenta tu declaración ante la DIAN", _wrap_correo(
+            "LO HACEMOS POR TI", cuerpo, "Quiero que la presenten →", SITIO)
+
+    if paso == "venc10":
+        cuerpo = f"""
+          <h1 style="font-size:20px;color:#1e2432;margin:0 0 8px">{hola} te quedan {faltan} días</h1>
+          <p style="font-size:15px;line-height:1.55">Tu <b>fecha límite para declarar renta es el {fecha}</b>. Después, la DIAN cobra <b>sanción por extemporaneidad</b> (mínimo ~$400.000).</p>
+          <p style="font-size:15px;line-height:1.55">{servicio}</p>"""
+        return f"⏳ Te quedan {faltan} días para declarar renta", _wrap_correo(
+            f"QUEDAN {faltan} DÍAS", cuerpo, "Declarar ahora →", SITIO)
+
+    # venc3 — última llamada
+    cuerpo = f"""
+      <h1 style="font-size:20px;color:#1e2432;margin:0 0 8px">⏰ Últimos días, {nom or ''}</h1>
+      <p style="font-size:15px;line-height:1.55">Tu plazo para declarar renta vence el <b>{fecha}</b> ({faltan} día(s)). No dejes que la DIAN te cobre <b>sanción + intereses</b>.</p>
+      <p style="font-size:15px;line-height:1.55">{servicio} Alcanzamos a dejarla presentada a tiempo.</p>"""
+    return "🔔 Últimos días para declarar tu renta (evita la sanción)", _wrap_correo(
+        "ÚLTIMA LLAMADA", cuerpo, "Presentar mi declaración →", SITIO)
+
+
+def recuperacion_leads() -> int:
+    """Secuencia de recuperación de quienes calcularon gratis y no compraron:
+    día 1 (refuerzo), día 3 (servicio), y avisos ~10 y ~3 días antes de su fecha
+    límite. Un correo por lead por corrida; no escribe a quien ya pagó.
+    """
+    from src.correo import enviar_email
+    from src.auth import LeadExogena
+
+    hoy_utc = datetime.utcnow().date()
+    hoy = date.today()
+    pagaron = set()
+    for o in OrdenRegistro.query.all():
+        try:
+            d = json.loads(o.data)
+        except Exception:
+            continue
+        if d.get("estado") == "pagada" and d.get("email"):
+            pagaron.add(str(d["email"]).strip().lower())
+
+    prioridad = {"venc3": 0, "venc10": 1, "d1": 2, "d3": 3}
+    enviados = 0
+    for lead in LeadExogena.query.all():
+        if not lead.email or not lead.creado or lead.email in pagaron:
+            continue
+        dias = (hoy_utc - lead.creado.date()).days
+        hechos = {h for h in (lead.onboarding or "").split(",") if h}
+        pendientes = []
+        if 1 <= dias <= 3 and "d1" not in hechos:
+            pendientes.append("d1")
+        if 3 <= dias <= 5 and "d3" not in hechos:
+            pendientes.append("d3")
+        if lead.obligado and lead.fecha_limite:
+            faltan = (lead.fecha_limite - hoy).days
+            if 8 <= faltan <= 12 and "venc10" not in hechos:
+                pendientes.append("venc10")
+            if 1 <= faltan <= 4 and "venc3" not in hechos:
+                pendientes.append("venc3")
+        if not pendientes:
+            continue
+        paso = sorted(pendientes, key=lambda p: prioridad[p])[0]
+        asunto, html = _correo_recuperacion(paso, lead)
+        try:
+            enviar_email(lead.email, asunto, html)
+        except Exception:
+            continue
+        lead.onboarding = ",".join(sorted(hechos | {paso}))
+        enviados += 1
+    if enviados:
+        db.session.commit()
+    return enviados
+
+
 # ---------- contenido semanal (marketing estilo Actualícese) ----------
 
 _PROMPT_MARKETING = (

@@ -111,6 +111,11 @@ def _bucle_avisos_vencimientos():
                             n = _ger.onboarding_lector()
                             if n:
                                 print(f"[gerente] onboarding: {n} correo(s) enviados")
+                        # Recuperación de leads del cálculo gratis de renta.
+                        if _candado(f"recuperacion|{hoy}"):
+                            n = _ger.recuperacion_leads()
+                            if n:
+                                print(f"[gerente] recuperación: {n} correo(s) enviados")
                         # Lunes: lote de contenido de marketing.
                         if ahora.weekday() == 0 and _candado(f"mkt|{hoy}"):
                             _ger.contenido_semanal(IA_CFG)
