@@ -488,6 +488,14 @@ def enlaces():
                            ia_whatsapp=IA_CFG.get("negocio", {}).get("whatsapp", ""))
 
 
+@app.get("/admin/dashboard")
+@autorizado_requerido
+def admin_dashboard():
+    """Panel con el pulso del negocio: funnel B2C, pases de temporada y Lector."""
+    from src import gerente as _ger
+    return render_template("admin_dashboard.html", m=_ger.metricas_negocio())
+
+
 @app.get("/admin/lector")
 @autorizado_requerido
 def admin_lector():

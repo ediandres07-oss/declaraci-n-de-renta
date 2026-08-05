@@ -130,6 +130,67 @@ def informe_diario() -> bool:
     return True
 
 
+# ---------- métricas para el dashboard de /admin ----------
+
+def metricas_negocio() -> dict:
+    """Números vivos para el panel: funnel B2C (renta), pase de temporada de
+    contadores y estado del Lector (pruebas/pagadas). Lee lo que ya existe."""
+    from src.auth import ArchivoExogena, AccesoAutorizado, EmpresaLector
+
+    hoy = date.today()
+    b2c_creadas = b2c_pagadas = 0
+    b2c_ingreso = 0.0
+    pase_creadas = pase_pagadas = 0
+    pase_ingreso = 0.0
+    lector_ord_pagadas = 0
+
+    for o in OrdenRegistro.query.all():
+        try:
+            d = json.loads(o.data)
+        except Exception:
+            continue
+        if d.get("tipo") != "orden":
+            continue                                   # cargas de exógena sin orden
+        plan = (d.get("plan") or "").lower()
+        pagada = d.get("estado") == "pagada"
+        precio = float(d.get("precio") or d.get("valor") or 0)
+        if plan in ("pdf", "presentacion"):
+            b2c_creadas += 1
+            if pagada:
+                b2c_pagadas += 1
+                b2c_ingreso += precio
+        elif plan == "contadores":
+            pase_creadas += 1
+            if pagada:
+                pase_pagadas += 1
+                pase_ingreso += precio
+        elif plan == "lector" and pagada:
+            lector_ord_pagadas += 1
+
+    pruebas = SuscripcionLector.query.filter_by(plan="prueba", activa=True).all()
+    pruebas_activas = sum(1 for s in pruebas if not s.vence or s.vence >= hoy)
+    pagadas_activas = (SuscripcionLector.query
+                       .filter(SuscripcionLector.plan != "prueba",
+                               SuscripcionLector.activa.is_(True)).count())
+
+    return {
+        "exogenas": ArchivoExogena.query.count(),
+        "leads": LeadEspera.query.count(),
+        "b2c_creadas": b2c_creadas,
+        "b2c_pagadas": b2c_pagadas,
+        "b2c_conversion": round(100 * b2c_pagadas / b2c_creadas) if b2c_creadas else 0,
+        "b2c_ingreso": b2c_ingreso,
+        "pase_creadas": pase_creadas,
+        "pase_pagadas": pase_pagadas,
+        "pase_ingreso": pase_ingreso,
+        "pase_accesos": AccesoAutorizado.query.count(),
+        "lector_pruebas_activas": pruebas_activas,
+        "lector_pagadas_activas": pagadas_activas + lector_ord_pagadas,
+        "lector_empresas": EmpresaLector.query.count(),
+        "ingreso_total": b2c_ingreso + pase_ingreso,
+    }
+
+
 # ---------- onboarding del trial del Lector (secuencia de 4 correos) ----------
 
 SITIO = "https://tributando.co"
