@@ -757,11 +757,20 @@ async function cargar(archivo) {
 }
 
 function _emailOk(e) { return e && e.indexOf("@") > 0 && e.indexOf(".") > e.indexOf("@"); }
+let _convLeadFired = false;
 async function enviarLead(email) {
   const ctx = window._resLead || {};
   const r = await fetch("/api/mi-resultado", {method:"POST", headers:{"Content-Type":"application/json"},
     body: JSON.stringify({ token: token, email: email, obligado: !!ctx.obligado, valor: ctx.valor || 0 })});
-  return await r.json();
+  const j = await r.json();
+  // Conversión Google Ads: persona natural que dejó su correo (lead real).
+  if (j && j.ok && !_convLeadFired && typeof gtag === "function") {
+    _convLeadFired = true;
+    gtag('event', 'conversion', {
+      'send_to': 'AW-18353583911/BrvcCLXeodccEKfu1a9E', 'value': 1.0, 'currency': 'COP'
+    });
+  }
+  return j;
 }
 
 if ($("#btnLead")) $("#btnLead").addEventListener("click", async () => {
