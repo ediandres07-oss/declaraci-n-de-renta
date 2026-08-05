@@ -105,6 +105,11 @@ def _bucle_avisos_vencimientos():
                         if _candado(f"gerente|{hoy}"):
                             _ger.informe_diario()
                             print("[gerente] informe diario enviado")
+                        # Onboarding del trial del Lector (secuencia días 1/7/20/28).
+                        if _candado(f"onboarding|{hoy}"):
+                            n = _ger.onboarding_lector()
+                            if n:
+                                print(f"[gerente] onboarding: {n} correo(s) enviados")
                         # Lunes: lote de contenido de marketing.
                         if ahora.weekday() == 0 and _candado(f"mkt|{hoy}"):
                             _ger.contenido_semanal(IA_CFG)

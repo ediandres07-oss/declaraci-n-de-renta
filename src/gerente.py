@@ -130,6 +130,120 @@ def informe_diario() -> bool:
     return True
 
 
+# ---------- onboarding del trial del Lector (secuencia de 4 correos) ----------
+
+SITIO = "https://tributando.co"
+_DESCARGA_LECTOR = SITIO + "/descargar-lector"
+_PLANES_LECTOR = SITIO + "/contadores/lector"
+_ONBOARDING_PASOS = [1, 7, 20, 28]
+
+
+def _wrap_correo(pill: str, cuerpo: str, cta_txt: str, cta_url: str) -> str:
+    return f"""
+    <div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:540px;margin:auto;color:#2b3242">
+      <div style="background:#1e2432;padding:22px 26px;border-radius:14px 14px 0 0;text-align:center">
+        <div style="font-size:20px;font-weight:800;color:#fff">Tributando<span style="color:#cdab7e">.co</span></div>
+      </div>
+      <div style="background:#fff;border:1px solid #e6e2d8;border-top:none;border-radius:0 0 14px 14px;padding:26px">
+        <div style="display:inline-block;background:#f3ede1;color:#8a6d3b;font-weight:800;font-size:11px;padding:4px 11px;border-radius:999px;letter-spacing:.3px">{pill}</div>
+        {cuerpo}
+        <div style="text-align:center;margin:22px 0 6px">
+          <a href="{cta_url}" style="display:inline-block;background:#c8991f;color:#fff;font-weight:800;text-decoration:none;padding:13px 30px;border-radius:11px">{cta_txt}</a>
+        </div>
+        <p style="color:#9aa2b0;font-size:12px;margin-top:16px">Lector XML DIAN de Tributando · ¿Dudas? Responde este correo y te ayudamos.</p>
+      </div>
+    </div>"""
+
+
+def _correo_onboarding(paso: int, s) -> tuple[str, str]:
+    """(asunto, html) del correo del día `paso` para la suscripción de prueba `s`."""
+    if paso == 1:
+        cuerpo = f"""
+          <h1 style="font-size:20px;margin:14px 0 8px;color:#1e2432">Tu prueba gratis ya está activa 🎉</h1>
+          <p style="font-size:15px;line-height:1.55">Deja de digitar las facturas a mano. Así arrancas en 5 minutos:</p>
+          <ol style="font-size:15px;line-height:1.75;padding-left:18px">
+            <li><b>Descarga</b> el Lector para Windows.</li>
+            <li><b>Entra con tu correo</b> (<b>{s.email}</b>) y el código de 6 dígitos que te llega.</li>
+            <li><b>Activa el token de la DIAN</b>, baja las facturas de un cliente y exporta el <b>plano listo</b> para Siigo, World Office o Helisa.</li>
+          </ol>
+          <p style="font-size:15px">Tienes <b>30 días</b> para probarlo con un cliente real.</p>"""
+        return "🚀 Empieza con el Lector en 3 pasos", _wrap_correo(
+            "DÍA 1 · CÓMO EMPEZAR", cuerpo, "⬇ Descargar el Lector", _DESCARGA_LECTOR)
+
+    if paso == 7:
+        cuerpo = """
+          <h1 style="font-size:20px;margin:14px 0 8px;color:#1e2432">De horas digitando a minutos</h1>
+          <p style="font-size:15px;line-height:1.55">Una semana de prueba. Esto es lo que los contadores dejan de hacer a mano:</p>
+          <ul style="font-size:15px;line-height:1.75;padding-left:18px">
+            <li><b>Cero digitación:</b> baja las facturas de la DIAN y salen en plano para tu software.</li>
+            <li><b>Multi-cliente:</b> cada empresa con su carpeta y su historial.</li>
+            <li><b>Auditoría de acuses:</b> ve qué compras a crédito faltan por acusar (o pierdes el IVA descontable).</li>
+            <li><b>Integra</b> Siigo, World Office y Helisa.</li>
+          </ul>
+          <!-- TODO: pegar aquí 3 testimonios REALES de contadores (con nombre y ciudad). -->
+          <p style="font-size:15px">¿No lo has probado con un cliente todavía? Es el mejor momento.</p>"""
+        return "⏱️ Lo que hacen los contadores con el Lector", _wrap_correo(
+            "DÍA 7 · CÓMO SE USA", cuerpo, "Abrir el Lector", _DESCARGA_LECTOR)
+
+    if paso == 20:
+        rest = (s.vence - date.today()).days if s.vence else 10
+        cuerpo = f"""
+          <h1 style="font-size:20px;margin:14px 0 8px;color:#1e2432">Te quedan {rest} días de prueba</h1>
+          <p style="font-size:15px;line-height:1.55">Si ya viste cuánto tiempo te ahorra en <b>un</b> cliente, imagina con <b>toda tu cartera</b>, mes a mes.</p>
+          <p style="font-size:15px;line-height:1.55">Cuando venza la prueba, tus clientes y su historial quedan guardados — solo activas un plan para seguir.</p>"""
+        return f"⏳ Te quedan {rest} días de prueba del Lector", _wrap_correo(
+            f"DÍA 20 · QUEDAN {rest} DÍAS", cuerpo, "Ver los planes", _PLANES_LECTOR)
+
+    # paso 28 — cierre
+    rest = (s.vence - date.today()).days if s.vence else 2
+    rest = max(rest, 0)
+    cuerpo = f"""
+      <h1 style="font-size:20px;margin:14px 0 8px;color:#1e2432">Última llamada ⏰</h1>
+      <p style="font-size:15px;line-height:1.55">Tu prueba del Lector vence en <b>{rest} día(s)</b>. Activa tu plan y sigue armando los planos sin digitar nada.</p>
+      <p style="font-size:15px;line-height:1.55">Tus clientes actuales y su historial <b>no se pierden</b>: al activar el plan, sigues justo donde quedaste.</p>"""
+    return "🔔 Tu prueba del Lector vence pronto", _wrap_correo(
+        "DÍA 28 · ACTIVA TU PLAN", cuerpo, "Activar mi plan", _PLANES_LECTOR)
+
+
+def onboarding_lector() -> int:
+    """Secuencia de bienvenida a las pruebas gratis del Lector (días 1/7/20/28).
+
+    Envía como máximo UN correo por contador por corrida, en su día (con ventana
+    de 3 días por si el job no corrió). Corre a diario junto al informe. Nunca
+    escribe a quien ya tiene un plan pagado activo. Devuelve cuántos envió.
+    """
+    from src.correo import enviar_email
+
+    # `creado` se guarda en UTC (datetime.utcnow); comparo en la misma base.
+    hoy_utc = datetime.utcnow().date()
+    # Correos con plan pagado activo → no molestar con el onboarding de prueba.
+    pagados = {r.email for r in SuscripcionLector.query
+               .filter(SuscripcionLector.plan != "prueba",
+                       SuscripcionLector.activa.is_(True)).all() if r.email}
+
+    enviados = 0
+    for s in SuscripcionLector.query.filter_by(plan="prueba").all():
+        if not s.email or not s.creado or s.email in pagados:
+            continue
+        dias = (hoy_utc - s.creado.date()).days
+        hechos = {h for h in (s.onboarding or "").split(",") if h}
+        for paso in _ONBOARDING_PASOS:
+            # Ventana [paso, paso+2]: tolera días sin correr y evita spamear
+            # pruebas viejas al desplegar (una vieja no cae en ninguna ventana).
+            if paso <= dias <= paso + 2 and str(paso) not in hechos:
+                asunto, html = _correo_onboarding(paso, s)
+                try:
+                    enviar_email(s.email, asunto, html)
+                except Exception:
+                    break                      # falló el envío: reintenta mañana
+                s.onboarding = ",".join(sorted(hechos | {str(paso)}))
+                enviados += 1
+                break                          # un solo correo por contador/corrida
+    if enviados:
+        db.session.commit()
+    return enviados
+
+
 # ---------- contenido semanal (marketing estilo Actualícese) ----------
 
 _PROMPT_MARKETING = (

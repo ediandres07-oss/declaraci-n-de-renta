@@ -297,6 +297,8 @@ class SuscripcionLector(db.Model):
     agente = db.Column(db.Boolean, default=False)           # ¿tiene el add-on activo?
     agente_periodo = db.Column(db.String(7))                # "YYYY-MM" del contador de usos
     agente_usos = db.Column(db.Integer, default=0)          # acciones usadas en el mes
+    # Onboarding: días de la secuencia de bienvenida ya enviados ("1,7,20,28").
+    onboarding = db.Column(db.String(40), default="")
 
 
 # Tope de acciones del agente por contador al mes (protege el saldo de Gemini).
@@ -757,7 +759,8 @@ def _migrar_columnas_faltantes():
                     con.execute(text(f"ALTER TABLE suscripciones_lector ADD COLUMN {nombre} {tipo}"))
         # Complemento agente: agente / agente_periodo / agente_usos.
         ag_cols = {"agente": f"BOOLEAN DEFAULT {falso}", "agente_periodo": "VARCHAR(7)",
-                   "agente_usos": "INTEGER DEFAULT 0"}
+                   "agente_usos": "INTEGER DEFAULT 0",
+                   "onboarding": "VARCHAR(40)"}
         with db.engine.begin() as con:
             for nombre, tipo in ag_cols.items():
                 if nombre not in cols:
