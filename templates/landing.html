@@ -539,8 +539,8 @@
         <div id="resObligado"></div>
       </div>
     </div>
-    <div id="capturaLead" style="padding:16px 22px;border-top:1px solid var(--borde);background:var(--gris)">
-      <div style="font-weight:800;color:var(--azul);font-size:.95rem">📧 ¿Te enviamos tu resultado y tu fecha límite por correo?</div>
+    <div id="capturaLead" style="padding:18px 22px;border-top:1px solid var(--borde);background:#fbf7ec;border-left:4px solid #cdab7e">
+      <div style="font-weight:800;color:var(--azul);font-size:1.02rem">📧 ¿Te enviamos tu resultado y tu fecha límite por correo?</div>
       <div style="font-size:.8rem;color:#5a6b7f;margin:3px 0 10px">Te lo guardamos y te avisamos <b>antes de que venza</b>, para que no pagues sanción.</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
         <input id="leadEmail" type="email" inputmode="email" autocomplete="email" placeholder="tucorreo@ejemplo.com"
@@ -686,6 +686,27 @@
   </div>
 </footer>
 
+<!-- Nudge de salida: captura el correo de quien se iba sin dejarlo -->
+<div id="nudgeSalida" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(15,22,34,.55);
+     align-items:center;justify-content:center;padding:18px">
+  <div style="background:#fff;border-radius:18px;max-width:420px;width:100%;padding:26px 24px;
+       box-shadow:0 24px 60px rgba(10,25,45,.4);position:relative">
+    <button id="nudgeCerrar" aria-label="Cerrar" style="position:absolute;top:12px;right:14px;border:0;
+       background:none;font-size:1.3rem;color:#9db0c4;cursor:pointer;line-height:1">×</button>
+    <div id="nudgeCuerpo">
+      <div style="font-size:1.8rem">👋</div>
+      <h3 style="color:var(--azul,#1e2b3a);font-size:1.2rem;margin:6px 0 6px">Antes de irte…</h3>
+      <p style="font-size:.92rem;color:#5a6b7f;line-height:1.5;margin-bottom:14px">
+        ¿Te enviamos <b>tu resultado y tu fecha límite</b> por correo? Te avisamos <b>antes de que venza</b> para que no pagues sanción.</p>
+      <input id="nudgeEmail" type="email" inputmode="email" autocomplete="email" placeholder="tucorreo@ejemplo.com"
+        style="width:100%;padding:12px;border:1px solid var(--borde,#dbe3ec);border-radius:10px;font-size:.95rem;margin-bottom:10px">
+      <button id="nudgeBtn" style="width:100%;border:0;border-radius:10px;padding:13px;font-weight:800;
+        cursor:pointer;background:var(--azul2,#2d6cdf);color:#fff;font-size:.98rem">Enviármelo →</button>
+      <div id="nudgeMsg" style="font-size:.82rem;margin-top:8px;text-align:center"></div>
+    </div>
+  </div>
+</div>
+
 <div id="modal" class="oculto">
   <div class="caja" id="modalContenido"></div>
 </div>
@@ -735,20 +756,56 @@ async function cargar(archivo) {
   }
 }
 
+function _emailOk(e) { return e && e.indexOf("@") > 0 && e.indexOf(".") > e.indexOf("@"); }
+async function enviarLead(email) {
+  const ctx = window._resLead || {};
+  const r = await fetch("/api/mi-resultado", {method:"POST", headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({ token: token, email: email, obligado: !!ctx.obligado, valor: ctx.valor || 0 })});
+  return await r.json();
+}
+
 if ($("#btnLead")) $("#btnLead").addEventListener("click", async () => {
   const email = ($("#leadEmail").value || "").trim();
   const msg = $("#leadMsg");
-  if (!email || email.indexOf("@") < 1 || email.indexOf(".") < 0) {
-    msg.style.color = "#b3372f"; msg.textContent = "Escribe un correo válido."; return;
-  }
+  if (!_emailOk(email)) { msg.style.color = "#b3372f"; msg.textContent = "Escribe un correo válido."; return; }
   const btn = $("#btnLead"); btn.disabled = true; btn.textContent = "Enviando…";
   try {
-    const ctx = window._resLead || {};
-    const r = await fetch("/api/mi-resultado", {method:"POST", headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({ token: token, email: email, obligado: !!ctx.obligado, valor: ctx.valor || 0 })});
-    const j = await r.json();
+    const j = await enviarLead(email);
     if (j.ok) {
+      window._leadCaptured = true;
       $("#capturaLead").innerHTML = '<div style="font-weight:800;color:var(--verde)">✓ Listo — te enviamos tu resultado a <b>' + email + '</b>. Revisa tu correo 📬</div>';
+    } else {
+      msg.style.color = "#b3372f"; msg.textContent = "⚠ " + (j.error || "No se pudo.");
+      btn.disabled = false; btn.textContent = "Enviármelo →";
+    }
+  } catch (e) {
+    msg.style.color = "#b3372f"; msg.textContent = "Error de red, intenta de nuevo.";
+    btn.disabled = false; btn.textContent = "Enviármelo →";
+  }
+});
+
+// --- Nudge de salida: capta a quien se iba sin dejar el correo ---
+let _nudgeMostrado = false;
+function mostrarNudge() {
+  if (_nudgeMostrado || window._leadCaptured) return;
+  const res = $("#resultado");
+  if (!res || res.classList.contains("oculto")) return;   // solo si ya vio su resultado
+  _nudgeMostrado = true;
+  $("#nudgeSalida").style.display = "flex";
+}
+document.addEventListener("mouseout", (e) => { if (e.clientY <= 0) mostrarNudge(); });   // desktop
+if ($("#nudgeCerrar")) $("#nudgeCerrar").addEventListener("click", () => { $("#nudgeSalida").style.display = "none"; });
+if ($("#nudgeBtn")) $("#nudgeBtn").addEventListener("click", async () => {
+  const email = ($("#nudgeEmail").value || "").trim();
+  const msg = $("#nudgeMsg");
+  if (!_emailOk(email)) { msg.style.color = "#b3372f"; msg.textContent = "Escribe un correo válido."; return; }
+  const btn = $("#nudgeBtn"); btn.disabled = true; btn.textContent = "Enviando…";
+  try {
+    const j = await enviarLead(email);
+    if (j.ok) {
+      window._leadCaptured = true;
+      $("#nudgeCuerpo").innerHTML = '<div style="text-align:center;padding:6px 0"><div style="font-size:2rem">📬</div><div style="font-weight:800;color:var(--verde);margin-top:6px">¡Listo! Te enviamos tu resultado a ' + email + '.</div></div>';
+      setTimeout(() => { $("#nudgeSalida").style.display = "none"; }, 2500);
     } else {
       msg.style.color = "#b3372f"; msg.textContent = "⚠ " + (j.error || "No se pudo.");
       btn.disabled = false; btn.textContent = "Enviármelo →";
@@ -763,6 +820,8 @@ function mostrarResultado(j) {
   window._resLead = { obligado: !!j.obligado, valor: Number(j.valor_a_pagar || 0) };
   const _cap = $("#capturaLead"); if (_cap) _cap.style.display = "";
   const _lm = $("#leadMsg"); if (_lm) _lm.textContent = "";
+  clearTimeout(window._nudgeTimer);                       // fallback móvil: si no captura en 30s, ofrécelo
+  window._nudgeTimer = setTimeout(mostrarNudge, 30000);
   $("#resNit").textContent = j.nit_final || "··";
   $("#resCab").innerHTML = (j.nombre ? `Hola <b>${j.nombre}</b> — resultado para tu documento terminado en <b>${j.nit_final}</b>` :
                             `Resultado para tu documento terminado en <b>${j.nit_final}</b>`);
