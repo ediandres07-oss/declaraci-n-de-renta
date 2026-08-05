@@ -27,8 +27,8 @@ def _es_propio(email: str) -> bool:
     e = (email or "").strip().lower()
     if not e or "@" not in e:
         return True
-    if e.startswith("ediandres07") or e == "contacto@tributando.co":
-        return True
+    if e.startswith("ediandres07") or e in ("contacto@tributando.co", "davinchitose@gmail.com"):
+        return True   # cuentas del dueño (davinchitose = misma cédula que ediandres07)
     if e.split("@")[-1] in ("test.co", "test.com", "example.com", "qa.co"):
         return True
     if e.startswith(("prueba.qa", "nuevo.qa", "qa.", "test.")) or ".qa@" in e:
