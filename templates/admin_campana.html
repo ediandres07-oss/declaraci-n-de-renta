@@ -44,11 +44,11 @@
   <div class="card">
     <label>1 · Público</label>
     <div class="aud">
-      <label><input type="radio" name="pub" value="personas" checked> 👤 Personas naturales</label>
-      <label><input type="radio" name="pub" value="contadores"> 👔 Contadores</label>
-      <label><input type="radio" name="pub" value="guia"> 🎁 Leads de la guía</label>
-      <label><input type="radio" name="pub" value="calculo"> 🧮 Leads del cálculo</label>
-      <label><input type="radio" name="pub" value="todos"> 🌐 Todos</label>
+      <label><input type="radio" name="pub" value="personas" checked> 👤 Personas naturales <b style="margin-left:auto">{{ cont.personas }}</b></label>
+      <label><input type="radio" name="pub" value="contadores"> 👔 Contadores <b style="margin-left:auto">{{ cont.contadores }}</b></label>
+      <label><input type="radio" name="pub" value="guia"> 🎁 Leads de la guía <b style="margin-left:auto">{{ cont.guia }}</b></label>
+      <label><input type="radio" name="pub" value="calculo"> 🧮 Leads del cálculo <b style="margin-left:auto">{{ cont.calculo }}</b></label>
+      <label><input type="radio" name="pub" value="todos"> 🌐 Todos <b style="margin-left:auto">{{ cont.todos }}</b></label>
       <label><input type="radio" name="pub" value="lista"> ✍️ Lista a la medida</label>
     </div>
     <div id="listaBox" style="display:none">

@@ -499,7 +499,8 @@ def enlaces():
 def admin_dashboard():
     """Panel con el pulso del negocio: funnel B2C, pases de temporada y Lector."""
     from src import gerente as _ger
-    return render_template("admin_dashboard.html", m=_ger.metricas_negocio())
+    return render_template("admin_dashboard.html", m=_ger.metricas_negocio(),
+                           cont=_ger.metricas_contactos())
 
 
 @app.get("/admin/lector")
@@ -620,7 +621,8 @@ def _emails_de(b):
 def admin_campana():
     """Panel de campañas: redactar, elegir público, preview, enviar e historial."""
     from src import gerente as _ger
-    return render_template("admin_campana.html", historial=_ger.historial_campanas())
+    return render_template("admin_campana.html", historial=_ger.historial_campanas(),
+                           cont=_ger.metricas_contactos())
 
 
 @app.route("/admin/campana/preview", methods=["GET", "POST"])

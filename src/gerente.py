@@ -105,6 +105,28 @@ def destinatarios_campana(publico: str = "personas", emails=None) -> list[str]:
     return sorted(c for c in correos if not _es_propio(c))
 
 
+def metricas_contactos() -> dict:
+    """Conteo de contactos por audiencia, para estadísticas y campañas."""
+    from src.auth import MuestraContador, MuestraContadorEmail
+    cortesia = set()
+    for m in MuestraContador.query.all():
+        if m.email:
+            cortesia.add(m.email.strip().lower())
+    for m in MuestraContadorEmail.query.all():
+        if m.email:
+            cortesia.add(m.email.strip().lower())
+    lector = {s.email.strip().lower() for s in SuscripcionLector.query.all() if s.email}
+    return {
+        "todos": len(destinatarios_campana("todos")),
+        "personas": len(destinatarios_campana("personas")),   # naturales registrados
+        "calculo": len(destinatarios_campana("calculo")),      # dejaron correo en el cálculo
+        "guia": len(destinatarios_campana("guia")),            # lista de espera (guía)
+        "contadores": len(destinatarios_campana("contadores")),
+        "cortesia": len([c for c in cortesia if not _es_propio(c)]),
+        "lector": len([c for c in lector if not _es_propio(c)]),
+    }
+
+
 def envolver_campana(cuerpo_html: str, cta_txt: str = "", cta_url: str = "https://tributando.co") -> str:
     """Envuelve el mensaje de una campaña en la plantilla de marca de Tributando."""
     cta = ""

@@ -98,6 +98,18 @@
     <div class="card"><div class="n">{{ m.lector_empresas }}</div><div class="l">Empresas registradas</div></div>
   </div>
 
+  <h2>📇 Contactos por audiencia <span style="font-size:.72rem;color:var(--tx2);font-weight:400">(para campañas)</span></h2>
+  <div class="grid">
+    <div class="card"><div class="n">{{ cont.todos }}</div><div class="l">Todos (únicos)</div></div>
+    <div class="card"><div class="n">{{ cont.personas }}</div><div class="l">👤 Personas naturales</div></div>
+    <div class="card oro"><div class="n">{{ cont.calculo }}</div><div class="l">🧮 Dejaron correo en el cálculo</div></div>
+    <div class="card"><div class="n">{{ cont.guia }}</div><div class="l">🎁 Leads de la guía</div></div>
+    <div class="card"><div class="n">{{ cont.contadores }}</div><div class="l">👔 Contadores</div></div>
+    <div class="card verde"><div class="n">{{ cont.cortesia }}</div><div class="l">🎟️ Contadores con cortesía</div></div>
+    <div class="card verde"><div class="n">{{ cont.lector }}</div><div class="l">🤖 Lector (con licencia)</div></div>
+  </div>
+  <p style="text-align:center;margin:14px 0 0"><a href="/admin/campana" style="color:var(--oro);font-weight:700;text-decoration:none">Enviar una campaña a estas audiencias →</a></p>
+
   <nav class="links">
     <a href="/admin/lector">Suscripciones del Lector →</a>
     <a href="/admin">Panel admin →</a>
