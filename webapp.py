@@ -2572,6 +2572,7 @@ button:hover:not(:disabled){{transform:translateY(-2px); box-shadow:0 8px 18px r
 </style></head><body>
 <div class="nav-admin">
   <a class="actual">🏠 Órdenes y usuarios</a>
+  <a href="/admin/dashboard" style="background:#1e2432">📊 Panel del negocio</a>
   <a href="/admin/lector">🔑 Suscripciones Lector XML</a>
   <a href="/vencimientos">📅 Gestor de vencimientos</a>
 </div>
