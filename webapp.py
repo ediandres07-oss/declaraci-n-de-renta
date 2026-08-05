@@ -381,6 +381,28 @@ def api_chat():
 # Meta valida el webhook con un GET (handshake) y entrega los mensajes con un
 # POST. El POST debe responder 200 rápido o Meta reintenta; por eso cualquier
 # fallo se traga y siempre devolvemos 200.
+def _wa_avisar_traspaso(remitente: str, texto: str) -> None:
+    """Avisa al dueño (Telegram + correo) que un contador pide hablar en persona."""
+    seguro = (texto or "")[:200].replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+    aviso = (f"📲 Un contador pide hablar contigo en WhatsApp.\n"
+             f"De: +{remitente}\n"
+             f"Mensaje: \"{seguro}\"\n"
+             f"Abre el chat: https://wa.me/{remitente}\n"
+             f"(El bot se pausó 6h en ese chat para que le respondas tú.)")
+    try:
+        from src import gerente as _ger
+        _ger._telegram_enviar(aviso)
+    except Exception:
+        pass
+    try:
+        from src.correo import enviar_email
+        enviar_email("ediandres07@gmail.com",
+                     "📲 Un contador quiere hablar contigo (WhatsApp)",
+                     f"<pre style='font-family:-apple-system,sans-serif;font-size:14px;white-space:pre-wrap'>{aviso}</pre>")
+    except Exception:
+        pass
+
+
 @app.get("/api/whatsapp")
 def whatsapp_verificar():
     challenge = wa_mod.verificar_webhook(
@@ -400,8 +422,10 @@ def whatsapp_webhook():
     if wa_mod.activo(IA_CFG) and asistente_ia_activo(IA_CFG):
         # Los contadores llegan por WhatsApp (campañas + /contadores): el asistente
         # los atiende con el contexto de contador (pase de temporada / Lector XML).
+        # Si piden hablar con una persona, el bot avisa al dueño y se calla en ese chat.
         wa_mod.atender(IA_CFG, payload,
-                       lambda hist: responder_ia(hist, IA_CFG, contexto="contador"))
+                       lambda hist: responder_ia(hist, IA_CFG, contexto="contador"),
+                       on_handoff=_wa_avisar_traspaso)
     return "ok", 200
 
 

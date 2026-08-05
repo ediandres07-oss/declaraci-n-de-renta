@@ -129,18 +129,68 @@ def enviar(cfg: dict | None, destino: str, texto: str) -> bool:
     return True
 
 
-def atender(cfg: dict | None, payload: dict | None, generar_respuesta) -> int:
+# --- Traspaso a humano: si el contador pide hablar con una persona/el dueño ---
+_PAUSA_HORAS = 6                     # tras el traspaso, el bot calla este rato en ese chat
+_pausados: dict = {}                # remitente -> timestamp del traspaso
+_MSG_HANDOFF = ("¡Con gusto! 🙌 Ya le aviso a *Edison* para que te escriba personalmente. "
+                "Dame un momentico. Mientras, cuéntame por aquí lo que necesites.")
+_FRASES_HUMANO = (
+    "hablar con", "hablar contigo", "con una persona", "con alguien",
+    "con un asesor", "con una asesora", "con el dueño", "con el dueno", "con edison",
+    "un humano", "atención personal", "atencion personal", "me escribes", "me llamas",
+    "me contactas", "me puedes llamar", "me puede llamar", "quiero hablar",
+    "puedo hablar", "número de contacto", "numero de contacto",
+)
+
+
+def _pide_humano(texto: str) -> bool:
+    t = (texto or "").lower()
+    return any(f in t for f in _FRASES_HUMANO)
+
+
+def _pausar(remitente: str) -> None:
+    with _lock:
+        _pausados[remitente] = time.time()
+
+
+def _en_pausa(remitente: str) -> bool:
+    with _lock:
+        t = _pausados.get(remitente)
+    return bool(t and (time.time() - t) < _PAUSA_HORAS * 3600)
+
+
+def atender(cfg: dict | None, payload: dict | None, generar_respuesta,
+            on_handoff=None) -> int:
     """Procesa un webhook entrante y responde cada mensaje nuevo.
 
     `generar_respuesta(historial)` recibe el historial [{rol, texto}] (con el
-    mensaje actual al final) y devuelve el texto de respuesta. Devuelve cuántos
-    mensajes se atendieron. Nunca lanza: un fallo con un remitente no frena a los demás.
+    mensaje actual al final) y devuelve el texto de respuesta. `on_handoff(remitente,
+    texto)` (opcional) se llama cuando el contador pide hablar con una persona: el
+    bot avisa al dueño y se calla en ese chat para que él responda. Devuelve cuántos
+    mensajes atendió. Nunca lanza: un fallo con un remitente no frena a los demás.
     """
     atendidos = 0
     for remitente, texto, msg_id in extraer_mensajes(payload):
         if not _recordar_id(msg_id):
             continue
         try:
+            # El dueño ya está atendiendo este chat: guarda el contexto, no respondas.
+            if _en_pausa(remitente):
+                _agregar_turno(remitente, "user", texto)
+                continue
+            # ¿Pide hablar con una persona/el dueño? → traspaso a humano.
+            if _pide_humano(texto):
+                _agregar_turno(remitente, "user", texto)
+                enviar(cfg, remitente, _MSG_HANDOFF)
+                _agregar_turno(remitente, "assistant", _MSG_HANDOFF)
+                _pausar(remitente)
+                if on_handoff:
+                    try:
+                        on_handoff(remitente, texto)
+                    except Exception:
+                        _log.warning("WhatsApp: fallo avisando el traspaso", exc_info=True)
+                atendidos += 1
+                continue
             historial = _agregar_turno(remitente, "user", texto)
             respuesta = (generar_respuesta(historial) or "").strip()
             if respuesta:
