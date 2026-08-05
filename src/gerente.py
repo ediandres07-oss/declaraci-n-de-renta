@@ -135,7 +135,7 @@ def informe_diario() -> bool:
 def metricas_negocio() -> dict:
     """Números vivos para el panel: funnel B2C (renta), pase de temporada de
     contadores y estado del Lector (pruebas/pagadas). Lee lo que ya existe."""
-    from src.auth import ArchivoExogena, AccesoAutorizado, EmpresaLector
+    from src.auth import ArchivoExogena, AccesoAutorizado, EmpresaLector, LeadExogena
 
     hoy = date.today()
     b2c_creadas = b2c_pagadas = 0
@@ -176,6 +176,7 @@ def metricas_negocio() -> dict:
     return {
         "exogenas": ArchivoExogena.query.count(),
         "leads": LeadEspera.query.count(),
+        "leads_exogena": LeadExogena.query.count(),
         "b2c_creadas": b2c_creadas,
         "b2c_pagadas": b2c_pagadas,
         "b2c_conversion": round(100 * b2c_pagadas / b2c_creadas) if b2c_creadas else 0,

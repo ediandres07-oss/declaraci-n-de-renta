@@ -27,7 +27,8 @@ from src import wompi as wompi_mod
 from src.asistente import asistente_activo as asistente_ia_activo
 from src.asistente import cargar_config as cargar_config_ia
 from src.asistente import responder as responder_ia
-from src.auth import (AccesoAutorizado, ArchivoExogena, LeadEspera, MuestraContador,
+from src.auth import (AccesoAutorizado, ArchivoExogena, LeadEspera, LeadExogena,
+                      MuestraContador,
                       OrdenRegistro, Usuario, auth_bp, autorizado_requerido, db,
                       init_auth, login_requerido, pro_requerido, usuario_actual,
                       PLANES_LECTOR, SuscripcionLector, EmpresaLector,
@@ -1519,6 +1520,81 @@ def _monto_valido(valor) -> float:
     if monto < 0 or monto > 1e13:
         raise ValueError(valor)
     return monto
+
+
+def _correo_resultado_lead(nombre, limite, obligado, valor):
+    """(asunto, html) del correo con el resultado del cálculo gratis."""
+    meses = ["", "enero", "febrero", "marzo", "abril", "mayo", "junio", "julio",
+             "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
+    fecha_txt = f"{limite.day} de {meses[limite.month]} de {limite.year}" if limite else "por confirmar"
+    hola = f"Hola {nombre.split()[0].title()} 👋" if nombre else "Hola 👋"
+    linea = ("Según tu exógena, <b>estás obligado a declarar renta</b>."
+             if obligado else
+             "Con lo reportado quizá no pagues impuesto, pero <b>revisa si estás obligado a presentar</b>.")
+    valor_txt = f"${valor:,.0f}".replace(",", ".")
+    html = f"""
+    <div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:540px;margin:auto;color:#2b3242">
+      <div style="background:#1e2432;padding:22px 26px;border-radius:14px 14px 0 0;text-align:center">
+        <div style="font-size:20px;font-weight:800;color:#fff">Tributando<span style="color:#cdab7e">.co</span></div>
+      </div>
+      <div style="background:#fff;border:1px solid #e6e2d8;border-top:none;border-radius:0 0 14px 14px;padding:26px">
+        <h1 style="font-size:20px;color:#1e2432;margin:0 0 8px">{hola}</h1>
+        <p style="font-size:15px;line-height:1.55">{linea}</p>
+        <table role="presentation" width="100%" style="margin:14px 0;border-collapse:collapse">
+          <tr><td style="padding:10px 0;border-bottom:1px solid #eee;font-size:14px;color:#6a7482">Valor estimado a pagar</td>
+              <td style="padding:10px 0;border-bottom:1px solid #eee;text-align:right;font-weight:800;color:#1e2432">{valor_txt}</td></tr>
+          <tr><td style="padding:10px 0;font-size:14px;color:#6a7482">Tu fecha límite</td>
+              <td style="padding:10px 0;text-align:right;font-weight:800;color:#c8991f">{fecha_txt}</td></tr>
+        </table>
+        <p style="font-size:14px;line-height:1.55;color:#4b5563">Te recordaremos antes de que venza para que <b>no pagues sanción</b>. Cuando quieras, elaboramos y <b>presentamos tu declaración ante la DIAN</b> por ti.</p>
+        <div style="text-align:center;margin:20px 0 6px">
+          <a href="https://tributando.co" style="display:inline-block;background:#c8991f;color:#fff;font-weight:800;text-decoration:none;padding:13px 30px;border-radius:11px">Ver mi declaración →</a>
+        </div>
+        <p style="color:#9aa2b0;font-size:12px;margin-top:14px">Estimado con la información reportada a la DIAN; puede variar. ¿Dudas? Responde este correo.</p>
+      </div>
+    </div>"""
+    return "📄 Tu resultado de renta y tu fecha límite", html
+
+
+@app.post("/api/mi-resultado")
+def guardar_lead_exogena():
+    """Guarda el correo de quien calculó gratis (para recordarle y recuperarlo) y
+    le envía su resultado. Captura el lead que antes se perdía."""
+    b = request.get_json(silent=True) or {}
+    token = (b.get("token") or "").strip()
+    email = (b.get("email") or "").strip().lower()
+    if not email or "@" not in email or "." not in email.rsplit("@", 1)[-1]:
+        return jsonify({"ok": False, "error": "Escribe un correo válido."}), 400
+
+    carga = _leer_ordenes().get(token) or {}
+    nombre = carga.get("nombre", "")
+    nit = carga.get("nit", "")
+    limite = fecha_limite(nit, PLANTILLA) if nit else None
+    try:
+        valor = _monto_valido(b.get("valor") or 0)
+    except (TypeError, ValueError):
+        valor = 0.0
+    obligado = bool(b.get("obligado"))
+
+    lead = db.session.get(LeadExogena, email)
+    if lead is None:
+        lead = LeadExogena(email=email)
+        db.session.add(lead)
+    lead.nombre = nombre or lead.nombre
+    lead.nit = nit or lead.nit
+    lead.fecha_limite = limite
+    lead.obligado = obligado
+    lead.valor = valor
+    lead.token = token or lead.token
+    db.session.commit()
+
+    try:
+        from src.correo import enviar_email
+        asunto, html = _correo_resultado_lead(nombre, limite, obligado, valor)
+        enviar_email(email, asunto, html)
+    except Exception:
+        app.logger.warning("mi-resultado: no se pudo enviar el correo de resultado")
+    return jsonify({"ok": True})
 
 
 @app.post("/api/recalcular-landing")

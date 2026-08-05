@@ -127,6 +127,22 @@ class LeadEspera(db.Model):
     creado = db.Column(db.DateTime, default=datetime.utcnow)
 
 
+class LeadExogena(db.Model):
+    """Lead capturado en el cálculo GRATIS de renta: la persona subió su exógena,
+    vio su resultado y dejó su correo para recibirlo + recordatorio. Es la base de
+    la secuencia de recuperación (los que calculan y no compran de una)."""
+    __tablename__ = "leads_exogena"
+    email = db.Column(db.String(200), primary_key=True)   # en minúsculas
+    nombre = db.Column(db.String(200))
+    nit = db.Column(db.String(30))
+    fecha_limite = db.Column(db.Date)                     # su plazo para declarar
+    obligado = db.Column(db.Boolean, default=False)
+    valor = db.Column(db.Float, default=0)                # valor estimado a pagar
+    token = db.Column(db.String(100))                     # carga asociada
+    onboarding = db.Column(db.String(40), default="")     # días de recuperación ya enviados
+    creado = db.Column(db.DateTime, default=datetime.utcnow)
+
+
 class ArchivoExogena(db.Model):
     """Excel de exógena subido por el cliente, guardado en la BD (Postgres en
     producción) para que un redeploy no borre el insumo del trámite: es el

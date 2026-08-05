@@ -536,6 +536,17 @@
         <div id="resObligado"></div>
       </div>
     </div>
+    <div id="capturaLead" style="padding:16px 22px;border-top:1px solid var(--borde);background:var(--gris)">
+      <div style="font-weight:800;color:var(--azul);font-size:.95rem">📧 ¿Te enviamos tu resultado y tu fecha límite por correo?</div>
+      <div style="font-size:.8rem;color:#5a6b7f;margin:3px 0 10px">Te lo guardamos y te avisamos <b>antes de que venza</b>, para que no pagues sanción.</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <input id="leadEmail" type="email" inputmode="email" autocomplete="email" placeholder="tucorreo@ejemplo.com"
+          style="flex:1;min-width:190px;padding:11px;border:1px solid var(--borde);border-radius:9px;font-size:.92rem">
+        <button id="btnLead" style="border:0;border-radius:9px;padding:11px 22px;font-weight:800;cursor:pointer;background:var(--azul2);color:#fff">Enviármelo →</button>
+      </div>
+      <div id="leadMsg" style="font-size:.82rem;margin-top:8px"></div>
+    </div>
+
     <div style="padding:10px 22px;border-top:1px solid var(--borde);text-align:right">
       <button id="btnEliminar" style="border:0;background:none;color:#9db0c4;font-size:.78rem;
         cursor:pointer;text-decoration:underline">🗑 No quiero continuar — eliminar mi archivo y mis datos</button>
@@ -721,7 +732,34 @@ async function cargar(archivo) {
   }
 }
 
+if ($("#btnLead")) $("#btnLead").addEventListener("click", async () => {
+  const email = ($("#leadEmail").value || "").trim();
+  const msg = $("#leadMsg");
+  if (!email || email.indexOf("@") < 1 || email.indexOf(".") < 0) {
+    msg.style.color = "#b3372f"; msg.textContent = "Escribe un correo válido."; return;
+  }
+  const btn = $("#btnLead"); btn.disabled = true; btn.textContent = "Enviando…";
+  try {
+    const ctx = window._resLead || {};
+    const r = await fetch("/api/mi-resultado", {method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ token: token, email: email, obligado: !!ctx.obligado, valor: ctx.valor || 0 })});
+    const j = await r.json();
+    if (j.ok) {
+      $("#capturaLead").innerHTML = '<div style="font-weight:800;color:var(--verde)">✓ Listo — te enviamos tu resultado a <b>' + email + '</b>. Revisa tu correo 📬</div>';
+    } else {
+      msg.style.color = "#b3372f"; msg.textContent = "⚠ " + (j.error || "No se pudo.");
+      btn.disabled = false; btn.textContent = "Enviármelo →";
+    }
+  } catch (e) {
+    msg.style.color = "#b3372f"; msg.textContent = "Error de red, intenta de nuevo.";
+    btn.disabled = false; btn.textContent = "Enviármelo →";
+  }
+});
+
 function mostrarResultado(j) {
+  window._resLead = { obligado: !!j.obligado, valor: Number(j.valor_a_pagar || 0) };
+  const _cap = $("#capturaLead"); if (_cap) _cap.style.display = "";
+  const _lm = $("#leadMsg"); if (_lm) _lm.textContent = "";
   $("#resNit").textContent = j.nit_final || "··";
   $("#resCab").innerHTML = (j.nombre ? `Hola <b>${j.nombre}</b> — resultado para tu documento terminado en <b>${j.nit_final}</b>` :
                             `Resultado para tu documento terminado en <b>${j.nit_final}</b>`);
