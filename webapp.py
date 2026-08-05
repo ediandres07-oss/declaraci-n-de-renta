@@ -19,7 +19,7 @@ from datetime import date, datetime
 from pathlib import Path
 
 import yaml
-from flask import (Flask, jsonify, redirect, render_template,
+from flask import (Flask, Response, jsonify, redirect, render_template,
                    render_template_string, request, send_file, session, url_for)
 
 from src import whatsapp as wa_mod
@@ -36,7 +36,7 @@ from src.auth import (AccesoAutorizado, ArchivoExogena, LeadEspera, MuestraConta
                       esta_bloqueado, limpiar_intentos_fallidos,
                       agente_consumir, agente_set)
 from src.calendario import fecha_limite
-from src.vencimientos import venc_bp
+from src.vencimientos import venc_bp, calendario_publico
 from src.documentos import generar_checklist_pdf
 from src.guia_dian import generar_guia_dian_pdf
 
@@ -424,6 +424,49 @@ def contabilidad():
     """Página del servicio de contabilidad para negocios (cross-sell)."""
     return render_template("contabilidad.html",
                            ia_whatsapp=IA_CFG.get("negocio", {}).get("whatsapp", ""))
+
+
+@app.get("/calendario-tributario-2026")
+@app.get("/calendario")
+def calendario_2026_publico():
+    """Calendario tributario 2026 PÚBLICO e indexable (SEO). Muestra el rango de
+    fechas de cada obligación; la fecha exacta por dígito de NIT y lo personalizado
+    (avisos, PDF con logo, multi-cliente) queda tras el login en /vencimientos."""
+    _M = ["", "ene", "feb", "mar", "abr", "may", "jun",
+          "jul", "ago", "sep", "oct", "nov", "dic"]
+    fmt = lambda d: f"{d.day} {_M[d.month]}"
+    obligaciones = []
+    for ob in calendario_publico(2026):
+        periodos = [{
+            "etiqueta": p["etiqueta"],
+            "rango": fmt(p["hasta"]) if p["desde"] == p["hasta"]
+                     else f"{fmt(p['desde'])} – {fmt(p['hasta'])}",
+            "por_digito": p["por_digito"],
+        } for p in ob["periodos"]]
+        obligaciones.append({"nombre": ob["nombre"], "periodos": periodos})
+    return render_template("calendario_publico.html", ano=2026, obligaciones=obligaciones)
+
+
+# --- SEO: robots + sitemap (para que Google indexe las páginas públicas) ---
+_URLS_PUBLICAS = ["/", "/calendario-tributario-2026", "/contabilidad",
+                  "/contadores", "/links"]
+
+
+@app.get("/robots.txt")
+def robots_txt():
+    cuerpo = ("User-agent: *\nAllow: /\n"
+              "Sitemap: https://tributando.co/sitemap.xml\n")
+    return Response(cuerpo, mimetype="text/plain")
+
+
+@app.get("/sitemap.xml")
+def sitemap_xml():
+    base = "https://tributando.co"
+    urls = "".join(f"<url><loc>{base}{u}</loc></url>" for u in _URLS_PUBLICAS)
+    xml = ('<?xml version="1.0" encoding="UTF-8"?>'
+           '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+           f'{urls}</urlset>')
+    return Response(xml, mimetype="application/xml")
 
 
 @app.get("/privacidad")

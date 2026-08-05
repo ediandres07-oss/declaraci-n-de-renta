@@ -180,6 +180,36 @@ def catalogo_obligaciones(ano: int = 2026) -> List[dict]:
             for k, v in cal.get("obligaciones", {}).items()]
 
 
+def calendario_publico(ano: int = 2026) -> List[dict]:
+    """Vista pública (sin NIT) del calendario: cada obligación con sus períodos y
+    el RANGO de fechas (según el último dígito del NIT). Sirve para una página
+    indexable por buscadores; la fecha exacta por dígito queda tras el login."""
+    cal = cargar_calendario(ano)
+    salida = []
+    for clave, ob in cal.get("obligaciones", {}).items():
+        periodos = []
+        for periodo in ob.get("periodos", []):
+            fechas = []
+            for f in (periodo.get("fechas") or {}).values():
+                fechas.append(f if isinstance(f, date)
+                              else datetime.strptime(str(f), "%Y-%m-%d").date())
+            if not fechas:
+                continue
+            periodos.append({
+                "etiqueta": periodo.get("etiqueta", ""),
+                "desde": min(fechas),
+                "hasta": max(fechas),
+                "por_digito": len(set(fechas)) > 1,   # ¿la fecha cambia según el NIT?
+            })
+        if periodos:
+            salida.append({
+                "clave": clave,
+                "nombre": ob.get("nombre", clave),
+                "periodos": periodos,
+            })
+    return salida
+
+
 # Obligaciones sugeridas al elegir el tipo de cliente (el contador puede ajustar)
 SUGERENCIAS = {
     "natural": ["renta_pn"],

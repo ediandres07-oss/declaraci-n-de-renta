@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calendario Tributario {{ ano }} Colombia — Vencimientos DIAN | Tributando.co</title>
+<meta name="description" content="Calendario tributario {{ ano }} en Colombia: fechas de vencimiento DIAN de renta, IVA, retención en la fuente, exógena, régimen simple, ICA y nómina electrónica. Consulta y organiza los plazos de tus clientes.">
+<link rel="canonical" href="https://tributando.co/calendario-tributario-{{ ano }}">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Calendario Tributario {{ ano }} Colombia — Vencimientos DIAN">
+<meta property="og:description" content="Todas las fechas de vencimiento DIAN {{ ano }}: renta, IVA, retención, exógena, RST, ICA y nómina.">
+<meta property="og:url" content="https://tributando.co/calendario-tributario-{{ ano }}">
+<style>
+  :root{ --navy:#1e2432; --oro:#c8991f; --dorado:#cdab7e; --tx:#2b3242; --tx2:#5a6473;
+         --ln:#e6e2d8; --bg:#f7f5f1; --card:#fff; }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{ font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+        color:var(--tx); background:var(--bg); line-height:1.55; }
+  .wrap{ max-width:900px; margin:0 auto; padding:0 18px; }
+  header{ background:var(--navy); color:#fff; padding:40px 0 34px; text-align:center; }
+  header .marca{ font-size:1.15rem; font-weight:800; letter-spacing:.2px; margin-bottom:14px; }
+  header .marca span{ color:var(--dorado); }
+  h1{ font-size:clamp(1.6rem,3vw+1rem,2.3rem); font-weight:800; line-height:1.2; }
+  header p{ color:#c9d0dc; margin-top:10px; font-size:1rem; }
+  main{ padding:34px 0 20px; }
+  .intro{ color:var(--tx2); font-size:1rem; margin-bottom:26px; }
+  .intro b{ color:var(--tx); }
+  .obl{ background:var(--card); border:1px solid var(--ln); border-radius:14px;
+        padding:18px 20px; margin-bottom:16px; box-shadow:0 4px 16px rgba(20,26,40,.05); }
+  .obl h2{ font-size:1.15rem; color:var(--navy); margin-bottom:12px; }
+  table{ width:100%; border-collapse:collapse; font-size:.95rem; }
+  th,td{ text-align:left; padding:8px 10px; border-bottom:1px solid #f0ede5; }
+  th{ font-size:.78rem; text-transform:uppercase; letter-spacing:.4px; color:var(--tx2); }
+  td.rango{ font-weight:700; color:var(--navy); white-space:nowrap; }
+  .nota-dig{ font-size:.78rem; color:var(--oro); }
+  .aviso{ background:#fbf7ec; border:1px solid #ecdcb4; border-radius:12px;
+          padding:14px 16px; font-size:.9rem; color:#6b5827; margin:6px 0 30px; }
+  .cta{ background:var(--navy); color:#fff; border-radius:18px; padding:32px 26px;
+        text-align:center; margin:20px 0 34px; }
+  .cta h3{ font-size:1.35rem; margin-bottom:8px; }
+  .cta p{ color:#c9d0dc; margin-bottom:18px; }
+  .cta a.boton{ display:inline-block; background:var(--dorado); color:var(--navy);
+                font-weight:800; text-decoration:none; padding:13px 30px; border-radius:12px; }
+  .cta small{ display:block; color:#9aa2b0; margin-top:12px; }
+  footer{ text-align:center; color:var(--tx2); font-size:.82rem; padding:24px 0 40px; }
+  footer a{ color:var(--oro); text-decoration:none; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="marca">Tributando<span>.co</span></div>
+    <h1>Calendario tributario {{ ano }} en Colombia</h1>
+    <p>Fechas de vencimiento de la DIAN, organizadas por obligación.</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <p class="intro">
+    Estas son las <b>fechas de vencimiento {{ ano }}</b> de las principales obligaciones ante la
+    <b>DIAN</b>: declaración de <b>renta</b>, <b>IVA</b>, <b>retención en la fuente</b>,
+    <b>información exógena</b>, <b>Régimen Simple (RST)</b>, <b>ICA</b> y <b>nómina electrónica</b>.
+    La fecha exacta depende del <b>último dígito del NIT</b>; abajo ves el rango de cada período.
+  </p>
+
+  {% for ob in obligaciones %}
+  <section class="obl">
+    <h2>{{ ob.nombre }}</h2>
+    <table>
+      <thead><tr><th>Período</th><th>Vence ({{ ano }})</th><th></th></tr></thead>
+      <tbody>
+        {% for p in ob.periodos %}
+        <tr>
+          <td>{{ p.etiqueta }}</td>
+          <td class="rango">{{ p.rango }}</td>
+          <td class="nota-dig">{% if p.por_digito %}según último dígito del NIT{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+  {% endfor %}
+
+  <div class="aviso">
+    📌 Calendario de apoyo con base en el calendario tributario {{ ano }}. Verifica siempre la
+    fecha exacta según el <b>último dígito del NIT</b> de cada contribuyente.
+  </div>
+
+  <div class="cta">
+    <h3>¿Contador? Deja de perseguir fechas 📅</h3>
+    <p>Gratis: guarda a <b>todos tus clientes</b>, recibe avisos automáticos por correo,
+      exporta el calendario a tu celular y descarga un informe en PDF con tu logo.</p>
+    <a class="boton" href="/vencimientos">Usar el gestor de vencimientos →</a>
+    <small>Gratis para contadores · con tu cuenta de Google o Microsoft</small>
+  </div>
+
+  <p class="intro" style="text-align:center">
+    ¿Persona natural? Calcula tu <a href="/" style="color:var(--oro);font-weight:700">declaración de renta {{ ano }}</a> antes de pagar.
+  </p>
+</main>
+
+<footer>
+  Tributando.co · Calendario tributario Colombia · <a href="/">Inicio</a> ·
+  <a href="/vencimientos">Gestor de vencimientos</a> · <a href="/contabilidad">Contabilidad</a>
+</footer>
+
+</body>
+</html>

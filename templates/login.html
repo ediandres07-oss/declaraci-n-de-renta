@@ -64,9 +64,15 @@
 <!-- FORMULARIO LOGIN (centrado sobre mapa) -->
 <div class="contenedor">
   <div class="caja">
+    {% if 'vencimientos' in next %}
+    <div class="logo">📅</div>
+    <h1>Acceso para contadores</h1>
+    <p class="sub">Gratis: controla los vencimientos de <b>todos tus clientes</b>, recibe avisos y descarga el calendario DIAN con tu logo.</p>
+    {% else %}
     <div class="logo">🧾</div>
     <h1>Ingresa a tu cuenta</h1>
     <p class="sub">Guarda tu fecha de vencimiento y recibe recordatorios para no pagar sanciones.</p>
+    {% endif %}
 
     {% if error == "no_configurado" %}
       <div class="no-config">Ese método de ingreso aún no está configurado. Intenta con otro.</div>
