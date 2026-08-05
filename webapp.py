@@ -398,7 +398,10 @@ def whatsapp_verificar():
 def whatsapp_webhook():
     payload = request.get_json(silent=True) or {}
     if wa_mod.activo(IA_CFG) and asistente_ia_activo(IA_CFG):
-        wa_mod.atender(IA_CFG, payload, lambda hist: responder_ia(hist, IA_CFG))
+        # Los contadores llegan por WhatsApp (campañas + /contadores): el asistente
+        # los atiende con el contexto de contador (pase de temporada / Lector XML).
+        wa_mod.atender(IA_CFG, payload,
+                       lambda hist: responder_ia(hist, IA_CFG, contexto="contador"))
     return "ok", 200
 
 
