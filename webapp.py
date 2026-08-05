@@ -625,6 +625,20 @@ def admin_campana():
                            cont=_ger.metricas_contactos())
 
 
+@app.get("/admin/telegram/probar")
+@autorizado_requerido
+def admin_telegram_probar():
+    """Manda un mensaje de prueba a Telegram para verificar la configuración."""
+    from src import gerente as _ger
+    if not _ger.telegram_configurado():
+        return jsonify({"ok": False,
+                        "error": "Faltan TELEGRAM_BOT_TOKEN y/o TELEGRAM_CHAT_ID en Render."}), 400
+    ok = _ger._telegram_enviar(
+        "✅ <b>Telegram conectado</b> a Tributando. Aquí te avisaré de cada venta. 💰")
+    return jsonify({"ok": ok} if ok else
+                   {"ok": False, "error": "No se pudo enviar. Revisa el token y el chat_id."})
+
+
 @app.route("/admin/campana/preview", methods=["GET", "POST"])
 @autorizado_requerido
 def admin_campana_preview():
@@ -2040,6 +2054,12 @@ def _finalizar_pago_orden(orden_id: str, orden: dict, ordenes: dict) -> None:
         from src.correo import notificar_pago
         if notificar_pago(orden_id, orden, confirmado=True):
             orden["aviso_pago_confirmado_enviado"] = True
+
+    # Push instantáneo a Telegram del dueño (bandera propia: no repetir).
+    if not orden.get("aviso_venta_telegram"):
+        from src import gerente as _ger
+        if _ger.notificar_venta_telegram(orden_id, orden):
+            orden["aviso_venta_telegram"] = True
 
     # Entrega automática al cliente (plan PDF): Formulario 210 + guía + links.
     _entregar_pdf_al_cliente(orden_id, orden, ordenes)

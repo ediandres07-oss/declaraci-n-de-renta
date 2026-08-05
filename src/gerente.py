@@ -105,6 +105,45 @@ def destinatarios_campana(publico: str = "personas", emails=None) -> list[str]:
     return sorted(c for c in correos if not _es_propio(c))
 
 
+def _telegram_enviar(texto: str) -> bool:
+    """Manda un mensaje a Telegram. Requiere TELEGRAM_BOT_TOKEN y TELEGRAM_CHAT_ID
+    en el entorno (Render). Devuelve True si se envió. Nunca lanza."""
+    import os
+    token = (os.environ.get("TELEGRAM_BOT_TOKEN") or "").strip()
+    chat = (os.environ.get("TELEGRAM_CHAT_ID") or "").strip()
+    if not token or not chat:
+        return False
+    try:
+        import requests
+        r = requests.post(f"https://api.telegram.org/bot{token}/sendMessage",
+                          json={"chat_id": chat, "text": texto, "parse_mode": "HTML",
+                                "disable_web_page_preview": True},
+                          timeout=8)
+        return r.status_code == 200
+    except Exception:
+        return False
+
+
+def telegram_configurado() -> bool:
+    import os
+    return bool((os.environ.get("TELEGRAM_BOT_TOKEN") or "").strip()
+                and (os.environ.get("TELEGRAM_CHAT_ID") or "").strip())
+
+
+def notificar_venta_telegram(orden_id: str, orden: dict) -> bool:
+    """Push a Telegram cuando entra una venta confirmada."""
+    plan = orden.get("plan") or "?"
+    valor = float(orden.get("precio") or orden.get("valor") or 0)
+    contacto = orden.get("contacto") or {}
+    quien = contacto.get("nombre") or contacto.get("email") or orden.get("email") or "—"
+    nombres = {"pdf": "Formulario 210 (PDF)", "presentacion": "Declaración presentada",
+               "contadores": "Pase de temporada", "lector": "Suscripción Lector"}
+    valor_txt = f"${valor:,.0f}".replace(",", ".")
+    texto = (f"💰 <b>Nueva venta</b>\n{nombres.get(plan, plan)} · <b>{valor_txt}</b>\n"
+             f"👤 {quien}\n🧾 Orden {orden_id}")
+    return _telegram_enviar(texto)
+
+
 def metricas_contactos() -> dict:
     """Conteo de contactos por audiencia, para estadísticas y campañas."""
     from src.auth import MuestraContador, MuestraContadorEmail
