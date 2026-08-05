@@ -127,6 +127,21 @@ class LeadEspera(db.Model):
     creado = db.Column(db.DateTime, default=datetime.utcnow)
 
 
+class CampanaEnviada(db.Model):
+    """Historial de campañas de correo enviadas desde /admin/campana: para saber
+    a quién, cuántos y cuándo se envió (antes las campañas se disparaban por
+    código y no quedaba registro)."""
+    __tablename__ = "campanas_enviadas"
+    id = db.Column(db.Integer, primary_key=True)
+    asunto = db.Column(db.String(200))
+    publico = db.Column(db.String(30))
+    total = db.Column(db.Integer, default=0)
+    enviados = db.Column(db.Integer, default=0)
+    fallidos = db.Column(db.Integer, default=0)
+    muestra = db.Column(db.Text)                          # primeros correos, para referencia
+    fecha = db.Column(db.DateTime, default=datetime.utcnow)
+
+
 class LeadExogena(db.Model):
     """Lead capturado en el cálculo GRATIS de renta: la persona subió su exógena,
     vio su resultado y dejó su correo para recibirlo + recordatorio. Es la base de

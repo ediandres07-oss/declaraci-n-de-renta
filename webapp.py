@@ -605,33 +605,64 @@ def admin_lector_borrar():
     return jsonify({"ok": True})
 
 
-@app.get("/admin/campana/preview")
+def _emails_de(b):
+    """Lista de correos a la medida desde el cuerpo (texto o lista). None si no hay."""
+    crudo = b.get("emails")
+    if crudo is None:
+        return None
+    if isinstance(crudo, str):
+        crudo = re.split(r"[\s,;]+", crudo)
+    return [e for e in (crudo or []) if e and "@" in e]
+
+
+@app.get("/admin/campana")
+@autorizado_requerido
+def admin_campana():
+    """Panel de campañas: redactar, elegir público, preview, enviar e historial."""
+    from src import gerente as _ger
+    return render_template("admin_campana.html", historial=_ger.historial_campanas())
+
+
+@app.route("/admin/campana/preview", methods=["GET", "POST"])
 @autorizado_requerido
 def admin_campana_preview():
-    """Cuántos destinatarios tendría la campaña. ?publico=personas → usuarios
-    registrados (renta); por defecto leads + contadores. No envía nada."""
+    """Cuántos destinatarios tendría la campaña (no envía). Acepta publico o una
+    lista a la medida en 'emails'."""
     from src import gerente as _ger
-    publico = request.args.get("publico", "contadores")
-    dest = _ger.destinatarios_campana(publico)
-    return jsonify({"ok": True, "publico": publico, "total": len(dest), "muestra": dest[:5]})
+    b = request.get_json(silent=True) or {}
+    publico = b.get("publico") or request.args.get("publico", "personas")
+    dest = _ger.destinatarios_campana(publico, emails=_emails_de(b))
+    return jsonify({"ok": True, "publico": publico, "total": len(dest), "muestra": dest[:6]})
 
 
 @app.post("/admin/campana/enviar")
 @autorizado_requerido
 def admin_campana_enviar():
-    """Envía la campaña real a leads + contadores. Requiere {asunto, html,
-    confirmar:true} — no dispara sin confirmación explícita."""
+    """Envía la campaña. Requiere {asunto, mensaje, confirmar:true}. Envuelve el
+    mensaje en la plantilla de marca, registra el envío en el historial y nunca
+    dispara sin confirmación explícita."""
     b = request.get_json(silent=True) or {}
     if not b.get("confirmar"):
         return jsonify({"ok": False, "error": "Falta confirmar:true"}), 400
     from src import gerente as _ger
-    dest = _ger.destinatarios_campana(b.get("publico", "contadores"))
+    publico = b.get("publico", "personas")
+    dest = _ger.destinatarios_campana(publico, emails=_emails_de(b))
     asunto = (b.get("asunto") or "").strip()
-    html = (b.get("html") or "").strip()
-    if not asunto or not html:
-        return jsonify({"ok": False, "error": "Falta asunto o html."}), 400
+    mensaje = (b.get("mensaje") or b.get("html") or "").strip()
+    if not asunto or not mensaje:
+        return jsonify({"ok": False, "error": "Falta el asunto o el mensaje."}), 400
+    if not dest:
+        return jsonify({"ok": False, "error": "No hay destinatarios para ese público."}), 400
+    html = mensaje if b.get("html") else _ger.envolver_campana(
+        mensaje, (b.get("cta_txt") or "").strip(), (b.get("cta_url") or "https://tributando.co").strip())
     res = _ger.enviar_campana(asunto, html, dest)
-    return jsonify({"ok": True, "total": len(dest), **res})
+    try:
+        _ger.registrar_campana(asunto, publico if _emails_de(b) is None else "lista",
+                               len(dest), res["enviados"], len(res["fallidos"]), dest)
+    except Exception:
+        app.logger.warning("campana: no se pudo registrar en el historial")
+    return jsonify({"ok": True, "total": len(dest),
+                    "enviados": res["enviados"], "fallidos": len(res["fallidos"])})
 
 
 @app.post("/admin/gerente/probar")
@@ -2573,6 +2604,7 @@ button:hover:not(:disabled){{transform:translateY(-2px); box-shadow:0 8px 18px r
 <div class="nav-admin">
   <a class="actual">🏠 Órdenes y usuarios</a>
   <a href="/admin/dashboard" style="background:#1e2432">📊 Panel del negocio</a>
+  <a href="/admin/campana" style="background:#8a4b1e">📣 Campañas</a>
   <a href="/admin/lector">🔑 Suscripciones Lector XML</a>
   <a href="/vencimientos">📅 Gestor de vencimientos</a>
 </div>

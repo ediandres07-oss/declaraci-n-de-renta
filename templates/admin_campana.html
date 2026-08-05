@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Campañas · Tributando</title>
+<style>
+  :root{ --navy:#1e2432; --oro:#c8991f; --dorado:#cdab7e; --tx:#2b3242; --tx2:#6a7482;
+         --ln:#e6e2d8; --bg:#f4f2ee; --card:#fff; --verde:#1a7f37; --rojo:#b3372f; }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{ font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; color:var(--tx); background:var(--bg); }
+  .wrap{ max-width:820px; margin:0 auto; padding:24px 18px 60px; }
+  h1{ font-size:1.5rem; color:var(--navy); margin-bottom:4px; }
+  .sub{ color:var(--tx2); font-size:.9rem; margin-bottom:18px; }
+  nav a{ color:var(--oro); text-decoration:none; font-size:.88rem; margin-right:14px; }
+  .card{ background:var(--card); border:1px solid var(--ln); border-radius:14px; padding:20px; margin-bottom:18px; box-shadow:0 3px 12px rgba(20,26,40,.05); }
+  label{ display:block; font-size:.8rem; font-weight:700; color:var(--tx2); margin:12px 0 5px; }
+  input[type=text], textarea, select{ width:100%; padding:11px; border:1px solid var(--ln); border-radius:9px; font-size:.95rem; font-family:inherit; }
+  textarea{ min-height:120px; resize:vertical; }
+  .fila{ display:flex; gap:12px; flex-wrap:wrap; }
+  .fila > div{ flex:1; min-width:180px; }
+  .aud{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:8px; }
+  .aud label{ display:flex; align-items:center; gap:8px; font-weight:600; color:var(--tx); font-size:.9rem;
+    border:1px solid var(--ln); border-radius:10px; padding:10px 12px; cursor:pointer; margin:0; }
+  .aud label:has(input:checked){ border-color:var(--oro); background:#fbf7ec; }
+  .btn{ border:0; border-radius:10px; padding:12px 22px; font-weight:800; cursor:pointer; font-size:.95rem; }
+  .btn.prev{ background:#e8eef5; color:var(--navy); }
+  .btn.send{ background:var(--oro); color:#fff; }
+  .btn:disabled{ opacity:.5; cursor:default; }
+  #prevMsg{ font-size:.95rem; margin-top:10px; }
+  table{ width:100%; border-collapse:collapse; font-size:.85rem; margin-top:6px; }
+  th,td{ text-align:left; padding:8px 10px; border-bottom:1px solid #efece4; }
+  th{ font-size:.75rem; text-transform:uppercase; color:var(--tx2); letter-spacing:.4px; }
+  .pill{ display:inline-block; background:#eef2f7; color:var(--navy); border-radius:20px; padding:2px 9px; font-size:.75rem; font-weight:700; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>📣 Campañas</h1>
+  <div class="sub">Redacta, elige el público, mira el preview y envía. Queda en el historial.</div>
+  <nav style="margin-bottom:16px"><a href="/admin">← Panel admin</a><a href="/admin/dashboard">📊 Panel del negocio</a></nav>
+
+  <div class="card">
+    <label>1 · Público</label>
+    <div class="aud">
+      <label><input type="radio" name="pub" value="personas" checked> 👤 Personas naturales</label>
+      <label><input type="radio" name="pub" value="contadores"> 👔 Contadores</label>
+      <label><input type="radio" name="pub" value="guia"> 🎁 Leads de la guía</label>
+      <label><input type="radio" name="pub" value="calculo"> 🧮 Leads del cálculo</label>
+      <label><input type="radio" name="pub" value="todos"> 🌐 Todos</label>
+      <label><input type="radio" name="pub" value="lista"> ✍️ Lista a la medida</label>
+    </div>
+    <div id="listaBox" style="display:none">
+      <label>Correos (separados por coma, espacio o salto de línea)</label>
+      <textarea id="emails" placeholder="uno@correo.com, dos@correo.com"></textarea>
+    </div>
+
+    <label>2 · Plantilla rápida</label>
+    <select id="plantilla">
+      <option value="">— Escribir desde cero —</option>
+      <option value="tarifas">Nuevas tarifas de renta</option>
+      <option value="home">Oferta de la home</option>
+    </select>
+
+    <label>Asunto</label>
+    <input type="text" id="asunto" placeholder="Asunto del correo">
+    <label>Mensaje (se envuelve en la plantilla de marca; puedes usar &lt;b&gt;, &lt;p&gt;…)</label>
+    <textarea id="mensaje" placeholder="Escribe el cuerpo del correo…"></textarea>
+    <div class="fila">
+      <div><label>Texto del botón (CTA)</label><input type="text" id="ctaTxt" placeholder="Calcular mi declaración →"></div>
+      <div><label>Enlace del botón</label><input type="text" id="ctaUrl" value="https://tributando.co"></div>
+    </div>
+
+    <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <button class="btn prev" id="btnPrev" type="button">👁 Ver destinatarios</button>
+      <button class="btn send" id="btnSend" type="button">📤 Enviar campaña</button>
+      <span id="prevMsg"></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <label style="margin-top:0">🕓 Historial de campañas</label>
+    <table>
+      <thead><tr><th>Fecha</th><th>Asunto</th><th>Público</th><th>Total</th><th>Enviados</th><th>Fallidos</th></tr></thead>
+      <tbody id="histBody">
+        {% for c in historial %}
+        <tr>
+          <td>{{ c.fecha.strftime('%Y-%m-%d %H:%M') if c.fecha else '—' }}</td>
+          <td>{{ c.asunto }}</td>
+          <td><span class="pill">{{ c.publico }}</span></td>
+          <td>{{ c.total }}</td>
+          <td style="color:var(--verde);font-weight:700">{{ c.enviados }}</td>
+          <td style="color:{{ '#b3372f' if c.fallidos else '#6a7482' }}">{{ c.fallidos }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" style="color:var(--tx2)">Aún no has enviado campañas.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const PLANTILLAS = {
+  tarifas: {
+    asunto: "Bajamos el precio de tu declaración de renta 💛",
+    mensaje: "<p>Hola 👋</p><p>Buenas noticias: <b>bajamos el precio</b>.</p>"
+      + "<p>Tu declaración <b>presentada ante la DIAN</b> (la elaboramos, la montamos en el portal y la dejamos <b>en firme</b>): ahora <b>$149.900</b> — antes $189.900.</p>"
+      + "<p>¿Prefieres hacerlo tú? Tu <b>Formulario 210 en PDF</b> desde <b>$49.900</b>.</p>"
+      + "<p>Conoce tu resultado <b>gratis</b> antes de pagar un solo peso.</p>",
+    cta: "Calcular mi declaración →"
+  },
+  home: {
+    asunto: "Ya abrió tu Renta 2025 — conoce tu resultado gratis",
+    mensaje: "<p>Hola 👋</p><p>En <b>Tributando</b> lo hacemos fácil: sube tu exógena y mira <b>gratis</b> si estás obligado y cuánto pagarías.</p>"
+      + "<p>Y si prefieres, un <b>contador profesional</b> elabora tu declaración, la <b>presenta ante la DIAN</b> y la deja <b>en firme</b>.</p>",
+    cta: "Calcular mi declaración gratis →"
+  }
+};
+$("#plantilla").addEventListener("change", () => {
+  const p = PLANTILLAS[$("#plantilla").value]; if (!p) return;
+  $("#asunto").value = p.asunto; $("#mensaje").value = p.mensaje; $("#ctaTxt").value = p.cta;
+});
+document.querySelectorAll('input[name=pub]').forEach(r =>
+  r.addEventListener("change", () => { $("#listaBox").style.display = (pub() === "lista") ? "" : "none"; }));
+
+function pub(){ return document.querySelector('input[name=pub]:checked').value; }
+function cuerpo(){
+  const p = pub();
+  const b = { publico: p, asunto: $("#asunto").value.trim(), mensaje: $("#mensaje").value.trim(),
+              cta_txt: $("#ctaTxt").value.trim(), cta_url: $("#ctaUrl").value.trim() };
+  if (p === "lista") b.emails = $("#emails").value;
+  return b;
+}
+$("#btnPrev").addEventListener("click", async () => {
+  const msg = $("#prevMsg"); msg.style.color = "var(--tx2)"; msg.textContent = "Consultando…";
+  try {
+    const r = await fetch("/admin/campana/preview", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(cuerpo())});
+    const j = await r.json();
+    msg.style.color = "var(--navy)";
+    msg.innerHTML = `<b>${j.total}</b> destinatario(s). Ej.: ${(j.muestra||[]).join(", ") || "—"}`;
+  } catch(e){ msg.style.color = "var(--rojo)"; msg.textContent = "Error al consultar."; }
+});
+$("#btnSend").addEventListener("click", async () => {
+  const b = cuerpo();
+  const msg = $("#prevMsg");
+  if (!b.asunto || !b.mensaje) { msg.style.color = "var(--rojo)"; msg.textContent = "Falta el asunto o el mensaje."; return; }
+  // primero cuántos
+  let total = 0;
+  try {
+    const pr = await (await fetch("/admin/campana/preview", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(b)})).json();
+    total = pr.total || 0;
+  } catch(e){}
+  if (!total) { msg.style.color = "var(--rojo)"; msg.textContent = "No hay destinatarios para ese público."; return; }
+  if (!confirm(`¿Enviar la campaña a ${total} destinatario(s)? Esta acción manda correos reales.`)) return;
+  const btn = $("#btnSend"); btn.disabled = true; btn.textContent = "Enviando…";
+  try {
+    b.confirmar = true;
+    const j = await (await fetch("/admin/campana/enviar", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(b)})).json();
+    if (j.ok) { msg.style.color = "var(--verde)"; msg.innerHTML = `✓ Enviada: <b>${j.enviados}</b> enviados, ${j.fallidos} fallidos. Recarga para ver el historial.`; }
+    else { msg.style.color = "var(--rojo)"; msg.textContent = "⚠ " + (j.error || "No se pudo enviar."); }
+  } catch(e){ msg.style.color = "var(--rojo)"; msg.textContent = "Error de red al enviar."; }
+  btn.disabled = false; btn.textContent = "📤 Enviar campaña";
+});
+</script>
+</body>
+</html>

@@ -28,24 +28,113 @@ def _es_propio(email: str) -> bool:
     return e.startswith("ediandres07") or e == "contacto@tributando.co"
 
 
-def destinatarios_campana(publico: str = "contadores") -> list[str]:
-    """Correos únicos para una campaña, según el público:
-      - 'personas': usuarios registrados (personas naturales de renta, tabla Usuario)
-      - cualquier otro: leads en espera (guía) + contadores con licencia (Lector)
+def _emails_contadores() -> set:
+    """Correos que son de CONTADORES: suscriptores del Lector, con pase de
+    temporada, o que usaron la muestra profesional."""
+    from src.auth import AccesoAutorizado, MuestraContador, MuestraContadorEmail
+    cont = set()
+    for s in SuscripcionLector.query.all():
+        if s.email:
+            cont.add(s.email.strip().lower())
+    for a in AccesoAutorizado.query.all():
+        if a.email:
+            cont.add(a.email.strip().lower())
+    for m in MuestraContador.query.all():
+        if m.email:
+            cont.add(m.email.strip().lower())
+    for m in MuestraContadorEmail.query.all():
+        if m.email:
+            cont.add(m.email.strip().lower())
+    for o in OrdenRegistro.query.all():
+        try:
+            d = json.loads(o.data)
+        except Exception:
+            continue
+        if d.get("plan") == "contadores":
+            c = (d.get("contacto", {}) or {}).get("email") or d.get("email")
+            if c:
+                cont.add(str(c).strip().lower())
+    return cont
+
+
+def destinatarios_campana(publico: str = "personas", emails=None) -> list[str]:
+    """Correos únicos para una campaña, ya segmentados y sin duplicar:
+      - 'personas'  → personas naturales (usuarios registrados MENOS contadores)
+      - 'contadores'→ suscriptores Lector + pases + muestras profesionales
+      - 'guia'      → leads de la guía-obsequio (lista de espera)
+      - 'calculo'   → leads del cálculo gratis (dejaron correo en el resultado)
+      - 'todos'     → la unión de todo
+      - lista a la medida → pasa `emails` y se usa esa lista
     Siempre excluye los correos propios/de prueba."""
     correos = set()
-    if publico == "personas":
-        for u in Usuario.query.all():
-            if u.email:
-                correos.add(u.email.strip().lower())
-    else:
+    if emails is not None:
+        for e in emails:
+            if e:
+                correos.add(str(e).strip().lower())
+    elif publico == "contadores":
+        correos = _emails_contadores()
+    elif publico == "guia":
         for l in LeadEspera.query.all():
             if l.email:
                 correos.add(l.email.strip().lower())
-        for s in SuscripcionLector.query.all():
-            if s.email:
-                correos.add(s.email.strip().lower())
+    elif publico == "calculo":
+        from src.auth import LeadExogena
+        for l in LeadExogena.query.all():
+            if l.email:
+                correos.add(l.email.strip().lower())
+    elif publico == "todos":
+        cont = _emails_contadores()
+        from src.auth import LeadExogena
+        for u in Usuario.query.all():
+            if u.email:
+                correos.add(u.email.strip().lower())
+        correos |= cont
+        for l in LeadEspera.query.all():
+            if l.email:
+                correos.add(l.email.strip().lower())
+        for l in LeadExogena.query.all():
+            if l.email:
+                correos.add(l.email.strip().lower())
+    else:                                   # 'personas' = naturales (sin contadores)
+        cont = _emails_contadores()
+        for u in Usuario.query.all():
+            if u.email:
+                e = u.email.strip().lower()
+                if e not in cont:
+                    correos.add(e)
     return sorted(c for c in correos if not _es_propio(c))
+
+
+def envolver_campana(cuerpo_html: str, cta_txt: str = "", cta_url: str = "https://tributando.co") -> str:
+    """Envuelve el mensaje de una campaña en la plantilla de marca de Tributando."""
+    cta = ""
+    if cta_txt:
+        cta = (f'<div style="text-align:center;margin:20px 0 6px">'
+               f'<a href="{cta_url}" style="display:inline-block;background:#c8991f;color:#fff;'
+               f'font-weight:800;text-decoration:none;padding:13px 30px;border-radius:11px">{cta_txt}</a></div>')
+    return f"""<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:540px;margin:auto;color:#2b3242">
+      <div style="background:#1e2432;padding:22px 26px;border-radius:14px 14px 0 0;text-align:center">
+        <div style="font-size:20px;font-weight:800;color:#fff">Tributando<span style="color:#cdab7e">.co</span></div>
+      </div>
+      <div style="background:#fff;border:1px solid #e6e2d8;border-top:none;border-radius:0 0 14px 14px;padding:26px;font-size:15px;line-height:1.6">
+        {cuerpo_html}
+        {cta}
+        <p style="color:#9aa2b0;font-size:12px;margin-top:16px">Tributando.co · ¿Dudas? Responde este correo.</p>
+      </div>
+    </div>"""
+
+
+def registrar_campana(asunto, publico, total, enviados, fallidos, muestra) -> None:
+    from src.auth import CampanaEnviada
+    db.session.add(CampanaEnviada(
+        asunto=(asunto or "")[:200], publico=(publico or "")[:30], total=total,
+        enviados=enviados, fallidos=fallidos, muestra=", ".join(muestra[:5])))
+    db.session.commit()
+
+
+def historial_campanas(limite: int = 40):
+    from src.auth import CampanaEnviada
+    return CampanaEnviada.query.order_by(CampanaEnviada.fecha.desc()).limit(limite).all()
 
 
 def enviar_campana(asunto: str, html: str, destinatarios: list[str]) -> dict:
