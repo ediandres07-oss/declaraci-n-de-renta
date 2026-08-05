@@ -73,6 +73,14 @@ def destinatarios_campana(publico: str = "personas", emails=None) -> list[str]:
                 correos.add(str(e).strip().lower())
     elif publico == "contadores":
         correos = _emails_contadores()
+    elif publico == "cortesia":
+        from src.auth import MuestraContador, MuestraContadorEmail
+        for m in MuestraContador.query.all():
+            if m.email:
+                correos.add(m.email.strip().lower())
+        for m in MuestraContadorEmail.query.all():
+            if m.email:
+                correos.add(m.email.strip().lower())
     elif publico == "guia":
         for l in LeadEspera.query.all():
             if l.email:
