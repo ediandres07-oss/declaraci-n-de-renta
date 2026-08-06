@@ -763,13 +763,10 @@ async function enviarLead(email) {
   const r = await fetch("/api/mi-resultado", {method:"POST", headers:{"Content-Type":"application/json"},
     body: JSON.stringify({ token: token, email: email, obligado: !!ctx.obligado, valor: ctx.valor || 0 })});
   const j = await r.json();
-  // Conversión Google Ads: persona natural que dejó su correo (lead real).
-  if (j && j.ok && !_convLeadFired && typeof gtag === "function") {
-    _convLeadFired = true;
-    gtag('event', 'conversion', {
-      'send_to': 'AW-18353583911/BrvcCLXeodccEKfu1a9E', 'value': 1.0, 'currency': 'COP'
-    });
-  }
+  // (Antes aquí se contaba como conversión de Ads el "dejó su correo" (lead),
+  //  mezclándose con las ventas. Ahora la conversión de Ads es SOLO la venta
+  //  pagada (/epayco/respuesta). El lead se sigue guardando en la BD, pero no
+  //  optimiza la campaña.)
   return j;
 }
 

@@ -1116,14 +1116,23 @@ def payu_respuesta():
            if pagada else
            "Si el pago se completó, en unos minutos recibirás la activación por correo. "
            "Si fue rechazado, puedes intentar de nuevo.")
+    valor = orden.get("precio", 0) or 0
     return render_template_string(
-        "<!doctype html><html><head><meta charset='utf-8'><title>{{t}}</title></head>"
+        "<!doctype html><html><head><meta charset='utf-8'><title>{{t}}</title>"
+        "{% if pagada and valor %}"
+        "<script async src='https://www.googletagmanager.com/gtag/js?id=AW-18353583911'></script>"
+        "<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}"
+        "gtag('js', new Date());gtag('config','AW-18353583911');"
+        "gtag('event','conversion',{'send_to':'AW-18353583911/BrvcCLXeodccEKfu1a9E',"
+        "'value':{{ valor }},'currency':'COP','transaction_id':'{{ ref }}'});</script>"
+        "{% endif %}"
+        "</head>"
         "<body style='font-family:sans-serif;max-width:520px;margin:60px auto;text-align:center;color:#1e2432'>"
         "<div style='font-size:52px'>{{ '✅' if pagada else '⏳' }}</div>"
         "<h1 style='color:#1e2432'>{{t}}</h1><p style='color:#5a6b7f'>{{m}}</p>"
         "<a href='/contadores/lector' style='display:inline-block;margin-top:16px;background:#c8991f;color:#fff;"
         "padding:12px 22px;border-radius:10px;text-decoration:none;font-weight:600'>Volver</a></body></html>",
-        t=titulo, m=msg, pagada=pagada)
+        t=titulo, m=msg, pagada=pagada, valor=valor, ref=ref)
 
 
 def _enviar_licencia_lector(email: str, plan: str, licencia: str):
@@ -1198,14 +1207,23 @@ def epayco_respuesta():
            "También puedes entrar al Lector con tu correo (te llega un código)."
            if pagada else
            "Si el pago se completó, en unos minutos recibirás la activación por correo.")
+    valor = orden.get("precio", 0) or 0
     return render_template_string(
-        "<!doctype html><html><head><meta charset='utf-8'><title>{{t}}</title></head>"
+        "<!doctype html><html><head><meta charset='utf-8'><title>{{t}}</title>"
+        "{% if pagada and valor %}"
+        "<script async src='https://www.googletagmanager.com/gtag/js?id=AW-18353583911'></script>"
+        "<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}"
+        "gtag('js', new Date());gtag('config','AW-18353583911');"
+        "gtag('event','conversion',{'send_to':'AW-18353583911/BrvcCLXeodccEKfu1a9E',"
+        "'value':{{ valor }},'currency':'COP','transaction_id':'{{ ref }}'});</script>"
+        "{% endif %}"
+        "</head>"
         "<body style='font-family:sans-serif;max-width:520px;margin:60px auto;text-align:center;color:#1e2432'>"
         "<div style='font-size:52px'>{{ '✅' if pagada else '⏳' }}</div>"
         "<h1 style='color:#1e2432'>{{t}}</h1><p style='color:#5a6b7f'>{{m}}</p>"
         "<a href='/contadores/lector' style='display:inline-block;margin-top:16px;background:#c8991f;color:#fff;"
         "padding:12px 22px;border-radius:10px;text-decoration:none;font-weight:600'>Volver</a></body></html>",
-        t=titulo, m=msg, pagada=pagada)
+        t=titulo, m=msg, pagada=pagada, valor=valor, ref=ref)
 
 
 @app.post("/api/muestra/codigo")
