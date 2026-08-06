@@ -974,6 +974,14 @@ def descargar_lector():
 # Última versión publicada del Lector. Súbela cada vez que recompiles y publiques
 # un instalador nuevo; el Lector la consulta y avisa al contador si está atrasado.
 LECTOR_VERSION_LATEST = os.environ.get("LECTOR_VERSION", "1.2.3")
+# Novedades de la última versión (se muestran en el banner "¿Qué hay de nuevo?"
+# dentro del Lector). Se puede sobrescribir con la variable de entorno del mismo
+# nombre sin recompilar el servidor. Usa saltos de línea para viñetas.
+LECTOR_NOVEDADES = os.environ.get("LECTOR_NOVEDADES",
+    "• Lee balances de Helisa (.xls).\n"
+    "• 7 sistemas contables para elegir: Siigo, World Office, Helisa, Genérico, Alegra, Loggro y Contai.\n"
+    "• Corregir una cuenta del catálogo ahora sí se refleja en el plano.\n"
+    "• Pantalla de entrada renovada.")
 
 
 @app.post("/api/lector-suscripcion/crear")
@@ -3259,7 +3267,8 @@ def api_lector_ia():
 @app.route("/api/lector/version", methods=["GET", "POST"])
 def api_lector_version():
     """Última versión del Lector, para que avise si hay una nueva."""
-    return jsonify({"version": LECTOR_VERSION_LATEST, "url": DESCARGA_LECTOR_URL})
+    return jsonify({"version": LECTOR_VERSION_LATEST, "url": DESCARGA_LECTOR_URL,
+                    "novedades": LECTOR_NOVEDADES})
 
 
 @app.route("/api/lector/recordatorio-tareas", methods=["POST"])

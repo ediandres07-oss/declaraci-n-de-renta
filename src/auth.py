@@ -484,6 +484,10 @@ def estado_licencia(licencia: str, equipo: str | None = None) -> dict:
                     "error": "Esta licencia ya está activa en otro equipo. "
                              "Escríbenos para trasladarla."}
     usadas = EmpresaLector.query.filter_by(licencia=sus.licencia).count()
+    # Subida directa por API (Siigo/Helisa/Alegra/World Office): incluida en Pro o
+    # superior (25+ empresas, o ilimitado). El Excel de todos los sistemas va en
+    # todos los planes; lo premium es mandar con un clic al programa.
+    api_incluida = (sus.empresas_max == 0) or (sus.empresas_max >= 25)
     return {
         "valida": bool(sus.activa) and not vencida,
         "activa": bool(sus.activa),
@@ -491,6 +495,7 @@ def estado_licencia(licencia: str, equipo: str | None = None) -> dict:
         "plan": sus.plan,
         "empresas_max": sus.empresas_max,      # 0 = ilimitado
         "empresas_usadas": usadas,
+        "api": api_incluida,                   # ¿incluye subida directa por API?
         "vence": sus.vence.isoformat() if sus.vence else None,
         "agente": bool(sus.agente),                        # ¿tiene el complemento agente?
         "agente_limite": AGENTE_LIMITE_MES,
