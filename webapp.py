@@ -19,7 +19,7 @@ from datetime import date, datetime
 from pathlib import Path
 
 import yaml
-from flask import (Flask, Response, jsonify, redirect, render_template,
+from flask import (Flask, Response, abort, jsonify, redirect, render_template,
                    render_template_string, request, send_file, session, url_for)
 
 from src import whatsapp as wa_mod
@@ -487,7 +487,11 @@ def calendario_2026_publico():
 
 # --- SEO: robots + sitemap (para que Google indexe las páginas públicas) ---
 _URLS_PUBLICAS = ["/", "/calendario-tributario-2026", "/contabilidad",
-                  "/contadores", "/links"]
+                  "/contadores", "/links", "/descargar-lector", "/guia-dian",
+                  "/lector-xml-dian", "/plano-contable-siigo",
+                  "/plano-contable-contai", "/plano-contable-world-office",
+                  "/plano-contable-helisa", "/iva-descontable-xml-dian",
+                  "/descargar-xml-dian"]
 
 
 @app.get("/robots.txt")
@@ -970,6 +974,184 @@ DESCARGA_LECTOR_PUBLICA = _SITIO_PUB + "/descargar-lector"
 def descargar_lector():
     """Enlace limpio de descarga del Lector: redirige al instalador real."""
     return redirect(DESCARGA_LECTOR_URL, code=302)
+
+
+# ---------------------------------------------------------------------------
+# Páginas SEO — para que un contador encuentre el Lector en Google.
+# Cada URL es una landing con contenido único + enlaces internos + CTA a
+# /contadores. Se renderizan con templates/seo.html (data-driven).
+# ---------------------------------------------------------------------------
+def _plano_seo(prog: str, slug: str) -> dict:
+    return {
+        "url": f"/{slug}",
+        "title": f"Plano contable para {prog} desde los XML de la DIAN | Tributando.co",
+        "meta": (f"Convierte los XML de la factura electrónica de la DIAN en el archivo plano "
+                 f"listo para importar en {prog}, con el IVA discriminado. Sin digitar factura "
+                 f"por factura. Prueba gratis para contadores."),
+        "kick": "Plano contable",
+        "h1": f"Genera el <span class='g'>plano contable para {prog}</span> desde los XML de la DIAN",
+        "intro": (f"Con el Lector de Tributando descargas las facturas de la DIAN y obtienes el "
+                  f"archivo plano listo para importar en {prog} —con el IVA ya discriminado— en "
+                  f"minutos, no en horas."),
+        "sections": [
+            {"h2": f"De los XML de la DIAN al plano de {prog} en 3 pasos", "html": (
+                "<ul class='chk'>"
+                "<li>Conéctate a la DIAN con el token del correo y descarga tus facturas recibidas o emitidas.</li>"
+                "<li>El Lector lee cada XML y discrimina el IVA, la retención y el tercero (NIT).</li>"
+                f"<li>Genera el archivo plano con la estructura exacta de {prog} y lo importas.</li>"
+                "</ul>")},
+            {"h2": f"Por qué los contadores lo usan para {prog}", "html": (
+                "<ul class='chk'>"
+                "<li>Deja de digitar factura por factura: un solo cliente puede traer cientos de XML.</li>"
+                "<li>El IVA descontable queda discriminado y cuadrado, tomado del XML.</li>"
+                f"<li>La estructura del plano coincide con la que espera {prog}, sin re-armarla a mano.</li>"
+                "<li>Ideal para causar compras y gastos y para preparar la información exógena.</li>"
+                "</ul>")},
+        ],
+        "programas": True,
+        "faq": [
+            [f"¿El plano sirve para importar en {prog}?",
+             f"Sí. El Lector arma el archivo plano con la estructura que {prog} espera, para que lo importes sin re-digitar."],
+            ["¿Discrimina el IVA?",
+             "Sí. Separa el IVA de cada factura (incluidas tarifas diferentes) y la retención, tomando los datos directamente del XML."],
+            ["¿Cómo descargo las facturas de la DIAN?",
+             "Desde el Lector te conectas a la DIAN con el token del correo (el del botón verde) y descargas tus facturas por fecha o por CUFE."],
+            ["¿Puedo probarlo gratis?",
+             "Sí. La primera prueba es gratis; luego el pase de temporada te da uso ilimitado por un solo pago."],
+        ],
+        "cta_titulo": f"Tu plano para {prog}, en minutos",
+    }
+
+
+_SEO_PAGES = {
+    "lector-xml-dian": {
+        "url": "/lector-xml-dian",
+        "title": "Lector de XML de la DIAN: tus facturas al plano contable en minutos | Tributando.co",
+        "meta": ("Lee los XML de la factura electrónica de la DIAN y genera el plano contable con el "
+                 "IVA discriminado, listo para Siigo, Contai, World Office o Helisa. Prueba gratis para contadores."),
+        "kick": "Para contadores",
+        "h1": "Lector de <span class='g'>XML de la DIAN</span> → tu plano contable en minutos",
+        "intro": ("El Lector de Tributando descarga las facturas electrónicas de la DIAN, lee cada XML y "
+                  "te arma el plano contable con el IVA discriminado, listo para tu programa contable. "
+                  "Deja de digitar factura por factura."),
+        "sections": [
+            {"h2": "Qué hace el Lector de XML de la DIAN", "html": (
+                "<ul class='chk'>"
+                "<li>Se conecta a la DIAN y descarga tus facturas (recibidas y emitidas) por fecha o por CUFE.</li>"
+                "<li>Lee el XML de cada factura y extrae proveedor, NIT, valores, IVA y retención.</li>"
+                "<li>Discrimina el IVA descontable, incluso con varias tarifas en una misma factura.</li>"
+                "<li>Genera el archivo plano listo para importar en Siigo, Contai, World Office o Helisa.</li>"
+                "</ul>")},
+            {"h2": "Cómo funciona, paso a paso", "html": (
+                "<ul class='chk'>"
+                "<li><b>1.</b> Solicita el token en la DIAN.</li>"
+                "<li><b>2.</b> En el correo de la DIAN, copia el vínculo del botón verde y pégalo en el Lector.</li>"
+                "<li><b>3.</b> Activa el token y descarga tus CUFEs; el Lector los lee al tiempo.</li>"
+                "<li><b>4.</b> Genera el plano para tu programa contable con el IVA ya discriminado.</li>"
+                "</ul>")},
+            {"h2": "Para quién es", "html": (
+                "<p>Para contadores y firmas que procesan la contabilidad de varios clientes y no quieren "
+                "digitar cada factura a mano. Un solo cliente puede traer cientos de XML al mes: el Lector "
+                "los convierte en el plano contable en minutos.</p>")},
+        ],
+        "programas": True,
+        "faq": [
+            ["¿Qué es un lector de XML de la DIAN?",
+             "Es una herramienta que lee los archivos XML de las facturas electrónicas de la DIAN y extrae sus datos (IVA, retención, terceros) para llevarlos a la contabilidad sin digitarlos a mano."],
+            ["¿Sirve para la información exógena?",
+             "Sí. Al tener las compras y ventas con el IVA discriminado y el tercero identificado, facilita preparar los formatos de exógena."],
+            ["¿Con qué programas contables funciona?",
+             "Genera el plano para Siigo, Contai, World Office y Helisa. Si usas otro, escríbenos y lo agregamos."],
+            ["¿Cuánto cuesta?",
+             "La primera prueba es gratis. Después, el pase de temporada da uso ilimitado por un solo pago."],
+        ],
+        "cta_titulo": "Deja de digitar factura por factura",
+    },
+    "plano-contable-siigo": _plano_seo("Siigo", "plano-contable-siigo"),
+    "plano-contable-contai": _plano_seo("Contai", "plano-contable-contai"),
+    "plano-contable-world-office": _plano_seo("World Office", "plano-contable-world-office"),
+    "plano-contable-helisa": _plano_seo("Helisa", "plano-contable-helisa"),
+    "iva-descontable-xml-dian": {
+        "url": "/iva-descontable-xml-dian",
+        "title": "IVA descontable desde los XML de la DIAN: cómo extraerlo | Tributando.co",
+        "meta": ("Extrae el IVA descontable de las facturas electrónicas de la DIAN directamente del XML, "
+                 "discriminado por tarifa, sin digitar. Listo para tu contabilidad y la exógena."),
+        "kick": "IVA descontable",
+        "h1": "<span class='g'>IVA descontable</span> desde los XML de la DIAN, sin digitar",
+        "intro": ("El Lector lee el XML de cada factura y separa el IVA descontable —incluso con varias "
+                  "tarifas en una misma factura— junto con la retención y el tercero, para que llegue "
+                  "cuadrado a tu contabilidad."),
+        "sections": [
+            {"h2": "El IVA sale del XML, no a mano", "html": (
+                "<ul class='chk'>"
+                "<li>Toma el valor del impuesto tal cual viene en el XML de la DIAN.</li>"
+                "<li>Discrimina IVA al 19%, 5% y exento, y la retención en la fuente.</li>"
+                "<li>Identifica el tercero (NIT) de cada factura.</li>"
+                "<li>Lo entrega en el plano listo para importar en tu programa contable.</li>"
+                "</ul>")},
+            {"h2": "Por qué importa para el contador", "html": (
+                "<p>Digitar el IVA factura por factura es lento y propenso a errores. Al leerlo del XML, el "
+                "IVA descontable queda exacto y cuadrado, lo que agiliza la causación y la preparación de "
+                "la información exógena.</p>")},
+        ],
+        "programas": True,
+        "faq": [
+            ["¿De dónde saca el IVA?",
+             "Directamente del XML de la factura electrónica de la DIAN, que es el documento con validez fiscal."],
+            ["¿Maneja varias tarifas de IVA?",
+             "Sí. Discrimina las distintas tarifas (19%, 5%, exento) dentro de una misma factura."],
+            ["¿Incluye la retención?",
+             "Sí, además del IVA separa la retención en la fuente cuando viene en el documento."],
+        ],
+        "cta_titulo": "Tu IVA descontable, cuadrado y sin digitar",
+    },
+    "descargar-xml-dian": {
+        "url": "/descargar-xml-dian",
+        "title": "Descargar los XML de la DIAN masivamente (con token) | Tributando.co",
+        "meta": ("Descarga tus facturas electrónicas de la DIAN de forma masiva con el token, por fecha o "
+                 "por CUFE, y léelas al tiempo para armar el plano contable. Prueba gratis."),
+        "kick": "Descarga masiva",
+        "h1": "Descarga los <span class='g'>XML de la DIAN</span> masivamente, con el token",
+        "intro": ("Con el Lector te conectas a la DIAN usando el token del correo y descargas todas tus "
+                  "facturas de una —por rango de fechas o pegando los CUFEs— para leerlas al tiempo."),
+        "sections": [
+            {"h2": "Cómo descargar los XML de la DIAN", "html": (
+                "<ul class='chk'>"
+                "<li>Solicita el token en la DIAN.</li>"
+                "<li>Copia el vínculo del botón verde del correo de la DIAN y pégalo en el Lector.</li>"
+                "<li>Activa el token y descarga tus facturas recibidas o emitidas.</li>"
+                "<li>El Lector las lee al tiempo y arma el plano contable con el IVA discriminado.</li>"
+                "</ul>")},
+            {"h2": "Por fecha o pegando los CUFEs", "html": (
+                "<p>Puedes traer las facturas por un rango de fechas o pegar directamente los CUFEs que "
+                "necesites. Ideal cuando un cliente te entrega un listado y quieres procesarlo de una.</p>")},
+        ],
+        "programas": True,
+        "faq": [
+            ["¿Necesito el token de la DIAN?",
+             "Sí. El token es el que la DIAN te envía por correo (el del botón verde); con él el Lector se conecta y descarga tus facturas."],
+            ["¿Puedo descargar muchas facturas a la vez?",
+             "Sí. La descarga es masiva: por rango de fechas o pegando los CUFEs, y se leen todas al tiempo."],
+            ["¿Después qué obtengo?",
+             "El plano contable listo para tu programa (Siigo, Contai, World Office o Helisa), con el IVA discriminado."],
+        ],
+        "cta_titulo": "Descarga y lee tus facturas de la DIAN de una",
+    },
+}
+
+
+def _seo_view(slug):
+    """Landings SEO para contadores (ver _SEO_PAGES)."""
+    p = _SEO_PAGES.get(slug)
+    if not p:
+        abort(404)
+    return render_template("seo.html", p=p)
+
+
+for _seo_slug in _SEO_PAGES:
+    app.add_url_rule("/" + _seo_slug,
+                     endpoint="seo_" + _seo_slug.replace("-", "_"),
+                     view_func=(lambda s=_seo_slug: _seo_view(s)))
 
 # Última versión publicada del Lector. Súbela cada vez que recompiles y publiques
 # un instalador nuevo; el Lector la consulta y avisa al contador si está atrasado.
