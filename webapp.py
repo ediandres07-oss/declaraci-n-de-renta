@@ -3411,6 +3411,11 @@ _IA_AGENTE = (
     "- iva_mes(periodicidad:'bimestral'|'cuatrimestral', numero:int, anio:int): borrador del Formulario 300.\n"
     "- revisar_cliente(): qué le falta al cliente activo (vencimientos y pendientes).\n"
     "- calcular_retencion(base:number, concepto:string, declarante:bool): cuánto retener en la fuente.\n"
+    "- crear_tarea(titulo:string, fecha:'AAAA-MM-DD'): agrega una tarea o vencimiento al cliente activo "
+    "(p.ej. 'Retención en la fuente — Julio', fecha '2026-08-13'). Sin fecha clara, pídela.\n"
+    "- cargar_obligaciones(tipo:'natural'|'juridica'|'gran'|'rst'): trae las obligaciones del calendario "
+    "DIAN del cliente activo (según su NIT) y las crea como tareas, sin duplicar. Si no sabes si el "
+    "cliente es persona natural o jurídica, pregúntalo antes.\n"
     "El cliente/empresa ya está fijo en el Lector; no pidas el NIT."
 )
 
