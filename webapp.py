@@ -839,6 +839,44 @@ def admin_lector_cortesia():
                     "vence": sus.vence.isoformat() if sus.vence else None})
 
 
+@app.get("/admin/exogenas")
+@autorizado_requerido
+def admin_exogenas():
+    """Listado de exógenas subidas al cálculo gratis (funnel B2C): quiénes son,
+    cuándo subieron y si dejaron correo o compraron."""
+    from src.auth import LeadExogena
+    leads = {(l.token or ""): l for l in LeadExogena.query.all()}
+    compradores = set()
+    cargas = []
+    ordenes = _leer_ordenes()
+    for oid, d in ordenes.items():
+        if d.get("tipo") == "orden" and d.get("estado") == "pagada":
+            e = ((d.get("contacto") or {}).get("email") or "").lower()
+            if e:
+                compradores.add(e)
+    for oid, d in ordenes.items():
+        if d.get("tipo") != "carga":
+            continue
+        lead = leads.get(oid)
+        cargas.append({
+            "fecha": d.get("fecha_carga", ""), "nombre": d.get("nombre", ""),
+            "nit": d.get("nit", ""), "correo": (lead.email if lead else ""),
+            "compro": bool(lead and lead.email in compradores),
+        })
+    cargas.sort(key=lambda c: c["fecha"], reverse=True)
+    filas = "".join(
+        f"<tr><td>{c['fecha']}</td><td>{c['nombre'] or '—'}</td><td>{c['nit'] or '—'}</td>"
+        f"<td>{c['correo'] or '<span style=color:#b3372f>sin correo</span>'}</td>"
+        f"<td>{'✅' if c['compro'] else '—'}</td></tr>" for c in cargas)
+    return (f"<div style='font-family:sans-serif;max-width:760px;margin:30px auto;color:#1e2432'>"
+            f"<h2>🧾 Exógenas subidas ({len(cargas)})</h2>"
+            f"<p style='color:#5a6272'>Personas que calcularon su renta gratis. "
+            f"<a href='/admin/dashboard'>← Panel</a></p>"
+            f"<table border=0 cellpadding=8 style='border-collapse:collapse;width:100%'>"
+            f"<tr style='text-align:left;background:#f3ede1'><th>Fecha</th><th>Nombre</th>"
+            f"<th>NIT/Cédula</th><th>Correo (lead)</th><th>Compró</th></tr>{filas}</table></div>")
+
+
 @app.get("/admin/seguimiento/aprobar")
 @autorizado_requerido
 def admin_seguimiento_aprobar():
