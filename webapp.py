@@ -160,6 +160,10 @@ def _capturar_origen():
         org = "whatsapp"
     elif "google" in ref:
         org = "google_organico"
+    elif request.path.rstrip("/") == "/links":
+        # /links solo se difunde en la bio de Instagram; el navegador de la app
+        # no siempre manda referrer, así que la ruta misma es la marca.
+        org = "instagram"
     if org:
         session["origen"] = org
 
