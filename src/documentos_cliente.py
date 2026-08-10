@@ -109,8 +109,30 @@ def documentos_de(exogena) -> List[dict]:
                          plantilla.split("{")[0])
                 if clave not in vistos:
                     vistos.add(clave)
-                    docs.append({"categoria": cat, "documento": doc})
+                    docs.append({"categoria": cat, "documento": doc,
+                                 "entidad": _titulo(p.informante_nombre)})
                 break
+    # Un banco entrega UN solo certificado tributario que ya trae saldos,
+    # rendimientos, retención en la fuente y deudas: se consolida por entidad.
+    _FIN = {"Cuentas bancarias", "Rendimientos financieros", "Deudas",
+            "Inversiones", "Consumos (informativo)"}
+    financieras, resto = {}, []
+    for d in docs:
+        if d["categoria"] in _FIN:
+            financieras.setdefault(d["entidad"], set()).add(d["categoria"])
+        else:
+            resto.append(d)
+    ya_cubiertas = {d["entidad"] for d in resto
+                    if d["categoria"] in ("Ahorro voluntario", "Cesantías")}
+    for ent in financieras:
+        if ent in ya_cubiertas:
+            continue                     # su certificado de fondo ya lo trae todo
+        resto.append({"categoria": "Bancos y entidades financieras", "entidad": ent,
+                      "documento": f"Certificado tributario de {ent} — incluye saldos a "
+                                   "31 de diciembre, rendimientos, retención en la fuente "
+                                   "y saldos de deudas"})
+    docs = resto
+
     # El empleador que expide el F220 ya cubre sus cesantías/aportes/deudas.
     empleadores = {d["documento"].rsplit(" de ", 1)[-1] for d in docs
                    if d["categoria"] == "Ingresos laborales"}
@@ -128,8 +150,8 @@ def documentos_de(exogena) -> List[dict]:
         basicos.append("Copia de la declaración de renta del año anterior "
                        "(la exógena muestra que ya declaró).")
     out = [{"categoria": "Básicos", "documento": b} for b in basicos]
-    orden = {"Básicos": 0}
-    out += sorted(docs, key=lambda d: d["categoria"])
+    out += sorted(({"categoria": d["categoria"], "documento": d["documento"]}
+                   for d in docs), key=lambda d: d["categoria"])
     return out
 
 
