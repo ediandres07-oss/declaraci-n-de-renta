@@ -839,6 +839,39 @@ def admin_lector_cortesia():
                     "vence": sus.vence.isoformat() if sus.vence else None})
 
 
+@app.get("/admin/gestor")
+@autorizado_requerido
+def admin_gestor():
+    """Quién está usando el Gestor de Vencimientos: contadores con clientes
+    cargados, cuántos, y desde cuándo."""
+    from src.vencimientos import ClienteContador
+    from src.gerente import _es_propio
+    filas = {}
+    for c in ClienteContador.query.all():
+        f = filas.setdefault(c.usuario_id, {"n": 0, "ultimo": None})
+        f["n"] += 1
+        if c.creado and (f["ultimo"] is None or c.creado > f["ultimo"]):
+            f["ultimo"] = c.creado
+    usuarios = {u.id: u for u in Usuario.query.filter(Usuario.id.in_(filas)).all()} if filas else {}
+    cuerpo = []
+    for uid, f in sorted(filas.items(), key=lambda kv: -(kv[1]["n"])):
+        u = usuarios.get(uid)
+        email = (u.email if u else f"usuario #{uid}") or ""
+        propio = " <span style='color:#8a919c'>(tuyo)</span>" if _es_propio(email) else ""
+        ult = f["ultimo"].strftime("%Y-%m-%d") if f["ultimo"] else "—"
+        cuerpo.append(f"<tr><td>{(u.nombre if u else '') or '—'}</td><td>{email}{propio}</td>"
+                      f"<td style='text-align:center'>{f['n']}</td><td>{ult}</td></tr>")
+    if not cuerpo:
+        cuerpo = ["<tr><td colspan=4 style='color:#8a919c'>Nadie ha cargado clientes todavía.</td></tr>"]
+    return (f"<div style='font-family:sans-serif;max-width:720px;margin:30px auto;color:#1e2432'>"
+            f"<h2>📅 Uso del Gestor de Vencimientos ({len(filas)} contador(es))</h2>"
+            f"<p style='color:#5a6272'>Contadores con clientes cargados en /vencimientos. "
+            f"<a href='/admin/dashboard'>← Panel</a></p>"
+            f"<table cellpadding=8 style='border-collapse:collapse;width:100%'>"
+            f"<tr style='text-align:left;background:#f3ede1'><th>Contador</th><th>Correo</th>"
+            f"<th>Clientes</th><th>Último cargado</th></tr>{''.join(cuerpo)}</table></div>")
+
+
 @app.get("/admin/exogenas")
 @autorizado_requerido
 def admin_exogenas():
