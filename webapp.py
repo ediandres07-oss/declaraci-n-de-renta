@@ -1413,9 +1413,12 @@ def pagar_orden(orden_id):
     if _epayco_mod.activo(EPAYCO):
         if orden.get("estado") == "pagada":
             return redirect("/epayco/respuesta?ref=" + orden_id + "&ya=1")
+        cont = orden.get("contacto") or {}
         d = _epayco_mod.datos_checkout(
             EPAYCO, orden_id, orden.get("precio", 0), desc,
-            (orden.get("contacto") or {}).get("email", ""), _base_url_publica())
+            cont.get("email", ""), _base_url_publica(),
+            nombre=cont.get("nombre", "") or orden.get("nombre", ""),
+            telefono=cont.get("telefono", ""))
         return render_template_string(_EPAYCO_CHECKOUT_HTML, d=d)
 
     # --- PayU (WebCheckout) ---
@@ -1493,9 +1496,13 @@ def payu_respuesta():
         "<body style='font-family:sans-serif;max-width:520px;margin:60px auto;text-align:center;color:#1e2432'>"
         "<div style='font-size:52px'>{{ '✅' if pagada else '⏳' }}</div>"
         "<h1 style='color:#1e2432'>{{t}}</h1><p style='color:#5a6b7f'>{{m}}</p>"
+        "{% if rechazada %}"
+        "<a href='/pagar/{{ ref }}' style='display:inline-block;margin-top:16px;background:#1b7f4b;color:#fff;"
+        "padding:12px 22px;border-radius:10px;text-decoration:none;font-weight:700'>🔄 Intentar el pago de nuevo</a><br>"
+        "{% endif %}"
         "<a href='/contadores/lector' style='display:inline-block;margin-top:16px;background:#c8991f;color:#fff;"
         "padding:12px 22px;border-radius:10px;text-decoration:none;font-weight:600'>Volver</a></body></html>",
-        t=titulo, m=msg, pagada=pagada, valor=valor, ref=ref)
+        t=titulo, m=msg, pagada=pagada, rechazada=rechazada, valor=valor, ref=ref)
 
 
 def _enviar_licencia_lector(email: str, plan: str, licencia: str):
@@ -1519,16 +1526,31 @@ def _enviar_licencia_lector(email: str, plan: str, licencia: str):
 _EPAYCO_CHECKOUT_HTML = """<!doctype html><html><head><meta charset="utf-8">
 <title>Pago seguro — ePayco</title></head>
 <body style="font-family:sans-serif;text-align:center;margin-top:60px;color:#1e2432">
-<p>Abriendo el pago seguro de ePayco…</p>
+<p id="msg">Abriendo el pago seguro de ePayco…</p>
+<button id="btnPagar" style="display:none;background:#c8991f;color:#fff;border:0;border-radius:10px;
+  padding:14px 30px;font-weight:800;font-size:1rem;cursor:pointer">Abrir el pago seguro</button>
+<p style="color:#8a919c;font-size:.85rem;max-width:420px;margin:18px auto">Si tu banco rechaza el
+  primer intento, vuelve a intentarlo: es una verificación normal de seguridad y el segundo
+  intento suele pasar sin problema.</p>
 <script src="https://checkout.epayco.co/checkout.js"></script>
 <script>
   var handler = ePayco.checkout.configure({ key: "{{ d.public_key }}", test: {{ d.test }} });
-  handler.open({
-    name: "{{ d.name }}", description: "{{ d.description }}", invoice: "{{ d.invoice }}",
-    currency: "{{ d.currency }}", amount: "{{ d.amount }}", country: "{{ d.country }}",
-    external: "false", email_billing: "{{ d.email_billing }}",
-    response: "{{ d.response }}", confirmation: "{{ d.confirmation }}"
-  });
+  function abrirPago(){
+    handler.open({
+      name: "{{ d.name }}", description: "{{ d.description }}", invoice: "{{ d.invoice }}",
+      currency: "{{ d.currency }}", amount: "{{ d.amount }}", country: "{{ d.country }}",
+      external: "false", email_billing: "{{ d.email_billing }}",
+      name_billing: "{{ d.name_billing }}", mobilephone_billing: "{{ d.mobilephone_billing }}",
+      extra1: "{{ d.extra1 }}",
+      response: "{{ d.response }}", confirmation: "{{ d.confirmation }}"
+    });
+  }
+  var btn = document.getElementById("btnPagar");
+  btn.onclick = abrirPago;
+  abrirPago();
+  // Si el navegador bloqueó la apertura automática, mostrar el botón como plan B.
+  setTimeout(function(){ btn.style.display = "inline-block";
+    document.getElementById("msg").textContent = "Si no se abrió la ventana de pago, tócala aquí:"; }, 3500);
 </script></body></html>"""
 
 
@@ -1565,10 +1587,15 @@ def epayco_respuesta():
     ok = request.args.get("ya") == "1"
     orden = _leer_ordenes().get(ref, {})
     pagada = ok or orden.get("estado") == "pagada"
-    titulo = "¡Pago confirmado!" if pagada else "Pago en proceso"
+    rechazada = str(orden.get("estado", "")).startswith("pago_rechazada")
+    titulo = ("¡Pago confirmado!" if pagada else
+              "El banco no aprobó este intento" if rechazada else "Pago en proceso")
     msg = ("Tu suscripción quedó activa. Te enviamos la clave y el enlace de descarga a tu correo. "
            "También puedes entrar al Lector con tu correo (te llega un código)."
            if pagada else
+           "Tranquilo: es una verificación de seguridad normal en el primer intento y NO se hizo "
+           "ningún cobro. Vuelve a intentarlo — el segundo intento casi siempre pasa."
+           if rechazada else
            "Si el pago se completó, en unos minutos recibirás la activación por correo.")
     valor = orden.get("precio", 0) or 0
     return render_template_string(
@@ -1584,9 +1611,13 @@ def epayco_respuesta():
         "<body style='font-family:sans-serif;max-width:520px;margin:60px auto;text-align:center;color:#1e2432'>"
         "<div style='font-size:52px'>{{ '✅' if pagada else '⏳' }}</div>"
         "<h1 style='color:#1e2432'>{{t}}</h1><p style='color:#5a6b7f'>{{m}}</p>"
+        "{% if rechazada %}"
+        "<a href='/pagar/{{ ref }}' style='display:inline-block;margin-top:16px;background:#1b7f4b;color:#fff;"
+        "padding:12px 22px;border-radius:10px;text-decoration:none;font-weight:700'>🔄 Intentar el pago de nuevo</a><br>"
+        "{% endif %}"
         "<a href='/contadores/lector' style='display:inline-block;margin-top:16px;background:#c8991f;color:#fff;"
         "padding:12px 22px;border-radius:10px;text-decoration:none;font-weight:600'>Volver</a></body></html>",
-        t=titulo, m=msg, pagada=pagada, valor=valor, ref=ref)
+        t=titulo, m=msg, pagada=pagada, rechazada=rechazada, valor=valor, ref=ref)
 
 
 @app.post("/api/muestra/codigo")

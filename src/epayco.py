@@ -19,8 +19,12 @@ def activo(cfg: dict | None) -> bool:
 
 
 def datos_checkout(cfg: dict, orden_id: str, valor, descripcion: str,
-                   email: str, base_url: str) -> dict:
-    """Parámetros para abrir el checkout.js de ePayco en el navegador."""
+                   email: str, base_url: str, nombre: str = "",
+                   telefono: str = "") -> dict:
+    """Parámetros para abrir el checkout.js de ePayco en el navegador.
+
+    Nombre y teléfono van al antifraude de ePayco: un comprador sin datos de
+    facturación dispara rechazos en el primer intento."""
     return {
         "public_key": str(cfg.get("public_key", "")),
         "test": "true" if cfg.get("test", True) else "false",
@@ -31,6 +35,9 @@ def datos_checkout(cfg: dict, orden_id: str, valor, descripcion: str,
         "amount": str(int(round(float(valor)))),
         "country": "co",
         "email_billing": email or "",
+        "name_billing": (nombre or "")[:80],
+        "mobilephone_billing": "".join(c for c in (telefono or "") if c.isdigit())[:15],
+        "extra1": orden_id,
         "response": f"{base_url}/epayco/respuesta",
         "confirmation": f"{base_url}/epayco/confirmacion",
     }
