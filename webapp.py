@@ -134,6 +134,61 @@ def _bucle_avisos_vencimientos():
 threading.Thread(target=_bucle_avisos_vencimientos, daemon=True).start()
 
 
+@app.before_request
+def _capturar_origen():
+    """Atribución: recuerda de dónde llegó el visitante (ads/instagram/…) en su
+    primera visita, para sellarlo luego en leads, muestras y órdenes."""
+    if request.method != "GET" or request.path.startswith(("/static", "/api/", "/admin")):
+        return
+    if session.get("origen"):
+        return
+    a = request.args
+    utm = (a.get("utm_source") or "").strip().lower()
+    ref = (request.referrer or "").lower()
+    org = ""
+    if a.get("gclid") or utm in ("google", "google_ads", "ads", "adwords"):
+        org = "ads"
+    elif a.get("fbclid") or utm in ("ig", "instagram", "fb", "facebook", "meta"):
+        org = "instagram"
+    elif utm:
+        org = utm[:30]
+    elif "instagram" in ref or "facebook" in ref:
+        org = "instagram"
+    elif "youtube" in ref or "youtu.be" in ref:
+        org = "youtube"
+    elif "whatsapp" in ref or "wa.me" in ref:
+        org = "whatsapp"
+    elif "google" in ref:
+        org = "google_organico"
+    if org:
+        session["origen"] = org
+
+
+def _origen_actual() -> str:
+    """El canal de llegada guardado en la sesión ('' si entró directo)."""
+    return session.get("origen", "")
+
+
+def _sellar_origen_muestra(email: str) -> None:
+    """Sella el origen (sesión, o el del código pedido antes) en la fila de la
+    muestra ya registrada, sin pisar un valor existente."""
+    try:
+        from src.auth import CodigoMuestra, MuestraContadorEmail
+        email = (email or "").strip().lower()
+        fila = db.session.get(MuestraContadorEmail, email)
+        if fila is None or fila.origen:
+            return
+        org = _origen_actual()
+        if not org:
+            cod = db.session.get(CodigoMuestra, email)
+            org = (cod.origen if cod else "") or ""
+        if org:
+            fila.origen = org
+            db.session.commit()
+    except Exception:
+        db.session.rollback()
+
+
 @app.context_processor
 def _inyectar_usuario():
     """Deja disponible el usuario y los proveedores activos en todas las plantillas."""
@@ -901,7 +956,7 @@ def crear_pase_contador():
     orden_id = uuid.uuid4().hex[:12]
     ordenes = _leer_ordenes()
     ordenes[orden_id] = {
-        "tipo": "orden", "plan": "contadores",
+        "tipo": "orden", "plan": "contadores", "origen": _origen_actual(),
         "precio": cont.get("precio", 149900), "contacto": contacto,
         "estado": "pendiente_pago", "fecha": str(date.today()),
         "nit": "", "nombre": nombre,
@@ -1201,7 +1256,7 @@ def crear_suscripcion_lector():
     orden_id = uuid.uuid4().hex[:12]
     ordenes = _leer_ordenes()
     ordenes[orden_id] = {
-        "tipo": "orden", "plan": "lector", "plan_lector": plan,
+        "tipo": "orden", "plan": "lector", "plan_lector": plan, "origen": _origen_actual(),
         "precio": precio,
         "contacto": {"email": email, "nombre": (u.nombre or "").strip(),
                      "telefono": str(cuerpo.get("telefono", "")).strip()},
@@ -1439,6 +1494,14 @@ def api_muestra_codigo():
         return jsonify({"ok": False, "error": "Ese correo ya usó su muestra gratis. "
                         "Activa tu pase de temporada para declaraciones ilimitadas."}), 402
     codigo = generar_codigo_muestra(email)
+    try:
+        from src.auth import CodigoMuestra
+        fila = db.session.get(CodigoMuestra, email)
+        if fila is not None and not fila.origen:
+            fila.origen = _origen_actual()
+            db.session.commit()
+    except Exception:
+        db.session.rollback()
     html = (
         "<div style='font-family:sans-serif;max-width:460px;margin:auto'>"
         "<h2 style='color:#1e2432'>Tu código para la muestra</h2>"
@@ -1492,6 +1555,7 @@ def muestra_contador_pdf(token):
 
     registrar_muestra_email(email, token=token, nit=carga.get("nit", ""),
                             nombre=(getattr(u, "nombre", "") if u else ""))
+    _sellar_origen_muestra(email)
 
     return send_file(io.BytesIO(contenido), as_attachment=True,
                      download_name=f"MUESTRA_Formulario210_{carga.get('nit','')}.pdf",
@@ -1598,6 +1662,7 @@ def muestra_contador_zip(token):
 
     registrar_muestra_email(email, token=token, nit=nit,
                             nombre=(getattr(u, "nombre", "") if u else ""))
+    _sellar_origen_muestra(email)
 
     return send_file(buf, as_attachment=True,
                      download_name=f"MUESTRA_Declaracion_{nit}.zip",
@@ -1891,6 +1956,7 @@ def guardar_lead_exogena():
     lead.obligado = obligado
     lead.valor = valor
     lead.token = token or lead.token
+    lead.origen = lead.origen or _origen_actual() or None
     db.session.commit()
 
     try:
@@ -1977,7 +2043,7 @@ def checkout():
 
     orden_id = uuid.uuid4().hex[:12]
     ordenes[orden_id] = {
-        "tipo": "orden", "token": token, "plan": plan,
+        "tipo": "orden", "token": token, "plan": plan, "origen": _origen_actual(),
         "precio": PLANES[plan]["precio"], "contacto": contacto,
         "estado": "pendiente_pago", "fecha": str(date.today()),
         "nit": ordenes[token].get("nit", ""), "nombre": ordenes[token].get("nombre", ""),

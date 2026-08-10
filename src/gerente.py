@@ -238,6 +238,38 @@ def _pesos(n) -> str:
         return "$0"
 
 
+def _atribucion_semana() -> list[str]:
+    """Líneas '<canal>: N llegada(s)' de los últimos 7 días: códigos de muestra
+    pedidos, muestras descargadas y leads del cálculo gratis, por origen."""
+    from src.auth import CodigoMuestra, LeadExogena, MuestraContadorEmail
+    desde = datetime.utcnow() - timedelta(days=7)
+    conteo = {}
+
+    def _suma(origen, que):
+        canal = origen or "directo"
+        conteo.setdefault(canal, {}).setdefault(que, 0)
+        conteo[canal][que] += 1
+
+    for c in CodigoMuestra.query.all():
+        if c.expira and c.expira >= desde and not _es_propio(c.email):
+            _suma(c.origen, "códigos")
+    for m in MuestraContadorEmail.query.all():
+        if m.creado and m.creado >= desde and not _es_propio(m.email):
+            _suma(m.origen, "muestras")
+    for l in LeadExogena.query.all():
+        if l.creado and l.creado >= desde and not _es_propio(l.email):
+            _suma(l.origen, "leads renta")
+
+    etiqueta = {"ads": "🎯 Google Ads", "instagram": "📸 Instagram/Meta",
+                "youtube": "▶️ YouTube", "whatsapp": "💬 WhatsApp",
+                "google_organico": "🔎 Google orgánico", "directo": "🚪 Directo/otro"}
+    lineas = []
+    for canal, partes in sorted(conteo.items(), key=lambda kv: -sum(kv[1].values())):
+        det = " · ".join(f"{n} {q}" for q, n in partes.items())
+        lineas.append(f"{etiqueta.get(canal, canal)}: {det}")
+    return lineas
+
+
 def informe_diario() -> bool:
     """Arma y envía el informe del día anterior. True si se envió."""
     from src.correo import enviar_email
@@ -288,6 +320,8 @@ def informe_diario() -> bool:
         <li>Vencen en ≤7 días: <b>{len(por_vencer)}</b>{(' — ' + ', '.join(f"{s.email} ({s.vence})" for s in por_vencer)) if por_vencer else ''}</li>
         <li>Acciones del agente este mes: <b>{agente_usos}</b></li>
       </ul>
+      <h3 style="margin-bottom:4px">📣 De dónde llegan (últimos 7 días)</h3>
+      <ul style="margin-top:4px">{_lista(_atribucion_semana(), "Sin llegadas con origen registrado aún.")}</ul>
       <p style="color:#8a919c;font-size:.85rem">Enviado por tu gerente virtual · tributando.co</p>
     </div>"""
     enviar_email(ADMIN_EMAIL, f"📊 Tributando {ayer.strftime('%d/%m')}: "
@@ -718,9 +752,11 @@ def seguimientos_pendientes() -> list[dict]:
 
     # descargaron la muestra (con o sin registro)
     descargaron = {}
+    origenes = {}
     for m in MuestraContadorEmail.query.all():
         if m.email:
             descargaron[m.email.lower()] = (m.creado or hoy, m.nombre or "")
+            origenes[m.email.lower()] = m.origen or ""
     for m in MuestraContador.query.all():
         if m.email:
             descargaron.setdefault(m.email.lower(), (getattr(m, "creado", None) or hoy, ""))
@@ -731,6 +767,7 @@ def seguimientos_pendientes() -> list[dict]:
         e = (c.email or "").lower()
         if e and e not in descargaron and c.expira:
             pidieron[e] = c.expira - timedelta(minutes=15)
+            origenes.setdefault(e, c.origen or "")
 
     ya = {s.email: {p for p in (s.enviados or "").split(",") if p}
           for s in SeguimientoContador.query.all()}
@@ -742,6 +779,7 @@ def seguimientos_pendientes() -> list[dict]:
         dias = (hoy - fecha).days
         if 1 <= dias <= 4 and "codigo" not in ya.get(email, ()):
             out.append({"email": email, "nombre": "", "paso": "codigo",
+                        "origen": origenes.get(email, ""),
                         "motivo": f"pidió código hace {dias} día(s), no descargó"})
     for email, (fecha, nombre) in descargaron.items():
         if _es_propio(email) or email in compradores:
@@ -752,9 +790,11 @@ def seguimientos_pendientes() -> list[dict]:
         dias = (hoy - fecha).days
         if 2 <= dias <= 6 and "valor" not in hechos:
             out.append({"email": email, "nombre": nombre, "paso": "valor",
+                        "origen": origenes.get(email, ""),
                         "motivo": f"descargó la muestra hace {dias} día(s), sin compra"})
         elif 7 <= dias <= 14 and "cierre" not in hechos:
             out.append({"email": email, "nombre": nombre, "paso": "cierre",
+                        "origen": origenes.get(email, ""),
                         "motivo": f"descargó hace {dias} día(s), sin compra"})
     return out
 
@@ -776,7 +816,7 @@ def seguimiento_contadores() -> int:
         bloques.append(f"""
         <div style="border:1px solid #e2ddd2;border-radius:10px;padding:14px;margin:10px 0">
           <div style="font-weight:800">{p['email']}</div>
-          <div style="color:#8a6d3b;font-size:13px">{_SEG_PASOS[p['paso']]} — {p['motivo']}</div>
+          <div style="color:#8a6d3b;font-size:13px">{_SEG_PASOS[p['paso']]} — {p['motivo']}{(' · llegó por ' + p['origen']) if p.get('origen') else ''}</div>
           <div style="font-size:14px;margin:6px 0">Asunto: <i>{asunto}</i></div>
           <a href="{aprobar}" style="display:inline-block;background:#c8991f;color:#fff;font-weight:800;text-decoration:none;padding:9px 18px;border-radius:9px">✅ Aprobar y enviar</a>
         </div>""")

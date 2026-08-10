@@ -151,6 +151,7 @@ class LeadExogena(db.Model):
     nombre = db.Column(db.String(200))
     nit = db.Column(db.String(30))
     fecha_limite = db.Column(db.Date)                     # su plazo para declarar
+    origen = db.Column(db.String(30))                     # de dónde llegó (ads/instagram/…)
     obligado = db.Column(db.Boolean, default=False)
     valor = db.Column(db.Float, default=0)                # valor estimado a pagar
     token = db.Column(db.String(100))                     # carga asociada
@@ -201,6 +202,7 @@ class MuestraContadorEmail(db.Model):
     nombre = db.Column(db.String(200))
     token = db.Column(db.String(80))                      # token de la carga usada
     nit_muestra = db.Column(db.String(30))
+    origen = db.Column(db.String(30))                     # de dónde llegó (ads/instagram/…)
     creado = db.Column(db.DateTime, default=datetime.utcnow)
 
 
@@ -239,6 +241,7 @@ class CodigoMuestra(db.Model):
     codigo_hash = db.Column(db.String(64))
     expira = db.Column(db.DateTime)
     intentos = db.Column(db.Integer, default=0)
+    origen = db.Column(db.String(30))                     # de dónde llegó (ads/instagram/…)
 
 
 def generar_codigo_muestra(email: str) -> "str | None":
@@ -811,6 +814,15 @@ def _migrar_columnas_faltantes():
             for nombre, tipo in ag_cols.items():
                 if nombre not in cols:
                     con.execute(text(f"ALTER TABLE suscripciones_lector ADD COLUMN {nombre} {tipo}"))
+
+
+    # Columna 'origen' (atribución ads/instagram/…) en las tablas del embudo.
+    for tabla in ("leads_exogena", "muestras_contador_email", "codigos_muestra"):
+        if tabla in insp.get_table_names():
+            cols = {c["name"] for c in insp.get_columns(tabla)}
+            if "origen" not in cols:
+                with db.engine.begin() as con:
+                    con.execute(text(f"ALTER TABLE {tabla} ADD COLUMN origen VARCHAR(30)"))
 
 
 auth_bp = Blueprint("auth", __name__)
