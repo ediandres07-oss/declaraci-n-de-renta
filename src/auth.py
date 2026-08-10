@@ -222,6 +222,18 @@ def registrar_muestra_email(email: str, token: str = "", nit: str = "", nombre: 
         db.session.rollback()
 
 
+class Bono(db.Model):
+    """Bono de descuento personal, de un solo uso, que reparte el agente
+    comercial (correo de cierre / última llamada). Vence a los 3 días."""
+    __tablename__ = "bonos"
+    codigo = db.Column(db.String(20), primary_key=True)
+    email = db.Column(db.String(200))                 # a quién se le dio
+    tipo = db.Column(db.String(10))                   # "pase" | "renta"
+    expira = db.Column(db.DateTime)
+    usado = db.Column(db.Boolean, default=False)
+    creado = db.Column(db.DateTime, default=datetime.utcnow)
+
+
 class SeguimientoContador(db.Model):
     """Seguimientos comerciales del embudo de contadores (muestra → pase).
     Registra qué correos de seguimiento ya se le enviaron a cada lead para no

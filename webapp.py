@@ -140,6 +140,8 @@ def _capturar_origen():
     primera visita, para sellarlo luego en leads, muestras y órdenes."""
     if request.method != "GET" or request.path.startswith(("/static", "/api/", "/admin")):
         return
+    if request.args.get("bono"):
+        session["bono"] = request.args.get("bono").strip().upper()[:20]
     if session.get("origen"):
         return
     a = request.args
@@ -171,6 +173,24 @@ def _capturar_origen():
 def _origen_actual() -> str:
     """El canal de llegada guardado en la sesión ('' si entró directo)."""
     return session.get("origen", "")
+
+
+def _canjear_bono(plan: str) -> tuple[str, int]:
+    """(codigo, descuento) si hay un bono válido en la sesión para ese plan.
+    No lo marca como usado (eso pasa al confirmarse el pago)."""
+    from src.auth import Bono
+    from src.gerente import BONO_PASE, BONO_RENTA
+    cod = (session.get("bono") or "").strip().upper()
+    if not cod:
+        return "", 0
+    b = db.session.get(Bono, cod)
+    if b is None or b.usado or (b.expira and b.expira < datetime.utcnow()):
+        return "", 0
+    if b.tipo == "pase" and plan == "contadores":
+        return cod, BONO_PASE
+    if b.tipo == "renta" and plan in BONO_RENTA:
+        return cod, BONO_RENTA[plan]
+    return "", 0
 
 
 def _sellar_origen_muestra(email: str) -> None:
@@ -958,10 +978,12 @@ def crear_pase_contador():
     contacto = {"email": email, "nombre": nombre,
                 "telefono": str(cuerpo.get("telefono", "")).strip()}
     orden_id = uuid.uuid4().hex[:12]
+    bono_cod, bono_desc = _canjear_bono("contadores")
     ordenes = _leer_ordenes()
     ordenes[orden_id] = {
         "tipo": "orden", "plan": "contadores", "origen": _origen_actual(),
-        "precio": cont.get("precio", 149900), "contacto": contacto,
+        "bono": bono_cod, "descuento": bono_desc,
+        "precio": max(cont.get("precio", 149900) - bono_desc, 0), "contacto": contacto,
         "estado": "pendiente_pago", "fecha": str(date.today()),
         "nit": "", "nombre": nombre,
     }
@@ -969,7 +991,8 @@ def crear_pase_contador():
     from src import payu as _payu_mod
     from src import epayco as _epayco_mod
     pago_url = f"/pagar/{orden_id}" if (_epayco_mod.activo(EPAYCO) or _payu_mod.activo()) else ""
-    return jsonify({"orden_id": orden_id, "precio": cont.get("precio", 149900), "pago_url": pago_url})
+    return jsonify({"orden_id": orden_id, "precio": ordenes[orden_id]["precio"],
+                    "descuento": bono_desc, "pago_url": pago_url})
 
 
 # Precios de la suscripción al Lector XML (Tributando Contadores). Plana,
@@ -2046,15 +2069,18 @@ def checkout():
         return jsonify({"error": "Déjenos un correo o teléfono de contacto."}), 400
 
     orden_id = uuid.uuid4().hex[:12]
+    bono_cod, bono_desc = _canjear_bono(plan)
     ordenes[orden_id] = {
         "tipo": "orden", "token": token, "plan": plan, "origen": _origen_actual(),
-        "precio": PLANES[plan]["precio"], "contacto": contacto,
+        "bono": bono_cod, "descuento": bono_desc,
+        "precio": max(PLANES[plan]["precio"] - bono_desc, 0), "contacto": contacto,
         "estado": "pendiente_pago", "fecha": str(date.today()),
         "nit": ordenes[token].get("nit", ""), "nombre": ordenes[token].get("nombre", ""),
     }
     _guardar_ordenes(ordenes)
     return jsonify({"orden_id": orden_id, "plan": PLANES[plan],
-                    "precio": PLANES[plan]["precio"], "pago": PAGO})
+                    "precio": ordenes[orden_id]["precio"], "descuento": bono_desc,
+                    "pago": PAGO})
 
 
 @app.post("/api/checkout-realmy")
@@ -2350,6 +2376,17 @@ def _finalizar_pago_orden(orden_id: str, orden: dict, ordenes: dict) -> None:
     exógena y genera el checklist para el trámite. Idempotente."""
     orden["estado"] = ("pagada" if orden["plan"] in ("pdf", "contadores", "lector")
                        else "pagada_en_tramite")
+
+    # Bono canjeado: quemarlo (un solo uso). Idempotente.
+    if orden.get("bono"):
+        try:
+            from src.auth import Bono
+            b = db.session.get(Bono, orden["bono"])
+            if b is not None and not b.usado:
+                b.usado = True
+                db.session.commit()
+        except Exception:
+            db.session.rollback()
 
     # Suscripción al Lector XML: crea la suscripción y entrega la clave. Idempotente.
     if orden["plan"] == "lector":

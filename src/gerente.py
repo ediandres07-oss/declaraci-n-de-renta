@@ -516,8 +516,9 @@ def _fecha_larga(d) -> str:
     return f"{d.day} de {_MESES[d.month]} de {d.year}" if d else "por confirmar"
 
 
-def _correo_recuperacion(paso: str, lead) -> tuple[str, str]:
-    """(asunto, html) del correo de recuperación `paso` para el lead."""
+def _correo_recuperacion(paso: str, lead, bono: str = "") -> tuple[str, str]:
+    """(asunto, html) del correo de recuperación `paso` para el lead. En el paso
+    'venc3', `bono` agrega el código de descuento personal."""
     nom = (lead.nombre or "").split()[0].title() if lead.nombre else ""
     hola = f"Hola {nom} 👋" if nom else "Hola 👋"
     fecha = _fecha_larga(lead.fecha_limite)
@@ -555,8 +556,15 @@ def _correo_recuperacion(paso: str, lead) -> tuple[str, str]:
       <h1 style="font-size:20px;color:#1e2432;margin:0 0 8px">⏰ Últimos días, {nom or ''}</h1>
       <p style="font-size:15px;line-height:1.55">Tu plazo para declarar renta vence el <b>{fecha}</b> ({faltan} día(s)). No dejes que la DIAN te cobre <b>sanción + intereses</b>.</p>
       <p style="font-size:15px;line-height:1.55">{servicio} Alcanzamos a dejarla presentada a tiempo.</p>"""
+    if bono:
+        cuerpo += f"""
+      <div style="background:#faf7f0;border:1px dashed #c8991f;border-radius:10px;padding:14px;margin:14px 0;text-align:center">
+        <div style="font-size:14px">Para que alcances antes del plazo, tu bono personal:</div>
+        <div style="font-size:22px;font-weight:800;color:#8a6d3b;letter-spacing:1px">{bono}</div>
+        <div style="font-size:15px"><b>$30.000 menos</b> en la presentación (o $10.000 en el PDF) · válido <b>72 horas</b> · un solo uso</div>
+      </div>"""
     return "🔔 Últimos días para declarar tu renta (evita la sanción)", _wrap_correo(
-        "ÚLTIMA LLAMADA", cuerpo, "Presentar mi declaración →", SITIO)
+        "ÚLTIMA LLAMADA", cuerpo, "Presentar mi declaración →", SITIO + (f"?bono={bono}" if bono else ""))
 
 
 def recuperacion_leads() -> int:
@@ -599,7 +607,8 @@ def recuperacion_leads() -> int:
         if not pendientes:
             continue
         paso = sorted(pendientes, key=lambda p: prioridad[p])[0]
-        asunto, html = _correo_recuperacion(paso, lead)
+        bono = _crear_bono(lead.email, "renta") if paso == "venc3" else ""
+        asunto, html = _correo_recuperacion(paso, lead, bono)
         try:
             enviar_email(lead.email, asunto, html)
         except Exception:
@@ -674,15 +683,31 @@ def contenido_semanal(ia_cfg: dict) -> bool:
 # dueño un resumen con cada correo propuesto y un botón "Aprobar y enviar".
 # Tope: máximo 2 seguimientos por lead, y solo dentro de la ventana de cada paso.
 
+BONO_PASE = 30000            # descuento del bono al pase de temporada
+BONO_RENTA = {"pdf": 10000, "presentacion": 30000}   # descuento por plan de renta
+
+
+def _crear_bono(email: str, tipo: str, dias: int = 3) -> str:
+    """Crea y guarda un bono de un solo uso para ese correo. Devuelve el código."""
+    import secrets as _secrets
+    from src.auth import Bono
+    codigo = f"RESCATE-{_secrets.token_hex(2).upper()}"
+    db.session.add(Bono(codigo=codigo, email=(email or "").lower(), tipo=tipo,
+                        expira=datetime.utcnow() + timedelta(days=dias)))
+    db.session.commit()
+    return codigo
+
+
 _SEG_PASOS = {"codigo": "Pidió el código y no descargó",
               "valor": "Descargó la muestra y no ha comprado",
               "cierre": "Último recordatorio (temporada de renta)"}
 
 
-def _correo_seguimiento(paso: str, nombre: str = "") -> tuple[str, str]:
-    """(asunto, html) del correo de seguimiento `paso` para un lead contador."""
+def _correo_seguimiento(paso: str, nombre: str = "", bono: str = "") -> tuple[str, str]:
+    """(asunto, html) del correo de seguimiento `paso` para un lead contador.
+    En el paso 'cierre', `bono` agrega el código de descuento personal."""
     hola = f"Hola {nombre.split()[0].title()}," if (nombre or "").strip() else "Hola,"
-    url = "https://tributando.co/contadores"
+    url = "https://tributando.co/contadores" + (f"?bono={bono}" if bono else "")
     if paso == "codigo":
         asunto = "¿Pudiste descargar tu muestra? — Tributando.co"
         cuerpo = f"""
@@ -717,7 +742,14 @@ def _correo_seguimiento(paso: str, nombre: str = "") -> tuple[str, str]:
       <p style="font-size:15px;line-height:1.7">Con el <b>Pase de temporada</b> ($149.900,
       pago único) armas declaraciones ilimitadas desde la exógena: 210 en PDF + papeles de
       trabajo. Este es el último correo que te enviamos al respecto. 🙂</p>"""
-    return asunto, _wrap_correo("TEMPORADA DE RENTA", cuerpo, "Activar mi pase", url)
+    if bono:
+        cuerpo += f"""
+      <div style="background:#faf7f0;border:1px dashed #c8991f;border-radius:10px;padding:14px;margin:14px 0;text-align:center">
+        <div style="font-size:14px">Por ser de los primeros, tu bono personal:</div>
+        <div style="font-size:22px;font-weight:800;color:#8a6d3b;letter-spacing:1px">{bono}</div>
+        <div style="font-size:15px">Pase a <b>$119.900</b> (ahorras $30.000) · válido <b>72 horas</b> · un solo uso</div>
+      </div>"""
+    return asunto, _wrap_correo("TEMPORADA DE RENTA", cuerpo, "Activar mi pase con descuento" if bono else "Activar mi pase", url)
 
 
 def _seg_compradores() -> set:
@@ -847,7 +879,8 @@ def seguimiento_aprobar(email: str, paso: str) -> dict:
     if len(hechos) >= 2:
         return {"ok": False, "error": "Ese lead ya recibió sus 2 seguimientos."}
     m = db.session.get(MuestraContadorEmail, email)
-    asunto, html = _correo_seguimiento(paso, (m.nombre if m else "") or "")
+    bono = _crear_bono(email, "pase") if paso == "cierre" else ""
+    asunto, html = _correo_seguimiento(paso, (m.nombre if m else "") or "", bono)
     enviar_email(email, asunto, html)
     if reg is None:
         reg = SeguimientoContador(email=email)
