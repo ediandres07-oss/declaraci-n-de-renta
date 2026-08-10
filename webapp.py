@@ -1507,8 +1507,13 @@ def payu_respuesta():
         "<div style='text-align:center;margin:10px 0'><img src='/static/img/qr-bre-b.png?v=2' "
         "alt='QR Bre-B para pagar desde Nequi o tu banco' style='width:150px;height:auto;border-radius:10px'><br>"
         "<span style='font-size:.8rem;color:#8a919c'>Escanea desde Nequi o tu app bancaria (Bre-B)</span></div>"
-        "<span style='color:#8a919c'>Valor exacto y tu número de orden <b>{{ ref }}</b> como referencia. "
-        "Confirmamos y te activamos por correo.</span></div><br>"
+        "<span style='color:#8a919c'>Valor exacto y tu número de orden <b>{{ ref }}</b> como referencia.</span>"
+        "<div style='text-align:center;margin-top:10px'><button onclick=\"fetch('/api/reportar-pago',{method:'POST',"
+        "headers:{'Content-Type':'application/json'},body:JSON.stringify({orden_id:'{{ ref }}'})})"
+        ".then(r=>{this.disabled=true;document.getElementById('ypMsg').textContent=r.ok?'✓ Aviso enviado. Verificamos y te activamos por correo.':'No se pudo, escríbenos por WhatsApp.'})\" "
+        "style='background:#1b7f4b;color:#fff;border:0;border-radius:9px;padding:10px 18px;font-weight:700;"
+        "cursor:pointer'>✅ Ya transferí — avisar</button>"
+        "<div id='ypMsg' style='font-size:.85rem;color:#1b7f4b;margin-top:6px'></div></div></div><br>"
         "{% endif %}"
         "<a href='/contadores/lector' style='display:inline-block;margin-top:16px;background:#c8991f;color:#fff;"
         "padding:12px 22px;border-radius:10px;text-decoration:none;font-weight:600'>Volver</a></body></html>",
@@ -1551,8 +1556,26 @@ _EPAYCO_CHECKOUT_HTML = """<!doctype html><html><head><meta charset="utf-8">
     alt="QR Bre-B para pagar desde Nequi o tu banco" style="width:150px;height:auto;border-radius:10px"><br>
     <span style="font-size:.8rem;color:#8a919c">Escanea desde Nequi o tu app bancaria (Bre-B)</span></div>
   <span style="color:#8a919c">Transfiere el valor exacto y usa tu número de orden
-  <b>{{ d.invoice }}</b> como referencia. Confirmamos y te activamos por correo.</span>
+  <b>{{ d.invoice }}</b> como referencia.</span>
+  <div style="text-align:center;margin-top:10px">
+    <button id="btnYaPague" onclick="reportarPago()" style="background:#1b7f4b;color:#fff;border:0;
+      border-radius:9px;padding:10px 18px;font-weight:700;cursor:pointer">✅ Ya transferí — avisar</button>
+    <div id="yaPagueMsg" style="font-size:.85rem;color:#1b7f4b;margin-top:6px"></div>
+  </div>
 </div>
+<script>
+async function reportarPago(){
+  const b = document.getElementById("btnYaPagué") || document.getElementById("btnYaPague");
+  b.disabled = true;
+  try {
+    const r = await fetch("/api/reportar-pago", {method:"POST",
+      headers:{"Content-Type":"application/json"}, body: JSON.stringify({orden_id: "{{ d.invoice }}"})});
+    document.getElementById("yaPagueMsg").textContent = r.ok
+      ? "✓ Aviso enviado. Verificamos tu pago y te activamos por correo."
+      : "No se pudo enviar el aviso, escríbenos por WhatsApp.";
+  } catch(e){ document.getElementById("yaPagueMsg").textContent = "Sin conexión, intenta de nuevo."; b.disabled = false; }
+}
+</script>
 <script src="https://checkout.epayco.co/checkout.js"></script>
 <script>
   var handler = ePayco.checkout.configure({ key: "{{ d.public_key }}", test: {{ d.test }} });
@@ -1641,8 +1664,13 @@ def epayco_respuesta():
         "<div style='text-align:center;margin:10px 0'><img src='/static/img/qr-bre-b.png?v=2' "
         "alt='QR Bre-B para pagar desde Nequi o tu banco' style='width:150px;height:auto;border-radius:10px'><br>"
         "<span style='font-size:.8rem;color:#8a919c'>Escanea desde Nequi o tu app bancaria (Bre-B)</span></div>"
-        "<span style='color:#8a919c'>Valor exacto y tu número de orden <b>{{ ref }}</b> como referencia. "
-        "Confirmamos y te activamos por correo.</span></div><br>"
+        "<span style='color:#8a919c'>Valor exacto y tu número de orden <b>{{ ref }}</b> como referencia.</span>"
+        "<div style='text-align:center;margin-top:10px'><button onclick=\"fetch('/api/reportar-pago',{method:'POST',"
+        "headers:{'Content-Type':'application/json'},body:JSON.stringify({orden_id:'{{ ref }}'})})"
+        ".then(r=>{this.disabled=true;document.getElementById('ypMsg').textContent=r.ok?'✓ Aviso enviado. Verificamos y te activamos por correo.':'No se pudo, escríbenos por WhatsApp.'})\" "
+        "style='background:#1b7f4b;color:#fff;border:0;border-radius:9px;padding:10px 18px;font-weight:700;"
+        "cursor:pointer'>✅ Ya transferí — avisar</button>"
+        "<div id='ypMsg' style='font-size:.85rem;color:#1b7f4b;margin-top:6px'></div></div></div><br>"
         "{% endif %}"
         "<a href='/contadores/lector' style='display:inline-block;margin-top:16px;background:#c8991f;color:#fff;"
         "padding:12px 22px;border-radius:10px;text-decoration:none;font-weight:600'>Volver</a></body></html>",
@@ -2338,14 +2366,29 @@ def reportar_pago():
     orden = ordenes.get(orden_id)
     if not orden or orden.get("tipo") != "orden":
         return jsonify({"error": "Orden no encontrada."}), 404
-    if orden["estado"] == "pendiente_pago":
-        orden["estado"] = "pago_reportado"
-        # Aviso al negocio: hay una consignación por verificar. Nunca tumba el
-        # endpoint (la orden queda en el panel /admin de todos modos).
-        from src.correo import notificar_pago
-        if notificar_pago(orden_id, orden, confirmado=False):
-            orden["aviso_pago_enviado"] = True
-        _guardar_ordenes(ordenes)
+    # También puede reportar quien venía de un pago rechazado/cancelado en la
+    # pasarela y terminó pagando por transferencia o QR.
+    if orden["estado"] == "pendiente_pago" or orden["estado"].startswith("pago_"):
+        if orden["estado"] != "pago_reportado":
+            orden["estado"] = "pago_reportado"
+            # Aviso al negocio: hay una consignación por verificar. Nunca tumba
+            # el endpoint (la orden queda en el panel /admin de todos modos).
+            from src.correo import notificar_pago
+            if notificar_pago(orden_id, orden, confirmado=False):
+                orden["aviso_pago_enviado"] = True
+            try:
+                from src.gerente import _telegram_enviar, telegram_configurado
+                if telegram_configurado():
+                    c = orden.get("contacto") or {}
+                    _telegram_enviar(
+                        f"💰 Pago por transferencia/QR reportado\n"
+                        f"Orden {orden_id} · {orden.get('plan','?')} · "
+                        f"${int(orden.get('precio') or 0):,} COP\n"
+                        f"{c.get('email','')}\n"
+                        f"Verifica en Bancolombia/Nequi y confirma en tributando.co/admin")
+            except Exception:
+                pass
+            _guardar_ordenes(ordenes)
     return jsonify({"estado": orden["estado"], "orden_id": orden_id})
 
 
