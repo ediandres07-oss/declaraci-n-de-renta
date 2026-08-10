@@ -632,3 +632,186 @@ def contenido_semanal(ia_cfg: dict) -> bool:
     </div>"""
     enviar_email(ADMIN_EMAIL, "📣 Contenido de la semana — tributando.co", html)
     return True
+
+
+# ---------- seguimiento comercial: embudo de contadores (muestra → pase) ----------
+# Cada día arma los correos de seguimiento para los contadores que pidieron o
+# descargaron la muestra y no han comprado. NO envía nada al lead: le manda al
+# dueño un resumen con cada correo propuesto y un botón "Aprobar y enviar".
+# Tope: máximo 2 seguimientos por lead, y solo dentro de la ventana de cada paso.
+
+_SEG_PASOS = {"codigo": "Pidió el código y no descargó",
+              "valor": "Descargó la muestra y no ha comprado",
+              "cierre": "Último recordatorio (temporada de renta)"}
+
+
+def _correo_seguimiento(paso: str, nombre: str = "") -> tuple[str, str]:
+    """(asunto, html) del correo de seguimiento `paso` para un lead contador."""
+    hola = f"Hola {nombre.split()[0].title()}," if (nombre or "").strip() else "Hola,"
+    url = "https://tributando.co/contadores"
+    if paso == "codigo":
+        asunto = "¿Pudiste descargar tu muestra? — Tributando.co"
+        cuerpo = f"""
+          <h1 style="font-size:20px;margin:14px 0 8px;color:#1e2432">{hola}</h1>
+          <p style="font-size:15px;line-height:1.7">Vimos que pediste el código para la
+          <b>declaración de muestra gratis</b> pero no alcanzaste a descargarla. El código
+          vence en 15 minutos, así que a veces se queda a mitad de camino.</p>
+          <p style="font-size:15px;line-height:1.7">Pide uno nuevo cuando quieras: entras,
+          lo escribes y descargas tu <b>Formulario 210 de muestra con papeles de trabajo</b>
+          en un par de minutos.</p>"""
+        return asunto, _wrap_correo("MUESTRA GRATIS", cuerpo, "Descargar mi muestra", url)
+    if paso == "valor":
+        asunto = "Lo que viste en la muestra, para todos tus clientes"
+        cuerpo = f"""
+          <h1 style="font-size:20px;margin:14px 0 8px;color:#1e2432">{hola}</h1>
+          <p style="font-size:15px;line-height:1.7">Esa declaración de muestra que descargaste
+          —210 armado + papeles de trabajo desde la exógena— la puedes tener para
+          <b>todos tus clientes, ilimitada</b>, con el <b>Pase de temporada</b>.</p>
+          <ul style="font-size:15px;line-height:1.75;padding-left:18px">
+            <li>Declaraciones ilimitadas toda la temporada de renta (ago–oct).</li>
+            <li>Formulario 210 en PDF + papeles de trabajo en Excel.</li>
+            <li>Un solo pago de <b>$149.900</b> — se paga solo con la primera declaración.</li>
+          </ul>"""
+        return asunto, _wrap_correo("PASE DE TEMPORADA", cuerpo, "Activar mi pase", url)
+    # cierre
+    asunto = "Ya arrancaron los vencimientos de renta — último recordatorio"
+    cuerpo = f"""
+      <h1 style="font-size:20px;margin:14px 0 8px;color:#1e2432">{hola}</h1>
+      <p style="font-size:15px;line-height:1.7">Los plazos de renta de personas naturales
+      (AG 2025) ya están corriendo, según los dos últimos dígitos de la cédula. Es el
+      momento en que cada declaración manual te cuesta más horas.</p>
+      <p style="font-size:15px;line-height:1.7">Con el <b>Pase de temporada</b> ($149.900,
+      pago único) armas declaraciones ilimitadas desde la exógena: 210 en PDF + papeles de
+      trabajo. Este es el último correo que te enviamos al respecto. 🙂</p>"""
+    return asunto, _wrap_correo("TEMPORADA DE RENTA", cuerpo, "Activar mi pase", url)
+
+
+def _seg_compradores() -> set:
+    """Correos que ya son clientes: pase activo, orden pagada o licencia del Lector."""
+    from src.auth import AccesoAutorizado, SuscripcionLector
+    out = set()
+    try:
+        out |= {(a.email or "").lower() for a in AccesoAutorizado.query.all()}
+    except Exception:
+        pass
+    for o in OrdenRegistro.query.all():
+        try:
+            d = json.loads(o.data)
+        except Exception:
+            continue
+        if d.get("estado") == "pagada" and d.get("email"):
+            out.add(str(d["email"]).strip().lower())
+    try:
+        out |= {(s.email or "").lower() for s in SuscripcionLector.query.all()}
+    except Exception:
+        pass
+    return out
+
+
+def seguimientos_pendientes() -> list[dict]:
+    """Leads del embudo de contadores con un seguimiento listo para aprobar.
+    [{email, nombre, paso, motivo}] — máx. 1 paso por lead por corrida."""
+    from src.auth import CodigoMuestra, MuestraContador, MuestraContadorEmail, SeguimientoContador
+
+    hoy = datetime.utcnow()
+    compradores = _seg_compradores()
+
+    # descargaron la muestra (con o sin registro)
+    descargaron = {}
+    for m in MuestraContadorEmail.query.all():
+        if m.email:
+            descargaron[m.email.lower()] = (m.creado or hoy, m.nombre or "")
+    for m in MuestraContador.query.all():
+        if m.email:
+            descargaron.setdefault(m.email.lower(), (getattr(m, "creado", None) or hoy, ""))
+
+    # pidieron código pero nunca descargaron (fecha ≈ expira - 15 min)
+    pidieron = {}
+    for c in CodigoMuestra.query.all():
+        e = (c.email or "").lower()
+        if e and e not in descargaron and c.expira:
+            pidieron[e] = c.expira - timedelta(minutes=15)
+
+    ya = {s.email: {p for p in (s.enviados or "").split(",") if p}
+          for s in SeguimientoContador.query.all()}
+
+    out = []
+    for email, fecha in pidieron.items():
+        if _es_propio(email) or email in compradores or len(ya.get(email, ())) >= 2:
+            continue
+        dias = (hoy - fecha).days
+        if 1 <= dias <= 4 and "codigo" not in ya.get(email, ()):
+            out.append({"email": email, "nombre": "", "paso": "codigo",
+                        "motivo": f"pidió código hace {dias} día(s), no descargó"})
+    for email, (fecha, nombre) in descargaron.items():
+        if _es_propio(email) or email in compradores:
+            continue
+        hechos = ya.get(email, set())
+        if len(hechos) >= 2:
+            continue
+        dias = (hoy - fecha).days
+        if 2 <= dias <= 6 and "valor" not in hechos:
+            out.append({"email": email, "nombre": nombre, "paso": "valor",
+                        "motivo": f"descargó la muestra hace {dias} día(s), sin compra"})
+        elif 7 <= dias <= 14 and "cierre" not in hechos:
+            out.append({"email": email, "nombre": nombre, "paso": "cierre",
+                        "motivo": f"descargó hace {dias} día(s), sin compra"})
+    return out
+
+
+def seguimiento_contadores() -> int:
+    """Correo diario al dueño con los seguimientos propuestos y su botón de
+    aprobación. No envía nada a los leads. Devuelve cuántos propuso."""
+    from urllib.parse import quote
+    from src.correo import enviar_email
+
+    pend = seguimientos_pendientes()
+    if not pend:
+        return 0
+    bloques = []
+    for p in pend:
+        asunto, _ = _correo_seguimiento(p["paso"], p["nombre"])
+        aprobar = (f"https://tributando.co/admin/seguimiento/aprobar"
+                   f"?email={quote(p['email'])}&paso={p['paso']}")
+        bloques.append(f"""
+        <div style="border:1px solid #e2ddd2;border-radius:10px;padding:14px;margin:10px 0">
+          <div style="font-weight:800">{p['email']}</div>
+          <div style="color:#8a6d3b;font-size:13px">{_SEG_PASOS[p['paso']]} — {p['motivo']}</div>
+          <div style="font-size:14px;margin:6px 0">Asunto: <i>{asunto}</i></div>
+          <a href="{aprobar}" style="display:inline-block;background:#c8991f;color:#fff;font-weight:800;text-decoration:none;padding:9px 18px;border-radius:9px">✅ Aprobar y enviar</a>
+        </div>""")
+    html = f"""
+    <div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:640px;margin:auto;color:#2b3242">
+      <h2 style="color:#1e2432">🤝 Seguimiento a contadores — {len(pend)} propuesto(s)</h2>
+      <p style="color:#5a6272">Tu agente comercial preparó estos correos. Nada se envía
+      sin tu clic. Cada lead recibe máximo 2 seguimientos.</p>
+      {''.join(bloques)}
+    </div>"""
+    enviar_email(ADMIN_EMAIL, f"🤝 {len(pend)} seguimiento(s) comercial(es) por aprobar", html)
+    return len(pend)
+
+
+def seguimiento_aprobar(email: str, paso: str) -> dict:
+    """Envía el seguimiento `paso` al lead `email` y lo deja registrado (lo
+    dispara el dueño desde el botón del correo resumen)."""
+    from src.auth import SeguimientoContador, MuestraContadorEmail
+    from src.correo import enviar_email
+
+    email = (email or "").strip().lower()
+    if not email or paso not in _SEG_PASOS:
+        return {"ok": False, "error": "Datos incompletos."}
+    reg = db.session.get(SeguimientoContador, email)
+    hechos = {p for p in ((reg.enviados if reg else "") or "").split(",") if p}
+    if paso in hechos:
+        return {"ok": False, "error": "Ese seguimiento ya se había enviado."}
+    if len(hechos) >= 2:
+        return {"ok": False, "error": "Ese lead ya recibió sus 2 seguimientos."}
+    m = db.session.get(MuestraContadorEmail, email)
+    asunto, html = _correo_seguimiento(paso, (m.nombre if m else "") or "")
+    enviar_email(email, asunto, html)
+    if reg is None:
+        reg = SeguimientoContador(email=email)
+        db.session.add(reg)
+    reg.enviados = ",".join(sorted(hechos | {paso}))
+    db.session.commit()
+    return {"ok": True, "email": email, "paso": paso}

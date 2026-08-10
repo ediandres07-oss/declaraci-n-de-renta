@@ -220,6 +220,16 @@ def registrar_muestra_email(email: str, token: str = "", nit: str = "", nombre: 
         db.session.rollback()
 
 
+class SeguimientoContador(db.Model):
+    """Seguimientos comerciales del embudo de contadores (muestra → pase).
+    Registra qué correos de seguimiento ya se le enviaron a cada lead para no
+    repetir y respetar el tope (máx. 2 por lead)."""
+    __tablename__ = "seguimientos_contador"
+    email = db.Column(db.String(200), primary_key=True)   # en minúsculas
+    enviados = db.Column(db.String(80), default="")       # pasos ya enviados, csv
+    creado = db.Column(db.DateTime, default=datetime.utcnow)
+
+
 class CodigoMuestra(db.Model):
     """Código de 6 dígitos para verificar el correo ANTES de descargar la muestra
     (sin registro): así 1 muestra = 1 correo verificado, y no basta con inventar

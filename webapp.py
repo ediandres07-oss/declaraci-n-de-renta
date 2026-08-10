@@ -116,6 +116,12 @@ def _bucle_avisos_vencimientos():
                             n = _ger.recuperacion_leads()
                             if n:
                                 print(f"[gerente] recuperación: {n} correo(s) enviados")
+                        # Agente comercial: seguimientos del embudo de contadores
+                        # (solo propone; el dueño aprueba cada correo).
+                        if _candado(f"segcont|{hoy}"):
+                            n = _ger.seguimiento_contadores()
+                            if n:
+                                print(f"[gerente] seguimiento contadores: {n} propuesto(s)")
                         # Lunes: lote de contenido de marketing.
                         if ahora.weekday() == 0 and _candado(f"mkt|{hoy}"):
                             _ger.contenido_semanal(IA_CFG)
@@ -752,6 +758,18 @@ def admin_lector_cortesia():
         agente_set(sus.licencia, True)
     return jsonify({"ok": True, "email": email, "licencia": sus.licencia,
                     "vence": sus.vence.isoformat() if sus.vence else None})
+
+
+@app.get("/admin/seguimiento/aprobar")
+@autorizado_requerido
+def admin_seguimiento_aprobar():
+    """Botón 'Aprobar y enviar' del correo resumen del agente comercial."""
+    r = _ger.seguimiento_aprobar(request.args.get("email", ""), request.args.get("paso", ""))
+    color, msg = ("#1b7f4b", f"✅ Seguimiento enviado a {r.get('email')}") if r.get("ok") \
+        else ("#b3372f", f"⚠️ {r.get('error')}")
+    return (f"<div style='font-family:sans-serif;max-width:480px;margin:60px auto;"
+            f"text-align:center;color:{color};font-size:18px'>{msg}"
+            f"<br><br><a href='/admin' style='color:#8a6d3b'>Volver al panel</a></div>")
 
 
 @app.post("/admin/lector/agente")
