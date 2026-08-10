@@ -779,7 +779,20 @@ if ($("#btnLead")) $("#btnLead").addEventListener("click", async () => {
     const j = await enviarLead(email);
     if (j.ok) {
       window._leadCaptured = true;
-      $("#capturaLead").innerHTML = '<div style="font-weight:800;color:var(--verde)">✓ Listo — te enviamos tu resultado a <b>' + email + '</b>. Revisa tu correo 📬</div>';
+      let extra = "";
+      if (j.bono) {
+        // El descuento queda activo en la sesión: el checkout lo aplica solo.
+        const _f = n => (n||0).toLocaleString("es-CO");
+        if (typeof precios !== "undefined") {
+          precios.pdf = Math.max(precios.pdf - (j.desc_pdf||0), 0);
+          precios.presentacion = Math.max(precios.presentacion - (j.desc_presentacion||0), 0);
+        }
+        extra = '<div style="margin-top:12px;background:#faf7f0;border:1px dashed #c8991f;border-radius:12px;padding:14px;text-align:center">'
+          + '🎁 <b>Tu bono de bienvenida:</b> <span style="font-weight:800;letter-spacing:1px;color:#8a6d3b">' + j.bono + '</span><br>'
+          + '<b>$' + _f(j.desc_presentacion) + ' menos</b> si presentamos tu declaración por ti, o $' + _f(j.desc_pdf) + ' en el PDF.<br>'
+          + '<span style="color:#8a6d3b">Válido 72 horas · ya quedó aplicado: elige tu plan y verás el precio con descuento.</span></div>';
+      }
+      $("#capturaLead").innerHTML = '<div style="font-weight:800;color:var(--verde)">✓ Listo — te enviamos tu resultado a <b>' + email + '</b>. Revisa tu correo 📬</div>' + extra;
     } else {
       msg.style.color = "#b3372f"; msg.textContent = "⚠ " + (j.error || "No se pudo.");
       btn.disabled = false; btn.textContent = "Enviármelo →";

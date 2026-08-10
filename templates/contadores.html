@@ -654,6 +654,15 @@
         if (r.ok && j.ok) {
           document.getElementById("muestraCodigoBox").hidden = false;
           if (msg) { msg.style.color = "#8fe3b6"; msg.textContent = "✓ " + (j.mensaje || "Te enviamos un código a tu correo."); }
+          if (j.bono && !document.getElementById("bonoContador")) {
+            var d = document.createElement("div");
+            d.id = "bonoContador";
+            d.style.cssText = "margin-top:12px;background:rgba(200,153,31,.12);border:1px dashed #c8991f;border-radius:12px;padding:14px;text-align:center";
+            d.innerHTML = '🎁 <b>Tu bono de bienvenida:</b> <span style="font-weight:800;letter-spacing:1px;color:#c8991f">' + j.bono + '</span><br>'
+              + '<b>$30.000 menos</b> en tu Pase de temporada: lo pagas a <b>$119.900</b>.<br>'
+              + '<span style="opacity:.8">Válido 72 horas · queda aplicado solo — si compras, el descuento sale al pagar.</span>';
+            document.getElementById("muestraCodigoBox").parentNode.appendChild(d);
+          }
           var ci = document.getElementById("muestraCodigo"); if (ci) ci.focus();
           btnCod.textContent = "Reenviar código";
         } else if (msg) { msg.style.color = "#ff9a9a"; msg.textContent = j.error || "No pudimos enviar el código."; }

@@ -1529,6 +1529,20 @@ def api_muestra_codigo():
             db.session.commit()
     except Exception:
         db.session.rollback()
+    # Bono de bienvenida del contador: se entrega al dejar el correo y se
+    # descuenta solo cuando compra el pase (un bono por correo).
+    bono_cod = ""
+    try:
+        from src.auth import Bono
+        from src.gerente import _crear_bono
+        b = (Bono.query.filter_by(email=email, tipo="pase", usado=False)
+             .filter(Bono.expira > datetime.utcnow()).first())
+        if b is None:
+            b = db.session.get(Bono, _crear_bono(email, "pase"))
+        bono_cod = b.codigo
+        session["bono"] = bono_cod
+    except Exception:
+        app.logger.warning("muestra/codigo: no se pudo crear el bono")
     html = (
         "<div style='font-family:sans-serif;max-width:460px;margin:auto'>"
         "<h2 style='color:#1e2432'>Tu código para la muestra</h2>"
@@ -1542,7 +1556,8 @@ def api_muestra_codigo():
     except Exception as e:
         app.logger.warning("muestra código: no se pudo enviar: %s", e)
         return jsonify({"ok": False, "error": "No pudimos enviar el correo. Intenta de nuevo."}), 502
-    return jsonify({"ok": True, "mensaje": "Te enviamos un código a tu correo."})
+    return jsonify({"ok": True, "mensaje": "Te enviamos un código a tu correo.",
+                    "bono": bono_cod, "descuento": 30000})
 
 
 @app.get("/api/muestra-contador/<token>.pdf")
@@ -1992,7 +2007,24 @@ def guardar_lead_exogena():
         enviar_email(email, asunto, html)
     except Exception:
         app.logger.warning("mi-resultado: no se pudo enviar el correo de resultado")
-    return jsonify({"ok": True})
+
+    # Bono en caliente: al dejar el correo recibe su código de descuento (uno
+    # por correo; si ya tiene uno vigente se reutiliza) y queda activo en la
+    # sesión para que el checkout lo descuente solo.
+    bono_cod = ""
+    try:
+        from src.auth import Bono
+        from src.gerente import BONO_RENTA, _crear_bono
+        b = (Bono.query.filter_by(email=email, tipo="renta", usado=False)
+             .filter(Bono.expira > datetime.utcnow()).first())
+        if b is None:
+            b = db.session.get(Bono, _crear_bono(email, "renta"))
+        bono_cod = b.codigo
+        session["bono"] = bono_cod
+    except Exception:
+        app.logger.warning("mi-resultado: no se pudo crear el bono")
+    return jsonify({"ok": True, "bono": bono_cod,
+                    "desc_pdf": 10000, "desc_presentacion": 30000})
 
 
 @app.post("/api/recalcular-landing")
