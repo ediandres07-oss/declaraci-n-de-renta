@@ -779,6 +779,9 @@ if ($("#btnLead")) $("#btnLead").addEventListener("click", async () => {
     const j = await enviarLead(email);
     if (j.ok) {
       window._leadCaptured = true;
+      const cu = document.querySelector("#resultado .cuerpo");
+      if (cu) { cu.style.filter = ""; cu.style.pointerEvents = ""; cu.style.userSelect = ""; }
+      $("#seccionPlanes").classList.remove("oculto");
       let extra = "";
       if (j.bono) {
         // El descuento queda activo en la sesión: el checkout lo aplica solo.
@@ -868,8 +871,18 @@ function mostrarResultado(j) {
   $("#patDeudas").value = fmt(j.deudas || 0);
   $("#patOk").textContent = "";
   $("#resultado").classList.remove("oculto");
-  $("#seccionPlanes").classList.remove("oculto");
-  $("#seccionPlanes").scrollIntoView({behavior:"smooth", block:"nearest"});
+  if (window._leadCaptured) {
+    $("#seccionPlanes").classList.remove("oculto");
+    $("#seccionPlanes").scrollIntoView({behavior:"smooth", block:"nearest"});
+  } else {
+    // Compuerta: el resultado queda borroso hasta que deje su correo.
+    const cu = document.querySelector("#resultado .cuerpo");
+    if (cu) { cu.style.filter = "blur(9px)"; cu.style.pointerEvents = "none"; cu.style.userSelect = "none"; }
+    const tit = document.querySelector("#capturaLead > div");
+    if (tit) tit.innerHTML = "🔒 <b>Tu resultado ya está listo.</b> Escribe tu correo y lo destapamos aquí mismo:";
+    $("#capturaLead").scrollIntoView({behavior:"smooth", block:"center"});
+    const le = $("#leadEmail"); if (le) le.focus();
+  }
 }
 
 // Pinta el estimado (a pagar o a favor) con la respuesta del recálculo.

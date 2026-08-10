@@ -842,12 +842,13 @@ def admin_lector_cortesia():
 @app.get("/admin/exogenas")
 @autorizado_requerido
 def admin_exogenas():
-    """Listado de exógenas subidas al cálculo gratis (funnel B2C): quiénes son,
-    cuándo subieron y si dejaron correo o compraron."""
+    """Leads reales del cálculo gratis: solo cargas CON correo, sin las del
+    dueño ni cuentas propias. Las viejas sin correo quedan como conteo."""
     from src.auth import LeadExogena
+    from src.gerente import _es_propio
     leads = {(l.token or ""): l for l in LeadExogena.query.all()}
     compradores = set()
-    cargas = []
+    cargas, sin_correo = [], 0
     ordenes = _leer_ordenes()
     for oid, d in ordenes.items():
         if d.get("tipo") == "orden" and d.get("estado") == "pagada":
@@ -857,20 +858,29 @@ def admin_exogenas():
     for oid, d in ordenes.items():
         if d.get("tipo") != "carga":
             continue
+        if "".join(ch for ch in str(d.get("nit") or "") if ch.isdigit()) == "3362058":
+            continue                                   # cargas del dueño
         lead = leads.get(oid)
+        correo = (lead.email if lead else "") or ""
+        if not correo or _es_propio(correo):
+            sin_correo += 1
+            continue
         cargas.append({
             "fecha": d.get("fecha_carga", ""), "nombre": d.get("nombre", ""),
-            "nit": d.get("nit", ""), "correo": (lead.email if lead else ""),
-            "compro": bool(lead and lead.email in compradores),
+            "nit": d.get("nit", ""), "correo": correo,
+            "compro": correo in compradores,
         })
     cargas.sort(key=lambda c: c["fecha"], reverse=True)
     filas = "".join(
         f"<tr><td>{c['fecha']}</td><td>{c['nombre'] or '—'}</td><td>{c['nit'] or '—'}</td>"
-        f"<td>{c['correo'] or '<span style=color:#b3372f>sin correo</span>'}</td>"
+        f"<td>{c['correo']}</td>"
         f"<td>{'✅' if c['compro'] else '—'}</td></tr>" for c in cargas)
+    if not filas:
+        filas = "<tr><td colspan=5 style='color:#8a919c'>Aún no hay leads con correo — desde hoy el resultado pide el correo antes de mostrarse, aquí irán apareciendo.</td></tr>"
     return (f"<div style='font-family:sans-serif;max-width:760px;margin:30px auto;color:#1e2432'>"
-            f"<h2>🧾 Exógenas subidas ({len(cargas)})</h2>"
-            f"<p style='color:#5a6272'>Personas que calcularon su renta gratis. "
+            f"<h2>🧾 Leads del cálculo de renta ({len(cargas)})</h2>"
+            f"<p style='color:#5a6272'>Solo se listan los que dejaron correo (sin tus cargas de prueba). "
+            f"Subidas históricas sin correo: {sin_correo}. "
             f"<a href='/admin/dashboard'>← Panel</a></p>"
             f"<table border=0 cellpadding=8 style='border-collapse:collapse;width:100%'>"
             f"<tr style='text-align:left;background:#f3ede1'><th>Fecha</th><th>Nombre</th>"
