@@ -241,6 +241,8 @@
         <button class="btn2" id="btnRecalcular">Recalcular</button>
         <button class="btn2" id="btnPdf" disabled>📄 Resumen ejecutivo PDF</button>
         <button class="btn2" id="btnF210Pdf" disabled>🧾 Formulario 210 PDF</button>
+        <button class="btn2" id="btnDocsCliente" disabled title="Lista de documentos que su cliente le debe entregar, según su exógena">📋 Documentos del cliente</button>
+        <button class="btn2" id="btnDocsWpp" disabled title="Copia el pedido de documentos listo para pegarlo en WhatsApp">💬 Pedir por WhatsApp</button>
         <button id="btnDescargar" disabled>⬇ Descargar Formulario 210</button>
       </div>
       <div id="advertenciasCalc"></div>
@@ -421,6 +423,8 @@ async function recalcular() {
   $("#btnDescargar").disabled = false;
   $("#btnPdf").disabled = false;
   $("#btnF210Pdf").disabled = false;
+  if ($("#btnDocsCliente")) $("#btnDocsCliente").disabled = false;
+  if ($("#btnDocsWpp")) $("#btnDocsWpp").disabled = false;
 }
 
 async function descargarPdf(url, nombreDefecto) {
@@ -440,6 +444,20 @@ $("#btnF210Pdf").addEventListener("click", () => descargarPdf("/api/formulario-p
 $("#btnRecalcular").addEventListener("click", recalcular);
 
 $("#btnPdf").addEventListener("click", () => descargarPdf("/api/resumen-pdf", "ResumenEjecutivo.pdf"));
+
+$("#btnDocsCliente").addEventListener("click", () => descargarPdf("/api/documentos-cliente-pdf", "DocumentosCliente.pdf"));
+$("#btnDocsWpp").addEventListener("click", async () => {
+  const b = $("#btnDocsWpp");
+  try {
+    const r = await fetch("/api/documentos-cliente", {method:"POST",
+      headers:{"Content-Type":"application/json"}, body: JSON.stringify({token})});
+    const j = await r.json();
+    if (!r.ok) { alert(j.error || "No se pudo generar la lista."); return; }
+    await navigator.clipboard.writeText(j.whatsapp);
+    const t = b.textContent; b.textContent = "✓ Copiado — pégalo en WhatsApp";
+    setTimeout(() => { b.textContent = t; }, 2500);
+  } catch(e) { alert("No se pudo copiar. Descarga el PDF."); }
+});
 
 $("#btnDescargar").addEventListener("click", async () => {
   volcarFormularioADatos();

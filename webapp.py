@@ -1938,6 +1938,42 @@ def generar():
     )
 
 
+@app.post("/api/documentos-cliente")
+@pro_requerido
+def documentos_cliente_json():
+    """Lista personalizada de documentos que el cliente debe entregar, deducida
+    de su exógena, + texto listo para WhatsApp. Solo pases activos."""
+    from src import documentos_cliente as _dc
+    exogena = _EXOGENAS.get((request.get_json(silent=True) or {}).get("token", ""))
+    if exogena is None:
+        return jsonify({"error": "Sube primero la exógena del cliente."}), 400
+    u = usuario_actual()
+    contador = (getattr(u, "nombre", "") or "").strip()
+    return jsonify({"documentos": _dc.documentos_de(exogena),
+                    "whatsapp": _dc.texto_whatsapp(exogena, contador)})
+
+
+@app.post("/api/documentos-cliente-pdf")
+@pro_requerido
+def documentos_cliente_pdf():
+    """PDF de la lista personalizada, con el nombre del contador."""
+    from src import documentos_cliente as _dc
+    exogena = _EXOGENAS.get((request.get_json(silent=True) or {}).get("token", ""))
+    if exogena is None:
+        return jsonify({"error": "Sube primero la exógena del cliente."}), 400
+    u = usuario_actual()
+    contador = (getattr(u, "nombre", "") or "").strip()
+    with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
+        salida = Path(tmp.name)
+    try:
+        _dc.generar_pdf(salida, exogena, contador)
+        nombre = f"Documentos_{exogena.identificacion or 'cliente'}.pdf"
+        return send_file(salida, as_attachment=True, download_name=nombre,
+                         mimetype="application/pdf")
+    finally:
+        pass   # el tmp se limpia con el SO; send_file lo necesita abierto
+
+
 @app.post("/api/resumen-pdf")
 @pro_requerido
 def resumen_pdf():
