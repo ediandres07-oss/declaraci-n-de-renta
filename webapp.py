@@ -1419,6 +1419,8 @@ def pagar_orden(orden_id):
             cont.get("email", ""), _base_url_publica(),
             nombre=cont.get("nombre", "") or orden.get("nombre", ""),
             telefono=cont.get("telefono", ""))
+        d.update({"banco": PAGO.get("banco", ""), "tipo_cuenta": PAGO.get("tipo", ""),
+                  "numero_cuenta": PAGO.get("numero", ""), "nequi": PAGO.get("nequi", "")})
         return render_template_string(_EPAYCO_CHECKOUT_HTML, d=d)
 
     # --- PayU (WebCheckout) ---
@@ -1498,11 +1500,21 @@ def payu_respuesta():
         "<h1 style='color:#1e2432'>{{t}}</h1><p style='color:#5a6b7f'>{{m}}</p>"
         "{% if rechazada %}"
         "<a href='/pagar/{{ ref }}' style='display:inline-block;margin-top:16px;background:#1b7f4b;color:#fff;"
-        "padding:12px 22px;border-radius:10px;text-decoration:none;font-weight:700'>🔄 Intentar el pago de nuevo</a><br>"
+        "padding:12px 22px;border-radius:10px;text-decoration:none;font-weight:700'>🔄 Intentar el pago de nuevo</a>"
+        "<div style='margin:14px auto;max-width:420px;background:#faf7f0;border:1px dashed #c8991f;"
+        "border-radius:12px;padding:14px;font-size:.9rem;text-align:left'><b>O paga por transferencia:</b><br>"
+        "{{ banco }} {{ tipo_cuenta }} <b>{{ numero_cuenta }}</b>{% if nequi %} · Nequi <b>{{ nequi }}</b>{% endif %}<br>"
+        "<div style='text-align:center;margin:10px 0'><img src='/static/img/qr-bre-b.png?v=2' "
+        "alt='QR Bre-B para pagar desde Nequi o tu banco' style='width:150px;height:auto;border-radius:10px'><br>"
+        "<span style='font-size:.8rem;color:#8a919c'>Escanea desde Nequi o tu app bancaria (Bre-B)</span></div>"
+        "<span style='color:#8a919c'>Valor exacto y tu número de orden <b>{{ ref }}</b> como referencia. "
+        "Confirmamos y te activamos por correo.</span></div><br>"
         "{% endif %}"
         "<a href='/contadores/lector' style='display:inline-block;margin-top:16px;background:#c8991f;color:#fff;"
         "padding:12px 22px;border-radius:10px;text-decoration:none;font-weight:600'>Volver</a></body></html>",
-        t=titulo, m=msg, pagada=pagada, rechazada=rechazada, valor=valor, ref=ref)
+        t=titulo, m=msg, pagada=pagada, rechazada=rechazada, valor=valor, ref=ref,
+        banco=PAGO.get("banco", ""), tipo_cuenta=PAGO.get("tipo", ""),
+        numero_cuenta=PAGO.get("numero", ""), nequi=PAGO.get("nequi", ""))
 
 
 def _enviar_licencia_lector(email: str, plan: str, licencia: str):
@@ -1532,6 +1544,15 @@ _EPAYCO_CHECKOUT_HTML = """<!doctype html><html><head><meta charset="utf-8">
 <p style="color:#8a919c;font-size:.85rem;max-width:420px;margin:18px auto">Si tu banco rechaza el
   primer intento, vuelve a intentarlo: es una verificación normal de seguridad y el segundo
   intento suele pasar sin problema.</p>
+<div style="max-width:420px;margin:10px auto;background:#faf7f0;border:1px dashed #c8991f;border-radius:12px;padding:14px;font-size:.9rem;text-align:left">
+  <b>¿Prefieres pagar por transferencia?</b><br>
+  {{ d.banco }} {{ d.tipo_cuenta }} <b>{{ d.numero_cuenta }}</b>{% if d.nequi %} · Nequi <b>{{ d.nequi }}</b>{% endif %}<br>
+  <div style="text-align:center;margin:10px 0"><img src="/static/img/qr-bre-b.png?v=2"
+    alt="QR Bre-B para pagar desde Nequi o tu banco" style="width:150px;height:auto;border-radius:10px"><br>
+    <span style="font-size:.8rem;color:#8a919c">Escanea desde Nequi o tu app bancaria (Bre-B)</span></div>
+  <span style="color:#8a919c">Transfiere el valor exacto y usa tu número de orden
+  <b>{{ d.invoice }}</b> como referencia. Confirmamos y te activamos por correo.</span>
+</div>
 <script src="https://checkout.epayco.co/checkout.js"></script>
 <script>
   var handler = ePayco.checkout.configure({ key: "{{ d.public_key }}", test: {{ d.test }} });
@@ -1613,11 +1634,21 @@ def epayco_respuesta():
         "<h1 style='color:#1e2432'>{{t}}</h1><p style='color:#5a6b7f'>{{m}}</p>"
         "{% if rechazada %}"
         "<a href='/pagar/{{ ref }}' style='display:inline-block;margin-top:16px;background:#1b7f4b;color:#fff;"
-        "padding:12px 22px;border-radius:10px;text-decoration:none;font-weight:700'>🔄 Intentar el pago de nuevo</a><br>"
+        "padding:12px 22px;border-radius:10px;text-decoration:none;font-weight:700'>🔄 Intentar el pago de nuevo</a>"
+        "<div style='margin:14px auto;max-width:420px;background:#faf7f0;border:1px dashed #c8991f;"
+        "border-radius:12px;padding:14px;font-size:.9rem;text-align:left'><b>O paga por transferencia:</b><br>"
+        "{{ banco }} {{ tipo_cuenta }} <b>{{ numero_cuenta }}</b>{% if nequi %} · Nequi <b>{{ nequi }}</b>{% endif %}<br>"
+        "<div style='text-align:center;margin:10px 0'><img src='/static/img/qr-bre-b.png?v=2' "
+        "alt='QR Bre-B para pagar desde Nequi o tu banco' style='width:150px;height:auto;border-radius:10px'><br>"
+        "<span style='font-size:.8rem;color:#8a919c'>Escanea desde Nequi o tu app bancaria (Bre-B)</span></div>"
+        "<span style='color:#8a919c'>Valor exacto y tu número de orden <b>{{ ref }}</b> como referencia. "
+        "Confirmamos y te activamos por correo.</span></div><br>"
         "{% endif %}"
         "<a href='/contadores/lector' style='display:inline-block;margin-top:16px;background:#c8991f;color:#fff;"
         "padding:12px 22px;border-radius:10px;text-decoration:none;font-weight:600'>Volver</a></body></html>",
-        t=titulo, m=msg, pagada=pagada, rechazada=rechazada, valor=valor, ref=ref)
+        t=titulo, m=msg, pagada=pagada, rechazada=rechazada, valor=valor, ref=ref,
+        banco=PAGO.get("banco", ""), tipo_cuenta=PAGO.get("tipo", ""),
+        numero_cuenta=PAGO.get("numero", ""), nequi=PAGO.get("nequi", ""))
 
 
 @app.post("/api/muestra/codigo")
