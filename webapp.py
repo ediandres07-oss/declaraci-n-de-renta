@@ -3672,8 +3672,14 @@ def firmar_formulario_pdf():
 
 
 @app.after_request
-def sin_cache(resp):
-    resp.headers["Cache-Control"] = "no-store"
+def politica_cache(resp):
+    """Estáticos con caché larga (van versionados con ?v=); lo dinámico sin
+    caché. Antes TODO iba con no-store y cada visita re-descargaba hasta el
+    video de fondo — por eso el consumo de ancho de banda en Render."""
+    if request.path.startswith("/static/"):
+        resp.headers["Cache-Control"] = "public, max-age=2592000, immutable"
+    else:
+        resp.headers["Cache-Control"] = "no-store"
     return resp
 
 
