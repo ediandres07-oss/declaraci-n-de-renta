@@ -354,6 +354,31 @@ def parsear_exogena(ruta, hoja: Optional[str] = None) -> ResultadoExogena:
     if not resultado.partidas:
         resultado.advertencias.append("No se encontraron partidas en el reporte.")
 
+    # Patrimonio y deudas duplicados: la DIAN consolida varios formatos y el
+    # MISMO saldo (mismo tercero, mismo concepto, mismo valor) puede venir 2 o
+    # 3 veces — sumarlo repetido infla el patrimonio. Se deja una sola fila
+    # activa y las demás se excluyen con nota (el contador puede reactivarlas
+    # si de verdad son bienes distintos con valores idénticos).
+    vistos_pat = {}
+    duplicadas = 0
+    for pt in resultado.partidas:
+        if pt.excluida or pt.renglon_asignado not in (29, 30):
+            continue
+        clave = (pt.renglon_asignado, pt.informante_nit,
+                 _norm(pt.detalle), round(pt.valor or 0))
+        if clave in vistos_pat:
+            pt.excluida = True
+            pt.nota = ("Fila repetida en la exógena (mismo tercero, concepto y "
+                       "valor): se cuenta una sola vez en el patrimonio.")
+            duplicadas += 1
+        else:
+            vistos_pat[clave] = pt
+    if duplicadas:
+        resultado.advertencias.append(
+            f"Se excluyeron {duplicadas} fila(s) de patrimonio/deudas repetidas "
+            "(mismo tercero, concepto y valor). Verifique en las partidas que no "
+            "sean bienes distintos con valores idénticos.")
+
     # Deducción 1% factura electrónica (Art. 336 num. 5): si la DIAN reporta el
     # "monto susceptible de beneficio" (el que SÍ cumple los requisitos: pago
     # electrónico, no tomado como costo), esa es la base del R28 — no el total
