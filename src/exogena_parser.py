@@ -364,12 +364,14 @@ def parsear_exogena(ruta, hoja: Optional[str] = None) -> ResultadoExogena:
     for pt in resultado.partidas:
         if pt.excluida or pt.renglon_asignado not in (29, 30):
             continue
-        clave = (pt.renglon_asignado, pt.informante_nit,
-                 _norm(pt.detalle), round(pt.valor or 0))
+        # Mismo tercero + mismo valor = el mismo bien, aunque el concepto venga
+        # redactado distinto (la DIAN consolida formatos con textos diferentes).
+        clave = (pt.renglon_asignado, pt.informante_nit, round(pt.valor or 0))
         if clave in vistos_pat:
             pt.excluida = True
-            pt.nota = ("Fila repetida en la exógena (mismo tercero, concepto y "
-                       "valor): se cuenta una sola vez en el patrimonio.")
+            pt.nota = ("Mismo tercero y mismo valor ya contado en el patrimonio "
+                       "(la exógena lo repite con otro concepto): se cuenta una "
+                       "sola vez. Reactive la partida si son bienes distintos.")
             duplicadas += 1
         else:
             vistos_pat[clave] = pt
@@ -378,6 +380,25 @@ def parsear_exogena(ruta, hoja: Optional[str] = None) -> ResultadoExogena:
             f"Se excluyeron {duplicadas} fila(s) de patrimonio/deudas repetidas "
             "(mismo tercero, concepto y valor). Verifique en las partidas que no "
             "sean bienes distintos con valores idénticos.")
+
+    # Aportes a salud del PENSIONADO: si quien los reporta es el mismo tercero
+    # que paga la pensión (fondo/Colpensiones), el descuento va al INCRNGO de la
+    # cédula de PENSIONES (R100), no al de rentas de trabajo (R33).
+    pagadores_pension = {pt.informante_nit for pt in resultado.partidas
+                         if pt.renglon_asignado == 99}
+    for pt in resultado.partidas:
+        if pt.excluida or pt.renglon_asignado != 33:
+            continue
+        det = _norm(pt.detalle)
+        if "salud" not in det and "pension" not in det:
+            continue
+        inf = _norm(pt.informante_nombre)
+        es_pagador = pt.informante_nit in pagadores_pension or             re.search(r"colpensiones|fondo de pensiones|pensiones y cesantias|"
+                      r"porvenir|proteccion|colfondos|skandia", inf) is not None
+        if es_pagador and pt.informante_nit in pagadores_pension:
+            pt.renglon_asignado = 100
+            pt.nota = ("Aporte a salud descontado por el pagador de la pensión: "
+                       "va al INCRNGO de la cédula de pensiones (R100).")
 
     # Cesantías duplicadas: la MISMA cesantía puede venir reportada por el
     # EMPLEADOR ("consignadas al fondo") y por el FONDO ("abonadas en el
