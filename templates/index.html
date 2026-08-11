@@ -298,9 +298,12 @@ function mostrarResumen(res) {
                      "Tope 5 Compras": res.topes.compras })
       .map(([k, v]) => `<span class="pill">${k}: $${fmt(v)}</span>`).join("");
   $("#obligado").innerHTML = res.obligado.length
-    ? `<p class="alerta"><b>Está obligado a declarar:</b></p><ul class="obligado">` +
-      res.obligado.map(r => `<li>${r}</li>`).join("") + "</ul>"
-    : `<p style="color:var(--verde)">Con estos topes no estaría obligado a declarar (revise si fue responsable de IVA).</p>`;
+    ? `<div style="background:#b3372f;color:#fff;border-radius:12px;padding:14px 18px;margin:10px 0;
+        font-size:1.15rem;font-weight:800;text-align:center">⚠️ SÍ ESTÁ OBLIGADO A DECLARAR</div>
+       <ul class="obligado">` + res.obligado.map(r => `<li>${r}</li>`).join("") + "</ul>"
+    : `<div style="background:var(--verde,#1f9d55);color:#fff;border-radius:12px;padding:14px 18px;margin:10px 0;
+        font-size:1.15rem;font-weight:800;text-align:center">✓ NO ESTÁ OBLIGADO A DECLARAR</div>
+       <p style="color:#5a6b7f;font-size:.85rem">Según los topes de la exógena — verifique si fue responsable de IVA. Puede declarar voluntariamente.</p>`;
   $("#numPartidas").textContent = res.num_partidas;
   const tb = $("#tablaPartidas tbody"); tb.innerHTML = "";
   res.partidas.forEach(p => {
