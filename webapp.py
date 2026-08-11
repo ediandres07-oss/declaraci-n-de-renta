@@ -924,6 +924,7 @@ def admin_exogenas():
 @autorizado_requerido
 def admin_seguimiento_aprobar():
     """Botón 'Aprobar y enviar' del correo resumen del agente comercial."""
+    from src import gerente as _ger
     r = _ger.seguimiento_aprobar(request.args.get("email", ""), request.args.get("paso", ""))
     color, msg = ("#1b7f4b", f"✅ Seguimiento enviado a {r.get('email')}") if r.get("ok") \
         else ("#b3372f", f"⚠️ {r.get('error')}")
