@@ -141,10 +141,19 @@ def mapear_exogena_a_datos(exogena: ResultadoExogena,
 
     # Regla: TODO "valor avalúo" (inmuebles/vehículos con avalúo catastral o
     # comercial) debe sumar al patrimonio bruto (R29), aunque la exógena no lo
-    # haya marcado con R29. Se saltan los ya asignados a R29 para no duplicar.
+    # haya marcado con R29. OJO: el municipio suele reportar el MISMO inmueble
+    # dos veces (fila del avalúo catastral + fila del impuesto predial con el
+    # mismo valor) — se cuenta una sola vez por (tercero, valor).
+    vistos_aval = {(pt.informante_nit, round(pt.valor or 0))
+                   for pt in exogena.partidas_activas()
+                   if pt.renglon_asignado == 29}
     for p in exogena.partidas_activas():
         det = (p.detalle or "").lower()
         if ("avalú" in det or "avaluo" in det) and p.renglon_asignado != 29:
+            clave = (p.informante_nit, round(p.valor or 0))
+            if clave in vistos_aval:
+                continue          # mismo tercero y mismo valor: es el mismo bien
+            vistos_aval.add(clave)
             datos.patrimonio_bruto += float(p.valor or 0)
     return datos
 

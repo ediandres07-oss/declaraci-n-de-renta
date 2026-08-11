@@ -379,6 +379,33 @@ def parsear_exogena(ruta, hoja: Optional[str] = None) -> ResultadoExogena:
             "(mismo tercero, concepto y valor). Verifique en las partidas que no "
             "sean bienes distintos con valores idénticos.")
 
+    # Cesantías duplicadas: la MISMA cesantía puede venir reportada por el
+    # EMPLEADOR ("consignadas al fondo") y por el FONDO ("abonadas en el
+    # periodo") con idéntico valor y el mismo renglón — sumarla dos veces
+    # infla el ingreso. Se deja una sola (se prefiere la del fondo) cuando
+    # coinciden renglón y valor con informantes distintos.
+    ces = [pt for pt in resultado.partidas
+           if not pt.excluida and pt.renglon_asignado is not None
+           and "cesant" in _norm(pt.detalle)
+           and "intereses" not in _norm(pt.detalle)]
+    grupos_ces = {}
+    for pt in ces:
+        grupos_ces.setdefault((pt.renglon_asignado, round(pt.valor or 0)), []).append(pt)
+    dup_ces = 0
+    for (_, _), filas_g in grupos_ces.items():
+        if len(filas_g) < 2 or len({f.informante_nit for f in filas_g}) < 2:
+            continue
+        filas_g.sort(key=lambda f: 0 if "fondo" in _norm(f.informante_nombre) else 1)
+        for f in filas_g[1:]:
+            f.excluida = True
+            f.nota = ("Cesantía reportada también por el fondo con el mismo valor: "
+                      "se cuenta una sola vez.")
+            dup_ces += 1
+    if dup_ces:
+        resultado.advertencias.append(
+            f"Se excluyeron {dup_ces} fila(s) de cesantías duplicadas (mismo valor "
+            "reportado por el empleador y por el fondo). Verifique en las partidas.")
+
     # Deducción 1% factura electrónica (Art. 336 num. 5): si la DIAN reporta el
     # "monto susceptible de beneficio" (el que SÍ cumple los requisitos: pago
     # electrónico, no tomado como costo), esa es la base del R28 — no el total
