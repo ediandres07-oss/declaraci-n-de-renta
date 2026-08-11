@@ -1504,9 +1504,10 @@ def payu_respuesta():
         "<div style='margin:14px auto;max-width:420px;background:#faf7f0;border:1px dashed #c8991f;"
         "border-radius:12px;padding:14px;font-size:.9rem;text-align:left'><b>O paga por transferencia:</b><br>"
         "{{ banco }} {{ tipo_cuenta }} <b>{{ numero_cuenta }}</b>{% if nequi %} · Nequi <b>{{ nequi }}</b>{% endif %}<br>"
-        "<div style='text-align:center;margin:10px 0'><img src='/static/img/qr-bre-b.png?v=2' "
-        "alt='QR Bre-B para pagar desde Nequi o tu banco' style='width:150px;height:auto;border-radius:10px'><br>"
-        "<span style='font-size:.8rem;color:#8a919c'>Escanea desde Nequi o tu app bancaria (Bre-B)</span></div>"
+        "<div style='text-align:center;margin:10px 0'><img src='/static/img/qr-bre-b-solo.png?v=1' "
+        "alt='QR Bre-B para pagar desde Nequi o tu banco' style='width:260px;max-width:90%;height:auto;border-radius:10px'><br>"
+        "<span style='font-size:.8rem;color:#8a919c'>Escanea desde Nequi o tu app bancaria (Bre-B)<br>"
+        "o paga a la llave Bre-B <b>0093134158</b> (Tributando · Nequi Negocios)</span></div>"
         "<span style='color:#8a919c'>Valor exacto y tu número de orden <b>{{ ref }}</b> como referencia.</span>"
         "<div style='text-align:center;margin-top:10px'><button onclick=\"fetch('/api/reportar-pago',{method:'POST',"
         "headers:{'Content-Type':'application/json'},body:JSON.stringify({orden_id:'{{ ref }}'})})"
@@ -1552,9 +1553,10 @@ _EPAYCO_CHECKOUT_HTML = """<!doctype html><html><head><meta charset="utf-8">
 <div style="max-width:420px;margin:10px auto;background:#faf7f0;border:1px dashed #c8991f;border-radius:12px;padding:14px;font-size:.9rem;text-align:left">
   <b>¿Prefieres pagar por transferencia?</b><br>
   {{ d.banco }} {{ d.tipo_cuenta }} <b>{{ d.numero_cuenta }}</b>{% if d.nequi %} · Nequi <b>{{ d.nequi }}</b>{% endif %}<br>
-  <div style="text-align:center;margin:10px 0"><img src="/static/img/qr-bre-b.png?v=2"
-    alt="QR Bre-B para pagar desde Nequi o tu banco" style="width:150px;height:auto;border-radius:10px"><br>
-    <span style="font-size:.8rem;color:#8a919c">Escanea desde Nequi o tu app bancaria (Bre-B)</span></div>
+  <div style="text-align:center;margin:10px 0"><img src="/static/img/qr-bre-b-solo.png?v=1"
+    alt="QR Bre-B para pagar desde Nequi o tu banco" style="width:260px;max-width:90%;height:auto;border-radius:10px"><br>
+    <span style="font-size:.8rem;color:#8a919c">Escanea desde Nequi o tu app bancaria (Bre-B)<br>
+    o paga a la llave Bre-B <b>0093134158</b> (Tributando · Nequi Negocios)</span></div>
   <span style="color:#8a919c">Transfiere el valor exacto y usa tu número de orden
   <b>{{ d.invoice }}</b> como referencia.</span>
   <div style="text-align:center;margin-top:10px">
@@ -1661,9 +1663,10 @@ def epayco_respuesta():
         "<div style='margin:14px auto;max-width:420px;background:#faf7f0;border:1px dashed #c8991f;"
         "border-radius:12px;padding:14px;font-size:.9rem;text-align:left'><b>O paga por transferencia:</b><br>"
         "{{ banco }} {{ tipo_cuenta }} <b>{{ numero_cuenta }}</b>{% if nequi %} · Nequi <b>{{ nequi }}</b>{% endif %}<br>"
-        "<div style='text-align:center;margin:10px 0'><img src='/static/img/qr-bre-b.png?v=2' "
-        "alt='QR Bre-B para pagar desde Nequi o tu banco' style='width:150px;height:auto;border-radius:10px'><br>"
-        "<span style='font-size:.8rem;color:#8a919c'>Escanea desde Nequi o tu app bancaria (Bre-B)</span></div>"
+        "<div style='text-align:center;margin:10px 0'><img src='/static/img/qr-bre-b-solo.png?v=1' "
+        "alt='QR Bre-B para pagar desde Nequi o tu banco' style='width:260px;max-width:90%;height:auto;border-radius:10px'><br>"
+        "<span style='font-size:.8rem;color:#8a919c'>Escanea desde Nequi o tu app bancaria (Bre-B)<br>"
+        "o paga a la llave Bre-B <b>0093134158</b> (Tributando · Nequi Negocios)</span></div>"
         "<span style='color:#8a919c'>Valor exacto y tu número de orden <b>{{ ref }}</b> como referencia.</span>"
         "<div style='text-align:center;margin-top:10px'><button onclick=\"fetch('/api/reportar-pago',{method:'POST',"
         "headers:{'Content-Type':'application/json'},body:JSON.stringify({orden_id:'{{ ref }}'})})"
