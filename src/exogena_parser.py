@@ -390,16 +390,23 @@ def parsear_exogena(ruta, hoja: Optional[str] = None) -> ResultadoExogena:
         if pt.excluida:
             continue
         det = _norm(pt.detalle)
-        if "base del impuesto predial" in det or "avaluo catastral" in det:
-            predial_por_mun.setdefault(pt.informante_nit, []).append(pt)
-    for filas_mun in predial_por_mun.values():
-        if len(filas_mun) < 2:
+        if "base del impuesto predial" in det:
+            predial_por_mun.setdefault(pt.informante_nit, {}).setdefault("base", []).append(pt)
+        elif "avaluo catastral" in det:
+            predial_por_mun.setdefault(pt.informante_nit, {}).setdefault("avaluo", []).append(pt)
+    for grupos in predial_por_mun.values():
+        # Solo cuando el municipio reporta AMBOS conceptos (mismo(s) predio(s)
+        # dos veces). Varios avalúos solos = varios predios: se respetan.
+        if not grupos.get("base") or not grupos.get("avaluo"):
             continue
-        filas_mun.sort(key=lambda f: -(f.valor or 0))
-        for f in filas_mun[1:]:
+        tot_base = sum(f.valor or 0 for f in grupos["base"])
+        tot_aval = sum(f.valor or 0 for f in grupos["avaluo"])
+        perdedor = grupos["avaluo"] if tot_base >= tot_aval else grupos["base"]
+        for f in perdedor:
             f.excluida = True
-            f.nota = ("El mismo municipio reporta el inmueble dos veces: se toma "
-                      "el MAYOR valor (Art. 277 E.T.) y esta fila se excluye.")
+            f.nota = ("El municipio reporta el inmueble con dos conceptos (base "
+                      "del predial y avalúo): se toma el de MAYOR valor "
+                      "(Art. 277 E.T.) y esta fila se excluye.")
 
     # Saldo a favor del año anterior: la exógena lo trae como fila informativa
     # ("Total saldo a favor") sin renglón — va al R131 del 210.
