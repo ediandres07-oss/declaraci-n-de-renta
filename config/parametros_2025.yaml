@@ -152,6 +152,10 @@ componente_inflacionario: 0.5543
 # (Art. 206 num. 5 E.T.). El motor la aplica automáticamente con este tope.
 pension_exenta_uvt_anual: 12000
 
+# UVT del año de PRESENTACIÓN (2026): las sanciones se liquidan con la UVT
+# vigente al momento de presentar, no con la del año gravable.
+uvt_presentacion: 52374
+
 # Descuento tributario por donaciones (Art. 257 E.T.): 25% del valor donado a
 # ESAL del Régimen Tributario Especial. (Donaciones de alimentos/aseo a bancos
 # de alimentos: 37%, Ley 2380/2024, desde AG2025.) La exógena reporta el VALOR
