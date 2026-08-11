@@ -2052,7 +2052,17 @@ def resumen_pdf():
     with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
         salida = Path(tmp.name)
     try:
-        generar_resumen_pdf(salida, datos, liq, PARAMS, exogena, razones)
+        u = usuario_actual()
+        fl = None
+        try:
+            nit_dec = (datos.contribuyente.nit or (exogena.identificacion if exogena else ""))
+            if nit_dec:
+                fl = fecha_limite(nit_dec, PLANTILLA)
+        except Exception:
+            pass
+        generar_resumen_pdf(salida, datos, liq, PARAMS, exogena, razones,
+                            preparado_por=(getattr(u, "nombre", "") or "").strip(),
+                            fecha_lim=fl)
         contenido = salida.read_bytes()
     finally:
         salida.unlink(missing_ok=True)

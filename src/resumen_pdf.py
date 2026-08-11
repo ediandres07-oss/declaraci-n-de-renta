@@ -74,6 +74,46 @@ def _tabla(filas, anchos, negrilla_ultima=False, resaltar=None):
     return t
 
 
+def _norm(t: str) -> str:
+    import unicodedata
+    t = unicodedata.normalize("NFD", (t or "").lower())
+    return "".join(c for c in t if unicodedata.category(c) != "Mn")
+
+
+def _top_terceros(exogena, renglones, n=7):
+    """[(informante, detalle corto, valor)] de las partidas activas de esos renglones."""
+    acum = {}
+    for pt in exogena.partidas_activas():
+        if pt.renglon_asignado in renglones:
+            k = (pt.informante_nombre[:38], pt.detalle[:52])
+            acum[k] = acum.get(k, 0) + pt.valor
+    filas = sorted(acum.items(), key=lambda kv: -kv[1])[:n]
+    return [(a, b, v) for (a, b), v in filas]
+
+
+def _retenciones_por_tercero(exogena, n=8):
+    acum = {}
+    for pt in exogena.partidas_activas():
+        if "retencion" in _norm(pt.detalle) and pt.renglon_asignado == 132:
+            acum[pt.informante_nombre[:44]] = acum.get(pt.informante_nombre[:44], 0) + pt.valor
+    return sorted(acum.items(), key=lambda kv: -kv[1])[:n]
+
+
+def _partidas_renglon(exogena, renglon, n=12):
+    """[(informante, detalle corto, valor)] de las partidas activas de un renglón."""
+    filas = [(pt.informante_nombre[:36], pt.detalle[:50], pt.valor)
+             for pt in exogena.partidas_activas() if pt.renglon_asignado == renglon]
+    filas.sort(key=lambda f: -f[2])
+    return filas[:n]
+
+
+def _patrimonio_anterior(exogena):
+    for pt in exogena.partidas:
+        if "patrimonio bruto declarado en el ano anterior" in _norm(pt.detalle):
+            return pt.valor or 0
+    return 0
+
+
 def generar_resumen_pdf(
     ruta: Path,
     datos: DatosDeclaracion,
@@ -82,6 +122,7 @@ def generar_resumen_pdf(
     exogena: Optional[ResultadoExogena] = None,
     razones_obligado=None,
     preparado_por: str = "",
+    fecha_lim=None,
 ) -> Path:
     ruta = Path(ruta)
     ruta.parent.mkdir(parents=True, exist_ok=True)
@@ -123,14 +164,55 @@ def generar_resumen_pdf(
         for r in razones_obligado:
             e.append(Paragraph(f"• {r}", st["normal"]))
 
+    # ---------------- calendario ----------------
+    if fecha_lim:
+        dias = (fecha_lim - date.today()).days
+        e.append(Paragraph("2b. Plazo para declarar", st["h2"]))
+        e.append(Paragraph(
+            f"Fecha límite según los dos últimos dígitos del documento: "
+            f"<b>{fecha_lim.strftime('%d/%m/%Y')}</b> "
+            f"({'quedan <b>%d días</b>' % dias if dias >= 0 else '<b>VENCIDA hace %d días</b>' % -dias}). "
+            f"Presentar después de la fecha causa sanción de extemporaneidad "
+            f"(mínima {_fmt(p.a_pesos(10))} = 10 UVT) más intereses de mora.", st["normal"]))
+
     # ---------------- patrimonio ----------------
-    e.append(Paragraph("3. Patrimonio", st["h2"]))
+    e.append(Paragraph("3. Patrimonio detallado", st["h2"]))
+    bienes = _partidas_renglon(exogena, 29) if exogena else []
+    if bienes:
+        suma_rep = sum(v for *_, v in bienes)
+        filas_b = [["Bien / derecho (reportado por)", "Detalle", "Valor"]]
+        filas_b += [[a, b, _fmt(v)] for a, b, v in bienes]
+        if R(29) - suma_rep > 0.5:
+            filas_b.append(["Otros activos no reportados en exógena",
+                            "(vehículos, inmuebles, efectivo, ajustes)", _fmt(R(29) - suma_rep)])
+        filas_b.append(["TOTAL PATRIMONIO BRUTO (R29)", "", _fmt(R(29))])
+        e.append(_tabla(filas_b, [150, None, 90], negrilla_ultima=True))
+    deudas = _partidas_renglon(exogena, 30) if exogena else []
+    if deudas or R(30):
+        e.append(Spacer(1, 4))
+        suma_d = sum(v for *_, v in deudas)
+        filas_d = [["Deuda (reportada por)", "Detalle", "Valor"]]
+        filas_d += [[a, b, _fmt(v)] for a, b, v in deudas]
+        if R(30) - suma_d > 0.5:
+            filas_d.append(["Otras deudas no reportadas en exógena", "", _fmt(R(30) - suma_d)])
+        filas_d.append(["TOTAL DEUDAS (R30)", "", _fmt(R(30))])
+        e.append(_tabla(filas_d, [150, None, 90], negrilla_ultima=True))
+    e.append(Spacer(1, 4))
     e.append(_tabla([
         ["Concepto", "Renglón", "Valor"],
         ["Patrimonio bruto", "29", _fmt(R(29))],
-        ["Deudas", "30", _fmt(R(30))],
+        ["(−) Deudas", "30", _fmt(R(30))],
         ["Patrimonio líquido", "31", _fmt(R(31))],
     ], [None, 60, 110], negrilla_ultima=True))
+    pat_ant = _patrimonio_anterior(exogena) if exogena else 0
+    if pat_ant:
+        delta = R(29) - pat_ant
+        e.append(Paragraph(
+            f"Patrimonio bruto declarado el año anterior: <b>{_fmt(pat_ant)}</b> · variación: "
+            f"<b>{'+' if delta >= 0 else ''}{_fmt(delta)}</b> "
+            f"({delta / pat_ant * 100:+.1f}%). Una variación no justificada con las rentas "
+            f"declaradas puede activar renta por comparación patrimonial (Art. 236 E.T.) — "
+            f"documente el origen del incremento.", st["peq"]))
 
     # ---------------- rentas por cédula ----------------
     e.append(Paragraph("4. Composición de las rentas", st["h2"]))
@@ -151,6 +233,20 @@ def generar_resumen_pdf(
         f"Límite de rentas exentas y deducciones aplicado (Art. 336 E.T.): menor entre el 40% de la "
         f"base y 1.340 UVT ({_fmt(p.a_pesos(1340))}). Deducción por dependientes (R139): {_fmt(R(139))}. "
         f"Deducción 1% factura electrónica (R28): {_fmt(R(28))}.", st["peq"]))
+
+    # ---------------- terceros principales ----------------
+    if exogena:
+        top = _top_terceros(exogena, {32, 43, 58, 74, 99, 104})
+        if top:
+            e.append(Paragraph("4b. Principales ingresos reportados por terceros", st["h2"]))
+            filas_t = [["Quién reportó", "Concepto", "Valor"]]
+            filas_t += [[a, b, _fmt(v)] for a, b, v in top]
+            filas_t.append(["TOTAL ingresos reportados (principales)", "",
+                            _fmt(sum(v for *_, v in top))])
+            e.append(_tabla(filas_t, [170, None, 90], negrilla_ultima=True))
+            e.append(Paragraph(
+                "Fuente: información exógena DIAN. Si un tercero reportó mal un valor, se "
+                "solicita la corrección al informante antes de declarar.", st["peq"]))
 
     # ---------------- liquidación ----------------
     e.append(Paragraph("5. Liquidación del impuesto", st["h2"]))
@@ -189,21 +285,24 @@ def generar_resumen_pdf(
                               ("ROUNDEDCORNERS", [6, 6, 6, 6])]))
     e.append(caja)
 
+    # ---------------- retenciones por tercero ----------------
+    if exogena:
+        rets = _retenciones_por_tercero(exogena)
+        if rets:
+            e.append(Paragraph("5b. Retenciones certificadas por terceros (R132)", st["h2"]))
+            filas_r = [["Agente retenedor", "Retención"]]
+            filas_r += [[a, _fmt(v)] for a, v in rets]
+            filas_r.append(["Total retenciones tomadas en la declaración", _fmt(R(132))])
+            e.append(_tabla(filas_r, [None, 110], negrilla_ultima=True))
+            e.append(Paragraph(
+                "Solicite el certificado de retención de cada agente para soportar el valor "
+                "tomado (la exógena orienta, el certificado soporta).", st["peq"]))
+
     # ---------------- advertencias y notas ----------------
     if liq.advertencias or (exogena and exogena.advertencias):
         e.append(Paragraph("6. Puntos de atención", st["h2"]))
         for a in (liq.advertencias + (exogena.advertencias if exogena else []))[:10]:
             e.append(Paragraph(f"⚠ {a}", st["alerta"]))
-
-    e.append(Spacer(1, 12))
-    e.append(HRFlowable(width="100%", color=colors.HexColor("#c9d4e2"), thickness=0.7))
-    e.append(Paragraph(
-        "Este documento es un BORRADOR de apoyo elaborado a partir de la información exógena "
-        "reportada por terceros a la DIAN y los datos suministrados por el contribuyente. No "
-        "constituye asesoría tributaria ni reemplaza el criterio de un contador público o abogado "
-        "tributarista. Verifique la UVT, topes, tarifas y el componente inflacionario contra la "
-        "normativa vigente antes de presentar la declaración. La información exógena no es "
-        "indispensable ni exonera de declarar la totalidad de la realidad económica.", st["peq"]))
 
     doc.build(e)
     return ruta
