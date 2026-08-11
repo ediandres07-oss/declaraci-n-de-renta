@@ -72,6 +72,7 @@ _MAPA_RENGLONES = {
     112: ("go_ingresos", None),
     132: ("retenciones", None),
     28: ("compras_factura_electronica", None),
+    131: ("saldo_favor_anterior", None),
 }
 
 

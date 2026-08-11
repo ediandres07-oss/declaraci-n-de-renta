@@ -381,6 +381,17 @@ def parsear_exogena(ruta, hoja: Optional[str] = None) -> ResultadoExogena:
             "(mismo tercero, concepto y valor). Verifique en las partidas que no "
             "sean bienes distintos con valores idénticos.")
 
+    # Saldo a favor del año anterior: la exógena lo trae como fila informativa
+    # ("Total saldo a favor") sin renglón — va al R131 del 210.
+    for pt in resultado.partidas:
+        if not pt.excluida and pt.renglon_asignado is None \
+                and (pt.valor or 0) > 0 \
+                and ("total saldo a favor" in _norm(pt.detalle)
+                     or "saldo a favor del ano anterior" in _norm(pt.detalle)
+                     or "saldo a favor ano anterior" in _norm(pt.detalle)):
+            pt.renglon_asignado = 131
+            pt.nota = "Saldo a favor del año anterior (R131), reportado por la DIAN."
+
     # Aportes a salud del PENSIONADO: si quien los reporta es el mismo tercero
     # que paga la pensión (fondo/Colpensiones), el descuento va al INCRNGO de la
     # cédula de PENSIONES (R100), no al de rentas de trabajo (R33).
