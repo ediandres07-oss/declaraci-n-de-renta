@@ -82,7 +82,8 @@ def test_totales_por_renglon_elizabeth(exogena_elizabeth):
     assert tot[132] == 1_362_514
     assert tot[58] == 38_242_290
     assert tot[74] == 644_700
-    assert tot[28] == 8_128_113
+    # R28 (base del 1%) = monto "susceptible de beneficio", no el bruto de facturas
+    assert tot[28] == 5_820_132
     assert tot[29] == 458_522_501
 
 

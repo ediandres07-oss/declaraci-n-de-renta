@@ -353,6 +353,23 @@ def parsear_exogena(ruta, hoja: Optional[str] = None) -> ResultadoExogena:
         )
     if not resultado.partidas:
         resultado.advertencias.append("No se encontraron partidas en el reporte.")
+
+    # Deducción 1% factura electrónica (Art. 336 num. 5): si la DIAN reporta el
+    # "monto susceptible de beneficio" (el que SÍ cumple los requisitos: pago
+    # electrónico, no tomado como costo), esa es la base del R28 — no el total
+    # bruto de facturas, que la exógena también trae y suele venir marcado R28.
+    susceptible = [pt for pt in resultado.partidas
+                   if "susceptible de beneficio" in _norm(pt.detalle)]
+    if susceptible:
+        for pt in susceptible:
+            pt.renglon_asignado = 28
+            pt.excluida = False
+            pt.nota = "Base del 1% de factura electrónica (monto susceptible de beneficio)."
+        for pt in resultado.partidas:
+            if pt.renglon_asignado == 28 and pt not in susceptible                     and "suma valor total facturas" in _norm(pt.detalle):
+                pt.excluida = True
+                pt.nota = ("Total bruto de facturas electrónicas: informativo. La base "
+                           "del 1% es el 'monto susceptible de beneficio'.")
     return resultado
 
 
@@ -375,11 +392,16 @@ def calcular_topes_propios(resultado: ResultadoExogena) -> Dict[str, float]:
         for t in p.topes:
             if t in mapa:
                 tot[mapa[t]] += p.valor
-    # compras: la DIAN usa la factura electrónica reportada (R28) si no hay filas "Tope 5"
+    # compras: la DIAN usa la factura electrónica reportada (R28) si no hay filas
+    # "Tope 5". Para el TOPE se toma el total bruto de facturas — incluso si la
+    # fila quedó excluida del R28 (allí la base del 1% es el monto "susceptible
+    # de beneficio", pero la obligación de declarar se mide con el consumo real).
     if tot["compras"] == 0.0:
-        for p in resultado.partidas_activas():
-            if 28 in p.renglones:
-                tot["compras"] += p.valor
+        candidatos = [p.valor for p in resultado.partidas if 28 in p.renglones]
+        candidatos += [p.valor for p in resultado.partidas
+                       if "susceptible de beneficio" in _norm(p.detalle)]
+        if candidatos:
+            tot["compras"] = max(candidatos)
     tot["patrimonio"] = max(tot["patrimonio"], patrimonio_anterior)
     return tot
 
