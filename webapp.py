@@ -313,6 +313,29 @@ def _guardar_archivo_bd(clave: str, nombre: str, datos: bytes) -> None:
         app.logger.error("No se pudo guardar el Excel %s en la BD: %s", clave, e)
 
 
+def _exogena_de(token: str):
+    """Exógena del token: de memoria o re-parseada desde la BD (sobrevive a
+    los redeploys de Render, que borran _EXOGENAS)."""
+    ex = _EXOGENAS.get(token or "")
+    if ex is not None or not token:
+        return ex
+    fila = _leer_archivo_bd(token)
+    if fila is None:
+        return None
+    try:
+        with tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False) as tmp:
+            tmp.write(fila.datos)
+            ruta = Path(tmp.name)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            ex = parsear_exogena(ruta)
+        ruta.unlink(missing_ok=True)
+        _EXOGENAS[token] = ex
+        return ex
+    except Exception:
+        return None
+
+
 def _leer_archivo_bd(clave: str):
     """Devuelve la fila ArchivoExogena o None."""
     return db.session.get(ArchivoExogena, clave)
@@ -1842,7 +1865,7 @@ def muestra_contador_zip(token):
 
     # La exógena para llenar su hoja de detalle: en memoria, y si se perdió (disco
     # efímero de Render), se re-lee del archivo guardado en la BD.
-    exogena = _EXOGENAS.get(token)
+    exogena = _exogena_de(token)
     if exogena is None:
         try:
             fila = _leer_archivo_bd(token)
@@ -1915,6 +1938,7 @@ def cargar():
     with tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False) as tmp:
         archivo.save(tmp.name)
         ruta_tmp = Path(tmp.name)
+    contenido_xlsx = ruta_tmp.read_bytes()
     try:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
@@ -1926,6 +1950,11 @@ def cargar():
 
     token = uuid.uuid4().hex
     _EXOGENAS[token] = exogena
+    try:
+        _guardar_archivo_bd(token, f"Exogena_{exogena.identificacion or 'sin_nit'}.xlsx",
+                            contenido_xlsx)
+    except Exception:
+        app.logger.warning("cargar: no se pudo persistir la exógena en BD")
     datos = mapear_exogena_a_datos(exogena, PARAMS)
 
     topes = exogena.topes_dian or calcular_topes_propios(exogena)
@@ -1981,7 +2010,7 @@ def generar():
         datos = DatosDeclaracion.from_dict(cuerpo.get("datos", {}))
     except (TypeError, KeyError) as exc:
         return jsonify({"error": f"Datos inválidos: {exc}"}), 400
-    exogena = _EXOGENAS.get(cuerpo.get("token", ""))
+    exogena = _exogena_de(cuerpo.get("token", ""))
     liq = calcular(datos, PARAMS)
 
     with tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False) as tmp:
@@ -2009,7 +2038,7 @@ def documentos_cliente_json():
     """Lista personalizada de documentos que el cliente debe entregar, deducida
     de su exógena, + texto listo para WhatsApp. Solo pases activos."""
     from src import documentos_cliente as _dc
-    exogena = _EXOGENAS.get((request.get_json(silent=True) or {}).get("token", ""))
+    exogena = _exogena_de((request.get_json(silent=True) or {}).get("token", ""))
     if exogena is None:
         return jsonify({"error": "Sube primero la exógena del cliente."}), 400
     u = usuario_actual()
@@ -2023,7 +2052,7 @@ def documentos_cliente_json():
 def documentos_cliente_pdf():
     """PDF de la lista personalizada, con el nombre del contador."""
     from src import documentos_cliente as _dc
-    exogena = _EXOGENAS.get((request.get_json(silent=True) or {}).get("token", ""))
+    exogena = _exogena_de((request.get_json(silent=True) or {}).get("token", ""))
     if exogena is None:
         return jsonify({"error": "Sube primero la exógena del cliente."}), 400
     u = usuario_actual()
@@ -2048,7 +2077,7 @@ def resumen_pdf():
         datos = DatosDeclaracion.from_dict(cuerpo.get("datos", {}))
     except (TypeError, KeyError) as exc:
         return jsonify({"error": f"Datos inválidos: {exc}"}), 400
-    exogena = _EXOGENAS.get(cuerpo.get("token", ""))
+    exogena = _exogena_de(cuerpo.get("token", ""))
     liq = calcular(datos, PARAMS)
     razones = []
     if exogena is not None:
