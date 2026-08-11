@@ -143,6 +143,10 @@ class Parametros:
     def componente_inflacionario(self) -> float:
         return float(self._data.get("componente_inflacionario", 0.0))
 
+    @property
+    def pension_exenta_uvt_anual(self) -> float:
+        return float(self._data.get("pension_exenta_uvt_anual", 12000))
+
     # -- utilidades ----------------------------------------------------
     def impuesto_tabla(self, base_pesos: float, tabla: Optional[List[Dict[str, Any]]] = None) -> float:
         """Aplica una tabla progresiva en UVT (formato tabla_art_241) a una base en pesos."""

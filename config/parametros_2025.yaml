@@ -148,6 +148,10 @@ anticipo:
 # Decreto 0771 del 7 de julio de 2025, con 50,88%).
 componente_inflacionario: 0.5543
 
+# Pensiones: renta exenta hasta 1.000 UVT mensuales = 12.000 UVT anuales
+# (Art. 206 num. 5 E.T.). El motor la aplica automáticamente con este tope.
+pension_exenta_uvt_anual: 12000
+
 # Descuento tributario por donaciones (Art. 257 E.T.): 25% del valor donado a
 # ESAL del Régimen Tributario Especial. (Donaciones de alimentos/aseo a bancos
 # de alimentos: 37%, Ley 2380/2024, desde AG2025.) La exógena reporta el VALOR

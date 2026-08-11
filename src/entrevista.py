@@ -115,10 +115,27 @@ def mapear_exogena_a_datos(exogena: ResultadoExogena,
         datos.descuento_donaciones += round(donado * pct)
 
     if parametros is not None and parametros.componente_inflacionario > 0:
-        rendimientos = sum(
-            p.valor for p in exogena.partidas_activas()
-            if p.renglon_asignado == 58 and 59 in p.renglones
-        )
+        import re as _re
+        import unicodedata as _ud
+
+        def _es_rendimiento_financiero(pt):
+            """Rendimientos que dan derecho al componente inflacionario (Arts.
+            38-41 E.T.): intereses/rendimientos de entidades financieras. La
+            DIAN suele marcarlos R58|R59; si vienen solo con R58, se reconocen
+            por el concepto — excluyendo retiros de fondos voluntarios/AFC,
+            que son ingreso pleno sin componente."""
+            if pt.renglon_asignado != 58:
+                return False
+            if 59 in pt.renglones:
+                return True
+            det = _ud.normalize("NFD", (pt.detalle or "").lower())
+            det = "".join(c for c in det if _ud.category(c) != "Mn")
+            if _re.search(r"pension|retiro|afc|cesant", det):
+                return False
+            return bool(_re.search(r"rendimient|interes|cdt", det))
+
+        rendimientos = sum(p.valor for p in exogena.partidas_activas()
+                           if _es_rendimiento_financiero(p))
         if rendimientos > 0:
             datos.capital.incrngo += round(rendimientos * parametros.componente_inflacionario)
 

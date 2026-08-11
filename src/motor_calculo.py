@@ -342,8 +342,18 @@ def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
     liq.set(100, d.pension_incrngo, "INCRNGO pensiones")
     r101 = max(0.0, d.pension_ingresos - d.pension_incrngo)
     liq.set(101, r101, "renta líquida pensiones")
-    r102 = min(d.pension_exenta, r101)
-    liq.set(102, r102, "rentas exentas pensiones")
+    # Exenta Art. 206-5 E.T.: la mesada es exenta hasta 1.000 UVT MENSUALES
+    # (12.000 UVT al año). Se aplica sola; si el usuario digitó un valor menor
+    # (p. ej. pensión de solo unos meses), se respeta el menor.
+    tope_pension = p.a_pesos(p.pension_exenta_uvt_anual)
+    exenta_base = d.pension_exenta if d.pension_exenta > 0 else r101
+    r102 = min(exenta_base, r101, tope_pension)
+    liq.set(102, r102, f"rentas exentas pensiones (Art. 206-5, tope "
+            f"{p.pension_exenta_uvt_anual:,.0f} UVT/año)")
+    if r101 > tope_pension:
+        liq.advertencias.append(
+            "La pensión supera 1.000 UVT mensuales (12.000 UVT/año): el exceso "
+            "queda gravado en la cédula de pensiones (Art. 206-5 E.T.).")
     r103 = max(0.0, r101 - r102)
     liq.set(103, r103, "renta líquida gravable pensiones")
 
