@@ -105,8 +105,14 @@ def calcular_renta_exenta_25(datos: DatosDeclaracion, p: Parametros,
     para que el 25% no recaiga sobre la parte ya exenta.
     """
     t = datos.trabajo
+    # Dependientes Art. 387: deducción imputable a rentas de trabajo → también
+    # detrae la base del 25% (Art. 206-10 inc. 2, mod. Ley 2277 de 2022).
+    ded_dep_387 = 0.0
+    if datos.dependientes >= 1 and t.ingresos_brutos > 0:
+        ded_dep_387 = min(t.ingresos_brutos * p.dependientes_387_pct,
+                          p.a_pesos(p.dependientes_387_tope_uvt))
     base = (t.ingresos_brutos - t.incrngo - t.total_rentas_exentas
-            - t.total_deducciones - exenta_extra)
+            - t.total_deducciones - ded_dep_387 - exenta_extra)
     if base <= 0:
         return 0.0
     exenta = base * p.exenta_25_porcentaje
