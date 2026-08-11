@@ -3096,6 +3096,14 @@ def admin():
     OJO: sin autenticación — solo para uso local. Agregar login antes de
     publicar en internet."""
     ordenes = _leer_ordenes()
+    # hora real de cada orden (última actualización = pago/confirmación), en hora de Bogotá
+    from zoneinfo import ZoneInfo as _ZI
+    _tz_bog = _ZI("America/Bogota")
+    horas = {}
+    for fila_kv in OrdenRegistro.query.all():
+        if fila_kv.actualizado:
+            horas[fila_kv.id] = fila_kv.actualizado.replace(
+                tzinfo=_ZI("UTC")).astimezone(_tz_bog).strftime("%I:%M %p").lstrip("0").lower()
     filas = []
     for oid, o in sorted(ordenes.items(), key=lambda kv: kv[1].get("fecha", ""), reverse=True):
         if o.get("tipo") != "orden":
@@ -3139,7 +3147,8 @@ def admin():
                      f"style='margin-top:4px;background:none;border:0;color:#b3372f;"
                      f"cursor:pointer;font-size:12px'>🗑 Eliminar</button>")
         filas.append(
-            f"<tr><td>{o.get('fecha','')}</td><td><code>{oid}</code></td>"
+            f"<tr><td>{o.get('fecha','')}<br><small style='color:#8a919c'>"
+            f"{horas.get(oid, '')}</small></td><td><code>{oid}</code></td>"
             f"<td>{o.get('nombre','')}<br><small>{o.get('nit','')}</small></td>"
             f"<td>{('👔 ' + _CFG_PRECIOS.get('contadores',{}).get('nombre','Pase de temporada')) if o.get('plan')=='contadores' else PLANES.get(o.get('plan',''),{}).get('nombre', o.get('plan',''))}</td>"
             f"<td style='text-align:right'>${o.get('precio',0):,.0f}</td>"
