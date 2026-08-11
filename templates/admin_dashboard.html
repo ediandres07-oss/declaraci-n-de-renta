@@ -65,8 +65,12 @@
   <h2>🧾 Funnel B2C — Declaración de renta</h2>
   <div class="funnel">
     <div class="step">
-      <span class="et"><a href="/admin/exogenas" style="color:inherit">Exógenas subidas → ver leads</a></span>
-      <span><span class="barra" style="display:inline-block;width:180px"></span> &nbsp;<span class="v">{{ m.exogenas }}</span></span>
+      <span class="et"><a href="/admin/exogenas" style="color:inherit">Exógenas del cálculo gratis (landing) → ver leads</a></span>
+      <span><span class="barra" style="display:inline-block;width:180px"></span> &nbsp;<span class="v">{{ m.exogenas_landing }}</span></span>
+    </div>
+    <div class="step">
+      <span class="et">Cargas del liquidador (contadores con pase)</span>
+      <span><span class="barra" style="display:inline-block;width:120px;opacity:.5"></span> &nbsp;<span class="v">{{ m.exogenas - m.exogenas_landing }}</span></span>
     </div>
     <div class="step">
       <span class="et">Órdenes creadas</span>

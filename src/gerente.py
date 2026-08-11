@@ -332,6 +332,15 @@ def informe_diario() -> bool:
 
 # ---------- métricas para el dashboard de /admin ----------
 
+def _exogenas_landing() -> int:
+    """Exógenas subidas por la LANDING (cálculo gratis): las que tienen su
+    registro de carga en ordenes_kv. Las demás son arrastres del liquidador."""
+    from src.auth import ArchivoExogena
+    cargas = {o.id for o in OrdenRegistro.query.all() if '"tipo": "carga"' in (o.data or "")}
+    ids = [r[0] for r in ArchivoExogena.query.with_entities(ArchivoExogena.id).all()]
+    return sum(1 for i in ids if i in cargas)
+
+
 def metricas_negocio() -> dict:
     """Números vivos para el panel: funnel B2C (renta), pase de temporada de
     contadores y estado del Lector (pruebas/pagadas). Lee lo que ya existe."""
@@ -375,6 +384,7 @@ def metricas_negocio() -> dict:
 
     return {
         "exogenas": ArchivoExogena.query.count(),
+        "exogenas_landing": _exogenas_landing(),
         "leads": LeadEspera.query.count(),
         "leads_exogena": LeadExogena.query.count(),
         "b2c_creadas": b2c_creadas,
