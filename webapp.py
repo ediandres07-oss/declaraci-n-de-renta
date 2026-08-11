@@ -2097,7 +2097,8 @@ def resumen_pdf():
             pass
         generar_resumen_pdf(salida, datos, liq, PARAMS, exogena, razones,
                             preparado_por=(getattr(u, "nombre", "") or "").strip(),
-                            fecha_lim=fl)
+                            fecha_lim=fl,
+                            observaciones=str(cuerpo.get("observaciones") or "")[:4000])
         contenido = salida.read_bytes()
     finally:
         salida.unlink(missing_ok=True)

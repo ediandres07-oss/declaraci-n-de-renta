@@ -123,6 +123,7 @@ def generar_resumen_pdf(
     razones_obligado=None,
     preparado_por: str = "",
     fecha_lim=None,
+    observaciones: str = "",
 ) -> Path:
     ruta = Path(ruta)
     ruta.parent.mkdir(parents=True, exist_ok=True)
@@ -298,6 +299,13 @@ def generar_resumen_pdf(
             e.append(Paragraph(
                 "Solicite el certificado de retención de cada agente para soportar el valor "
                 "tomado (la exógena orienta, el certificado soporta).", st["peq"]))
+
+    # ---------------- observaciones del contador ----------------
+    if (observaciones or "").strip():
+        e.append(Paragraph("Observaciones y sugerencias del contador", st["h2"]))
+        for linea in observaciones.strip().splitlines():
+            if linea.strip():
+                e.append(Paragraph(f"• {linea.strip()}", st["normal"]))
 
     # ---------------- advertencias y notas ----------------
     if liq.advertencias or (exogena and exogena.advertencias):
