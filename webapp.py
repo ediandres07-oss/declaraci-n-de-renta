@@ -866,7 +866,8 @@ def admin_gestor():
     return (f"<div style='font-family:sans-serif;max-width:720px;margin:30px auto;color:#1e2432'>"
             f"<h2>📅 Uso del Gestor de Vencimientos ({len(filas)} contador(es))</h2>"
             f"<p style='color:#5a6272'>Contadores con clientes cargados en /vencimientos. "
-            f"<a href='/admin/dashboard'>← Panel</a></p>"
+            f"<a href='/admin'>🏠 Órdenes</a> · <a href='/admin/dashboard'>📊 Panel del negocio</a> · "
+            f"<a href='/admin/exogenas'>🧾 Leads del cálculo</a></p>"
             f"<table cellpadding=8 style='border-collapse:collapse;width:100%'>"
             f"<tr style='text-align:left;background:#f3ede1'><th>Contador</th><th>Correo</th>"
             f"<th>Clientes</th><th>Último cargado</th></tr>{''.join(cuerpo)}</table></div>")
@@ -914,7 +915,8 @@ def admin_exogenas():
             f"<h2>🧾 Leads del cálculo de renta ({len(cargas)})</h2>"
             f"<p style='color:#5a6272'>Solo se listan los que dejaron correo (sin tus cargas de prueba). "
             f"Subidas históricas sin correo: {sin_correo}. "
-            f"<a href='/admin/dashboard'>← Panel</a></p>"
+            f"<a href='/admin'>🏠 Órdenes</a> · <a href='/admin/dashboard'>📊 Panel del negocio</a> · "
+            f"<a href='/admin/gestor'>📅 Uso del Gestor</a></p>"
             f"<table border=0 cellpadding=8 style='border-collapse:collapse;width:100%'>"
             f"<tr style='text-align:left;background:#f3ede1'><th>Fecha</th><th>Nombre</th>"
             f"<th>NIT/Cédula</th><th>Correo (lead)</th><th>Compró</th></tr>{filas}</table></div>")
@@ -3280,6 +3282,8 @@ button:hover:not(:disabled){{transform:translateY(-2px); box-shadow:0 8px 18px r
   <a href="/admin/dashboard" style="background:#1e2432">📊 Panel del negocio</a>
   <a href="/admin/campana" style="background:#8a4b1e">📣 Campañas</a>
   <a href="/admin/lector">🔑 Suscripciones Lector XML</a>
+  <a href="/admin/exogenas">🧾 Leads del cálculo</a>
+  <a href="/admin/gestor">📅 Uso del Gestor</a>
   <a href="/vencimientos">📅 Gestor de vencimientos</a>
 </div>
 <div class="resumen">{resumen}</div>
