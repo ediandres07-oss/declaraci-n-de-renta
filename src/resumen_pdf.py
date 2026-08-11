@@ -124,6 +124,7 @@ def generar_resumen_pdf(
     preparado_por: str = "",
     fecha_lim=None,
     observaciones: str = "",
+    liq_base=None,
 ) -> Path:
     ruta = Path(ruta)
     ruta.parent.mkdir(parents=True, exist_ok=True)
@@ -300,9 +301,40 @@ def generar_resumen_pdf(
                 "Solicite el certificado de retención de cada agente para soportar el valor "
                 "tomado (la exógena orienta, el certificado soporta).", st["peq"]))
 
-    # ---------------- observaciones del contador ----------------
+    # ---------------- pronunciamiento profesional ----------------
+    # Si el contador corrigió valores frente a lo reportado por terceros
+    # (certificados físicos ≠ exógena DIAN), la diferencia queda expresa como
+    # su pronunciamiento profesional.
+    correcciones = []
+    if liq_base is not None:
+        etiquetas = {
+            29: "Patrimonio bruto", 30: "Deudas",
+            32: "Ingresos rentas de trabajo", 33: "INCRNGO rentas de trabajo",
+            38: "Intereses de vivienda", 43: "Ingresos honorarios",
+            58: "Ingresos rentas de capital", 59: "INCRNGO rentas de capital",
+            74: "Ingresos rentas no laborales", 99: "Ingresos por pensiones",
+            132: "Retenciones en la fuente",
+        }
+        for reng, nombre_r in etiquetas.items():
+            antes, ahora = liq_base.r(reng), R(reng)
+            if abs(antes - ahora) > 1000:
+                correcciones.append((reng, nombre_r, antes, ahora))
+    if correcciones or (observaciones or "").strip():
+        e.append(Paragraph("Pronunciamiento profesional del contador", st["h2"]))
+    if correcciones:
+        e.append(Paragraph(
+            "Cotejados los certificados y soportes físicos del cliente contra la "
+            "información exógena reportada por terceros a la DIAN, el contador "
+            "corrigió los siguientes valores (prevalecen los soportes):", st["normal"]))
+        filas_c = [["Renglón", "Concepto", "Según exógena DIAN", "Valor del contador", "Diferencia"]]
+        for reng, nombre_r, antes, ahora in correcciones:
+            filas_c.append([str(reng), nombre_r, _fmt(antes), _fmt(ahora), _fmt(ahora - antes)])
+        e.append(_tabla(filas_c, [45, None, 88, 88, 80]))
+        e.append(Paragraph(
+            "Nota: la información exógena es referencial y no exime de declarar la "
+            "realidad económica; las diferencias se soportan en los certificados "
+            "aportados por el cliente.", st["peq"]))
     if (observaciones or "").strip():
-        e.append(Paragraph("Observaciones y sugerencias del contador", st["h2"]))
         for linea in observaciones.strip().splitlines():
             if linea.strip():
                 e.append(Paragraph(f"• {linea.strip()}", st["normal"]))

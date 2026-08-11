@@ -2095,10 +2095,17 @@ def resumen_pdf():
                 fl = fecha_limite(nit_dec, PLANTILLA)
         except Exception:
             pass
+        liq_base = None
+        if exogena is not None:
+            try:
+                liq_base = calcular(mapear_exogena_a_datos(exogena, PARAMS), PARAMS)
+            except Exception:
+                liq_base = None
         generar_resumen_pdf(salida, datos, liq, PARAMS, exogena, razones,
                             preparado_por=(getattr(u, "nombre", "") or "").strip(),
                             fecha_lim=fl,
-                            observaciones=str(cuerpo.get("observaciones") or "")[:4000])
+                            observaciones=str(cuerpo.get("observaciones") or "")[:4000],
+                            liq_base=liq_base)
         contenido = salida.read_bytes()
     finally:
         salida.unlink(missing_ok=True)
