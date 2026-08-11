@@ -381,6 +381,21 @@ def parsear_exogena(ruta, hoja: Optional[str] = None) -> ResultadoExogena:
             "(mismo tercero, concepto y valor). Verifique en las partidas que no "
             "sean bienes distintos con valores idénticos.")
 
+    # "Valor base del impuesto predial" vs "Valor avalúo catastral": el mismo
+    # municipio reporta el mismo inmueble dos veces (y la base suele traer las
+    # vigencias sumadas). Al patrimonio va el AVALÚO (Art. 277 E.T.); la base
+    # del predial se excluye como informativa cuando el tercero reporta ambas.
+    municipios_con_avaluo = {pt.informante_nit for pt in resultado.partidas
+                             if not pt.excluida and "avaluo catastral" in _norm(pt.detalle)}
+    for pt in resultado.partidas:
+        if pt.excluida:
+            continue
+        det = _norm(pt.detalle)
+        if "base del impuesto predial" in det and pt.informante_nit in municipios_con_avaluo:
+            pt.excluida = True
+            pt.nota = ("Base del impuesto predial: informativa. Al patrimonio va "
+                       "el avalúo catastral del mismo municipio (Art. 277 E.T.).")
+
     # Saldo a favor del año anterior: la exógena lo trae como fila informativa
     # ("Total saldo a favor") sin renglón — va al R131 del 210.
     for pt in resultado.partidas:
