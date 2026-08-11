@@ -3186,12 +3186,27 @@ def admin():
 
     # ---- contadores que usaron su muestra gratis (termómetro + reinicio) ----
     filas_m = []
+    correos_m = set()
     for m in MuestraContador.query.order_by(MuestraContador.creado.desc()).all():
         fecha_m = m.creado.strftime("%Y-%m-%d %H:%M") if m.creado else ""
+        correos_m.add((m.email or "").lower())
         filas_m.append(
             f"<tr><td>{fecha_m}</td><td>{m.email or ''}</td>"
             f"<td>{m.nit_muestra or '—'}</td>"
             f"<td><button onclick=\"reiniciar({m.usuario_id})\" "
+            f"style='background:#b3372f;color:#fff;border:0;border-radius:6px;"
+            f"padding:6px 10px;cursor:pointer'>↺ Reiniciar prueba</button></td></tr>")
+    # muestras del flujo por correo + código (sin registro OAuth)
+    from src.auth import MuestraContadorEmail as _MCE
+    for m in _MCE.query.order_by(_MCE.creado.desc()).all():
+        if (m.email or "").lower() in correos_m:
+            continue
+        fecha_m = m.creado.strftime("%Y-%m-%d %H:%M") if m.creado else ""
+        filas_m.append(
+            f"<tr><td>{fecha_m}</td><td>{m.email or ''} "
+            f"<span style='color:#8a919c;font-size:.75rem'>(por correo)</span></td>"
+            f"<td>{m.nit_muestra or '—'}</td>"
+            f"<td><button onclick=\"reiniciarEmail('{m.email}')\" "
             f"style='background:#b3372f;color:#fff;border:0;border-radius:6px;"
             f"padding:6px 10px;cursor:pointer'>↺ Reiniciar prueba</button></td></tr>")
 
@@ -3341,6 +3356,12 @@ async function reiniciar(uid) {{
     headers:{{'Content-Type':'application/json'}}, body: JSON.stringify({{usuario_id: uid}})}});
   if (r.ok) location.reload(); else alert('Error reiniciando');
 }}
+async function reiniciarEmail(email) {{
+  if (!confirm('¿Devolverle la prueba gratis a ' + email + '?')) return;
+  const r = await fetch('/api/muestra-contador/reset', {{method:'POST',
+    headers:{{'Content-Type':'application/json'}}, body: JSON.stringify({{email}})}});
+  if (r.ok) location.reload(); else alert('Error reiniciando');
+}}
 </script></body></html>"""
 
 
@@ -3426,10 +3447,23 @@ def reset_muestra_contador():
     Solo personal autorizado, desde /admin."""
     cuerpo = request.get_json(silent=True) or {}
     uid = cuerpo.get("usuario_id")
-    fila = db.session.get(MuestraContador, uid) if uid is not None else None
-    if fila is None:
-        return jsonify({"error": "No encontrado."}), 404
-    db.session.delete(fila)
+    email = (cuerpo.get("email") or "").strip().lower()
+    if uid is not None:
+        fila = db.session.get(MuestraContador, uid)
+        if fila is None:
+            return jsonify({"error": "No encontrado."}), 404
+        db.session.delete(fila)
+    elif email:
+        from src.auth import CodigoMuestra, MuestraContadorEmail
+        fila = db.session.get(MuestraContadorEmail, email)
+        if fila is None:
+            return jsonify({"error": "No encontrado."}), 404
+        db.session.delete(fila)
+        cod = db.session.get(CodigoMuestra, email)
+        if cod is not None:
+            db.session.delete(cod)
+    else:
+        return jsonify({"error": "Falta usuario_id o email."}), 400
     db.session.commit()
     return jsonify({"ok": True})
 
