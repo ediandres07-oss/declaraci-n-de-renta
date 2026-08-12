@@ -1968,6 +1968,10 @@ def cargar():
             "num_partidas": len(exogena.partidas),
             "topes": topes,
             "obligado": evaluar_obligacion_declarar(topes, PARAMS),
+            "fecha_limite": (lambda _fl: {
+                "fecha": _fl.strftime("%d/%m/%Y") if _fl else None,
+                "dias": (_fl - date.today()).days if _fl else None,
+            })(fecha_limite(exogena.identificacion, PLANTILLA) if exogena.identificacion else None),
             "advertencias": exogena.advertencias,
             "partidas": [
                 {

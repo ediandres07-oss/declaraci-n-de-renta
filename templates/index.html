@@ -302,9 +302,12 @@ function mostrarResumen(res) {
                      "Tope 3 TC": res.topes.consumos_tc, "Tope 4 Consignaciones": res.topes.consignaciones,
                      "Tope 5 Compras": res.topes.compras })
       .map(([k, v]) => `<span class="pill">${k}: $${fmt(v)}</span>`).join("");
+  const _fl = res.fecha_limite || {};
+  const _flTxt = _fl.fecha ? `<div style="font-size:.9rem;font-weight:600;margin-top:6px">Vence el ${_fl.fecha}` +
+    (_fl.dias !== null ? (_fl.dias >= 0 ? ` — quedan ${_fl.dias} día(s)` : ` — VENCIDA hace ${-_fl.dias} día(s)`) : "") + `</div>` : "";
   $("#obligado").innerHTML = res.obligado.length
     ? `<div style="background:#b3372f;color:#fff;border-radius:12px;padding:14px 18px;margin:10px 0;
-        font-size:1.15rem;font-weight:800;text-align:center">⚠️ SÍ ESTÁ OBLIGADO A DECLARAR</div>
+        font-size:1.15rem;font-weight:800;text-align:center">⚠️ SÍ ESTÁ OBLIGADO A DECLARAR${_flTxt}</div>
        <ul class="obligado">` + res.obligado.map(r => `<li>${r}</li>`).join("") + "</ul>"
     : `<div style="background:var(--verde,#1f9d55);color:#fff;border-radius:12px;padding:14px 18px;margin:10px 0;
         font-size:1.15rem;font-weight:800;text-align:center">✓ NO ESTÁ OBLIGADO A DECLARAR</div>
