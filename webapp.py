@@ -958,6 +958,27 @@ def admin_seguimiento_aprobar():
             f"<br><br><a href='/admin' style='color:#8a6d3b'>Volver al panel</a></div>")
 
 
+@app.post("/admin/lector/plan")
+@autorizado_requerido
+def admin_lector_plan():
+    """Cambia el plan de una suscripción del Lector (sin tocar el vencimiento)."""
+    b = request.get_json(silent=True) or {}
+    email = (b.get("email") or "").strip().lower()
+    plan = (b.get("plan") or "").strip()
+    from src.auth import PLANES_LECTOR as _PL
+    if plan not in _PL:
+        return jsonify({"error": f"Plan desconocido: {plan}"}), 400
+    sus = SuscripcionLector.query.filter(
+        db.func.lower(SuscripcionLector.email) == email).first()
+    if sus is None:
+        return jsonify({"error": "No hay suscripción con ese correo."}), 404
+    anterior = sus.plan
+    sus.plan = plan
+    db.session.commit()
+    return jsonify({"ok": True, "email": email, "antes": anterior, "ahora": plan,
+                    "empresas_max": _PL[plan]["empresas_max"]})
+
+
 @app.post("/admin/lector/agente")
 @autorizado_requerido
 def admin_lector_agente():
