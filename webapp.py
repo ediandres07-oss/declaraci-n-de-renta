@@ -3018,6 +3018,21 @@ text-decoration:none;padding:12px 22px;border-radius:12px;font-weight:700}</styl
 <a href="/mi-cuenta">Ir a mi cuenta</a></div></body></html>"""
 
 
+@app.post("/admin/orden/<orden_id>/reentregar")
+@autorizado_requerido
+def admin_reentregar(orden_id):
+    """Reenvía al cliente su paquete PDF (formulario + documentos + guía)."""
+    ordenes = _leer_ordenes()
+    orden = ordenes.get(orden_id)
+    if not orden or orden.get("tipo") != "orden":
+        return jsonify({"error": "Orden no encontrada."}), 404
+    orden["entrega_cliente_enviada"] = False           # forzar reenvío
+    _entregar_pdf_al_cliente(orden_id, orden, ordenes)
+    _guardar_ordenes(ordenes)
+    ok = bool(orden.get("entrega_cliente_enviada"))
+    return jsonify({"ok": ok, "email": (orden.get("contacto") or {}).get("email", "")})
+
+
 @app.get("/api/orden/<orden_id>/documentos.pdf")
 @login_requerido
 def descargar_checklist(orden_id):
