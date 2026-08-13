@@ -264,7 +264,7 @@ def test_checklist_documentos_con_tramite_pagado(cliente):
     texto = "".join(p.extract_text() for p in PdfReader(io.BytesIO(r.data)).pages)
     assert "Documentos para su declaración de renta" in texto
     assert "RUT actualizado" in texto
-    assert "ELIZABETH" in texto            # personalizado
+    assert "Elizabeth" in texto            # personalizado
     assert "2026-09-02" in texto           # su fecha límite
 
     # copia del checklist guardada junto al trámite para control interno
