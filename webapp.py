@@ -3160,6 +3160,14 @@ def guardar_preferencias():
         nuevo = bool(cuerpo["quiere_asesor"])
         pidio_asesor_ahora = nuevo
         u.quiere_asesor = nuevo
+        if nuevo:
+            # motivo y WhatsApp que el usuario escribe al pedir el asesor
+            motivo = (cuerpo.get("asesor_motivo") or "").strip()[:500]
+            whats = (cuerpo.get("asesor_whatsapp") or "").strip()[:30]
+            if motivo:
+                u.asesor_motivo = motivo
+            if whats:
+                u.asesor_whatsapp = whats
     db.session.commit()
 
     aviso_enviado = False
@@ -3167,7 +3175,8 @@ def guardar_preferencias():
         from src.correo import notificar_solicitud_asesor
         aviso_enviado = notificar_solicitud_asesor(
             nombre=u.nombre or "", email_usuario=u.email or "",
-            cedula=u.cedula or "", limite=u.fecha_limite)
+            cedula=u.cedula or "", limite=u.fecha_limite,
+            telefono=u.asesor_whatsapp or "", motivo=u.asesor_motivo or "")
 
     return jsonify({"acepta_recordatorios": u.acepta_recordatorios,
                     "quiere_asesor": u.quiere_asesor,
@@ -3269,7 +3278,18 @@ def admin():
         rec = "🔔 sí" if d["acepta_recordatorios"] else "🔕 no"
         if d["quiere_asesor"]:
             n_asesor += 1
-            asesor = ("<b style='color:#b3372f'>⚑ PIDIÓ ASESOR</b><br>"
+            wa = (u.asesor_whatsapp or "").strip()
+            wa_num = "".join(ch for ch in wa if ch.isdigit())
+            if wa_num and not wa_num.startswith("57") and len(wa_num) == 10:
+                wa_num = "57" + wa_num
+            wa_html = (f"<br>📱 <a href='https://wa.me/{wa_num}' target='_blank' "
+                       f"style='color:#1e7d43;font-weight:700'>{wa}</a>" if wa_num else
+                       "<br><small style='color:#9db0c4'>sin WhatsApp</small>")
+            mot = (u.asesor_motivo or "").strip()
+            mot_html = (f"<br><span style='color:#5a6b7f'>💬 {mot}</span>" if mot else
+                        "<br><small style='color:#9db0c4'>sin motivo</small>")
+            asesor = ("<b style='color:#b3372f'>⚑ PIDIÓ ASESOR</b>"
+                      f"{wa_html}{mot_html}<br>"
                       f"<button onclick=\"atender({u.id})\" "
                       f"style='margin-top:4px;background:none;border:0;color:#1e7d43;"
                       f"cursor:pointer;font-size:12px'>✓ Atendido / quitar</button>")

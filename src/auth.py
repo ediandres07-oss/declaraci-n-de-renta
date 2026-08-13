@@ -76,6 +76,8 @@ class Usuario(db.Model):
     fecha_limite = db.Column(db.Date)             # vencimiento calculado
     acepta_recordatorios = db.Column(db.Boolean, default=True)
     quiere_asesor = db.Column(db.Boolean, default=False)
+    asesor_motivo = db.Column(db.String(500))     # en qué necesita ayuda (lo escribe el usuario)
+    asesor_whatsapp = db.Column(db.String(30))    # celular/WhatsApp para contactarlo
     # año en que ya se envió cada recordatorio (evita duplicados; se reinicia por año)
     recordatorio_30_year = db.Column(db.Integer)
     recordatorio_7_year = db.Column(db.Integer)
@@ -800,6 +802,8 @@ def _migrar_columnas_faltantes():
         "mfa_habilitado": f"BOOLEAN DEFAULT {falso}",
         "intentos_fallidos": "INTEGER DEFAULT 0",
         "bloqueado_hasta": marca_tiempo,
+        "asesor_motivo": "VARCHAR(500)",
+        "asesor_whatsapp": "VARCHAR(30)",
     }
     with db.engine.begin() as con:
         for nombre, tipo in nuevas.items():

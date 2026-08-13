@@ -127,6 +127,17 @@
       <button class="btn-asesor" id="btnAsesor">
         {{ 'Ya solicitaste asesor ✓' if u.quiere_asesor else 'Quiero que me contacte un asesor' }}
       </button>
+
+      <!-- Datos para el contacto: se despliegan al pedir asesor -->
+      <div id="formAsesor" class="oculto" style="margin-top:12px">
+        <label style="font-size:.82rem;color:#5a6b7f;font-weight:600">Tu WhatsApp</label>
+        <input id="asesorWhats" type="tel" inputmode="tel" placeholder="Ej: 3104601301"
+          style="width:100%;padding:11px;border:1px solid #d5dde6;border-radius:9px;margin:5px 0 12px;font-size:.95rem">
+        <label style="font-size:.82rem;color:#5a6b7f;font-weight:600">¿En qué necesitas ayuda?</label>
+        <textarea id="asesorMotivo" rows="3" placeholder="Cuéntanos brevemente tu caso (ej: dudas con mi declaración, presentarla, un tema puntual…)"
+          style="width:100%;padding:11px;border:1px solid #d5dde6;border-radius:9px;margin:5px 0 12px;font-size:.95rem;resize:vertical"></textarea>
+        <button class="btn-asesor" id="btnEnviarAsesor">Enviar solicitud</button>
+      </div>
       <div class="ok-msg" id="okAsesor"></div>
     </div>
   </div>
@@ -165,11 +176,28 @@ $("#swRecordatorios").onchange = async (e) => {
     setTimeout(()=>$("#okPref").textContent="", 2500); }
 };
 
-$("#btnAsesor").onclick = async () => {
+// Primer clic: despliega el formulario (WhatsApp + motivo) en vez de enviar de una.
+$("#btnAsesor").onclick = () => {
+  const f = $("#formAsesor");
+  f.classList.toggle("oculto");
+  if (!f.classList.contains("oculto")) $("#asesorWhats").focus();
+};
+
+$("#btnEnviarAsesor").onclick = async () => {
+  const asesor_whatsapp = $("#asesorWhats").value.trim();
+  const asesor_motivo = $("#asesorMotivo").value.trim();
+  $("#okAsesor").style.color = "";
   const r = await fetch("/api/mi-cuenta/preferencias", {method:"POST",
-    headers:{"Content-Type":"application/json"}, body: JSON.stringify({quiere_asesor: true})});
-  if (r.ok) { $("#btnAsesor").textContent = "Ya solicitaste asesor ✓";
-    $("#okAsesor").textContent = "✓ Un asesor te contactará al correo o celular registrado."; }
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({quiere_asesor: true, asesor_whatsapp, asesor_motivo})});
+  if (r.ok) {
+    $("#formAsesor").classList.add("oculto");
+    $("#btnAsesor").textContent = "Ya solicitaste asesor ✓";
+    $("#okAsesor").textContent = "✓ Un asesor te contactará muy pronto por WhatsApp o correo.";
+  } else {
+    $("#okAsesor").style.color = "#c0392b";
+    $("#okAsesor").textContent = "⚠ No se pudo enviar. Intenta de nuevo.";
+  }
 };
 </script>
 </body>

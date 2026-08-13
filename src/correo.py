@@ -19,6 +19,7 @@ from email.message import EmailMessage
 from email.utils import formataddr
 from pathlib import Path
 from typing import List, Optional
+from urllib.parse import quote
 
 import yaml
 
@@ -148,8 +149,26 @@ def plantilla_recordatorio(nombre: str, limite: date, dias: int,
     return asunto, html
 
 
+def _boton_whatsapp(telefono: str, nombre: str = "") -> str:
+    """Devuelve un botón HTML 'Escribir por WhatsApp' con enlace wa.me, o '' si
+    no hay número. Asume Colombia (+57) cuando el número viene sin indicativo."""
+    solo_num = "".join(ch for ch in (telefono or "") if ch.isdigit())
+    if len(solo_num) < 7:
+        return ""
+    if not solo_num.startswith("57") and len(solo_num) == 10:
+        solo_num = "57" + solo_num
+    saludo = f"Hola {nombre.split()[0]}" if nombre else "Hola"
+    texto = quote(f"{saludo}, te contacto de Tributando por tu solicitud de asesoría "
+                  "para tu declaración de renta. ¿En qué te ayudo?")
+    return (f'<p style="margin:16px 0 4px"><a href="https://wa.me/{solo_num}?text={texto}" '
+            f'style="display:inline-block;background:#25d366;color:#fff;text-decoration:none;'
+            f'font-weight:700;padding:11px 20px;border-radius:9px;font-size:.92rem">'
+            f'💬 Escribirle por WhatsApp</a></p>')
+
+
 def notificar_solicitud_asesor(nombre: str, email_usuario: str, cedula: str,
                                limite: Optional[date], telefono: str = "",
+                               motivo: str = "",
                                cfg: Optional[dict] = None) -> bool:
     """Avisa al negocio que un usuario pidió asesor. Devuelve True si se envió.
 
@@ -168,9 +187,10 @@ def notificar_solicitud_asesor(nombre: str, email_usuario: str, cedula: str,
     filas = [
         ("Nombre", nombre or "—"),
         ("Correo", email_usuario or "—"),
+        ("WhatsApp", telefono or "no registrado"),
+        ("Motivo", motivo or "no lo indicó"),
         ("Cédula / NIT", cedula or "no la ingresó"),
         ("Vencimiento", fecha),
-        ("Teléfono", telefono or "no registrado"),
     ]
     filas_html = "".join(
         f"<tr><td style='padding:6px 12px;color:#7b8a9c'>{k}</td>"
@@ -184,6 +204,7 @@ def notificar_solicitud_asesor(nombre: str, email_usuario: str, cedula: str,
           <p style="margin:0 0 12px">Un usuario solicitó que un asesor lo contacte para su
             declaración de renta. Sus datos:</p>
           <table style="border-collapse:collapse;font-size:.9rem">{filas_html}</table>
+          {_boton_whatsapp(telefono, nombre)}
           <p style="font-size:.82rem;color:#5a6b7f;margin-top:16px">
             Puedes responder a este correo o escribirle directamente. Este aviso también
             queda registrado en tu panel /admin.</p>
