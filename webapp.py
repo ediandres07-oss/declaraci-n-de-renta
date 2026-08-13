@@ -2492,19 +2492,31 @@ def _entregar_pdf_al_cliente(orden_id: str, orden: dict, ordenes: dict) -> None:
         nombre = carga.get("nombre", orden.get("nombre", ""))
         nit = orden.get("nit", "")
 
+        exogena = _exogena_de(orden.get("token", ""))
         with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tf:
             p_form = Path(tf.name)
         with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tg:
             p_guia = Path(tg.name)
+        with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as td:
+            p_docs = Path(td.name)
+        adj_docs = None
         try:
             generar_formulario_pdf(p_form, datos, liq, PARAMS)
             generar_guia_dian_pdf(p_guia, nombre=nombre,
                                   fecha_limite=str(limite) if limite else None)
+            if exogena is not None and exogena.partidas:
+                from src import documentos_cliente as _dc
+                _dc.generar_pdf(p_docs, exogena)
+            else:
+                generar_checklist_pdf(p_docs, nombre=nombre,
+                                      fecha_limite=str(limite) if limite else None)
             adj_form = p_form.read_bytes()
             adj_guia = p_guia.read_bytes()
+            adj_docs = p_docs.read_bytes()
         finally:
             p_form.unlink(missing_ok=True)
             p_guia.unlink(missing_ok=True)
+            p_docs.unlink(missing_ok=True)
 
         primer = (nombre or "").split()[0] if nombre else ""
         saludo = f"Hola {primer}," if primer else "Hola,"
@@ -2555,6 +2567,7 @@ def _entregar_pdf_al_cliente(orden_id: str, orden: dict, ordenes: dict) -> None:
         asunto = "🧾 Tu Formulario 210 y la guía para presentarlo — Tributando.co"
         enviar_email(email, asunto, html, cfg, adjuntos=[
             (f"Formulario210_{nit or 'borrador'}.pdf", adj_form, "application/pdf"),
+            ("Documentos_que_necesita.pdf", adj_docs, "application/pdf"),
             ("Guia_presentar_declaracion_DIAN.pdf", adj_guia, "application/pdf"),
         ])
         orden["entrega_cliente_enviada"] = True
