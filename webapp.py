@@ -3015,14 +3015,21 @@ def descargar_checklist(orden_id):
         return jsonify({"error": "Orden no encontrada."}), 404
     if not str(orden.get("estado", "")).startswith("pagada"):
         return jsonify({"error": "La orden aún no registra pago."}), 402
-    carga = ordenes.get(orden.get("token", ""), {})
+    token = orden.get("token", "")
+    carga = ordenes.get(token, {})
     limite = fecha_limite(carga.get("nit", orden.get("nit", "")), PLANTILLA)
+    exogena = _exogena_de(token)
 
     with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
         salida = Path(tmp.name)
     try:
-        generar_checklist_pdf(salida, nombre=carga.get("nombre", orden.get("nombre", "")),
-                              fecha_limite=str(limite) if limite else None)
+        if exogena is not None and exogena.partidas:
+            # Checklist PERSONALIZADO: solo los documentos que ESTA exógena pide.
+            from src import documentos_cliente as _dc
+            _dc.generar_pdf(salida, exogena)
+        else:
+            generar_checklist_pdf(salida, nombre=carga.get("nombre", orden.get("nombre", "")),
+                                  fecha_limite=str(limite) if limite else None)
         contenido = salida.read_bytes()
     finally:
         salida.unlink(missing_ok=True)
