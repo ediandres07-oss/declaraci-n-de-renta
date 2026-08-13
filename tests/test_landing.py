@@ -351,7 +351,7 @@ def test_pago_pdf_confirmado_entrega_al_cliente(cliente, monkeypatch, _sin_smtp_
     entregas = [a for a in _sin_smtp_real if a["destino"] == "ana@test.co"]
     assert len(entregas) == 1
     e = entregas[0]
-    assert len(e["adjuntos"]) == 2                       # formulario + guía
+    assert len(e["adjuntos"]) == 3   # formulario + documentos + guía
     nombres = [n for (n, _b, _m) in e["adjuntos"]]
     assert any("Formulario210" in n for n in nombres)
     assert any("Guia" in n for n in nombres)
