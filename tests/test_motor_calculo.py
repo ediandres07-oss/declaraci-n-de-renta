@@ -509,3 +509,17 @@ def test_comerciante_lista_activos_depreciacion_y_patrimonio(parametros):
     # round-trip de serialización
     d2 = DatosDeclaracion.from_dict(d.to_dict())
     assert calcular_depreciacion(d2) == 10_000_000
+
+
+def test_comerciante_no_descuenta_1pct_factura(parametros):
+    """Art. 336-5 req 5.1: si el comerciante deduce las compras como costo (CMV),
+    esas adquisiciones NO dan el 1% de factura electrónica (R28 = 0)."""
+    from src.modelos import DatosDeclaracion, SubcedulaGeneral
+    d = DatosDeclaracion(
+        no_laboral=SubcedulaGeneral(ingresos_brutos=200_000_000),
+        compras_mercancia=120_000_000, inventario_inicial=10_000_000,
+        inventario_final=15_000_000, compras_factura_electronica=5_000_000_000,
+        patrimonio_bruto=1,
+    )
+    liq = calcular(d, parametros)
+    assert liq.r(28) == 0

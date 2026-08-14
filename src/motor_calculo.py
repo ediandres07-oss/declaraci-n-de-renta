@@ -187,11 +187,30 @@ def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
     liq.set(31, max(0.0, patrimonio_bruto - d.deudas), "patrimonio líquido")
 
     # ===================== Renglón 28: 1% factura electrónica ============
-    r28 = min(d.compras_factura_electronica * p.factura_electronica_pct,
-              p.a_pesos(p.factura_electronica_tope_uvt))
-    r28 = _round_mil(r28)
-    liq.set(28, r28, "1% compras con factura electrónica (tope "
-            f"{p.factura_electronica_tope_uvt:,.0f} UVT)")
+    # Art. 336 num. 5, req. 5.1: la adquisición NO puede haber sido solicitada como
+    # costo o deducción (prohibición de doble beneficio). El comerciante deduce sus
+    # compras como CMV (costo) → esas compras NO dan el 1%. Si usa el módulo de
+    # comerciante (deduce compras/inventarios), R28 = 0.
+    deduce_compras_costo = bool(d.compras_mercancia or d.inventario_inicial
+                                or d.inventario_final)
+    if deduce_compras_costo:
+        r28 = 0.0
+        liq.set(28, r28, "1% factura electrónica: NO aplica — las compras se deducen "
+                "como costo/CMV (Art. 336-5 req. 5.1, doble beneficio)")
+        liq.advertencias.append(
+            "El 1% de compras con factura electrónica (R28) NO se aplicó: como "
+            "comerciante deduce las compras como costo (CMV), esas adquisiciones no "
+            "dan el beneficio del 1% (Art. 336 num. 5, prohibición de doble beneficio).")
+    else:
+        r28 = _round_mil(min(d.compras_factura_electronica * p.factura_electronica_pct,
+                             p.a_pesos(p.factura_electronica_tope_uvt)))
+        liq.set(28, r28, "1% compras con factura electrónica (tope "
+                f"{p.factura_electronica_tope_uvt:,.0f} UVT)")
+        if d.no_laboral.ingresos_brutos > 0 and r28 > 0:
+            liq.advertencias.append(
+                "Detectamos rentas no laborales (posible comerciante): si esas compras "
+                "con factura electrónica se deducen como costo/CMV, el 1% (R28) NO aplica "
+                "(Art. 336 num. 5). Al cargar las compras en el módulo, R28 se pone en cero.")
 
     # ======================= Cédula general: subcédulas ==================
     # Docente/rector de universidad OFICIAL: 50% del salario exento (Art. 206-9).
