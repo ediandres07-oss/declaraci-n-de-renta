@@ -194,10 +194,11 @@
     <section class="tarjeta">
       <h2>🏪 Comerciante (PN) — Inventarios y CMV <small>· Arts. 62/63</small></h2>
       <p style="font-size:.85rem;color:#5a6272;margin:-4px 0 10px">
-        Para comerciantes con inventario: el costo deducible es el <b>CMV</b>, no las compras.
-        Ingrese aquí las <b>compras de mercancía</b> y los inventarios; el
-        <b>CMV = compras + inventario inicial − inventario final</b> va a la casilla de costos (R77).
-        El inventario final suma al patrimonio.</p>
+        Para comerciantes con inventario, lo que va como <b>costo (R77) es el CMV</b> — no las compras sueltas
+        ni el inventario. Ingrese las <b>compras de mercancía</b> y los inventarios; el motor calcula
+        <b>CMV = inventario inicial + compras − inventario final</b> y lo lleva a la casilla de costos.
+        El <b>inventario final</b> hace dos cosas: se resta dentro del CMV <u>y además</u> es un activo,
+        así que suma al <b>patrimonio (R29)</b> — nunca va como costo por sí solo.</p>
       <div class="campos">
         <div class="campo"><label>Inventario inicial (1-ene)</label><input data-clave="inventario_inicial" data-tipo="monto"></div>
         <div class="campo"><label>Compras de mercancía</label><input data-clave="compras_mercancia" data-tipo="monto"></div>
