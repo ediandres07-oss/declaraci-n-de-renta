@@ -445,10 +445,10 @@ def test_comerciante_cmv_por_inventarios(parametros):
     inv.final), no las compras; el inventario final suma al patrimonio."""
     from src.modelos import DatosDeclaracion, SubcedulaGeneral
     d = DatosDeclaracion(
-        no_laboral=SubcedulaGeneral(ingresos_brutos=100_000_000,
-                                    costos_deducciones=60_000_000),
+        no_laboral=SubcedulaGeneral(ingresos_brutos=100_000_000),
         patrimonio_bruto=30_000_000,
-        inventario_inicial=10_000_000, inventario_final=15_000_000,
+        inventario_inicial=10_000_000, compras_mercancia=60_000_000,
+        inventario_final=15_000_000,
     )
     liq = calcular(d, parametros)
     assert liq.r(77) == 55_000_000          # CMV = 60 + 10 − 15
@@ -474,9 +474,9 @@ def test_comerciante_depreciacion_art137(parametros):
     from src.modelos import DatosDeclaracion, SubcedulaGeneral
     from src.motor_calculo import calcular_depreciacion
     d = DatosDeclaracion(
-        no_laboral=SubcedulaGeneral(ingresos_brutos=200_000_000,
-                                    costos_deducciones=60_000_000),
-        inventario_inicial=10_000_000, inventario_final=15_000_000,
+        no_laboral=SubcedulaGeneral(ingresos_brutos=200_000_000),
+        inventario_inicial=10_000_000, compras_mercancia=60_000_000,
+        inventario_final=15_000_000,
         activo_vehiculos=50_000_000, activo_equipo_computo=10_000_000,
         depreciacion_manual=1_000_000,
     )
@@ -492,9 +492,9 @@ def test_comerciante_lista_activos_depreciacion_y_patrimonio(parametros):
     from src.modelos import DatosDeclaracion, SubcedulaGeneral, ActivoFijo
     from src.motor_calculo import calcular_depreciacion
     d = DatosDeclaracion(
-        no_laboral=SubcedulaGeneral(ingresos_brutos=200_000_000,
-                                    costos_deducciones=60_000_000),
-        inventario_inicial=10_000_000, inventario_final=15_000_000,
+        no_laboral=SubcedulaGeneral(ingresos_brutos=200_000_000),
+        inventario_inicial=10_000_000, compras_mercancia=60_000_000,
+        inventario_final=15_000_000,
         patrimonio_bruto=100_000_000,
         activos_fijos=[
             ActivoFijo("Camioneta", "vehiculos", 80_000_000, False),

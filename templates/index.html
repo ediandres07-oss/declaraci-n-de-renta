@@ -186,7 +186,7 @@
         <div class="campo"><label>Ingresos brutos (R74)</label><input data-clave="no_laboral.ingresos_brutos" data-tipo="monto"></div>
         <div class="campo"><label>Devoluciones, rebajas y descuentos (R75)</label><input data-clave="no_laboral.devoluciones" data-tipo="monto"></div>
         <div class="campo"><label>INCRNGO (R76)</label><input data-clave="no_laboral.incrngo" data-tipo="monto"></div>
-        <div class="campo"><label>Costos y deducciones (R77)</label><input data-clave="no_laboral.costos_deducciones" data-tipo="monto"></div>
+        <div class="campo"><label>Otros costos/gastos (R77) <small>(no mercancía)</small></label><input data-clave="no_laboral.costos_deducciones" data-tipo="monto"></div>
         <div class="campo"><label>Rentas exentas (R80-81)</label><input data-clave="no_laboral.otras_rentas_exentas" data-tipo="monto"></div>
       </div>
     </section>
@@ -195,12 +195,14 @@
       <h2>🏪 Comerciante (PN) — Inventarios y CMV <small>· Arts. 62/63</small></h2>
       <p style="font-size:.85rem;color:#5a6272;margin:-4px 0 10px">
         Para comerciantes con inventario: el costo deducible es el <b>CMV</b>, no las compras.
-        Ingrese los inventarios; las <b>compras</b> son el valor de "Costos y deducciones (R77)" de arriba.
-        <b>CMV = compras + inventario inicial − inventario final.</b> El inventario final suma al patrimonio.</p>
+        Ingrese aquí las <b>compras de mercancía</b> y los inventarios; el
+        <b>CMV = compras + inventario inicial − inventario final</b> va a la casilla de costos (R77).
+        El inventario final suma al patrimonio.</p>
       <div class="campos">
         <div class="campo"><label>Inventario inicial (1-ene)</label><input data-clave="inventario_inicial" data-tipo="monto"></div>
+        <div class="campo"><label>Compras de mercancía</label><input data-clave="compras_mercancia" data-tipo="monto"></div>
         <div class="campo"><label>Inventario final (31-dic)</label><input data-clave="inventario_final" data-tipo="monto"></div>
-        <div class="campo"><label>Costos R77 calculado <small>(CMV + depreciación)</small></label><input id="cmvCalc" readonly style="background:#f2f4f7;font-weight:700"></div>
+        <div class="campo"><label>CMV → costos R77 <small>(automático)</small></label><input id="cmvCalc" readonly style="background:#f2f4f7;font-weight:700"></div>
       </div>
       <p style="font-size:.85rem;color:#5a6272;margin:12px 0 8px"><b>Depreciación de activos fijos</b> (Art. 137, línea recta) — agregue <b>cada activo</b> (incluidos los que la DIAN no reporta). Marque <b>"en exógena"</b> si ya está en su patrimonio; si no lo marca, se suma al patrimonio (R29).</p>
       <div id="activosFijos"></div>
@@ -484,7 +486,11 @@ async function recalcular() {
   $("#kpiAnticipo").textContent = "$" + fmt(R(133));
   $("#kpiPagar").textContent = "$" + fmt(R(136));
   $("#kpiFavor").textContent = "$" + fmt(R(137));
-  if ($("#cmvCalc")) $("#cmvCalc").value = "$" + fmt(R(77));
+  if ($("#cmvCalc")) {
+    const cmv = Math.max(0, (datos.compras_mercancia||0)
+      + (datos.inventario_inicial||0) - (datos.inventario_final||0));
+    $("#cmvCalc").value = "$" + fmt(cmv);
+  }
   if ($("#depCalc")) {
     let dep = (datos.depreciacion_manual||0)
       + 0.10*(datos.activo_vehiculos||0) + 0.10*(datos.activo_maquinaria||0)

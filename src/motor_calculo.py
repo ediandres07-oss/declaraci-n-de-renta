@@ -306,18 +306,21 @@ def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
     liq.set(74, nl.ingresos_brutos, "ingresos brutos no laborales")
     liq.set(75, nl.devoluciones, "devoluciones, rebajas y descuentos")
     liq.set(76, nl.incrngo, "INCRNGO no laborales")
-    # Comerciante: convierte las compras (nl.costos_deducciones) en CMV con el juego
-    # de inventarios (Arts. 62/63): CMV = compras + inventario inicial − inventario final;
-    # más la depreciación del año (Art. 137), también deducible en costos no laborales.
-    ajuste_inv = d.inventario_inicial - d.inventario_final
+    # Comerciante: el CMV se arma con el juego de inventarios (Arts. 62/63):
+    # CMV = compras de mercancía + inventario inicial − inventario final. R77 = otros
+    # costos/gastos (nl.costos_deducciones) + CMV + depreciación del año (Art. 137).
+    cmv = max(0.0, d.compras_mercancia + d.inventario_inicial - d.inventario_final)
     depreciacion = calcular_depreciacion(d)
-    r77 = max(0.0, nl.costos_deducciones + ajuste_inv + depreciacion)
-    if d.inventario_inicial or d.inventario_final or depreciacion:
-        cmv = max(0.0, nl.costos_deducciones + ajuste_inv)
-        liq.set(77, r77, "costos no laborales — CMV + depreciación")
+    es_comerciante = (d.compras_mercancia or d.inventario_inicial
+                      or d.inventario_final or depreciacion)
+    r77 = max(0.0, nl.costos_deducciones + cmv + depreciacion)
+    if es_comerciante:
+        liq.set(77, r77, "costos no laborales — otros costos + CMV + depreciación")
         liq.detalle.append(
-            f"CMV comerciante: compras {nl.costos_deducciones:,.0f} + inv. inicial "
+            f"CMV comerciante: compras {d.compras_mercancia:,.0f} + inv. inicial "
             f"{d.inventario_inicial:,.0f} − inv. final {d.inventario_final:,.0f} = {cmv:,.0f}")
+        if nl.costos_deducciones:
+            liq.detalle.append(f"Otros costos/gastos no laborales: {nl.costos_deducciones:,.0f}")
         if depreciacion:
             liq.detalle.append(
                 f"Depreciación del año (Art. 137): {depreciacion:,.0f} → costos R77")

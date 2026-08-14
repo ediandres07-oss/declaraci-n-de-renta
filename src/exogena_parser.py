@@ -188,6 +188,15 @@ def _clasificar(partida: PartidaExogena) -> None:
         partida.nota = "Cesantías consignadas al fondo → ingresos laborales (R32)."
         return
 
+    # Documentos soporte de adquisiciones (compras a no obligados a facturar):
+    # aunque la DIAN los rotula "Ingresos …", para el declarante son COMPRAS/costos
+    # documentados → costos no laborales (R77).
+    if "documento" in det_n and "soporte" in det_n and "adquisic" in det_n:
+        partida.renglon_asignado = 77
+        partida.renglones = [77]
+        partida.nota = "Documento soporte de adquisiciones → costos no laborales (R77)."
+        return
+
     uso = partida.uso_sugerido or ""
     partida.renglones = [int(m) for m in RE_RENGLON.findall(uso)]
     partida.topes = sorted({int(m) for m in RE_TOPE.findall(uso)})

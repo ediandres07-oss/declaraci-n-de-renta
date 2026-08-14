@@ -169,10 +169,12 @@ class DatosDeclaracion:
     deudas: float = 0.0
 
     # Comerciante (PN): costo de la mercancía vendida por juego de inventarios
-    # (Arts. 62/63 E.T.). Las COMPRAS ya van en no_laboral.costos_deducciones (R77);
-    # estos dos ajustan ese valor para obtener el CMV = compras + inv.ini − inv.fin.
+    # (Arts. 62/63 E.T.). Las COMPRAS se ingresan en el módulo (compras_mercancia);
+    # el CMV = compras + inv.inicial − inv.final va a costos no laborales (R77). En
+    # no_laboral.costos_deducciones quedan los OTROS costos/gastos (no mercancía).
     # El inventario final es un activo → suma al patrimonio bruto (R29).
     inventario_inicial: float = 0.0
+    compras_mercancia: float = 0.0
     inventario_final: float = 0.0
 
     # Activos fijos depreciables del comerciante — COSTO FISCAL por categoría.

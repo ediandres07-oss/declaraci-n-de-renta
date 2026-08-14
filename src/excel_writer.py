@@ -146,7 +146,7 @@ def escribir_formulario(
             tz.column_dimensions[col].width = ancho
 
     # ---- Comerciante (PN): CMV y ERI cedulado (base para el formato 2517) ----
-    if (datos.inventario_inicial or datos.inventario_final
+    if (datos.inventario_inicial or datos.inventario_final or datos.compras_mercancia
             or datos.activo_vehiculos or datos.activo_maquinaria
             or datos.activo_muebles or datos.activo_equipo_computo
             or datos.depreciacion_manual or datos.activos_fijos):
@@ -183,7 +183,7 @@ def _hoja_comerciante(wb, datos, liq) -> None:
             for c in ws[ws.max_row]: c.font = Font(bold=True)
 
     nl = datos.no_laboral
-    compras = nl.costos_deducciones
+    compras = datos.compras_mercancia
     cmv = max(0, compras + datos.inventario_inicial - datos.inventario_final)
     titulo("COMERCIANTE PN — Costo de ventas (Arts. 62/63) y ERI cedulado")
     ws.append(["Base para diligenciar el formato 2517 (conciliación fiscal, anexo 210). "
