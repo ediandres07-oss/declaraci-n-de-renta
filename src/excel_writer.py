@@ -145,6 +145,20 @@ def escribir_formulario(
         for col, ancho in zip("ABCDEFGH", (12, 14, 60, 16, 14, 40, 9, 60)):
             tz.column_dimensions[col].width = ancho
 
+    # ---- limpiar valores de EJEMPLO de la plantilla que confunden al contador --
+    # La hoja 'G.OCAS' (ganancias ocasionales) trae ejemplos hardcodeados (tipo de
+    # bien, años y fechas de compra/venta ficticias). Se borran para que la hoja
+    # quede en blanco y no parezcan datos reales del contribuyente.
+    if "G.OCAS" in wb.sheetnames:
+        wsg = wb["G.OCAS"]
+        for celda in ("F11", "F12", "F25", "F26", "F33", "F34", "F39", "F40",
+                      "F5", "F6", "F19", "F20"):
+            wsg[celda] = None
+    if "REAJUST FISCAL" in wb.sheetnames:
+        wsr = wb["REAJUST FISCAL"]
+        for celda in ("J12", "J70", "J140"):   # fechas de ejemplo hardcodeadas
+            wsr[celda] = None
+
     # ---- Comerciante (PN): CMV y ERI cedulado (base para el formato 2517) ----
     if (datos.inventario_inicial or datos.inventario_final or datos.compras_mercancia
             or datos.activo_vehiculos or datos.activo_maquinaria
