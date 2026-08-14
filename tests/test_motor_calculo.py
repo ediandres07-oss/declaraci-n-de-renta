@@ -293,14 +293,28 @@ def test_anticipo_primer_anio_25pct(parametros):
     assert liq.r(133) == round(liq.r(126) * 0.25 / 1000) * 1000
 
 
-def test_anticipo_tercer_anio_promedio(parametros):
+def test_anticipo_tercer_anio_sin_dato_anterior_usa_simple(parametros):
+    """Sin impuesto del año anterior NO se usa el promedio (asumirlo en 0 lo
+    bajaría a la mitad indebidamente): método simple = 75% del impuesto del año."""
     d = DatosDeclaracion(
         trabajo=SubcedulaGeneral(ingresos_brutos=200_000_000),
         aplicar_renta_exenta_25=False, numero_anio_declaracion=3,
         impuesto_neto_anio_anterior=0, patrimonio_bruto=1,
     )
     liq = calcular(d, parametros)
-    promedio = (liq.r(126) + 0) / 2
+    assert liq.r(133) == round(liq.r(126) * 0.75 / 1000) * 1000
+
+
+def test_anticipo_tercer_anio_con_dato_anterior_usa_promedio(parametros):
+    """Con impuesto del año anterior MENOR, el promedio es más favorable y se toma
+    (el contribuyente opta por el menor de los dos métodos, Art. 807)."""
+    d = DatosDeclaracion(
+        trabajo=SubcedulaGeneral(ingresos_brutos=200_000_000),
+        aplicar_renta_exenta_25=False, numero_anio_declaracion=3,
+        impuesto_neto_anio_anterior=1, patrimonio_bruto=1,
+    )
+    liq = calcular(d, parametros)
+    promedio = (liq.r(126) + 1) / 2
     assert liq.r(133) == round(promedio * 0.75 / 1000) * 1000
 
 

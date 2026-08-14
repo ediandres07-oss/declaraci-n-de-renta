@@ -513,15 +513,27 @@ def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
     liq.set(131, d.saldo_favor_anterior, "saldo a favor año anterior")
     liq.set(132, d.retenciones, "retenciones año gravable")
 
+    # Dos métodos (Art. 807): (a) simple = % × impuesto del año; (b) promedio =
+    # % × [(impuesto del año + impuesto NETO del año anterior) / 2]. El promedio
+    # SOLO aplica si se conoce el impuesto del año anterior (dato del contador);
+    # asumirlo en 0 lo bajaría a la mitad de forma indebida. Sin ese dato → método
+    # simple. Con el dato → el contribuyente toma el menor de los dos.
     pct = p.anticipo_porcentajes[min(max(d.numero_anio_declaracion, 1), 3)]
-    if d.numero_anio_declaracion <= 1:
+    if d.numero_anio_declaracion <= 1 or d.impuesto_neto_anio_anterior <= 0:
         base_anticipo = r126 * pct
+        metodo = "simple"
     else:
         promedio = (r126 + d.impuesto_neto_anio_anterior) / 2.0
-        # el contribuyente puede optar por el menor de los dos métodos
-        base_anticipo = min(promedio, r126) * pct
+        base_anticipo = min(promedio, r126) * pct   # el menor de los dos métodos
+        metodo = "promedio" if promedio < r126 else "simple"
     r133 = max(0.0, _round_mil(base_anticipo) - _round_mil(d.retenciones))
-    liq.set(133, r133, f"anticipo año siguiente ({pct:.0%}, método más favorable)")
+    liq.set(133, r133, f"anticipo año siguiente ({pct:.0%}, método {metodo})")
+    if d.numero_anio_declaracion >= 2 and d.impuesto_neto_anio_anterior <= 0 and r133 > 0:
+        liq.advertencias.append(
+            f"Anticipo de renta {r133:,.0f} calculado por el método simple "
+            f"({pct:.0%} del impuesto del año). Si conoce el impuesto NETO de renta del "
+            f"año anterior, ingréselo: podría bajar el anticipo por el método del "
+            f"promedio (se toma el menor de los dos, Art. 807).")
 
     # ===================== Saldo a pagar / a favor =======================
     saldo = r129 + r133 - liq.r(130) - liq.r(131) - liq.r(132)
