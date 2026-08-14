@@ -172,9 +172,20 @@ def _clasificar(partida: PartidaExogena) -> None:
     # valor a declarar (sumarían de más). Ej.: "ingreso laboral promedio de los
     # últimos seis meses" viene marcado R36, pero solo sirve para calcular el
     # tope de la renta exenta de cesantías — no es renta exenta en sí.
-    if "ingreso laboral promedio" in _norm(partida.detalle or ""):
+    det_n = _norm(partida.detalle or "")
+    if "ingreso laboral promedio" in det_n:
         partida.excluida = True
         partida.nota = "Dato de referencia (ingreso promedio para el tope de cesantías): no suma."
+        return
+
+    # Cesantías consignadas al fondo (concepto 2276): la DIAN las etiqueta con
+    # "Tope 1: Ingresos brutos | Tope 2: Patrimonio" (sin R#), así que quedaban sin
+    # sumar. Son ingreso laboral del año → van a R32 (la dedup evita el doble conteo
+    # con la fila "abonadas" que reporta el fondo).
+    if "cesant" in det_n and "consignad" in det_n:
+        partida.renglon_asignado = 32
+        partida.renglones = [32]
+        partida.nota = "Cesantías consignadas al fondo → ingresos laborales (R32)."
         return
 
     uso = partida.uso_sugerido or ""

@@ -113,10 +113,13 @@ def mapear_exogena_a_datos(exogena: ResultadoExogena,
     def _sin_tildes(s):
         s = _ud0.normalize("NFD", (s or "").lower())
         return "".join(c for c in s if _ud0.category(c) != "Mn")
+    # Cesantías que están como INGRESO en R32 (pagadas por el fondo o consignadas
+    # por el empleador) son renta exenta del Art. 206-4. Se excluyen los intereses,
+    # que tienen su propio tratamiento y ya suman aparte.
     ces = 0.0
     for pt in exogena.partidas_activas():
         det = _sin_tildes(pt.detalle)
-        if "cesant" in det and "pagad" in pt.detalle.lower() and pt.renglon_asignado == 32:
+        if "cesant" in det and pt.renglon_asignado == 32:
             ces += float(pt.valor or 0)
     if ces > 0:
         datos.cesantias = ces
