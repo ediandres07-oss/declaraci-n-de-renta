@@ -2057,6 +2057,39 @@ def generar():
     )
 
 
+@app.post("/api/borrador-comerciante")
+@pro_requerido
+def borrador_comerciante():
+    """Borrador de renta del comerciante (PN) en Excel: incluye la hoja
+    'Comerciante (CMV-ERI)' con el CMV, la depreciación y la guía de conciliación
+    fiscal — formato 2517 (anexo del 210)."""
+    cuerpo = request.get_json(silent=True) or {}
+    try:
+        datos = DatosDeclaracion.from_dict(cuerpo.get("datos", {}))
+    except (TypeError, KeyError) as exc:
+        return jsonify({"error": f"Datos inválidos: {exc}"}), 400
+    exogena = _exogena_de(cuerpo.get("token", ""))
+    liq = calcular(datos, PARAMS)
+
+    with tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False) as tmp:
+        salida = Path(tmp.name)
+    try:
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            escribir_formulario(PLANTILLA, salida, datos, liq, exogena)
+        contenido = salida.read_bytes()
+    finally:
+        salida.unlink(missing_ok=True)
+
+    nit = datos.contribuyente.nit or "sin_nit"
+    return send_file(
+        io.BytesIO(contenido),
+        as_attachment=True,
+        download_name=f"Borrador_Comerciante_Conciliacion2517_{nit}.xlsx",
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+
+
 @app.post("/api/documentos-cliente")
 @pro_requerido
 def documentos_cliente_json():

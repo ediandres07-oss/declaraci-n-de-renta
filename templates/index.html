@@ -276,6 +276,7 @@
         <button class="btn2" id="btnDocsCliente" disabled title="Lista de documentos que su cliente le debe entregar, según su exógena">📋 Documentos del cliente</button>
         <button class="btn2" id="btnDocsWpp" disabled title="Copia el pedido de documentos listo para pegarlo en WhatsApp">💬 Pedir por WhatsApp</button>
         <button id="btnDescargar" disabled>⬇ Descargar Formulario 210</button>
+        <button class="btn2" id="btnComerciante2517" disabled title="Borrador de renta del comerciante en Excel: CMV, depreciación y guía de conciliación fiscal (formato 2517, anexo del 210)">🏪 Borrador comerciante + Conciliación fiscal 2517</button>
       </div>
       <div id="advertenciasCalc"></div>
       <details><summary>Ver todos los renglones</summary>
@@ -521,6 +522,7 @@ async function recalcular() {
   $("#btnF210Pdf").disabled = false;
   if ($("#btnDocsCliente")) $("#btnDocsCliente").disabled = false;
   if ($("#btnDocsWpp")) $("#btnDocsWpp").disabled = false;
+  if ($("#btnComerciante2517")) $("#btnComerciante2517").disabled = false;
 }
 
 async function descargarPdf(url, nombreDefecto) {
@@ -537,6 +539,8 @@ async function descargarPdf(url, nombreDefecto) {
   URL.revokeObjectURL(a.href);
 }
 $("#btnF210Pdf").addEventListener("click", () => descargarPdf("/api/formulario-pdf", "Formulario210.pdf"));
+if ($("#btnComerciante2517")) $("#btnComerciante2517").addEventListener("click",
+  () => descargarPdf("/api/borrador-comerciante", "BorradorComerciante2517.xlsx"));
 $("#btnRecalcular").addEventListener("click", recalcular);
 if ($("#btnAddActivo")) $("#btnAddActivo").addEventListener("click", () => {
   $("#activosFijos").appendChild(filaActivo({}));
