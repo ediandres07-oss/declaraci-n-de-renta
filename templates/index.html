@@ -201,12 +201,10 @@
         <div class="campo"><label>Inventario final (31-dic)</label><input data-clave="inventario_final" data-tipo="monto"></div>
         <div class="campo"><label>Costos R77 calculado <small>(CMV + depreciación)</small></label><input id="cmvCalc" readonly style="background:#f2f4f7;font-weight:700"></div>
       </div>
-      <p style="font-size:.85rem;color:#5a6272;margin:12px 0 8px"><b>Depreciación de activos fijos</b> (Art. 137, línea recta) — ingrese el <b>costo fiscal</b> de cada categoría; el motor calcula la depreciación deducible del año y la lleva a costos.</p>
+      <p style="font-size:.85rem;color:#5a6272;margin:12px 0 8px"><b>Depreciación de activos fijos</b> (Art. 137, línea recta) — agregue <b>cada activo</b> (incluidos los que la DIAN no reporta). Marque <b>"en exógena"</b> si ya está en su patrimonio; si no lo marca, se suma al patrimonio (R29).</p>
+      <div id="activosFijos"></div>
+      <button type="button" id="btnAddActivo" style="margin:2px 0 10px;background:#eef2f7;border:1px solid #cfd8e3;border-radius:8px;padding:7px 14px;cursor:pointer;font-weight:600;color:#1e2b3a">+ Agregar activo</button>
       <div class="campos">
-        <div class="campo"><label>Vehículos <small>(10%/año)</small></label><input data-clave="activo_vehiculos" data-tipo="monto"></div>
-        <div class="campo"><label>Maquinaria y equipo <small>(10%)</small></label><input data-clave="activo_maquinaria" data-tipo="monto"></div>
-        <div class="campo"><label>Muebles y enseres <small>(10%)</small></label><input data-clave="activo_muebles" data-tipo="monto"></div>
-        <div class="campo"><label>Equipo de cómputo <small>(20%)</small></label><input data-clave="activo_equipo_computo" data-tipo="monto"></div>
         <div class="campo"><label>Otra depreciación <small>(ya calculada)</small></label><input data-clave="depreciacion_manual" data-tipo="monto"></div>
         <div class="campo"><label>Depreciación del año <small>(automático)</small></label><input id="depCalc" readonly style="background:#f2f4f7;font-weight:700"></div>
       </div>
@@ -401,6 +399,7 @@ function volcarDatosAFormulario() {
     else if (el.dataset.tipo === "monto") el.value = v ? fmt(v) : "0";
     else el.value = (v === null || v === undefined) ? "" : v;
   });
+  renderActivos();
 }
 
 function volcarFormularioADatos() {
@@ -411,6 +410,51 @@ function volcarFormularioADatos() {
     else if (el.dataset.tipo === "bool") v = el.value === "1";
     escribir(datos, el.dataset.clave, v);
   });
+  recolectarActivos();
+}
+
+// ---- Activos fijos: lista dinámica (uno por línea) ----
+const CAT_ACTIVO = [["vehiculos","Vehículos (10%)"],["maquinaria","Maquinaria (10%)"],
+  ["muebles","Muebles y enseres (10%)"],["computo","Equipo de cómputo (20%)"],
+  ["construcciones","Construcciones (2,22%)"],["otros","Otros (10%)"]];
+const TASA_ACTIVO = {vehiculos:.10,maquinaria:.10,muebles:.10,computo:.20,construcciones:.0222,otros:.10};
+
+function filaActivo(a) {
+  a = a || {};
+  const row = document.createElement("div");
+  row.className = "activo-fila";
+  row.style.cssText = "display:flex;gap:6px;margin-bottom:6px;align-items:center;flex-wrap:wrap";
+  const opts = CAT_ACTIVO.map(([k,t]) =>
+    `<option value="${k}" ${a.categoria===k?"selected":""}>${t}</option>`).join("");
+  row.innerHTML =
+    `<input class="af-desc" placeholder="Descripción (ej: Camioneta ABC123)" value="${a.descripcion||""}" style="flex:2;min-width:130px;padding:8px;border:1px solid #d5dde6;border-radius:7px">
+     <select class="af-cat" style="flex:1;min-width:120px;padding:8px;border:1px solid #d5dde6;border-radius:7px">${opts}</select>
+     <input class="af-val" placeholder="Valor (costo fiscal)" value="${a.valor?fmt(a.valor):""}" style="flex:1;min-width:110px;padding:8px;border:1px solid #d5dde6;border-radius:7px">
+     <label style="font-size:.82rem;display:flex;gap:4px;align-items:center;white-space:nowrap"><input type="checkbox" class="af-exo" ${a.en_exogena?"checked":""}> en exógena</label>
+     <button type="button" class="af-del" title="Quitar" style="background:none;border:0;color:#c0392b;cursor:pointer;font-size:1.1rem">✕</button>`;
+  row.querySelector(".af-del").onclick = () => { row.remove(); recalcular(); };
+  return row;
+}
+
+function renderActivos() {
+  const cont = $("#activosFijos");
+  if (!cont) return;
+  cont.innerHTML = "";
+  (datos && datos.activos_fijos || []).forEach(a => cont.appendChild(filaActivo(a)));
+}
+
+function recolectarActivos() {
+  if (!datos) return [];
+  const arr = [];
+  document.querySelectorAll("#activosFijos .activo-fila").forEach(r => {
+    const valor = Number(String(r.querySelector(".af-val").value).replace(/[^\d\-]/g,""))||0;
+    const desc = r.querySelector(".af-desc").value.trim();
+    if (!valor && !desc) return;
+    arr.push({descripcion:desc, categoria:r.querySelector(".af-cat").value,
+      valor, en_exogena:r.querySelector(".af-exo").checked});
+  });
+  datos.activos_fijos = arr;
+  return arr;
 }
 
 document.addEventListener("change", e => {
@@ -437,9 +481,10 @@ async function recalcular() {
   $("#kpiFavor").textContent = "$" + fmt(R(137));
   if ($("#cmvCalc")) $("#cmvCalc").value = "$" + fmt(R(77));
   if ($("#depCalc")) {
-    const dep = 0.10*(datos.activo_vehiculos||0) + 0.10*(datos.activo_maquinaria||0)
-      + 0.10*(datos.activo_muebles||0) + 0.20*(datos.activo_equipo_computo||0)
-      + (datos.depreciacion_manual||0);
+    let dep = (datos.depreciacion_manual||0)
+      + 0.10*(datos.activo_vehiculos||0) + 0.10*(datos.activo_maquinaria||0)
+      + 0.10*(datos.activo_muebles||0) + 0.20*(datos.activo_equipo_computo||0);
+    (datos.activos_fijos||[]).forEach(a => dep += (TASA_ACTIVO[a.categoria]||.10)*(a.valor||0));
     $("#depCalc").value = "$" + fmt(Math.round(dep));
   }
   $("#advertenciasCalc").innerHTML = (j.advertencias || [])
@@ -482,6 +527,9 @@ async function descargarPdf(url, nombreDefecto) {
 }
 $("#btnF210Pdf").addEventListener("click", () => descargarPdf("/api/formulario-pdf", "Formulario210.pdf"));
 $("#btnRecalcular").addEventListener("click", recalcular);
+if ($("#btnAddActivo")) $("#btnAddActivo").addEventListener("click", () => {
+  $("#activosFijos").appendChild(filaActivo({}));
+});
 
 $("#btnPdf").addEventListener("click", () => descargarPdf("/api/resumen-pdf", "ResumenEjecutivo.pdf"));
 

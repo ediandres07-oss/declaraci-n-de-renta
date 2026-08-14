@@ -130,6 +130,23 @@ class GananciaOcasional:
 
 
 @dataclass
+class ActivoFijo:
+    """Un activo fijo depreciable del comerciante (Art. 137, línea recta)."""
+    descripcion: str = ""
+    categoria: str = "vehiculos"   # vehiculos|maquinaria|muebles|computo|construcciones|otros
+    valor: float = 0.0             # costo fiscal
+    en_exogena: bool = False       # True si ya está en el patrimonio de la exógena
+
+    def to_dict(self) -> Dict[str, Any]:
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, d: Dict[str, Any]) -> "ActivoFijo":
+        return cls(**{k: v for k, v in d.items()
+                      if k in ("descripcion", "categoria", "valor", "en_exogena")})
+
+
+@dataclass
 class DatosDeclaracion:
     """Todo lo necesario para liquidar el Formulario 210."""
     contribuyente: DatosContribuyente = field(default_factory=DatosContribuyente)
@@ -163,11 +180,14 @@ class DatosDeclaracion:
     # del año a costos no laborales (R77). No suma al patrimonio (el activo ya
     # viene en la exógena por su avalúo/costo). `depreciacion_manual` es para lo
     # que el contador ya tenga calculado y no encaje en las categorías.
-    activo_vehiculos: float = 0.0        # 10% anual (10 años)
+    activo_vehiculos: float = 0.0        # 10% anual (10 años) — totales rápidos (compat)
     activo_maquinaria: float = 0.0       # 10%
     activo_muebles: float = 0.0          # 10%
     activo_equipo_computo: float = 0.0   # 20% (5 años)
     depreciacion_manual: float = 0.0
+    # Lista detallada de activos fijos (uno por línea). Permite cargar los que la
+    # exógena NO trae: se deprecian y, si `en_exogena=False`, suman al patrimonio.
+    activos_fijos: List["ActivoFijo"] = field(default_factory=list)
 
     # cédula de pensiones
     pension_ingresos: float = 0.0
@@ -244,6 +264,8 @@ class DatosDeclaracion:
             d[k] = SubcedulaGeneral(**d.get(k, {}))
         d["go_partidas"] = [GananciaOcasional.from_dict(g)
                             for g in d.get("go_partidas", [])]
+        d["activos_fijos"] = [ActivoFijo.from_dict(a)
+                              for a in d.get("activos_fijos", [])]
         return cls(**d)
 
 

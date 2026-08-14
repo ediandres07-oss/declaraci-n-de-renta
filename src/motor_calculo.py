@@ -153,13 +153,20 @@ _TASA_DEPRECIACION_137 = {
     "activo_vehiculos": 0.10, "activo_maquinaria": 0.10,
     "activo_muebles": 0.10, "activo_equipo_computo": 0.20,
 }
+# Tasas para la lista detallada de activos fijos (clave de categoría).
+_TASA_CATEGORIA = {
+    "vehiculos": 0.10, "maquinaria": 0.10, "muebles": 0.10,
+    "computo": 0.20, "construcciones": 0.0222, "otros": 0.10,
+}
 
 
 def calcular_depreciacion(datos: DatosDeclaracion) -> float:
-    """Depreciación deducible del año (Art. 137): costo fiscal × tasa por categoría,
-    más lo que el contador cargue manualmente."""
+    """Depreciación deducible del año (Art. 137): costo fiscal × tasa, sumando los
+    totales rápidos por categoría, la lista detallada de activos y lo manual."""
     dep = sum(getattr(datos, k, 0.0) * tasa
               for k, tasa in _TASA_DEPRECIACION_137.items())
+    for a in getattr(datos, "activos_fijos", []):
+        dep += (a.valor or 0.0) * _TASA_CATEGORIA.get(a.categoria, 0.10)
     return round(dep + getattr(datos, "depreciacion_manual", 0.0))
 
 
@@ -169,7 +176,12 @@ def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
 
     # =============================== Patrimonio ==========================
     # El inventario final del comerciante es un activo a 31-dic → patrimonio bruto.
-    patrimonio_bruto = d.patrimonio_bruto + max(0.0, d.inventario_final)
+    # Los activos fijos de la lista que NO estén en la exógena también suman (los
+    # que sí están ya vienen contados por su avalúo → no se duplican).
+    activos_no_exogena = sum(a.valor or 0.0 for a in getattr(d, "activos_fijos", [])
+                             if not a.en_exogena)
+    patrimonio_bruto = (d.patrimonio_bruto + max(0.0, d.inventario_final)
+                        + activos_no_exogena)
     liq.set(29, patrimonio_bruto, "patrimonio bruto")
     liq.set(30, d.deudas, "deudas")
     liq.set(31, max(0.0, patrimonio_bruto - d.deudas), "patrimonio líquido")

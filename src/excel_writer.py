@@ -149,7 +149,7 @@ def escribir_formulario(
     if (datos.inventario_inicial or datos.inventario_final
             or datos.activo_vehiculos or datos.activo_maquinaria
             or datos.activo_muebles or datos.activo_equipo_computo
-            or datos.depreciacion_manual):
+            or datos.depreciacion_manual or datos.activos_fijos):
         _hoja_comerciante(wb, datos, liq)
 
     wb.save(salida)
@@ -198,23 +198,36 @@ def _hoja_comerciante(wb, datos, liq) -> None:
     fila("= CMV (costo de ventas)", cmv, bold=True)
     ws.append([])
 
-    # Depreciación de activos fijos (Art. 137)
+    # Depreciación de activos fijos (Art. 137): totales rápidos + lista detallada.
+    from .motor_calculo import calcular_depreciacion, _TASA_CATEGORIA
+    _CAT_NOMBRE = {"vehiculos": "Vehículos", "maquinaria": "Maquinaria",
+                   "muebles": "Muebles y enseres", "computo": "Equipo de cómputo",
+                   "construcciones": "Construcciones", "otros": "Otros"}
     deps = [("Vehículos (10%)", datos.activo_vehiculos, 0.10),
             ("Maquinaria y equipo (10%)", datos.activo_maquinaria, 0.10),
             ("Muebles y enseres (10%)", datos.activo_muebles, 0.10),
             ("Equipo de cómputo (20%)", datos.activo_equipo_computo, 0.20)]
-    dep_total = sum(v * t for _, v, t in deps) + datos.depreciacion_manual
+    dep_total = calcular_depreciacion(datos)
     if dep_total:
         titulo("Depreciación de activos fijos (Art. 137, línea recta)")
-        encab(["Categoría", "Costo fiscal", "Depreciación año"])
+        encab(["Activo / categoría", "Costo fiscal", "Depreciación año", "¿En exógena?"])
         for etq, val, tasa in deps:
             if val:
-                ws.append([etq, round(val), round(val * tasa)])
-                for c in ws[ws.max_row][1:]: c.number_format = "#,##0"
+                ws.append([etq, round(val), round(val * tasa), ""])
+                for c in ws[ws.max_row][1:3]: c.number_format = "#,##0"
+        for a in getattr(datos, "activos_fijos", []):
+            if not a.valor:
+                continue
+            tasa = _TASA_CATEGORIA.get(a.categoria, 0.10)
+            etq = f"{a.descripcion or _CAT_NOMBRE.get(a.categoria, a.categoria)} " \
+                  f"({_CAT_NOMBRE.get(a.categoria, a.categoria)}, {tasa:.2%})"
+            ws.append([etq, round(a.valor), round(a.valor * tasa),
+                       "Sí" if a.en_exogena else "No → suma a R29"])
+            for c in ws[ws.max_row][1:3]: c.number_format = "#,##0"
         if datos.depreciacion_manual:
-            ws.append(["Otra (manual)", "", round(datos.depreciacion_manual)])
+            ws.append(["Otra (manual)", "", round(datos.depreciacion_manual), ""])
             ws[ws.max_row][2].number_format = "#,##0"
-        ws.append(["Total depreciación del año → costos R77", "", round(dep_total)])
+        ws.append(["Total depreciación del año → costos R77", "", round(dep_total), ""])
         r = ws[ws.max_row]; r[2].number_format = "#,##0"
         for c in r: c.font = Font(bold=True)
         ws.append([])
@@ -240,5 +253,5 @@ def _hoja_comerciante(wb, datos, liq) -> None:
     ws.append(["Nota: el formato 2517 pide además la columna CONTABLE (NIIF) y las "
                "diferencias por partida; esta hoja entrega la base fiscal ya clasificada "
                "en la cédula no laboral."])
-    for col, ancho in zip("ABC", (40, 18, 12)):
+    for col, ancho in zip("ABCD", (44, 18, 16, 18)):
         ws.column_dimensions[col].width = ancho

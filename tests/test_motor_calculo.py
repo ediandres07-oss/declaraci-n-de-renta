@@ -484,3 +484,28 @@ def test_comerciante_depreciacion_art137(parametros):
     liq = calcular(d, parametros)
     assert liq.r(77) == 63_000_000                   # CMV 55M + depreciación 8M
     assert liq.r(78) == 137_000_000
+
+
+def test_comerciante_lista_activos_depreciacion_y_patrimonio(parametros):
+    """Lista de activos fijos: deprecia todos; suma al patrimonio solo los que NO
+    están en la exógena (evita doble conteo)."""
+    from src.modelos import DatosDeclaracion, SubcedulaGeneral, ActivoFijo
+    from src.motor_calculo import calcular_depreciacion
+    d = DatosDeclaracion(
+        no_laboral=SubcedulaGeneral(ingresos_brutos=200_000_000,
+                                    costos_deducciones=60_000_000),
+        inventario_inicial=10_000_000, inventario_final=15_000_000,
+        patrimonio_bruto=100_000_000,
+        activos_fijos=[
+            ActivoFijo("Camioneta", "vehiculos", 80_000_000, False),
+            ActivoFijo("Moto", "vehiculos", 12_000_000, True),
+            ActivoFijo("PC", "computo", 4_000_000, False),
+        ],
+    )
+    assert calcular_depreciacion(d) == 10_000_000     # 8M + 1.2M + 0.8M
+    liq = calcular(d, parametros)
+    assert liq.r(77) == 65_000_000                    # CMV 55M + dep 10M
+    assert liq.r(29) == 199_000_000                   # 100M + inv.final 15M + 84M no-exógena
+    # round-trip de serialización
+    d2 = DatosDeclaracion.from_dict(d.to_dict())
+    assert calcular_depreciacion(d2) == 10_000_000
