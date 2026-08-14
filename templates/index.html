@@ -15,12 +15,12 @@
 <title>Formulario 210 — AG {{ anio }}</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-  :root { --azul:#1a4f8b; --azul2:#2d6cb5; --verde:#1e7d43; --rojo:#b3372f;
-          --gris:#f4f6f9; --borde:#d7dee8; }
+  :root { --azul:#1E2432; --azul2:#C9A75A; --oro:#C9A75A; --oro-claro:#E0C584;
+          --verde:#1f9d55; --rojo:#b3372f; --gris:#f6f4ee; --borde:#e2dccc; }
   * { box-sizing:border-box; }
   body { font-family:-apple-system,'Segoe UI',Roboto,sans-serif; margin:0;
          background:var(--gris); color:#22303f; }
-  header { background:var(--azul); color:#fff; padding:16px 28px; }
+  header { background:var(--azul); color:#fff; padding:16px 28px; border-bottom:3px solid var(--oro); }
   header h1 { margin:0; font-size:1.25rem; }
   header p { margin:4px 0 0; font-size:.8rem; opacity:.85; }
   main { max-width:1080px; margin:20px auto; padding:0 16px 60px; }
@@ -28,7 +28,7 @@
            padding:10px 14px; font-size:.82rem; margin-bottom:16px; }
   #dropzone { border:3px dashed var(--azul2); border-radius:14px; background:#fff;
               padding:56px 20px; text-align:center; cursor:pointer; transition:.15s; }
-  #dropzone.arrastrando { background:#e8f1fb; border-color:var(--azul); transform:scale(1.01); }
+  #dropzone.arrastrando { background:#f3ede1; border-color:var(--azul); transform:scale(1.01); }
   #dropzone .icono { font-size:2.6rem; }
   #dropzone p { margin:8px 0 0; color:#5a6b7f; }
   .oculto { display:none !important; }
@@ -45,7 +45,7 @@
   table { border-collapse:collapse; width:100%; font-size:.8rem; margin-top:10px; }
   th, td { border-bottom:1px solid var(--borde); padding:6px 8px; text-align:left; }
   td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
-  .pill { display:inline-block; background:#e8f1fb; color:var(--azul); border-radius:20px;
+  .pill { display:inline-block; background:#f3ede1; color:var(--azul); border-radius:20px;
           padding:2px 10px; font-size:.72rem; margin:2px 4px 2px 0; }
   .alerta { color:var(--rojo); font-size:.8rem; }
   .obligado li { font-size:.82rem; }
@@ -61,9 +61,10 @@
   button { border:0; border-radius:8px; padding:11px 20px; font-size:.92rem; cursor:pointer;
             transition: transform .15s ease, box-shadow .15s ease; }
   button:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 8px 18px rgba(10,25,45,.18); }
-  #btnDescargar { background:var(--verde); color:#fff; font-weight:600; }
-  #btnDescargar:disabled { background:#9db6a6; cursor:default; }
-  .btn2 { background:#e8eef6; color:var(--azul); }
+  #btnDescargar { background:var(--oro); color:#1a1205; font-weight:700; }
+  #btnDescargar:disabled { background:#e4dcc7; color:#8a8471; cursor:default; }
+  .btn2 { background:#f3ede1; color:var(--azul); font-weight:600; }
+  #btnRecalcular { background:var(--azul); color:#fff; font-weight:600; }
   details summary { cursor:pointer; color:var(--azul2); font-size:.85rem; margin-top:8px; }
   .error-msg { background:#fdecea; border:1px solid #e7b6b2; color:var(--rojo);
                padding:10px 14px; border-radius:8px; margin-top:12px; }
