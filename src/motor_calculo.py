@@ -148,6 +148,21 @@ def calcular_cesantias_exentas(datos: DatosDeclaracion, p: Parametros):
     return round(ces * pct), pct
 
 
+# Tasas de depreciación en línea recta por categoría (Art. 137 E.T., tope anual).
+_TASA_DEPRECIACION_137 = {
+    "activo_vehiculos": 0.10, "activo_maquinaria": 0.10,
+    "activo_muebles": 0.10, "activo_equipo_computo": 0.20,
+}
+
+
+def calcular_depreciacion(datos: DatosDeclaracion) -> float:
+    """Depreciación deducible del año (Art. 137): costo fiscal × tasa por categoría,
+    más lo que el contador cargue manualmente."""
+    dep = sum(getattr(datos, k, 0.0) * tasa
+              for k, tasa in _TASA_DEPRECIACION_137.items())
+    return round(dep + getattr(datos, "depreciacion_manual", 0.0))
+
+
 def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
     liq = Liquidacion()
     d = datos
@@ -280,14 +295,20 @@ def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
     liq.set(75, nl.devoluciones, "devoluciones, rebajas y descuentos")
     liq.set(76, nl.incrngo, "INCRNGO no laborales")
     # Comerciante: convierte las compras (nl.costos_deducciones) en CMV con el juego
-    # de inventarios (Arts. 62/63): CMV = compras + inventario inicial − inventario final.
+    # de inventarios (Arts. 62/63): CMV = compras + inventario inicial − inventario final;
+    # más la depreciación del año (Art. 137), también deducible en costos no laborales.
     ajuste_inv = d.inventario_inicial - d.inventario_final
-    r77 = max(0.0, nl.costos_deducciones + ajuste_inv)
-    if d.inventario_inicial or d.inventario_final:
-        liq.set(77, r77, "costos no laborales — CMV (compras + inv. inicial − inv. final)")
+    depreciacion = calcular_depreciacion(d)
+    r77 = max(0.0, nl.costos_deducciones + ajuste_inv + depreciacion)
+    if d.inventario_inicial or d.inventario_final or depreciacion:
+        cmv = max(0.0, nl.costos_deducciones + ajuste_inv)
+        liq.set(77, r77, "costos no laborales — CMV + depreciación")
         liq.detalle.append(
             f"CMV comerciante: compras {nl.costos_deducciones:,.0f} + inv. inicial "
-            f"{d.inventario_inicial:,.0f} − inv. final {d.inventario_final:,.0f} = {r77:,.0f}")
+            f"{d.inventario_inicial:,.0f} − inv. final {d.inventario_final:,.0f} = {cmv:,.0f}")
+        if depreciacion:
+            liq.detalle.append(
+                f"Depreciación del año (Art. 137): {depreciacion:,.0f} → costos R77")
     else:
         liq.set(77, r77, "costos y deducciones no laborales")
     r78 = max(0.0, nl.ingresos_brutos - nl.devoluciones - nl.incrngo - r77)

@@ -158,6 +158,17 @@ class DatosDeclaracion:
     inventario_inicial: float = 0.0
     inventario_final: float = 0.0
 
+    # Activos fijos depreciables del comerciante — COSTO FISCAL por categoría.
+    # El motor aplica la tasa del Art. 137 (línea recta) y lleva la depreciación
+    # del año a costos no laborales (R77). No suma al patrimonio (el activo ya
+    # viene en la exógena por su avalúo/costo). `depreciacion_manual` es para lo
+    # que el contador ya tenga calculado y no encaje en las categorías.
+    activo_vehiculos: float = 0.0        # 10% anual (10 años)
+    activo_maquinaria: float = 0.0       # 10%
+    activo_muebles: float = 0.0          # 10%
+    activo_equipo_computo: float = 0.0   # 20% (5 años)
+    depreciacion_manual: float = 0.0
+
     # cédula de pensiones
     pension_ingresos: float = 0.0
     pension_incrngo: float = 0.0

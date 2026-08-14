@@ -199,7 +199,16 @@
       <div class="campos">
         <div class="campo"><label>Inventario inicial (1-ene)</label><input data-clave="inventario_inicial" data-tipo="monto"></div>
         <div class="campo"><label>Inventario final (31-dic)</label><input data-clave="inventario_final" data-tipo="monto"></div>
-        <div class="campo"><label>CMV calculado <small>(automático)</small></label><input id="cmvCalc" readonly style="background:#f2f4f7;font-weight:700"></div>
+        <div class="campo"><label>Costos R77 calculado <small>(CMV + depreciación)</small></label><input id="cmvCalc" readonly style="background:#f2f4f7;font-weight:700"></div>
+      </div>
+      <p style="font-size:.85rem;color:#5a6272;margin:12px 0 8px"><b>Depreciación de activos fijos</b> (Art. 137, línea recta) — ingrese el <b>costo fiscal</b> de cada categoría; el motor calcula la depreciación deducible del año y la lleva a costos.</p>
+      <div class="campos">
+        <div class="campo"><label>Vehículos <small>(10%/año)</small></label><input data-clave="activo_vehiculos" data-tipo="monto"></div>
+        <div class="campo"><label>Maquinaria y equipo <small>(10%)</small></label><input data-clave="activo_maquinaria" data-tipo="monto"></div>
+        <div class="campo"><label>Muebles y enseres <small>(10%)</small></label><input data-clave="activo_muebles" data-tipo="monto"></div>
+        <div class="campo"><label>Equipo de cómputo <small>(20%)</small></label><input data-clave="activo_equipo_computo" data-tipo="monto"></div>
+        <div class="campo"><label>Otra depreciación <small>(ya calculada)</small></label><input data-clave="depreciacion_manual" data-tipo="monto"></div>
+        <div class="campo"><label>Depreciación del año <small>(automático)</small></label><input id="depCalc" readonly style="background:#f2f4f7;font-weight:700"></div>
       </div>
     </section>
 
@@ -427,6 +436,12 @@ async function recalcular() {
   $("#kpiPagar").textContent = "$" + fmt(R(136));
   $("#kpiFavor").textContent = "$" + fmt(R(137));
   if ($("#cmvCalc")) $("#cmvCalc").value = "$" + fmt(R(77));
+  if ($("#depCalc")) {
+    const dep = 0.10*(datos.activo_vehiculos||0) + 0.10*(datos.activo_maquinaria||0)
+      + 0.10*(datos.activo_muebles||0) + 0.20*(datos.activo_equipo_computo||0)
+      + (datos.depreciacion_manual||0);
+    $("#depCalc").value = "$" + fmt(Math.round(dep));
+  }
   $("#advertenciasCalc").innerHTML = (j.advertencias || [])
     .map(a => `<p class="alerta">⚠ ${a}</p>`).join("");
   const tb = $("#tablaRenglones tbody"); tb.innerHTML = "";

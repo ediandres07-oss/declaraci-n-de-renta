@@ -467,3 +467,20 @@ def test_sin_comerciante_no_altera_costos(parametros):
     liq = calcular(d, parametros)
     assert liq.r(77) == 60_000_000
     assert liq.r(29) == 30_000_000
+
+
+def test_comerciante_depreciacion_art137(parametros):
+    """Depreciación (Art. 137) por categoría suma a costos no laborales (R77)."""
+    from src.modelos import DatosDeclaracion, SubcedulaGeneral
+    from src.motor_calculo import calcular_depreciacion
+    d = DatosDeclaracion(
+        no_laboral=SubcedulaGeneral(ingresos_brutos=200_000_000,
+                                    costos_deducciones=60_000_000),
+        inventario_inicial=10_000_000, inventario_final=15_000_000,
+        activo_vehiculos=50_000_000, activo_equipo_computo=10_000_000,
+        depreciacion_manual=1_000_000,
+    )
+    assert calcular_depreciacion(d) == 8_000_000     # 50M*10% + 10M*20% + 1M
+    liq = calcular(d, parametros)
+    assert liq.r(77) == 63_000_000                   # CMV 55M + depreciación 8M
+    assert liq.r(78) == 137_000_000
