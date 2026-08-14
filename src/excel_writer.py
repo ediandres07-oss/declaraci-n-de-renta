@@ -250,8 +250,31 @@ def _hoja_comerciante(wb, datos, liq) -> None:
     ws.append(["Patrimonio bruto total", round(liq.renglones.get(29, 0)), "R29"])
     ws[ws.max_row][1].number_format = "#,##0"
     ws.append([])
+
+    # ---- Guía para diligenciar el formato 2517 (F2517 v8) — filas exactas ----
+    titulo("GUÍA F2517 — copie estos VALORES FISCALES a la hoja H3 (ERI) del prevalidador")
+    encab(["Destino en el formato 2517 (hoja · fila · concepto)", "Valor fiscal"])
+    guia = [
+        ("H3 ERI · fila 40 · Venta de bienes (Al territorio nacional)",
+         liq.renglones.get(74, 0)),
+        ("H3 ERI · fila 150 · Costo bienes vendidos (comerciantes): Inventario inicial",
+         datos.inventario_inicial),
+        ("H3 ERI · fila 151 · Costo bienes vendidos (comerciantes): compras locales",
+         compras),
+        ("H3 ERI · fila 153 · Costo bienes vendidos (comerciantes): Inventario final",
+         datos.inventario_final),
+        ("H3 ERI · fila 167 · Depreciación propiedades, planta y equipo (Del costo)",
+         dep_total),
+    ]
+    for etq, val in guia:
+        ws.append([etq, round(val or 0)])
+        ws[ws.max_row][1].number_format = "#,##0"
+    ws.append(["Los activos de la lista van a la hoja H6 (Activos fijos) por su categoría "
+               "(Equipos de Transporte, Maquinaria, Enseres, Equipos informáticos…).", ""])
+    ws.append([])
     ws.append(["Nota: el formato 2517 pide además la columna CONTABLE (NIIF) y las "
                "diferencias por partida; esta hoja entrega la base fiscal ya clasificada "
-               "en la cédula no laboral."])
-    for col, ancho in zip("ABCD", (44, 18, 16, 18)):
+               "en la cédula no laboral. El CMV usa el sistema periódico (inv. inicial + "
+               "compras − inv. final)."])
+    for col, ancho in zip("ABCD", (60, 20, 16, 18)):
         ws.column_dimensions[col].width = ancho
