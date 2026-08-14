@@ -303,8 +303,9 @@ def _hoja_comerciante(wb, datos, liq) -> None:
     ws.append([])
 
     # ---- Guía para diligenciar el formato 2517 (F2517 v8) — filas exactas ----
-    titulo("GUÍA F2517 — copie estos VALORES FISCALES a la hoja H3 (ERI) del prevalidador")
-    encab(["Destino en el formato 2517 (hoja · fila · concepto)", "Valor fiscal"])
+    titulo("GUÍA F2517 — lleve estos valores a la hoja H3 (ERI) del prevalidador")
+    encab(["Destino en el formato 2517 (hoja · fila · concepto)", "Valor fiscal",
+           "Valor contable (llene)", "Diferencia"])
     guia = [
         ("H3 ERI · fila 40 · Venta de bienes (Al territorio nacional)",
          liq.renglones.get(74, 0)),
@@ -318,8 +319,11 @@ def _hoja_comerciante(wb, datos, liq) -> None:
          dep_total),
     ]
     for etq, val in guia:
-        ws.append([etq, round(val or 0)])
-        ws[ws.max_row][1].number_format = "#,##0"
+        f = ws.max_row + 1
+        # col C = contable (la llena el contador); col D = diferencia = contable − fiscal
+        ws.append([etq, round(val or 0), None, f"=C{f}-B{f}"])
+        for i in (1, 2, 3):
+            ws[ws.max_row][i].number_format = "#,##0"
     ws.append(["Los activos de la lista van a la hoja H6 (Activos fijos) por su categoría "
                "(Equipos de Transporte, Maquinaria, Enseres, Equipos informáticos…).", ""])
     ws.append([])

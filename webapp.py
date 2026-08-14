@@ -2089,6 +2089,36 @@ def borrador_comerciante():
     )
 
 
+@app.post("/api/informe-comerciante-pdf")
+@pro_requerido
+def informe_comerciante_pdf():
+    """Informe ejecutivo del borrador del comerciante en PDF (marca Tributando):
+    actividad comercial, CMV, patrimonio, activos y guía de conciliación 2517."""
+    from src.informe_comerciante import generar_informe_comerciante_pdf
+    cuerpo = request.get_json(silent=True) or {}
+    try:
+        datos = DatosDeclaracion.from_dict(cuerpo.get("datos", {}))
+    except (TypeError, KeyError) as exc:
+        return jsonify({"error": f"Datos inválidos: {exc}"}), 400
+    exogena = _exogena_de(cuerpo.get("token", ""))
+    liq = calcular(datos, PARAMS)
+
+    with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
+        salida = Path(tmp.name)
+    try:
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            generar_informe_comerciante_pdf(salida, datos, liq, exogena)
+        contenido = salida.read_bytes()
+    finally:
+        salida.unlink(missing_ok=True)
+
+    nit = datos.contribuyente.nit or "sin_nit"
+    return send_file(io.BytesIO(contenido), as_attachment=True,
+                     download_name=f"Informe_Comerciante_{nit}.pdf",
+                     mimetype="application/pdf")
+
+
 @app.post("/api/documentos-cliente")
 @pro_requerido
 def documentos_cliente_json():
