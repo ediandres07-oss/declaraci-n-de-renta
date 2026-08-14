@@ -188,20 +188,20 @@ def escribir_borrador_comerciante(salida: Path, datos: DatosDeclaracion,
     ws.append(["Tributando.co  ·  Borrador de renta — Comerciante (PN)"])
     ws.merge_cells("A1:C1")
     ws["A1"].fill = PatternFill("solid", fgColor=AZUL)
-    ws["A1"].font = Font(bold=True, size=14, color=ORO_CLARO)
+    ws["A1"].font = Font(bold=True, size=17, color=ORO_CLARO)
     ws["A1"].alignment = Alignment(horizontal="left", vertical="center", indent=1)
-    ws.row_dimensions[1].height = 26
+    ws.row_dimensions[1].height = 34
     con = datos.contribuyente
     nom = " ".join(x for x in (con.primer_nombre, con.primer_apellido,
                                con.segundo_apellido) if x).strip()
     ws.append([f"{nom or ''}  ·  NIT {con.nit or ''}  ·  Año gravable 2025"])
     ws.merge_cells("A2:C2")
-    ws["A2"].font = Font(size=9, color="5A6B7F")
+    ws["A2"].font = Font(size=11, color="5A6B7F")
     ws.append([])
     ws.append(["Renglón", "Concepto", "Valor"])
     for c in ws[ws.max_row]:
         c.fill = PatternFill("solid", fgColor=AZUL)
-        c.font = Font(color=ORO_CLARO, bold=True)
+        c.font = Font(color=ORO_CLARO, bold=True, size=12)
         c.border = box
     NOM = {29: "Patrimonio bruto", 30: "Deudas", 31: "Patrimonio líquido",
            74: "Ingresos no laborales", 75: "Devoluciones/rebajas", 76: "INCRNGO",
@@ -222,7 +222,7 @@ def escribir_borrador_comerciante(salida: Path, datos: DatosDeclaracion,
                 for c in fila:
                     c.fill = PatternFill("solid", fgColor=GRIS)
                     c.font = Font(bold=True)
-    for col, w in zip("ABC", (11, 42, 20)):
+    for col, w in zip("ABC", (14, 50, 24)):
         ws.column_dimensions[col].width = w
     ws.freeze_panes = "A4"
     _hoja_comerciante(wb, datos, liq)
@@ -241,13 +241,13 @@ def _hoja_comerciante(wb, datos, liq) -> None:
     AZUL, ORO = "1E2432", "C9A75A"
 
     def titulo(txt):
-        ws.append([txt]); ws[ws.max_row][0].font = Font(bold=True, size=12, color=AZUL)
+        ws.append([txt]); ws[ws.max_row][0].font = Font(bold=True, size=14, color=AZUL)
 
     def encab(cols):
         ws.append(cols)
         for c in ws[ws.max_row]:
             c.fill = PatternFill("solid", fgColor=AZUL)
-            c.font = Font(color="E0C584", bold=True, size=9)
+            c.font = Font(color="E0C584", bold=True, size=11)
             c.alignment = Alignment(horizontal="center")
 
     def fila(etq, val, bold=False):
@@ -263,12 +263,12 @@ def _hoja_comerciante(wb, datos, liq) -> None:
     ws.append(["Tributando.co  ·  Comerciante — CMV, ERI y Conciliación fiscal 2517"])
     ws.merge_cells("A1:D1")
     ws["A1"].fill = PatternFill("solid", fgColor=AZUL)
-    ws["A1"].font = Font(bold=True, size=13, color="E0C584")
+    ws["A1"].font = Font(bold=True, size=15, color="E0C584")
     ws["A1"].alignment = Alignment(horizontal="left", vertical="center", indent=1)
-    ws.row_dimensions[1].height = 24
+    ws.row_dimensions[1].height = 32
     ws.append(["Base para diligenciar el formato 2517 (conciliación fiscal, anexo 210). "
                "La columna contable la ajusta el contador."])
-    ws["A2"].font = Font(size=8.5, color="5A6B7F")
+    ws["A2"].font = Font(size=10.5, color="5A6B7F")
     ws.append([])
 
     titulo("Costo de la mercancía vendida — CMV (Arts. 62/63)")
