@@ -42,7 +42,7 @@ from src.documentos import generar_checklist_pdf
 from src.guia_dian import generar_guia_dian_pdf
 
 from src.entrevista import mapear_exogena_a_datos
-from src.excel_writer import escribir_formulario
+from src.excel_writer import escribir_borrador_comerciante, escribir_formulario
 from src.exogena_parser import (ExogenaError, calcular_topes_propios,
                                 evaluar_obligacion_declarar, parsear_exogena)
 from src.modelos import DatosDeclaracion, ResultadoExogena
@@ -2068,7 +2068,6 @@ def borrador_comerciante():
         datos = DatosDeclaracion.from_dict(cuerpo.get("datos", {}))
     except (TypeError, KeyError) as exc:
         return jsonify({"error": f"Datos inválidos: {exc}"}), 400
-    exogena = _exogena_de(cuerpo.get("token", ""))
     liq = calcular(datos, PARAMS)
 
     with tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False) as tmp:
@@ -2076,7 +2075,7 @@ def borrador_comerciante():
     try:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            escribir_formulario(PLANTILLA, salida, datos, liq, exogena)
+            escribir_borrador_comerciante(salida, datos, liq)
         contenido = salida.read_bytes()
     finally:
         salida.unlink(missing_ok=True)

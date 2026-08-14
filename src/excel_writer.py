@@ -170,6 +170,43 @@ def escribir_formulario(
     return salida
 
 
+def escribir_borrador_comerciante(salida: Path, datos: DatosDeclaracion,
+                                  liq: Liquidacion) -> Path:
+    """Excel ENFOCADO del borrador del comerciante: solo la hoja 'Borrador 210'
+    (renglones clave) y la hoja 'Comerciante (CMV-ERI)' con la guía del formato
+    2517 — sin los demás papeles de trabajo de la plantilla."""
+    from openpyxl.styles import Font, PatternFill
+    salida = Path(salida)
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Borrador 210"
+    AZUL = "1E2432"
+    ws.append(["BORRADOR DE RENTA — Comerciante (PN)"])
+    ws["A1"].font = Font(bold=True, size=13, color=AZUL)
+    ws.append([f"NIT {datos.contribuyente.nit or ''} · Año gravable 2025"])
+    ws.append([])
+    ws.append(["Renglón", "Concepto", "Valor"])
+    for c in ws[ws.max_row]:
+        c.fill = PatternFill("solid", fgColor=AZUL)
+        c.font = Font(color="E0C584", bold=True)
+    NOM = {29: "Patrimonio bruto", 30: "Deudas", 31: "Patrimonio líquido",
+           74: "Ingresos no laborales", 75: "Devoluciones/rebajas", 76: "INCRNGO",
+           77: "Costos y deducciones (CMV + depreciación)", 78: "Renta líquida no laboral",
+           91: "Renta líquida cédula general", 97: "Renta líquida gravable",
+           116: "Impuesto rentas líquidas", 126: "Impuesto neto de renta",
+           129: "Total impuesto a cargo", 132: "Retenciones", 133: "Anticipo 2026",
+           136: "Saldo a pagar", 137: "Saldo a favor"}
+    for r in (29, 30, 31, 74, 75, 76, 77, 78, 91, 97, 116, 126, 129, 132, 133, 136, 137):
+        if r in liq.renglones:
+            ws.append([f"R{r}", NOM.get(r, ""), round(liq.renglones[r])])
+            ws[ws.max_row][2].number_format = "#,##0"
+    for col, w in zip("ABC", (10, 40, 18)):
+        ws.column_dimensions[col].width = w
+    _hoja_comerciante(wb, datos, liq)
+    wb.save(salida)
+    return salida
+
+
 def _hoja_comerciante(wb, datos, liq) -> None:
     """Hoja con el costo de ventas por inventarios y el ERI cedulado de la renta
     no laboral — muestra base para diligenciar el formato 2517 (anexo 210)."""
