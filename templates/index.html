@@ -205,7 +205,7 @@
         <div class="campo"><label>Inventario final (31-dic)</label><input data-clave="inventario_final" data-tipo="monto"></div>
         <div class="campo"><label>CMV → costos R77 <small>(automático)</small></label><input id="cmvCalc" readonly style="background:#f2f4f7;font-weight:700"></div>
       </div>
-      <p style="font-size:.85rem;color:#5a6272;margin:12px 0 8px"><b>Depreciación de activos fijos</b> (Art. 137, línea recta) — agregue <b>cada activo</b> (incluidos los que la DIAN no reporta). Marque <b>"en exógena"</b> si ya está en su patrimonio; si no lo marca, se suma al patrimonio (R29).</p>
+      <p style="font-size:.85rem;color:#5a6272;margin:12px 0 8px"><b>Depreciación de activos fijos</b> (Art. 137, línea recta). Los activos <b>que trae tu exógena</b> (avalúos de vehículos/inmuebles) se cargan aquí marcados <b>"en exógena"</b> y <b>Sin depreciación</b> — cámbiales la categoría para depreciar solo los del negocio, y bórralos o edítalos si no aplican. Puedes <b>agregar</b> los que la DIAN no reporta (esos, sin marcar "en exógena", suman al patrimonio R29).</p>
       <div id="activosFijos"></div>
       <button type="button" id="btnAddActivo" style="margin:2px 0 10px;background:#eef2f7;border:1px solid #cfd8e3;border-radius:8px;padding:7px 14px;cursor:pointer;font-weight:600;color:#1e2b3a">+ Agregar activo</button>
       <div class="campos">
@@ -423,10 +423,11 @@ function volcarFormularioADatos() {
 }
 
 // ---- Activos fijos: lista dinámica (uno por línea) ----
-const CAT_ACTIVO = [["vehiculos","Vehículos (10%)"],["maquinaria","Maquinaria (10%)"],
-  ["muebles","Muebles y enseres (10%)"],["computo","Equipo de cómputo (20%)"],
-  ["construcciones","Construcciones (2,22%)"],["otros","Otros (10%)"]];
-const TASA_ACTIVO = {vehiculos:.10,maquinaria:.10,muebles:.10,computo:.20,construcciones:.0222,otros:.10};
+const CAT_ACTIVO = [["no_deprecia","Sin depreciación (0%)"],["vehiculos","Vehículos (10%)"],
+  ["maquinaria","Maquinaria (10%)"],["muebles","Muebles y enseres (10%)"],
+  ["computo","Equipo de cómputo (20%)"],["construcciones","Construcciones (2,22%)"],
+  ["otros","Otros (10%)"]];
+const TASA_ACTIVO = {no_deprecia:0,vehiculos:.10,maquinaria:.10,muebles:.10,computo:.20,construcciones:.0222,otros:.10};
 
 function filaActivo(a) {
   a = a || {};

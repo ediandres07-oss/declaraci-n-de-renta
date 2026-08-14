@@ -157,6 +157,7 @@ _TASA_DEPRECIACION_137 = {
 _TASA_CATEGORIA = {
     "vehiculos": 0.10, "maquinaria": 0.10, "muebles": 0.10,
     "computo": 0.20, "construcciones": 0.0222, "otros": 0.10,
+    "no_deprecia": 0.0,   # terrenos, inversiones, activos personales: no deprecian
 }
 
 

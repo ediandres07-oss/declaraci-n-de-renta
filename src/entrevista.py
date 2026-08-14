@@ -13,7 +13,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from .modelos import DatosDeclaracion, ResultadoExogena
+from .modelos import ActivoFijo, DatosDeclaracion, ResultadoExogena
 
 
 def calcular_dv(nit: str) -> str:
@@ -188,6 +188,39 @@ def mapear_exogena_a_datos(exogena: ResultadoExogena,
                 continue          # mismo tercero y mismo valor: es el mismo bien
             vistos_aval.add(clave)
             datos.patrimonio_bruto += float(p.valor or 0)
+
+    # Pre-cargar en el módulo comerciante los activos fijos que trae la exógena
+    # (avalúos de vehículos e inmuebles), para que el contador los vea, ajuste o
+    # borre. Ya están en el patrimonio por su avalúo → en_exogena=True (no se
+    # duplican). El contador decide cuáles son del negocio y deben depreciarse.
+    def _cat_activo(det_n):
+        if "vehic" in det_n:
+            return "vehiculos"
+        if any(k in det_n for k in ("inmueble", "predio", "casa", "apartament",
+                                    "edificio", "local", "bodega", "oficina",
+                                    "lote", "terreno", "finca")):
+            return "construcciones"
+        if "maquinaria" in det_n:
+            return "maquinaria"
+        return "otros"
+    vistos_af = set()
+    for p in exogena.partidas_activas():
+        det_n = _sin_tildes(p.detalle)
+        if "avalu" in det_n and (p.valor or 0) > 0:
+            clave = (p.informante_nit, round(p.valor or 0))
+            if clave in vistos_af:
+                continue
+            vistos_af.add(clave)
+            tipo = _cat_activo(det_n)
+            base = ("Vehículo" if tipo == "vehiculos"
+                    else "Inmueble" if tipo == "construcciones" else "Activo")
+            extra = (p.info_adicional or "").strip()
+            desc = f"{base} — {extra[:40]}" if extra else base
+            # Se cargan SIN depreciación por defecto (opt-in): el contador cambia
+            # la categoría a los activos del negocio que sí deprecian.
+            datos.activos_fijos.append(ActivoFijo(
+                descripcion=desc, categoria="no_deprecia", valor=float(p.valor or 0),
+                en_exogena=True))
     return datos
 
 

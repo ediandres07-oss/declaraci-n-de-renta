@@ -541,3 +541,17 @@ def test_venta_activo_fijo_nota_por_fechas():
         informado_nit="", informado_nombre="", detalle="Venta de activo fijo",
         valor=100, uso_sugerido="", info_adicional="")
     assert "Verifique la" in _nota_venta_activo(sinf)
+
+
+def test_activos_exogena_precargados_sin_depreciar(parametros):
+    """Los activos que trae la exógena (avalúos) se pre-cargan en el módulo con
+    categoría 'no_deprecia' (opt-in) y en_exogena=True (no duplican patrimonio)."""
+    from src.modelos import DatosDeclaracion, ActivoFijo
+    from src.motor_calculo import calcular_depreciacion
+    d = DatosDeclaracion(
+        patrimonio_bruto=100_000_000,
+        activos_fijos=[ActivoFijo("Vehículo BXC086", "no_deprecia", 9_830_000, True)],
+    )
+    assert calcular_depreciacion(d) == 0            # no deprecia hasta que el contador cambie
+    liq = calcular(d, parametros)
+    assert liq.r(29) == 100_000_000                 # no duplica patrimonio (en_exogena)
