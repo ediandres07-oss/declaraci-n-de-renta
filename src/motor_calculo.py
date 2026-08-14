@@ -153,9 +153,11 @@ def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
     d = datos
 
     # =============================== Patrimonio ==========================
-    liq.set(29, d.patrimonio_bruto, "patrimonio bruto")
+    # El inventario final del comerciante es un activo a 31-dic → patrimonio bruto.
+    patrimonio_bruto = d.patrimonio_bruto + max(0.0, d.inventario_final)
+    liq.set(29, patrimonio_bruto, "patrimonio bruto")
     liq.set(30, d.deudas, "deudas")
-    liq.set(31, max(0.0, d.patrimonio_bruto - d.deudas), "patrimonio líquido")
+    liq.set(31, max(0.0, patrimonio_bruto - d.deudas), "patrimonio líquido")
 
     # ===================== Renglón 28: 1% factura electrónica ============
     r28 = min(d.compras_factura_electronica * p.factura_electronica_pct,
@@ -277,8 +279,18 @@ def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
     liq.set(74, nl.ingresos_brutos, "ingresos brutos no laborales")
     liq.set(75, nl.devoluciones, "devoluciones, rebajas y descuentos")
     liq.set(76, nl.incrngo, "INCRNGO no laborales")
-    liq.set(77, nl.costos_deducciones, "costos y deducciones no laborales")
-    r78 = max(0.0, nl.ingresos_brutos - nl.devoluciones - nl.incrngo - nl.costos_deducciones)
+    # Comerciante: convierte las compras (nl.costos_deducciones) en CMV con el juego
+    # de inventarios (Arts. 62/63): CMV = compras + inventario inicial − inventario final.
+    ajuste_inv = d.inventario_inicial - d.inventario_final
+    r77 = max(0.0, nl.costos_deducciones + ajuste_inv)
+    if d.inventario_inicial or d.inventario_final:
+        liq.set(77, r77, "costos no laborales — CMV (compras + inv. inicial − inv. final)")
+        liq.detalle.append(
+            f"CMV comerciante: compras {nl.costos_deducciones:,.0f} + inv. inicial "
+            f"{d.inventario_inicial:,.0f} − inv. final {d.inventario_final:,.0f} = {r77:,.0f}")
+    else:
+        liq.set(77, r77, "costos y deducciones no laborales")
+    r78 = max(0.0, nl.ingresos_brutos - nl.devoluciones - nl.incrngo - r77)
     liq.set(78, r78, "renta líquida no laborales")
     liq.set(79, nl.rentas_pasivas_ece, "rentas pasivas ECE no laborales")
     liq.set(80, nl.rentas_exentas_afc_fvp, "aportes AFC/FVP no laborales")

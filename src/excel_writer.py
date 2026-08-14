@@ -145,5 +145,76 @@ def escribir_formulario(
         for col, ancho in zip("ABCDEFGH", (12, 14, 60, 16, 14, 40, 9, 60)):
             tz.column_dimensions[col].width = ancho
 
+    # ---- Comerciante (PN): CMV y ERI cedulado (base para el formato 2517) ----
+    if datos.inventario_inicial or datos.inventario_final:
+        _hoja_comerciante(wb, datos, liq)
+
     wb.save(salida)
     return salida
+
+
+def _hoja_comerciante(wb, datos, liq) -> None:
+    """Hoja con el costo de ventas por inventarios y el ERI cedulado de la renta
+    no laboral — muestra base para diligenciar el formato 2517 (anexo 210)."""
+    from openpyxl.styles import Font, PatternFill, Alignment
+    nombre = "Comerciante (CMV-ERI)"
+    if nombre in wb.sheetnames:
+        del wb[nombre]
+    ws = wb.create_sheet(nombre)
+    AZUL, ORO = "1E2432", "C9A75A"
+
+    def titulo(txt):
+        ws.append([txt]); ws[ws.max_row][0].font = Font(bold=True, size=12, color=AZUL)
+
+    def encab(cols):
+        ws.append(cols)
+        for c in ws[ws.max_row]:
+            c.fill = PatternFill("solid", fgColor=AZUL)
+            c.font = Font(color="E0C584", bold=True, size=9)
+            c.alignment = Alignment(horizontal="center")
+
+    def fila(etq, val, bold=False):
+        ws.append([etq, round(val)])
+        ws[ws.max_row][1].number_format = "#,##0"
+        if bold:
+            for c in ws[ws.max_row]: c.font = Font(bold=True)
+
+    nl = datos.no_laboral
+    compras = nl.costos_deducciones
+    cmv = liq.renglones.get(77, 0)
+    titulo("COMERCIANTE PN — Costo de ventas (Arts. 62/63) y ERI cedulado")
+    ws.append(["Base para diligenciar el formato 2517 (conciliación fiscal, anexo 210). "
+               "La columna contable la ajusta el contador."])
+    ws.append([])
+
+    titulo("1) Costo de la mercancía vendida (CMV)")
+    encab(["Concepto", "Valor fiscal"])
+    fila("Inventario inicial (1-ene)", datos.inventario_inicial)
+    fila("(+) Compras del año", compras)
+    fila("(−) Inventario final (31-dic)", datos.inventario_final)
+    fila("= CMV (costo de ventas)", cmv, bold=True)
+    ws.append([])
+
+    titulo("2) ERI — Cédula de rentas NO laborales (comercial)")
+    encab(["Concepto", "Valor fiscal", "Renglón 210"])
+    for etq, r in [("Ingresos brutos", 74), ("(−) Devoluciones/rebajas", 75),
+                   ("(−) INCRNGO", 76), ("(−) Costos y deducciones (CMV)", 77),
+                   ("= Renta líquida no laboral", 78)]:
+        ws.append([etq, round(liq.renglones.get(r, 0)), f"R{r}"])
+        ws[ws.max_row][1].number_format = "#,##0"
+        if r == 78:
+            for c in ws[ws.max_row]: c.font = Font(bold=True)
+    ws.append([])
+
+    titulo("3) ESF — Patrimonio (parcial)")
+    encab(["Concepto", "Valor fiscal", "Renglón 210"])
+    ws.append(["Inventario final (activo)", round(datos.inventario_final), "R29"])
+    ws[ws.max_row][1].number_format = "#,##0"
+    ws.append(["Patrimonio bruto total", round(liq.renglones.get(29, 0)), "R29"])
+    ws[ws.max_row][1].number_format = "#,##0"
+    ws.append([])
+    ws.append(["Nota: el formato 2517 pide además la columna CONTABLE (NIIF) y las "
+               "diferencias por partida; esta hoja entrega la base fiscal ya clasificada "
+               "en la cédula no laboral."])
+    for col, ancho in zip("ABC", (40, 18, 12)):
+        ws.column_dimensions[col].width = ancho

@@ -438,3 +438,32 @@ def test_componente_inflacionario_no_aplica_a_otros_ingresos_de_capital(exogena_
     assert solo_r58 == 38_242_290 - 33_810_314  # 4.287.643 + 144.333
     # el INCRNGO solo proviene de los rendimientos marcados R58|R59
     assert datos.capital.incrngo == round(33_810_314 * parametros.componente_inflacionario)
+
+
+def test_comerciante_cmv_por_inventarios(parametros):
+    """Comerciante PN: el costo deducible es el CMV (compras + inv.inicial −
+    inv.final), no las compras; el inventario final suma al patrimonio."""
+    from src.modelos import DatosDeclaracion, SubcedulaGeneral
+    d = DatosDeclaracion(
+        no_laboral=SubcedulaGeneral(ingresos_brutos=100_000_000,
+                                    costos_deducciones=60_000_000),
+        patrimonio_bruto=30_000_000,
+        inventario_inicial=10_000_000, inventario_final=15_000_000,
+    )
+    liq = calcular(d, parametros)
+    assert liq.r(77) == 55_000_000          # CMV = 60 + 10 − 15
+    assert liq.r(78) == 45_000_000          # renta líquida = 100 − 55
+    assert liq.r(29) == 45_000_000          # patrimonio = 30 + inventario final 15
+
+
+def test_sin_comerciante_no_altera_costos(parametros):
+    """Sin inventarios, R77 sigue siendo los costos tal cual (sin ajuste)."""
+    from src.modelos import DatosDeclaracion, SubcedulaGeneral
+    d = DatosDeclaracion(
+        no_laboral=SubcedulaGeneral(ingresos_brutos=100_000_000,
+                                    costos_deducciones=60_000_000),
+        patrimonio_bruto=30_000_000,
+    )
+    liq = calcular(d, parametros)
+    assert liq.r(77) == 60_000_000
+    assert liq.r(29) == 30_000_000

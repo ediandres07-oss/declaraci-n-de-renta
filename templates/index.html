@@ -191,6 +191,19 @@
     </section>
 
     <section class="tarjeta">
+      <h2>🏪 Comerciante (PN) — Inventarios y CMV <small>· Arts. 62/63</small></h2>
+      <p style="font-size:.85rem;color:#5a6272;margin:-4px 0 10px">
+        Para comerciantes con inventario: el costo deducible es el <b>CMV</b>, no las compras.
+        Ingrese los inventarios; las <b>compras</b> son el valor de "Costos y deducciones (R77)" de arriba.
+        <b>CMV = compras + inventario inicial − inventario final.</b> El inventario final suma al patrimonio.</p>
+      <div class="campos">
+        <div class="campo"><label>Inventario inicial (1-ene)</label><input data-clave="inventario_inicial" data-tipo="monto"></div>
+        <div class="campo"><label>Inventario final (31-dic)</label><input data-clave="inventario_final" data-tipo="monto"></div>
+        <div class="campo"><label>CMV calculado <small>(automático)</small></label><input id="cmvCalc" readonly style="background:#f2f4f7;font-weight:700"></div>
+      </div>
+    </section>
+
+    <section class="tarjeta">
       <h2>Cédula de pensiones <small>· renglones 99–103</small></h2>
       <div class="campos">
         <div class="campo"><label>Ingresos por pensiones (R99)</label><input data-clave="pension_ingresos" data-tipo="monto"></div>
@@ -413,6 +426,7 @@ async function recalcular() {
   $("#kpiAnticipo").textContent = "$" + fmt(R(133));
   $("#kpiPagar").textContent = "$" + fmt(R(136));
   $("#kpiFavor").textContent = "$" + fmt(R(137));
+  if ($("#cmvCalc")) $("#cmvCalc").value = "$" + fmt(R(77));
   $("#advertenciasCalc").innerHTML = (j.advertencias || [])
     .map(a => `<p class="alerta">⚠ ${a}</p>`).join("");
   const tb = $("#tablaRenglones tbody"); tb.innerHTML = "";
