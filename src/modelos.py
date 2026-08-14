@@ -217,6 +217,11 @@ class DatosDeclaracion:
     compensaciones_perdidas: float = 0.0     # R94
     compensacion_exceso_presuntiva: float = 0.0  # R95
 
+    # Venta de activos fijos detectada en la exógena (para la nota Art. 300):
+    # la DIAN la manda a GO por defecto, pero solo es ganancia ocasional si el
+    # activo se poseyó 2 años o más; si menos, es renta no laboral (R74).
+    venta_activos_fijos: float = 0.0
+
     # otros datos de liquidación
     dependientes: int = 0
     dependientes_detalle: List[str] = field(default_factory=list)  # nombres (informativo)

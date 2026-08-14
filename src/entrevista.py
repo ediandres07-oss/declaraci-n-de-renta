@@ -131,6 +131,13 @@ def mapear_exogena_a_datos(exogena: ResultadoExogena,
     if promedios:
         datos.salario_mensual_promedio = max(promedios)
 
+    # Venta de activos fijos (Art. 300): se totaliza para que el motor deje la nota
+    # (GO solo si ≥2 años; si <2 años es renta no laboral).
+    datos.venta_activos_fijos = sum(
+        float(pt.valor or 0) for pt in exogena.partidas_activas()
+        if "venta" in _sin_tildes(pt.detalle)
+        and "activo" in _sin_tildes(pt.detalle) and "fijo" in _sin_tildes(pt.detalle))
+
     # Donaciones (renglón 123): la exógena reporta el VALOR donado, pero la
     # casilla 123 es el DESCUENTO tributario = un % de ese valor (Art. 257 E.T.:
     # 25% general). Por eso no va por _MAPA_RENGLONES (que pondría el valor

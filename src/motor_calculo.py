@@ -212,6 +212,14 @@ def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
                 "con factura electrónica se deducen como costo/CMV, el 1% (R28) NO aplica "
                 "(Art. 336 num. 5). Al cargar las compras en el módulo, R28 se pone en cero.")
 
+    # Venta de activos fijos (Art. 300): aviso al contador para clasificar bien.
+    if getattr(d, "venta_activos_fijos", 0) > 0:
+        liq.advertencias.append(
+            f"Venta de activos fijos por {d.venta_activos_fijos:,.0f} (inmuebles/vehículos). "
+            "Art. 300: es GANANCIA OCASIONAL solo si el activo se poseyó 2 años o más; si "
+            "MENOS de 2 años, la utilidad es RENTA NO LABORAL (R74). Revise la nota de la "
+            "partida (usa las fechas si la exógena las trae) y reclasifique si corresponde.")
+
     # ======================= Cédula general: subcédulas ==================
     # Docente/rector de universidad OFICIAL: 50% del salario exento (Art. 206-9).
     # Se calcula sobre el ingreso de trabajo y se suma a las rentas exentas de esa

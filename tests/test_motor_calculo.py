@@ -523,3 +523,21 @@ def test_comerciante_no_descuenta_1pct_factura(parametros):
     )
     liq = calcular(d, parametros)
     assert liq.r(28) == 0
+
+
+def test_venta_activo_fijo_nota_por_fechas():
+    """Art. 300: con fechas, la nota dice GO (≥2 años) o renta no laboral (<2 años)."""
+    from src.modelos import PartidaExogena
+    from src.exogena_parser import _nota_venta_activo
+    corto = PartidaExogena(fila=1, informante_nit="", informante_nombre="",
+        informado_nit="", informado_nombre="", detalle="Venta de activo fijo",
+        valor=100, uso_sugerido="", info_adicional="adq 2024-03-10 venta 2025-08-01")
+    assert "RENTA NO LABORAL" in _nota_venta_activo(corto)
+    largo = PartidaExogena(fila=2, informante_nit="", informante_nombre="",
+        informado_nit="", informado_nombre="", detalle="Venta de activo fijo",
+        valor=100, uso_sugerido="", info_adicional="adq 2020-01-15 venta 2025-06-30")
+    assert "GANANCIA OCASIONAL" in _nota_venta_activo(largo)
+    sinf = PartidaExogena(fila=3, informante_nit="", informante_nombre="",
+        informado_nit="", informado_nombre="", detalle="Venta de activo fijo",
+        valor=100, uso_sugerido="", info_adicional="")
+    assert "Verifique la" in _nota_venta_activo(sinf)

@@ -12,6 +12,7 @@ El parser valida por NOMBRE de columna, no por posición, y tolera
 variaciones de formato entre años (más/menos filas de metadatos,
 columnas en otro orden, montos como texto).
 """
+import datetime as _dt
 import re
 import unicodedata
 from pathlib import Path
@@ -40,6 +41,40 @@ def _norm(texto: str) -> str:
 # Regex tolerante: "R132", "R 30", "r58", "Renglón 29", "Renglon29", "R29:"
 RE_RENGLON = re.compile(r"(?:\bR|\brengl[oó]n)\s*\.?\s*(\d{2,3})\b", re.IGNORECASE)
 RE_TOPE = re.compile(r"\btope\s*(\d)\b", re.IGNORECASE)
+RE_FECHA = re.compile(r"\d{4}-\d{1,2}-\d{1,2}|\d{1,2}/\d{1,2}/\d{4}|\d{1,2}-\d{1,2}-\d{4}")
+
+
+def _parse_fechas(texto: str) -> List["_dt.date"]:
+    """Extrae fechas de un texto (formatos yyyy-mm-dd, dd/mm/yyyy, dd-mm-yyyy)."""
+    out = []
+    for s in RE_FECHA.findall(texto or ""):
+        for fmt in ("%Y-%m-%d", "%d/%m/%Y", "%d-%m-%Y"):
+            try:
+                out.append(_dt.datetime.strptime(s, fmt).date())
+                break
+            except ValueError:
+                continue
+    return out
+
+
+def _nota_venta_activo(pt: "PartidaExogena") -> str:
+    """Nota Art. 300 para una venta de activo fijo. Si la exógena trae las fechas
+    de adquisición y venta (en detalle o info adicional), calcula el tiempo de
+    posesión y dice si es ganancia ocasional (≥2 años) o renta no laboral (<2)."""
+    fechas = sorted(set(_parse_fechas(f"{pt.info_adicional or ''} {pt.detalle or ''}")))
+    if len(fechas) >= 2:
+        adq, ven = fechas[0], fechas[-1]
+        anios = (ven - adq).days / 365.25
+        if (ven - adq).days >= 730:
+            return (f"Venta de ACTIVO FIJO: adquirido {adq} y vendido {ven} "
+                    f"({anios:.1f} años de posesión, ≥2 años) → GANANCIA OCASIONAL "
+                    "(R112), correcto (Art. 300).")
+        return (f"Venta de ACTIVO FIJO: adquirido {adq} y vendido {ven} "
+                f"({anios:.1f} años de posesión, <2 años) → NO es ganancia ocasional: "
+                "va a RENTA NO LABORAL. Reclasifique de R112 a R74 (Art. 300).")
+    return ("Venta de ACTIVO FIJO. Art. 300: es ganancia ocasional solo si lo poseyó "
+            "2 años o más; si <2 años va a rentas no laborales (R74). Verifique la "
+            "fecha de adquisición.")
 
 # Beneficiario económico / titularidad (columna "Información Adicional")
 RE_PARTICIPACION = re.compile(r"porcentaje\s+de\s+participaci[oó]n:\s*([\d.,]+)", re.IGNORECASE)
@@ -484,6 +519,30 @@ def parsear_exogena(ruta, hoja: Optional[str] = None) -> ResultadoExogena:
         resultado.advertencias.append(
             f"Se excluyeron {dup_ces} fila(s) de cesantías duplicadas (mismo valor "
             "reportado por el empleador y por el fondo). Verifique en las partidas.")
+
+    # Venta de activos FIJOS (Art. 300): la DIAN la manda a ganancia ocasional
+    # (R112) por defecto, pero solo lo es si el activo se poseyó 2 años o más;
+    # si menos, es RENTA NO LABORAL (R74). El tiempo de posesión no viene en la
+    # exógena → se deja nota al contador para que lo verifique y reclasifique.
+    ventas_af = [pt for pt in resultado.partidas if not pt.excluida
+                 and "venta" in _norm(pt.detalle)
+                 and "activo" in _norm(pt.detalle) and "fijo" in _norm(pt.detalle)]
+    if ventas_af:
+        total_af = sum(float(pt.valor or 0) for pt in ventas_af)
+        con_fechas = False
+        for pt in ventas_af:
+            aviso = _nota_venta_activo(pt)     # usa fechas si la exógena las trae
+            if "años de posesión" in aviso:
+                con_fechas = True
+            pt.nota = (aviso + " " + (pt.nota or "")).strip()
+        base = (f"Detectamos venta de activos fijos por ${total_af:,.0f} (aplica a "
+                "inmuebles y vehículos). Art. 300 E.T.: es GANANCIA OCASIONAL solo si el "
+                "activo se poseyó 2 años o más; si MENOS de 2 años, la utilidad es RENTA "
+                "NO LABORAL (cédula general).")
+        if not con_fechas:
+            base += (" La exógena no trae la fecha de adquisición: verifique el tiempo de "
+                     "posesión y reclasifique (R112 GO ↔ R74 no laboral) si corresponde.")
+        resultado.advertencias.append(base)
 
     # Deducción 1% factura electrónica (Art. 336 num. 5): si la DIAN reporta el
     # "monto susceptible de beneficio" (el que SÍ cumple los requisitos: pago
