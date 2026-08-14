@@ -106,6 +106,28 @@ def mapear_exogena_a_datos(exogena: ResultadoExogena,
         objetivo = getattr(datos, sub) if sub else datos
         setattr(objetivo, attr, getattr(objetivo, attr) + total)
 
+    # Cesantías e intereses pagados: son renta exenta (Art. 206-4). Ya quedaron
+    # sumadas al ingreso laboral (R32) por el mapeo de renglón; aquí se totalizan
+    # aparte para que el motor calcule su exención y la detraiga de la base del 25%.
+    import unicodedata as _ud0
+    def _sin_tildes(s):
+        s = _ud0.normalize("NFD", (s or "").lower())
+        return "".join(c for c in s if _ud0.category(c) != "Mn")
+    ces = 0.0
+    for pt in exogena.partidas_activas():
+        det = _sin_tildes(pt.detalle)
+        if "cesant" in det and "pagad" in pt.detalle.lower() and pt.renglon_asignado == 32:
+            ces += float(pt.valor or 0)
+    if ces > 0:
+        datos.cesantias = ces
+    # Salario mensual promedio para el tope del Art. 206-4: la DIAN lo reporta como
+    # "ingreso laboral promedio de los últimos seis meses" (partida excluida del
+    # cómputo). Se toma el mayor valor reportado; si no hay, el motor usa R32/12.
+    promedios = [float(pt.valor or 0) for pt in exogena.partidas
+                 if "ingreso laboral promedio" in _sin_tildes(pt.detalle)]
+    if promedios:
+        datos.salario_mensual_promedio = max(promedios)
+
     # Donaciones (renglón 123): la exógena reporta el VALOR donado, pero la
     # casilla 123 es el DESCUENTO tributario = un % de ese valor (Art. 257 E.T.:
     # 25% general). Por eso no va por _MAPA_RENGLONES (que pondría el valor

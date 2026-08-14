@@ -119,6 +119,35 @@ def calcular_renta_exenta_25(datos: DatosDeclaracion, p: Parametros,
     return min(exenta, p.a_pesos(p.exenta_25_tope_uvt))
 
 
+# Tabla del Art. 206 num. 4 E.T.: % exento de las cesantías e intereses según el
+# salario mensual promedio (en UVT) de los últimos seis meses de vinculación.
+_CESANTIAS_206_4 = [(350, 1.00), (410, 0.90), (470, 0.80),
+                    (530, 0.60), (590, 0.40), (650, 0.20)]
+
+
+def calcular_cesantias_exentas(datos: DatosDeclaracion, p: Parametros):
+    """Renta exenta de cesantías e intereses (Art. 206 num. 4 E.T.).
+
+    El porcentaje exento depende del salario mensual promedio: 100% hasta 350
+    UVT/mes y decreciente hasta 0% por encima de 650 UVT/mes. Devuelve
+    (valor_exento, porcentaje). Las cesantías ya vienen incluidas en el ingreso
+    laboral (R32); esta exención se suma a R36 y se detrae de la base del 25%.
+    """
+    ces = getattr(datos, "cesantias", 0.0) or 0.0
+    if ces <= 0:
+        return 0.0, 1.0
+    smp = getattr(datos, "salario_mensual_promedio", 0.0) or 0.0
+    if smp <= 0:
+        smp = datos.trabajo.ingresos_brutos / 12.0
+    smp_uvt = smp / p.uvt if p.uvt else 0.0
+    pct = 0.0
+    for tope_uvt, porc in _CESANTIAS_206_4:
+        if smp_uvt <= tope_uvt:
+            pct = porc
+            break
+    return round(ces * pct), pct
+
+
 def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
     liq = Liquidacion()
     d = datos
@@ -147,13 +176,41 @@ def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
             liq.detalle.append(
                 f"Renta exenta 50% docente universidad oficial (Art. 206-9): {exenta_50:,.0f}")
 
+    # Cesantías e intereses exentos (Art. 206-4): se detraen de la base del 25%
+    # (son "demás rentas exentas", Art. 206-10) y se suman a R36. La DIAN en su
+    # declaración sugerida normalmente NO las exenta.
+    exenta_cesantias, pct_ces = 0.0, 1.0
+    if getattr(d, "cesantias", 0.0) > 0:
+        exenta_cesantias, pct_ces = calcular_cesantias_exentas(d, p)
+        if exenta_cesantias > 0:
+            liq.detalle.append(
+                f"Cesantías e intereses exentos (Art. 206-4, {pct_ces*100:.0f}%): "
+                f"{exenta_cesantias:,.0f}")
+
     # Renta exenta 25% laboral automática (se agrega a 'otras rentas exentas').
-    # Se le resta el 50% docente para no exentar dos veces la misma porción.
+    # Se le restan el 50% docente y las cesantías para no exentar dos veces la
+    # misma porción (Art. 206-10 inc. 2: la base se depura de las demás exentas).
     exenta_25 = 0.0
     if d.aplicar_renta_exenta_25:
-        exenta_25 = calcular_renta_exenta_25(d, p, exenta_extra=exenta_50)
+        exenta_25 = calcular_renta_exenta_25(
+            d, p, exenta_extra=exenta_50 + exenta_cesantias)
         if exenta_25 > 0:
             liq.detalle.append(f"Renta exenta 25% laboral (Art. 206-10): {exenta_25:,.0f}")
+
+    # Aviso al contador: cómo la saca la DIAN (sugerida, sin cesantías) vs cómo es
+    # correcto (con Art. 206-4). Solo cuando hay cesantías exentas de por medio.
+    if exenta_cesantias > 0:
+        exenta_25_dian = calcular_renta_exenta_25(d, p, exenta_extra=exenta_50)
+        total_dian = exenta_25_dian + exenta_50
+        total_correcto = exenta_25 + exenta_50 + exenta_cesantias
+        liq.advertencias.append(
+            f"Cesantías e intereses por {d.cesantias:,.0f} tratados como exentos "
+            f"(Art. 206-4, {pct_ces*100:.0f}% por salario promedio). La declaración "
+            f"SUGERIDA de la DIAN normalmente NO los exenta: así, la renta exenta de "
+            f"trabajo (R36) que muestra la DIAN es ~{total_dian:,.0f}, mientras que "
+            f"aplicando el Art. 206-4 es {total_correcto:,.0f} "
+            f"(diferencia {total_correcto - total_dian:,.0f} a favor del contribuyente). "
+            f"Verifique el certificado de cesantías del fondo.")
 
     t, h, c, nl = d.trabajo, d.honorarios, d.capital, d.no_laboral
 
@@ -163,8 +220,9 @@ def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
     r34 = max(0.0, t.ingresos_brutos - t.incrngo - t.costos_deducciones)
     liq.set(34, r34, "renta líquida rentas de trabajo")
     liq.set(35, t.rentas_exentas_afc_fvp, "aportes AFC/FVP/AVC")
-    r36 = t.otras_rentas_exentas + exenta_25 + exenta_50
-    liq.set(36, r36, "otras rentas exentas (incluye 25% y 50% docente si aplican)")
+    r36 = t.otras_rentas_exentas + exenta_25 + exenta_50 + exenta_cesantias
+    liq.set(36, r36, "otras rentas exentas (incluye 25%, 50% docente y cesantías "
+            "Art. 206-4 si aplican)")
     r37 = t.rentas_exentas_afc_fvp + r36
     liq.set(37, r37, "total rentas exentas trabajo")
     liq.set(38, t.intereses_vivienda, "intereses de vivienda")
