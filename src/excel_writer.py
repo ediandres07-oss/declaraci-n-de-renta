@@ -175,20 +175,34 @@ def escribir_borrador_comerciante(salida: Path, datos: DatosDeclaracion,
     """Excel ENFOCADO del borrador del comerciante: solo la hoja 'Borrador 210'
     (renglones clave) y la hoja 'Comerciante (CMV-ERI)' con la guía del formato
     2517 — sin los demás papeles de trabajo de la plantilla."""
-    from openpyxl.styles import Font, PatternFill
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
     salida = Path(salida)
+    AZUL, ORO_CLARO, GRIS = "1E2432", "E0C584", "F6F4EE"
+    thin = Side(style="thin", color="E2DCCC")
+    box = Border(left=thin, right=thin, top=thin, bottom=thin)
     wb = openpyxl.Workbook()
     ws = wb.active
     ws.title = "Borrador 210"
-    AZUL = "1E2432"
-    ws.append(["BORRADOR DE RENTA — Comerciante (PN)"])
-    ws["A1"].font = Font(bold=True, size=13, color=AZUL)
-    ws.append([f"NIT {datos.contribuyente.nit or ''} · Año gravable 2025"])
+
+    # banner de marca (azul marino + dorado)
+    ws.append(["Tributando.co  ·  Borrador de renta — Comerciante (PN)"])
+    ws.merge_cells("A1:C1")
+    ws["A1"].fill = PatternFill("solid", fgColor=AZUL)
+    ws["A1"].font = Font(bold=True, size=14, color=ORO_CLARO)
+    ws["A1"].alignment = Alignment(horizontal="left", vertical="center", indent=1)
+    ws.row_dimensions[1].height = 26
+    con = datos.contribuyente
+    nom = " ".join(x for x in (con.primer_nombre, con.primer_apellido,
+                               con.segundo_apellido) if x).strip()
+    ws.append([f"{nom or ''}  ·  NIT {con.nit or ''}  ·  Año gravable 2025"])
+    ws.merge_cells("A2:C2")
+    ws["A2"].font = Font(size=9, color="5A6B7F")
     ws.append([])
     ws.append(["Renglón", "Concepto", "Valor"])
     for c in ws[ws.max_row]:
         c.fill = PatternFill("solid", fgColor=AZUL)
-        c.font = Font(color="E0C584", bold=True)
+        c.font = Font(color=ORO_CLARO, bold=True)
+        c.border = box
     NOM = {29: "Patrimonio bruto", 30: "Deudas", 31: "Patrimonio líquido",
            74: "Ingresos no laborales", 75: "Devoluciones/rebajas", 76: "INCRNGO",
            77: "Costos y deducciones (CMV + depreciación)", 78: "Renta líquida no laboral",
@@ -196,12 +210,21 @@ def escribir_borrador_comerciante(salida: Path, datos: DatosDeclaracion,
            116: "Impuesto rentas líquidas", 126: "Impuesto neto de renta",
            129: "Total impuesto a cargo", 132: "Retenciones", 133: "Anticipo 2026",
            136: "Saldo a pagar", 137: "Saldo a favor"}
+    destacar = {97, 129, 136, 137}
     for r in (29, 30, 31, 74, 75, 76, 77, 78, 91, 97, 116, 126, 129, 132, 133, 136, 137):
         if r in liq.renglones:
             ws.append([f"R{r}", NOM.get(r, ""), round(liq.renglones[r])])
-            ws[ws.max_row][2].number_format = "#,##0"
-    for col, w in zip("ABC", (10, 40, 18)):
+            fila = ws[ws.max_row]
+            fila[2].number_format = "#,##0"
+            for c in fila:
+                c.border = box
+            if r in destacar:
+                for c in fila:
+                    c.fill = PatternFill("solid", fgColor=GRIS)
+                    c.font = Font(bold=True)
+    for col, w in zip("ABC", (11, 42, 20)):
         ws.column_dimensions[col].width = w
+    ws.freeze_panes = "A4"
     _hoja_comerciante(wb, datos, liq)
     wb.save(salida)
     return salida
@@ -236,9 +259,16 @@ def _hoja_comerciante(wb, datos, liq) -> None:
     nl = datos.no_laboral
     compras = datos.compras_mercancia
     cmv = max(0, compras + datos.inventario_inicial - datos.inventario_final)
-    titulo("COMERCIANTE PN — Costo de ventas (Arts. 62/63) y ERI cedulado")
+    # banner de marca
+    ws.append(["Tributando.co  ·  Comerciante — CMV, ERI y Conciliación fiscal 2517"])
+    ws.merge_cells("A1:D1")
+    ws["A1"].fill = PatternFill("solid", fgColor=AZUL)
+    ws["A1"].font = Font(bold=True, size=13, color="E0C584")
+    ws["A1"].alignment = Alignment(horizontal="left", vertical="center", indent=1)
+    ws.row_dimensions[1].height = 24
     ws.append(["Base para diligenciar el formato 2517 (conciliación fiscal, anexo 210). "
                "La columna contable la ajusta el contador."])
+    ws["A2"].font = Font(size=8.5, color="5A6B7F")
     ws.append([])
 
     titulo("Costo de la mercancía vendida — CMV (Arts. 62/63)")
