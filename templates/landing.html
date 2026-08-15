@@ -746,6 +746,9 @@ async function cargar(archivo) {
     if (!r.ok) throw new Error(j.error || "No pudimos leer el archivo");
     token = j.token;
     mostrarResultado(j);
+    // Guardamos la carga para restaurarla si el usuario va al login y vuelve
+    // (evita perder la exógena y quedar sin poder pagar).
+    try { localStorage.setItem("tr_carga", JSON.stringify({t: token, j: j, ts: Date.now()})); } catch (e) {}
     dz.querySelector("b").textContent = "✔ " + archivo.name + " — puedes subir otro para reemplazar";
   } catch (err) {
     dz.querySelector("b").textContent = "Arrastra aquí tu archivo de exógena (.xlsx)";
@@ -943,6 +946,7 @@ $("#btnEliminar").addEventListener("click", async () => {
   const j = await r.json();
   if (!r.ok) { alert(j.error); return; }
   token = null; ordenActual = null;
+  try { localStorage.removeItem("tr_carga"); } catch (e) {}
   $("#resultado").classList.add("oculto");
   $("#seccionPlanes").classList.add("oculto");
   dz.querySelector("b").textContent = "Arrastra aquí tu archivo de exógena (.xlsx)";
@@ -1154,6 +1158,22 @@ function mostrarExito(plan) {
     "Guia_presentar_declaracion_DIAN.pdf",
     "La guía se enviará junto con tu Formulario 210. Escríbenos si la necesitas antes.");
 }
+
+// Restaura la exógena cargada al volver del login (para no perder el pago).
+(function restaurarCarga() {
+  try {
+    if (!USUARIO_LOGUEADO) return;
+    const raw = localStorage.getItem("tr_carga");
+    if (!raw) return;
+    const s = JSON.parse(raw);
+    if (!s || !s.t || !s.j) return;
+    if (Date.now() - (s.ts || 0) > 2 * 3600 * 1000) { localStorage.removeItem("tr_carga"); return; }
+    token = s.t;
+    mostrarResultado(s.j);
+    const dzb = dz && dz.querySelector("b");
+    if (dzb) dzb.textContent = "✔ Exógena cargada — puedes subir otra para reemplazar";
+  } catch (e) {}
+})();
 </script>
 
 {% if ia_habilitado %}
