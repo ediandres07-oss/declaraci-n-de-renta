@@ -746,6 +746,9 @@ def init_auth(app):
     """Configura la BD y los proveedores OAuth sobre la app Flask."""
     cfg = cargar_config_oauth()
     app.secret_key = _clave_de_sesion(cfg)
+    # Sesiones de 30 días: sin esto la cookie muere al cerrar el navegador y el
+    # cliente vuelve al login justo cuando iba a pagar (pérdida de ventas).
+    app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=30)
     app.config["SQLALCHEMY_DATABASE_URI"] = uri_base_datos()
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     # Render cierra las conexiones ociosas; sin esto Postgres devuelve
@@ -925,6 +928,7 @@ def callback(proveedor):
         session["uid_pendiente"] = usuario.id
         return redirect(url_for("auth.verificar_mfa"))
 
+    session.permanent = True
     session["uid"] = usuario.id
     destino = session.pop("next", "/mi-cuenta")
     return redirect(destino)
@@ -953,6 +957,7 @@ def login_demo():
         session["uid_pendiente"] = usuario.id
         return redirect(url_for("auth.verificar_mfa"))
 
+    session.permanent = True
     session["uid"] = usuario.id
     return redirect(request.form.get("next") or "/mi-cuenta")
 
@@ -990,6 +995,7 @@ def verificar_codigo_totp():
 
     limpiar_intentos_fallidos(usuario)
     session.pop("uid_pendiente", None)
+    session.permanent = True
     session["uid"] = usuario.id
     return jsonify({"ok": True, "destino": session.pop("next", "/mi-cuenta")})
 
