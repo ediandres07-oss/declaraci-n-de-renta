@@ -400,7 +400,9 @@ def landing():
                            ia_whatsapp=IA_CFG.get("negocio", {}).get("whatsapp", ""),
                            ia_correo=IA_CFG.get("negocio", {}).get("correo", ""),
                            wompi_habilitado=wompi_mod.activo(WOMPI),
-                           usuario_logueado=usuario_actual() is not None)
+                           usuario_logueado=usuario_actual() is not None,
+                           usuario_nombre=getattr(usuario_actual(), "nombre", "") or "",
+                           usuario_email=getattr(usuario_actual(), "email", "") or "")
 
 
 # El chat de soporte es LIBRE (sin login): es el primer punto de contacto de un

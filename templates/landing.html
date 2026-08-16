@@ -721,8 +721,12 @@ const fmt = n => Number(n||0).toLocaleString("es-CO", {maximumFractionDigits:0})
 // elegir un plan) pide login primero. Nada de contenido se oculta. El chat de
 // soporte es libre: el servidor lo protege con un límite de mensajes por IP.
 const USUARIO_LOGUEADO = {{ usuario_logueado|tojson }};
-function requiereLogin() {
+const USUARIO_NOMBRE = {{ (usuario_nombre or '')|tojson }};
+const USUARIO_EMAIL = {{ (usuario_email or '')|tojson }};
+function requiereLogin(planPendiente) {
   if (!USUARIO_LOGUEADO) {
+    // recuerda el plan elegido: al volver del login el checkout se abre solo
+    try { if (planPendiente) localStorage.setItem("tr_plan", planPendiente); } catch (e) {}
     window.location.href = "/login?next=" + encodeURIComponent(window.location.pathname);
     return true;
   }
@@ -946,7 +950,7 @@ $("#btnEliminar").addEventListener("click", async () => {
   const j = await r.json();
   if (!r.ok) { alert(j.error); return; }
   token = null; ordenActual = null;
-  try { localStorage.removeItem("tr_carga"); } catch (e) {}
+  try { localStorage.removeItem("tr_carga"); localStorage.removeItem("tr_plan"); } catch (e) {}
   $("#resultado").classList.add("oculto");
   $("#seccionPlanes").classList.add("oculto");
   dz.querySelector("b").textContent = "Arrastra aquí tu archivo de exógena (.xlsx)";
@@ -959,7 +963,7 @@ document.querySelectorAll(".plan button").forEach(b =>
   b.addEventListener("click", () => abrirCheckout(b.dataset.plan)));
 
 function abrirCheckout(plan) {
-  if (requiereLogin()) return;
+  if (requiereLogin(plan)) return;
   if (!token) { alert("Primero sube tu archivo de exógena."); return; }
   const nombres = {pdf: "{{ planes.pdf.nombre }}", presentacion: "{{ planes.presentacion.nombre }}"};
   const precios = {pdf: {{ planes.pdf.precio }}, presentacion: {{ planes.presentacion.precio }}};
@@ -974,6 +978,10 @@ function abrirCheckout(plan) {
       <button id="btnPagar">Continuar al pago</button>
     </div>`;
   $("#modal").classList.remove("oculto");
+  // Prellenar con los datos de la sesión: no volver a pedir lo que ya sabemos.
+  if (USUARIO_NOMBRE) $("#cNombre").value = USUARIO_NOMBRE;
+  if (USUARIO_EMAIL) $("#cEmail").value = USUARIO_EMAIL;
+  ($("#cNombre").value ? ($("#cEmail").value ? $("#cTel") : $("#cEmail")) : $("#cNombre")).focus();
   $("#btnCancelar").onclick = () => $("#modal").classList.add("oculto");
   $("#btnPagar").onclick = () => crearOrden(plan);
 }
@@ -1172,6 +1180,12 @@ function mostrarExito(plan) {
     mostrarResultado(s.j);
     const dzb = dz && dz.querySelector("b");
     if (dzb) dzb.textContent = "✔ Exógena cargada — puedes subir otra para reemplazar";
+    // Si venía de elegir un plan antes del login, retomarlo: abrir el checkout solo.
+    const plan = localStorage.getItem("tr_plan");
+    if (plan === "pdf" || plan === "presentacion") {
+      localStorage.removeItem("tr_plan");
+      setTimeout(() => { try { abrirCheckout(plan); } catch (e) {} }, 400);
+    }
   } catch (e) {}
 })();
 </script>
