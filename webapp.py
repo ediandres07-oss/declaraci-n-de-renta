@@ -1741,8 +1741,23 @@ def api_muestra_codigo():
     if not _EMAIL_RE.match(email):
         return jsonify({"ok": False, "error": "Escribe un correo válido."}), 400
     if db.session.get(MuestraContadorEmail, email) is not None:
+        # Ya conoció la herramienta: en vez de solo rechazarlo, se le ofrece el
+        # bono de $30.000 para el pase (se reusa si ya tiene uno vigente).
+        bono_cod = ""
+        try:
+            from src.auth import Bono
+            from src.gerente import _crear_bono
+            bx = (Bono.query.filter_by(email=email, tipo="pase", usado=False)
+                  .filter(Bono.expira > datetime.utcnow()).first())
+            if bx is None:
+                bx = db.session.get(Bono, _crear_bono(email, "pase"))
+            bono_cod = bx.codigo
+            session["bono"] = bono_cod
+        except Exception:
+            app.logger.warning("muestra/codigo: no se pudo crear bono de recompra")
         return jsonify({"ok": False, "error": "Ese correo ya usó su muestra gratis. "
-                        "Activa tu pase de temporada para declaraciones ilimitadas."}), 402
+                        "Activa tu pase de temporada para declaraciones ilimitadas.",
+                        "bono": bono_cod, "descuento": 30000}), 402
     codigo = generar_codigo_muestra(email)
     try:
         from src.auth import CodigoMuestra

@@ -670,7 +670,20 @@
           }
           var ci = document.getElementById("muestraCodigo"); if (ci) ci.focus();
           btnCod.textContent = "Reenviar código";
-        } else if (msg) { msg.style.color = "#ff9a9a"; msg.textContent = j.error || "No pudimos enviar el código."; }
+        } else {
+          if (msg) { msg.style.color = "#ff9a9a"; msg.textContent = j.error || "No pudimos enviar el código."; }
+          // Ya usó su muestra → ofrecerle el bono de $30.000 para el pase.
+          if (j.bono && !document.getElementById("bonoContador")) {
+            var d2 = document.createElement("div");
+            d2.id = "bonoContador";
+            d2.style.cssText = "margin-top:12px;background:rgba(200,153,31,.12);border:1px dashed #c8991f;border-radius:12px;padding:14px;text-align:center";
+            d2.innerHTML = '🎁 <b>Tenemos un descuento para ti:</b> <span style="font-weight:800;letter-spacing:1px;color:#c8991f">' + j.bono + '</span><br>'
+              + '<b>$30.000 menos</b> en tu Pase de temporada: lo pagas a <b>$119.900</b>.<br>'
+              + '<span style="opacity:.8">Ya quedó aplicado — si compras el pase, el descuento sale solo al pagar.</span>';
+            var ancla2 = document.getElementById("muestraMsg") || msg;
+            if (ancla2 && ancla2.parentNode) ancla2.parentNode.insertBefore(d2, ancla2.nextSibling);
+          }
+        }
       } catch(e){ if (msgEl()){ msgEl().style.color="#ff9a9a"; msgEl().textContent="Problema de conexión."; } }
       btnCod.disabled = false;
     };
