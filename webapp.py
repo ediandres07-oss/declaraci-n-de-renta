@@ -176,20 +176,34 @@ def _origen_actual() -> str:
 
 
 def _canjear_bono(plan: str) -> tuple[str, int]:
-    """(codigo, descuento) si hay un bono válido en la sesión para ese plan.
-    No lo marca como usado (eso pasa al confirmarse el pago)."""
+    """(codigo, descuento) si hay un bono válido para ese plan.
+
+    Cada plan usa SU tipo de bono ('pase' para contadores, 'renta' para los de
+    la declaración). Se busca primero el bono de la sesión y, si no aplica (la
+    sesión solo guarda uno y puede ser del otro tipo), un bono vigente del
+    usuario logueado por su correo. No lo marca como usado (eso pasa al pago)."""
     from src.auth import Bono
     from src.gerente import BONO_PASE, BONO_RENTA
+    tipo_nec = "pase" if plan == "contadores" else "renta"
+    monto = BONO_PASE if tipo_nec == "pase" else BONO_RENTA.get(plan, 0)
+    if not monto:
+        return "", 0
+
+    def _vigente(b):
+        return (b is not None and not b.usado
+                and not (b.expira and b.expira < datetime.utcnow()))
+
     cod = (session.get("bono") or "").strip().upper()
-    if not cod:
-        return "", 0
-    b = db.session.get(Bono, cod)
-    if b is None or b.usado or (b.expira and b.expira < datetime.utcnow()):
-        return "", 0
-    if b.tipo == "pase" and plan == "contadores":
-        return cod, BONO_PASE
-    if b.tipo == "renta" and plan in BONO_RENTA:
-        return cod, BONO_RENTA[plan]
+    if cod:
+        b = db.session.get(Bono, cod)
+        if _vigente(b) and b.tipo == tipo_nec:
+            return cod, monto
+    u = usuario_actual()
+    if u is not None and u.email:
+        b = (Bono.query.filter_by(email=u.email, tipo=tipo_nec, usado=False)
+             .filter(Bono.expira > datetime.utcnow()).first())
+        if _vigente(b):
+            return b.codigo, monto
     return "", 0
 
 
@@ -1101,6 +1115,7 @@ def contadores():
         muestra_usada = db.session.get(MuestraContador, u.id) is not None
     return render_template("contadores.html",
                            contadores=_CFG_PRECIOS.get("contadores", {}),
+                           bono_pase=_canjear_bono("contadores")[1],
                            logueado=u is not None,
                            muestra_usada=muestra_usada,
                            pago=PAGO,

@@ -383,8 +383,14 @@
         <span class="cinta">SIN LÍMITE DE DECLARACIONES</span>
         <div class="plan">{{ contadores.nombre }}</div>
         <div class="temp">Temporada {{ contadores.temporada }}</div>
+        {% if bono_pase %}
+        <div class="valor"><s style="opacity:.55;font-size:.6em">${{ '{:,.0f}'.format(contadores.precio)|replace(',', '.') }}</s>
+          ${{ '{:,.0f}'.format(contadores.precio - bono_pase)|replace(',', '.') }}</div>
+        <div class="cop">COP · con tu bono de ${{ '{:,.0f}'.format(bono_pase)|replace(',', '.') }} aplicado 🎁</div>
+        {% else %}
         <div class="valor">${{ '{:,.0f}'.format(contadores.precio)|replace(',', '.') }}</div>
         <div class="cop">COP · pago único por toda la temporada</div>
+        {% endif %}
         <ul class="incluye">
           <li>Declaraciones <b>ilimitadas</b> durante la temporada</li>
           <li>Acceso al liquidador profesional</li>
@@ -412,7 +418,12 @@
       <button class="modal-x" id="modalX" aria-label="Cerrar">✕</button>
       <div id="paseStep1">
         <h3 style="margin-bottom:4px">Pagar el pase de temporada</h3>
+        {% if bono_pase %}
+        <div class="valor-pase"><s style="opacity:.55;font-size:.7em">${{ '{:,.0f}'.format(contadores.precio)|replace(',', '.') }}</s>
+          ${{ '{:,.0f}'.format(contadores.precio - bono_pase)|replace(',', '.') }} <small>COP · bono −${{ '{:,.0f}'.format(bono_pase)|replace(',', '.') }} 🎁</small></div>
+        {% else %}
         <div class="valor-pase">${{ '{:,.0f}'.format(contadores.precio)|replace(',', '.') }} <small>COP</small></div>
+        {% endif %}
         <div class="pago-box">
           <div class="pago-lbl">Escanea y paga con Bre-B 📲</div>
           <div class="pago-sub">Desde Nequi, Bancolombia o cualquier banco</div>
