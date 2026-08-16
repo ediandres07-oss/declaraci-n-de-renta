@@ -390,6 +390,21 @@ def landing():
     # interacciones (subir exógena, checkout) piden login — ver JS abajo y los
     # decoradores @login_requerido en las rutas /api/* correspondientes. El chat
     # de soporte es libre: solo tiene límite de mensajes por IP.
+    # Bono de $30.000 para todo usuario con sesión: se crea (o renueva) solo, y
+    # la tarjeta/modal muestran el precio tachado con el descuento aplicado.
+    u = usuario_actual()
+    if u is not None and u.email:
+        try:
+            if not _canjear_bono("presentacion")[1]:
+                from src.auth import Bono
+                from src.gerente import _crear_bono
+                bx = (Bono.query.filter_by(email=u.email, tipo="renta", usado=False)
+                      .filter(Bono.expira > datetime.utcnow()).first())
+                if bx is None:
+                    bx = db.session.get(Bono, _crear_bono(u.email, "renta"))
+                session["bono"] = bx.codigo
+        except Exception:
+            app.logger.warning("landing: no se pudo crear el bono del usuario")
     return render_template("landing.html", anio=PARAMS.anio_gravable,
                            planes=PLANES,
                            bono_pdf=_canjear_bono("pdf")[1],
