@@ -391,7 +391,10 @@ def landing():
     # decoradores @login_requerido en las rutas /api/* correspondientes. El chat
     # de soporte es libre: solo tiene límite de mensajes por IP.
     return render_template("landing.html", anio=PARAMS.anio_gravable,
-                           planes=PLANES, realmy_habilitado=REALMY.get("habilitado"),
+                           planes=PLANES,
+                           bono_pdf=_canjear_bono("pdf")[1],
+                           bono_presentacion=_canjear_bono("presentacion")[1],
+                           realmy_habilitado=REALMY.get("habilitado"),
                            realmy_public_key=REALMY.get("public_key", ""),
                            realmy_merchant_id=REALMY.get("merchant_id", ""),
                            realmy_test=REALMY.get("test", True),

@@ -558,7 +558,12 @@
     <div class="planes">
       <div class="plan">
         <h3>{{ planes.pdf.nombre }}</h3>
+        {% if bono_pdf %}
+        <div class="precio"><s style="opacity:.55;font-size:.72em">${{ '{:,.0f}'.format(planes.pdf.precio)|replace(',', '.') }}</s>
+          ${{ '{:,.0f}'.format(planes.pdf.precio - bono_pdf)|replace(',', '.') }} <small>COP · con tu bono aplicado 🎁</small></div>
+        {% else %}
         <div class="precio">${{ '{:,.0f}'.format(planes.pdf.precio)|replace(',', '.') }} <small>COP · pago único</small></div>
+        {% endif %}
         <ul>
           <li>Borrador de tu declaración: Formulario 210 diligenciado renglón por renglón (PDF)</li>
           <li>Resumen ejecutivo de tu liquidación</li>
@@ -569,7 +574,12 @@
       <div class="plan destacado">
         <span class="cinta">RECOMENDADO</span>
         <h3>{{ planes.presentacion.nombre }}</h3>
+        {% if bono_presentacion %}
+        <div class="precio"><s style="opacity:.55;font-size:.72em">${{ '{:,.0f}'.format(planes.presentacion.precio)|replace(',', '.') }}</s>
+          ${{ '{:,.0f}'.format(planes.presentacion.precio - bono_presentacion)|replace(',', '.') }} <small>COP · con tu bono aplicado 🎁</small></div>
+        {% else %}
         <div class="precio">${{ '{:,.0f}'.format(planes.presentacion.precio)|replace(',', '.') }} <small>COP · pago único</small></div>
+        {% endif %}
         <ul>
           <li>Todo lo del plan PDF</li>
           <li>Montamos tu declaración en el portal DIAN</li>
@@ -967,9 +977,13 @@ function abrirCheckout(plan) {
   if (!token) { alert("Primero sube tu archivo de exógena."); return; }
   const nombres = {pdf: "{{ planes.pdf.nombre }}", presentacion: "{{ planes.presentacion.nombre }}"};
   const precios = {pdf: {{ planes.pdf.precio }}, presentacion: {{ planes.presentacion.precio }}};
+  const bonos = {pdf: {{ bono_pdf or 0 }}, presentacion: {{ bono_presentacion or 0 }}};
+  const bonoTxt = bonos[plan]
+    ? `<s style="opacity:.55;font-size:.72em">$${fmt(precios[plan])}</s> $${fmt(precios[plan]-bonos[plan])} COP <span style="font-size:.72em">· bono −$${fmt(bonos[plan])} 🎁</span>`
+    : `$${fmt(precios[plan])} COP`;
   $("#modalContenido").innerHTML = `
     <h3>${nombres[plan]}</h3>
-    <div class="precio-m">$${fmt(precios[plan])} COP</div>
+    <div class="precio-m">${bonoTxt}</div>
     <label>Nombre completo</label><input id="cNombre" placeholder="Tu nombre">
     <label>Correo electrónico</label><input id="cEmail" type="email" placeholder="tucorreo@ejemplo.com">
     <label>Celular / WhatsApp</label><input id="cTel" placeholder="300 000 0000">
