@@ -81,6 +81,10 @@ def destinatarios_campana(publico: str = "personas", emails=None) -> list[str]:
                 correos.add(str(e).strip().lower())
     elif publico == "contadores":
         correos = _emails_contadores()
+    elif publico == "pase":
+        # SOLO contadores con pase de temporada habilitado desde /admin
+        from src.auth import _correos_pase
+        correos = set(_correos_pase())
     elif publico == "cortesia":
         from src.auth import MuestraContador, MuestraContadorEmail
         for m in MuestraContador.query.all():
@@ -177,6 +181,7 @@ def metricas_contactos() -> dict:
         "calculo": len(destinatarios_campana("calculo")),      # dejaron correo en el cálculo
         "guia": len(destinatarios_campana("guia")),            # lista de espera (guía)
         "contadores": len(destinatarios_campana("contadores")),
+        "pase": len(destinatarios_campana("pase")),
         "cortesia": len([c for c in cortesia if not _es_propio(c)]),
         "lector": len([c for c in lector if not _es_propio(c)]),
     }
