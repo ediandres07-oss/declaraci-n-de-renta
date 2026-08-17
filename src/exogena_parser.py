@@ -224,12 +224,16 @@ def _clasificar(partida: PartidaExogena) -> None:
         return
 
     # Documentos soporte de adquisiciones (compras a no obligados a facturar):
-    # aunque la DIAN los rotula "Ingresos …", para el declarante son COMPRAS/costos
-    # documentados → costos no laborales (R77).
+    # NO se precargan en ninguna casilla — el contador decide. Si el cliente es
+    # PN comerciante, esas compras ya deben ir DENTRO de las compras del módulo
+    # (sumarlas aparte en R77 sería doble deducción); si es PN sin actividad,
+    # no son deducibles (Art. 107 E.T.).
     if "documento" in det_n and "soporte" in det_n and "adquisic" in det_n:
-        partida.renglon_asignado = 77
+        partida.renglon_asignado = None
         partida.renglones = [77]
-        partida.nota = "Documento soporte de adquisiciones → costos no laborales (R77)."
+        partida.nota = ("Documento soporte de adquisiciones: NO se precarga. "
+                        "Comerciante: inclúyalo en las compras del módulo (CMV) si aplica. "
+                        "PN sin actividad: no es deducible (Art. 107).")
         return
 
     uso = partida.uso_sugerido or ""
