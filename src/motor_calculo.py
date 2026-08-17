@@ -453,8 +453,12 @@ def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
 
     r87 = max(0.0, r78 + nl.rentas_pasivas_ece - limitado["no_laboral"])
     liq.set(87, r87, "renta líquida ordinaria del ejercicio no laborales")
+    # La pérdida se mide con los MISMOS costos que la casilla 77 (r77: ya trae el
+    # filtro del Art. 107 para PN sin actividad, más CMV y depreciación) — si no,
+    # las compras reportadas en exógena a una PN sin negocio aparecían como
+    # "pérdida" en la 88.
     liq.set(88, max(0.0, -(nl.ingresos_brutos + nl.rentas_pasivas_ece - nl.devoluciones
-                           - nl.incrngo - nl.costos_deducciones)), "pérdida no laborales")
+                           - nl.incrngo - r77)), "pérdida líquida no laborales")
     liq.set(89, nl.compensaciones, "compensaciones no laborales")
     r90 = max(0.0, r87 - nl.compensaciones)
     liq.set(90, r90, "renta líquida ordinaria no laborales")
