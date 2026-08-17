@@ -126,7 +126,7 @@ def generar_resumen_pdf(
     fecha_lim=None,
     observaciones: str = "",
     liq_base=None,
-    logo_bytes: bytes | None = None,
+    logo_bytes: Optional[bytes] = None,
 ) -> Path:
     ruta = Path(ruta)
     ruta.parent.mkdir(parents=True, exist_ok=True)
