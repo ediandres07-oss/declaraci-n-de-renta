@@ -148,6 +148,13 @@ def _capturar_origen():
     primera visita, para sellarlo luego en leads, muestras y órdenes."""
     if request.method != "GET" or request.path.startswith(("/static", "/api/", "/admin")):
         return
+    # Bots/crawlers (el preview de Meta/WhatsApp golpea la landing en cada
+    # impresión): no tocamos su sesión para que su respuesta quede SIN cookie y
+    # Cloudflare/el navegador puedan cachearla — así no cargan el server.
+    ua = (request.headers.get("User-Agent") or "").lower()
+    if any(b in ua for b in ("facebookexternalhit", "bot", "crawler", "spider",
+                             "preview", "whatsapp", "telegrambot", "slackbot")):
+        return
     if request.args.get("bono"):
         session["bono"] = request.args.get("bono").strip().upper()[:20]
     if session.get("origen"):
@@ -3986,6 +3993,13 @@ def politica_cache(resp):
     video de fondo — por eso el consumo de ancho de banda en Render."""
     if request.path.startswith("/static/"):
         resp.headers["Cache-Control"] = "public, max-age=2592000, immutable"
+    elif (request.path == "/" and request.method == "GET"
+          and resp.status_code == 200 and not session.modified):
+        # Landing pública que NO cambió la sesión (bots, recargas, visitas ya
+        # atribuidas): cacheable un rato para que Cloudflare/el navegador
+        # absorban el tráfico de campaña. La 1ª visita con atribución sí modifica
+        # la sesión → cae en no-store y conserva la marca de origen.
+        resp.headers["Cache-Control"] = "public, max-age=120"
     else:
         resp.headers["Cache-Control"] = "no-store"
     return resp
