@@ -204,7 +204,8 @@ def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
         destino.otras_deducciones += ded_gmf
         liq.detalle.append(
             f"4×1000: GMF certificado {d.gmf_pagado:,.0f} → deducible el 50% "
-            f"(Art. 115) = {ded_gmf:,.0f}, imputado a la cédula con mayores ingresos.")
+            f"(Art. 115) = {ded_gmf:,.0f}, imputado a la cédula con mayores ingresos. "
+            "Conserve el certificado tributario del banco: es requisito expreso del Art. 115.")
 
     tope_viv = p.a_pesos(VIVIENDA_119_TOPE_UVT)
     subcedulas = (d.trabajo, d.honorarios, d.capital, d.no_laboral)
