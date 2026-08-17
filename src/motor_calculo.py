@@ -97,6 +97,7 @@ def _liquidar_ganancias_ocasionales(d: DatosDeclaracion, p: Parametros,
 
 SALUD_387_TOPE_UVT = 192.0        # 16 UVT/mes × 12 (Art. 387 inc. 1 E.T.)
 VIVIENDA_119_TOPE_UVT = 1200.0    # intereses de vivienda, tope anual (Art. 119 E.T.)
+ICETEX_119_TOPE_UVT = 100.0       # intereses crédito ICETEX, tope anual (Art. 119 inc. 2)
 
 
 def deduccion_salud_387(t, p: Parametros) -> float:
@@ -121,9 +122,10 @@ def calcular_renta_exenta_25(datos: DatosDeclaracion, p: Parametros,
     if datos.dependientes >= 1 and t.ingresos_brutos > 0:
         ded_dep_387 = min(t.ingresos_brutos * p.dependientes_387_pct,
                           p.a_pesos(p.dependientes_387_tope_uvt))
+    ded_icetex = min(max(0.0, datos.intereses_icetex), p.a_pesos(ICETEX_119_TOPE_UVT))
     base = (t.ingresos_brutos - t.incrngo - t.total_rentas_exentas
             - t.total_deducciones - ded_dep_387 - deduccion_salud_387(t, p)
-            - exenta_extra)
+            - ded_icetex - exenta_extra)
     if base <= 0:
         return 0.0
     exenta = base * p.exenta_25_porcentaje
@@ -326,12 +328,20 @@ def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
             f"Pagos por salud (prepagada/plan complementario) por "
             f"{t.salud_prepagada:,.0f} superan el tope del Art. 387 "
             f"(192 UVT = {p.a_pesos(SALUD_387_TOPE_UVT):,.0f}): se dedujo solo el tope.")
-    r39 = t.otras_deducciones + ded_dep_387 + ded_salud
+    ded_icetex = min(max(0.0, d.intereses_icetex), p.a_pesos(ICETEX_119_TOPE_UVT))
+    if d.intereses_icetex > p.a_pesos(ICETEX_119_TOPE_UVT):
+        liq.advertencias.append(
+            f"Intereses ICETEX por {d.intereses_icetex:,.0f} superan el tope del "
+            f"Art. 119 inc. 2 (100 UVT = {p.a_pesos(ICETEX_119_TOPE_UVT):,.0f}): "
+            "se dedujo solo el tope.")
+    r39 = t.otras_deducciones + ded_dep_387 + ded_salud + ded_icetex
     nota39 = "otras deducciones imputables"
     if ded_dep_387:
         nota39 += f" + dependientes Art.387 ({ded_dep_387:,.0f})"
     if ded_salud:
         nota39 += f" + salud prepagada Art.387 ({ded_salud:,.0f}, tope 192 UVT)"
+    if ded_icetex:
+        nota39 += f" + ICETEX Art.119 ({ded_icetex:,.0f}, tope 100 UVT)"
     liq.set(39, r39, nota39)
     r40 = t.intereses_vivienda + r39
     liq.set(40, r40, "total deducciones imputables trabajo")

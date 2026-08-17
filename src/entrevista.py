@@ -272,7 +272,11 @@ SECCIONES: List[Dict[str, Any]] = [
     {
         "titulo": "Costos, deducciones y rentas exentas no certificados",
         "preguntas": [
-            Pregunta("trabajo.intereses_vivienda", "Intereses de crédito de vivienda pagados (certificado banco)", "monto"),
+            Pregunta("trabajo.intereses_vivienda", "Intereses de crédito hipotecario de vivienda o leasing "
+                     "habitacional (certificado del banco). Art. 119: tope 1.200 UVT/año que el motor aplica solo. "
+                     "Si hay codeudores, ingrese solo la proporción del cliente (o el total si el otro no la usa)", "monto"),
+            Pregunta("intereses_icetex", "Intereses de crédito educativo ICETEX pagados en el año "
+                     "(Art. 119 inc. 2: el motor aplica el tope de 100 UVT)", "monto"),
             Pregunta("trabajo.salud_prepagada", "Pagos por salud Art. 387: medicina prepagada, "
                      "plan complementario o seguro de salud (el motor aplica solo el tope de "
                      "16 UVT/mes = 192 UVT/año)", "monto"),

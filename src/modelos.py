@@ -172,6 +172,11 @@ class DatosDeclaracion:
     patrimonio_bruto: float = 0.0
     deudas: float = 0.0
 
+    # Intereses de créditos educativos del ICETEX (Art. 119 inc. 2 E.T.,
+    # Ley 2010/2019): deducibles hasta 100 UVT al año. El motor aplica el tope
+    # y los lleva a deducciones imputables de rentas de trabajo (R39).
+    intereses_icetex: float = 0.0
+
     # Comerciante (PN): costo de la mercancía vendida por juego de inventarios
     # (Arts. 62/63 E.T.). Las COMPRAS se ingresan en el módulo (compras_mercancia);
     # el CMV = compras + inv.inicial − inv.final va a costos no laborales (R77). En
