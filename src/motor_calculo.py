@@ -193,6 +193,19 @@ def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
     # todas las subcédulas lo supera, se recorta a prorrata y se advierte. Se
     # ajusta aquí (antes de liquidar) para que el recorte llegue igual a las
     # casillas, al límite del 40% y a la base del 25%.
+    # 4×1000 — Art. 115 E.T.: deducible el 50% del GMF efectivamente pagado y
+    # certificado, tenga o no relación de causalidad. El contador digita el
+    # TOTAL (100%) y aquí se deduce solo la mitad, imputada a la cédula con
+    # mayores ingresos brutos (llega a la casilla de "otras deducciones").
+    if d.gmf_pagado > 0:
+        ded_gmf = round(d.gmf_pagado * 0.5)
+        destino = max((d.trabajo, d.honorarios, d.capital, d.no_laboral),
+                      key=lambda sc: sc.ingresos_brutos)
+        destino.otras_deducciones += ded_gmf
+        liq.detalle.append(
+            f"4×1000: GMF certificado {d.gmf_pagado:,.0f} → deducible el 50% "
+            f"(Art. 115) = {ded_gmf:,.0f}, imputado a la cédula con mayores ingresos.")
+
     tope_viv = p.a_pesos(VIVIENDA_119_TOPE_UVT)
     subcedulas = (d.trabajo, d.honorarios, d.capital, d.no_laboral)
     total_viv = sum(sc.intereses_vivienda for sc in subcedulas)

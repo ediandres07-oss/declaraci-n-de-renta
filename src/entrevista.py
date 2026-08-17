@@ -277,6 +277,8 @@ SECCIONES: List[Dict[str, Any]] = [
                      "Si hay codeudores, ingrese solo la proporción del cliente (o el total si el otro no la usa)", "monto"),
             Pregunta("intereses_icetex", "Intereses de crédito educativo ICETEX pagados en el año "
                      "(Art. 119 inc. 2: el motor aplica el tope de 100 UVT)", "monto"),
+            Pregunta("gmf_pagado", "4×1000 (GMF): digite el TOTAL certificado por el banco (100%) — "
+                     "el motor deduce solo el 50% (Art. 115)", "monto"),
             Pregunta("trabajo.salud_prepagada", "Pagos por salud Art. 387: medicina prepagada, "
                      "plan complementario o seguro de salud (el motor aplica solo el tope de "
                      "16 UVT/mes = 192 UVT/año)", "monto"),

@@ -177,6 +177,11 @@ class DatosDeclaracion:
     # y los lleva a deducciones imputables de rentas de trabajo (R39).
     intereses_icetex: float = 0.0
 
+    # 4×1000: se registra el TOTAL del GMF certificado por el banco (el 100%).
+    # El motor deduce SOLO el 50% (Art. 115 E.T.), sin exigir causalidad, y lo
+    # imputa a la cédula con mayores ingresos.
+    gmf_pagado: float = 0.0
+
     # Comerciante (PN): costo de la mercancía vendida por juego de inventarios
     # (Arts. 62/63 E.T.). Las COMPRAS se ingresan en el módulo (compras_mercancia);
     # el CMV = compras + inv.inicial − inv.final va a costos no laborales (R77). En
