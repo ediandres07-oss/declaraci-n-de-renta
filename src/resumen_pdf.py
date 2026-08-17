@@ -255,10 +255,14 @@ def generar_resumen_pdf(
     filas.append(["Renta líquida gravable (cédula general + pensiones)", "", "",
                   "", _fmt(R(97) + R(103))])
     e.append(_tabla(filas, [None, 78, 82, 80, 84], negrilla_ultima=True))
+    ded_gmf_txt = ""
+    if getattr(datos, "gmf_pagado", 0) > 0:
+        ded_gmf_txt = (f" Deducción 4×1000 (GMF, 50% Art. 115, en rentas de trabajo): "
+                       f"{_fmt(round(datos.gmf_pagado * 0.5))}.")
     e.append(Paragraph(
         f"Límite de rentas exentas y deducciones aplicado (Art. 336 E.T.): menor entre el 40% de la "
         f"base y 1.340 UVT ({_fmt(p.a_pesos(1340))}). Deducción por dependientes (R139): {_fmt(R(139))}. "
-        f"Deducción 1% factura electrónica (R28): {_fmt(R(28))}.", st["peq"]))
+        f"Deducción 1% factura electrónica (R28): {_fmt(R(28))}.{ded_gmf_txt}", st["peq"]))
 
     # ---------------- terceros principales ----------------
     if exogena:

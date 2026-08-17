@@ -195,37 +195,15 @@ def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
     # casillas, al límite del 40% y a la base del 25%.
     # 4×1000 — Art. 115 E.T.: deducible el 50% del GMF efectivamente pagado y
     # certificado, tenga o no relación de causalidad. El contador digita el
-    # TOTAL (100%) y aquí se deduce solo la mitad, imputada a la cédula con
-    # mayores ingresos brutos (llega a la casilla de "otras deducciones").
+    # TOTAL (100%) y aquí se deduce solo la mitad, imputada a la cédula de
+    # rentas de TRABAJO (laborales), tal como la ubica la DIAN / Ayuda Renta
+    # (llega a la casilla de "otras deducciones" de esa cédula).
     if d.gmf_pagado > 0:
         ded_gmf = round(d.gmf_pagado * 0.5)
-        # El Art. 115 no exige causalidad: el GMF puede imputarse a cualquier
-        # cédula. Se prefiere una DISTINTA de rentas de trabajo cuando exista
-        # otra con ingresos, porque toda deducción imputada a trabajo detrae la
-        # base del 25% exento (Art. 206-10 inc. 2) — así se protege el beneficio.
-        # …pero solo si esa otra cédula puede ABSORBER la deducción completa:
-        # imputarla a una cédula con renta líquida menor que el GMF la desperdicia
-        # (la renta líquida no baja de cero). Si ninguna la absorbe, va a trabajo
-        # aunque detraiga el 25% — deducir completo vale más que el 25% perdido.
-        def _absorbe(sc):
-            return max(0.0, sc.ingresos_brutos - sc.incrngo - sc.costos_deducciones
-                       - sc.devoluciones - sc.total_rentas_exentas
-                       - sc.total_deducciones)
-        otras = [sc for sc in (d.honorarios, d.capital, d.no_laboral)
-                 if _absorbe(sc) >= ded_gmf]
-        if otras:
-            destino = max(otras, key=_absorbe)
-            donde = ("imputado a una cédula distinta de trabajo (la absorbe completa) "
-                     "para no detraer el 25% exento")
-        else:
-            destino = d.trabajo
-            donde = ("imputado a rentas de trabajo; detrae la base del 25% "
-                     "(Art. 206-10 inc. 2) porque ninguna otra cédula podía "
-                     "absorber la deducción completa")
-        destino.otras_deducciones += ded_gmf
+        d.trabajo.otras_deducciones += ded_gmf
         liq.detalle.append(
             f"4×1000: GMF certificado {d.gmf_pagado:,.0f} → deducible el 50% "
-            f"(Art. 115) = {ded_gmf:,.0f}, {donde}. "
+            f"(Art. 115) = {ded_gmf:,.0f}, imputado a la cédula de rentas de trabajo. "
             "Conserve el certificado tributario del banco: es requisito expreso del Art. 115.")
 
     tope_viv = p.a_pesos(VIVIENDA_119_TOPE_UVT)
