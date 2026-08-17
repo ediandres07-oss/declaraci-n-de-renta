@@ -126,6 +126,14 @@ def _bucle_avisos_vencimientos():
                         if ahora.weekday() == 0 and _candado(f"mkt|{hoy}"):
                             _ger.contenido_semanal(IA_CFG)
                             print("[gerente] contenido semanal enviado")
+                # Limpieza de BD: a cualquier hora, una sola vez al día (corre en
+                # el primer ciclo tras un deploy, así limpia lo histórico ya).
+                # Borra exógenas de cálculos abandonados (>60 días sin compra).
+                with app.app_context():
+                    if _candado(f"purga-exogenas|{ahora.date().isoformat()}"):
+                        n = _purgar_exogenas_viejas(60)
+                        if n:
+                            print(f"[purga] {n} exógena(s) de cálculo viejas borradas")
         except Exception as exc:  # noqa: BLE001  — el hilo nunca debe morir
             print(f"[avisos-vencimientos] error: {exc}")
         time.sleep(1800)
@@ -325,6 +333,38 @@ def _guardar_archivo_bd(clave: str, nombre: str, datos: bytes) -> None:
     except Exception as e:
         db.session.rollback()
         app.logger.error("No se pudo guardar el Excel %s en la BD: %s", clave, e)
+
+
+def _purgar_exogenas_viejas(dias: int = 60) -> int:
+    """Limpieza de la BD: borra los Excel de exógena de CÁLCULOS abandonados
+    (leads que solo calcularon y nunca compraron) con más de `dias` días.
+
+    NUNCA borra:
+      - las de clientes que pagaron (id que empieza con "orden:", el insumo del
+        trámite de quien ya pagó), ni
+      - las cargas cuyo token esté referenciado por alguna orden (inició compra).
+    Así la BD deja de crecer sin control, sin tocar nada de un cliente real.
+    Devuelve cuántas borró."""
+    from datetime import timedelta
+    corte = datetime.utcnow() - timedelta(days=dias)
+    try:
+        ordenes = _leer_ordenes()
+        tokens_orden = {o.get("token") for o in ordenes.values()
+                        if isinstance(o, dict) and o.get("tipo") == "orden" and o.get("token")}
+        borradas = 0
+        viejas = ArchivoExogena.query.filter(ArchivoExogena.creado < corte).all()
+        for fila in viejas:
+            if fila.id.startswith("orden:") or fila.id in tokens_orden:
+                continue
+            db.session.delete(fila)
+            borradas += 1
+        if borradas:
+            db.session.commit()
+        return borradas
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error("purga de exógenas: %s", e)
+        return 0
 
 
 def _exogena_de(token: str):
