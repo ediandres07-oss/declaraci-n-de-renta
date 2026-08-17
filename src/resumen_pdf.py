@@ -13,14 +13,15 @@ from reportlab.lib.enums import TA_CENTER, TA_RIGHT
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import mm
-from reportlab.platypus import (HRFlowable, Paragraph, SimpleDocTemplate,
+from reportlab.platypus import (HRFlowable, Image, Paragraph, SimpleDocTemplate,
                                 Spacer, Table, TableStyle)
 
 from .modelos import DatosDeclaracion, Liquidacion, ResultadoExogena
 from .parametros import Parametros
 
-AZUL = colors.HexColor("#1a4f8b")
-GRIS = colors.HexColor("#f0f4f9")
+AZUL = colors.HexColor("#1E2432")   # azul Tributando
+GRIS = colors.HexColor("#f6f4ee")   # crema Tributando
+ORO = colors.HexColor("#E0C584")    # oro Tributando
 ROJO = colors.HexColor("#b3372f")
 VERDE = colors.HexColor("#1e7d43")
 
@@ -54,11 +55,11 @@ def _tabla(filas, anchos, negrilla_ultima=False, resaltar=None):
     estilo = [
         ("FONTSIZE", (0, 0), (-1, -1), 8.5),
         ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("TEXTCOLOR", (0, 0), (-1, 0), ORO),
         ("BACKGROUND", (0, 0), (-1, 0), AZUL),
         ("ALIGN", (1, 0), (-1, -1), "RIGHT"),
         ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, GRIS]),
-        ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#c9d4e2")),
+        ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#e2dccc")),
         ("TOPPADDING", (0, 0), (-1, -1), 3.5),
         ("BOTTOMPADDING", (0, 0), (-1, -1), 3.5),
         ("LEFTPADDING", (0, 0), (-1, -1), 6),
@@ -66,7 +67,7 @@ def _tabla(filas, anchos, negrilla_ultima=False, resaltar=None):
     ]
     if negrilla_ultima:
         estilo += [("FONTNAME", (0, -1), (-1, -1), "Helvetica-Bold"),
-                   ("BACKGROUND", (0, -1), (-1, -1), colors.HexColor("#dfe9f5"))]
+                   ("BACKGROUND", (0, -1), (-1, -1), colors.HexColor("#f0ebdd"))]
     if resaltar is not None:
         estilo += [("TEXTCOLOR", (1, resaltar), (1, resaltar),
                     ROJO if "pagar" in str(filas[resaltar][0]).lower() else VERDE)]
@@ -125,6 +126,7 @@ def generar_resumen_pdf(
     fecha_lim=None,
     observaciones: str = "",
     liq_base=None,
+    logo_bytes: bytes | None = None,
 ) -> Path:
     ruta = Path(ruta)
     ruta.parent.mkdir(parents=True, exist_ok=True)
@@ -141,12 +143,31 @@ def generar_resumen_pdf(
                             title=f"Resumen ejecutivo renta AG {p.anio_gravable}")
     e = []
 
-    # ---------------- encabezado ----------------
-    e.append(Paragraph("Resumen Ejecutivo — Declaración de Renta", st["titulo"]))
-    e.append(Paragraph(
+    # ---------------- encabezado (con el logo de la firma del contador) ----------------
+    titulo_flow = [Paragraph("Resumen Ejecutivo — Declaración de Renta", st["titulo"]),
+                   Paragraph(
         f"Formulario 210 · Personas Naturales Residentes · Año Gravable {p.anio_gravable} · "
         f"UVT {_fmt(p.uvt)} · Preparado el {date.today().strftime('%d/%m/%Y')}"
-        + (f" · {preparado_por}" if preparado_por else ""), st["sub"]))
+        + (f" · {preparado_por}" if preparado_por else ""), st["sub"])]
+    if logo_bytes:
+        try:
+            import io as _io
+            from reportlab.lib.utils import ImageReader
+            img = ImageReader(_io.BytesIO(logo_bytes))
+            iw, ih = img.getSize()
+            alto = 13 * mm
+            ancho = min(alto * iw / ih, 45 * mm)
+            logo = Image(_io.BytesIO(logo_bytes), width=ancho, height=alto)
+            cab = Table([[titulo_flow, logo]], colWidths=[None, ancho + 4])
+            cab.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                                     ("ALIGN", (1, 0), (1, 0), "RIGHT"),
+                                     ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                                     ("RIGHTPADDING", (0, 0), (-1, -1), 0)]))
+            e.append(cab)
+        except Exception:
+            e.extend(titulo_flow)          # logo dañado: se sigue sin él
+    else:
+        e.extend(titulo_flow)
     e.append(HRFlowable(width="100%", color=AZUL, thickness=1.2))
 
     # ---------------- declarante ----------------

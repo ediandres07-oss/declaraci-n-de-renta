@@ -77,6 +77,7 @@ class Usuario(db.Model):
     acepta_recordatorios = db.Column(db.Boolean, default=True)
     quiere_asesor = db.Column(db.Boolean, default=False)
     asesor_motivo = db.Column(db.String(500))     # en qué necesita ayuda (lo escribe el usuario)
+    logo_b64 = db.Column(db.Text)                 # logo de la firma del contador (base64)
     asesor_whatsapp = db.Column(db.String(30))    # celular/WhatsApp para contactarlo
     # año en que ya se envió cada recordatorio (evita duplicados; se reinicia por año)
     recordatorio_30_year = db.Column(db.Integer)
@@ -807,6 +808,7 @@ def _migrar_columnas_faltantes():
         "bloqueado_hasta": marca_tiempo,
         "asesor_motivo": "VARCHAR(500)",
         "asesor_whatsapp": "VARCHAR(30)",
+        "logo_b64": "TEXT",
     }
     with db.engine.begin() as con:
         for nombre, tipo in nuevas.items():

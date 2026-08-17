@@ -277,6 +277,8 @@
             style="width:100%;border:1px solid var(--linea,#dbe3ec);border-radius:9px;padding:10px 12px;font:inherit"></textarea>
         </div>
         <button class="btn2" id="btnPdf" disabled>📄 Resumen ejecutivo PDF</button>
+        <button class="btn2" id="btnLogo" type="button" title="El logo sale en el encabezado del resumen ejecutivo">🖼️ Logo de tu firma</button>
+        <input type="file" id="logoFile" accept="image/png,image/jpeg" style="display:none">
         <button class="btn2" id="btnF210Pdf" disabled>🧾 Formulario 210 PDF</button>
         <button class="btn2" id="btnDocsCliente" disabled title="Lista de documentos que su cliente le debe entregar, según su exógena">📋 Documentos del cliente</button>
         <button class="btn2" id="btnDocsWpp" disabled title="Copia el pedido de documentos listo para pegarlo en WhatsApp">💬 Pedir por WhatsApp</button>
@@ -557,6 +559,16 @@ if ($("#btnAddActivo")) $("#btnAddActivo").addEventListener("click", () => {
 });
 
 $("#btnPdf").addEventListener("click", () => descargarPdf("/api/resumen-pdf", "ResumenEjecutivo.pdf"));
+$("#btnLogo").addEventListener("click", () => $("#logoFile").click());
+$("#logoFile").addEventListener("change", async () => {
+  const f = $("#logoFile").files[0];
+  if (!f) return;
+  const fd = new FormData(); fd.append("logo", f);
+  const r = await fetch("/api/mi-logo", { method: "POST", body: fd });
+  const j = await r.json().catch(() => ({}));
+  alert(j.ok ? "Logo guardado ✓ — saldrá en el encabezado de tus resúmenes ejecutivos."
+             : ("No se pudo guardar: " + (j.error || "error")));
+});
 
 $("#btnDocsCliente").addEventListener("click", () => descargarPdf("/api/documentos-cliente-pdf", "DocumentosCliente.pdf"));
 $("#btnDocsWpp").addEventListener("click", async () => {

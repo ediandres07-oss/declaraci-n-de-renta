@@ -2205,6 +2205,38 @@ def documentos_cliente_pdf():
         pass   # el tmp se limpia con el SO; send_file lo necesita abierto
 
 
+@app.route("/api/mi-logo", methods=["GET", "POST", "DELETE"])
+@pro_requerido
+def mi_logo():
+    """Logo de la firma del contador para el resumen ejecutivo. Se guarda en la
+    base (base64) para sobrevivir los despliegues. Máx. 400 KB, PNG o JPG."""
+    import base64
+    u = usuario_actual()
+    if request.method == "GET":
+        if not getattr(u, "logo_b64", None):
+            return jsonify({"ok": False}), 404
+        crudo = base64.b64decode(u.logo_b64)
+        tipo = "image/png" if crudo[:8] == b"\x89PNG\r\n\x1a\n" else "image/jpeg"
+        return send_file(io.BytesIO(crudo), mimetype=tipo)
+    if request.method == "DELETE":
+        u.logo_b64 = None
+        db.session.commit()
+        return jsonify({"ok": True})
+    f = request.files.get("logo")
+    if not f:
+        return jsonify({"ok": False, "error": "Falta el archivo."}), 400
+    crudo = f.read()
+    if len(crudo) > 400 * 1024:
+        return jsonify({"ok": False, "error": "Máximo 400 KB — reduce la imagen."}), 400
+    es_png = crudo[:8] == b"\x89PNG\r\n\x1a\n"
+    es_jpg = crudo[:3] == b"\xff\xd8\xff"
+    if not (es_png or es_jpg):
+        return jsonify({"ok": False, "error": "Solo PNG o JPG."}), 400
+    u.logo_b64 = base64.b64encode(crudo).decode()
+    db.session.commit()
+    return jsonify({"ok": True})
+
+
 @app.post("/api/resumen-pdf")
 @pro_requerido
 def resumen_pdf():
@@ -2238,11 +2270,18 @@ def resumen_pdf():
                 liq_base = calcular(mapear_exogena_a_datos(exogena, PARAMS), PARAMS)
             except Exception:
                 liq_base = None
+        logo_bytes = None
+        if getattr(u, "logo_b64", None):
+            import base64
+            try:
+                logo_bytes = base64.b64decode(u.logo_b64)
+            except Exception:
+                logo_bytes = None
         generar_resumen_pdf(salida, datos, liq, PARAMS, exogena, razones,
                             preparado_por=(getattr(u, "nombre", "") or "").strip(),
                             fecha_lim=fl,
                             observaciones=str(cuerpo.get("observaciones") or "")[:4000],
-                            liq_base=liq_base)
+                            liq_base=liq_base, logo_bytes=logo_bytes)
         contenido = salida.read_bytes()
     finally:
         salida.unlink(missing_ok=True)
