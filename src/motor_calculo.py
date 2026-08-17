@@ -203,15 +203,25 @@ def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
         # cédula. Se prefiere una DISTINTA de rentas de trabajo cuando exista
         # otra con ingresos, porque toda deducción imputada a trabajo detrae la
         # base del 25% exento (Art. 206-10 inc. 2) — así se protege el beneficio.
+        # …pero solo si esa otra cédula puede ABSORBER la deducción completa:
+        # imputarla a una cédula con renta líquida menor que el GMF la desperdicia
+        # (la renta líquida no baja de cero). Si ninguna la absorbe, va a trabajo
+        # aunque detraiga el 25% — deducir completo vale más que el 25% perdido.
+        def _absorbe(sc):
+            return max(0.0, sc.ingresos_brutos - sc.incrngo - sc.costos_deducciones
+                       - sc.devoluciones - sc.total_rentas_exentas
+                       - sc.total_deducciones)
         otras = [sc for sc in (d.honorarios, d.capital, d.no_laboral)
-                 if sc.ingresos_brutos > 0]
+                 if _absorbe(sc) >= ded_gmf]
         if otras:
-            destino = max(otras, key=lambda sc: sc.ingresos_brutos)
-            donde = "imputado a una cédula distinta de trabajo para no detraer el 25% exento"
+            destino = max(otras, key=_absorbe)
+            donde = ("imputado a una cédula distinta de trabajo (la absorbe completa) "
+                     "para no detraer el 25% exento")
         else:
             destino = d.trabajo
-            donde = ("imputado a rentas de trabajo (única cédula con ingresos); "
-                     "detrae la base del 25% como ordena el Art. 206-10 inc. 2")
+            donde = ("imputado a rentas de trabajo; detrae la base del 25% "
+                     "(Art. 206-10 inc. 2) porque ninguna otra cédula podía "
+                     "absorber la deducción completa")
         destino.otras_deducciones += ded_gmf
         liq.detalle.append(
             f"4×1000: GMF certificado {d.gmf_pagado:,.0f} → deducible el 50% "
