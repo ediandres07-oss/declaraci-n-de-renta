@@ -242,6 +242,24 @@ def _clasificar(partida: PartidaExogena) -> None:
 
     if partida.renglones:
         partida.renglon_asignado = partida.renglones[0]
+        det_ya = _norm(partida.detalle)
+        # Filas de origen LABORAL que el uso sugerido manda a capital (R58/59):
+        # cesantías y sus intereses/rendimientos del fondo tributan como renta
+        # de TRABAJO (Art. 206-4), no como rendimientos financieros. Y si el uso
+        # trae varios renglones y el detalle es laboral, gana el R32.
+        if partida.renglon_asignado in (58, 59) and "cesant" in det_ya:
+            partida.renglon_asignado = 32
+            partida.renglones = [32]
+            partida.nota = ("Cesantías/intereses del fondo: renta de TRABAJO (R32, "
+                            "Art. 206-4) — el uso sugerido las traía como capital.")
+            return
+        if (32 in partida.renglones and partida.renglon_asignado != 32
+                and any(k in det_ya for k in ("salario", "laboral", "emolumento",
+                                              "prestacion", "prima "))):
+            partida.renglon_asignado = 32
+            partida.nota = ("Pagos laborales → R32 (el uso sugerido traía varios "
+                            "renglones; se prefiere el de rentas de trabajo).")
+            return
         if len(set(partida.renglones)) > 1:
             partida.nota = _NOTA_MULTIRENGLON
             # caso conocido: R58 + R59 (rendimientos financieros: el ingreso va
