@@ -13,7 +13,9 @@ variaciones de formato entre años (más/menos filas de metadatos,
 columnas en otro orden, montos como texto).
 """
 import datetime as _dt
+import gc
 import re
+import threading
 import unicodedata
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -21,6 +23,13 @@ from typing import Dict, List, Optional, Tuple
 import openpyxl
 
 from .modelos import PartidaExogena, ResultadoExogena
+
+# Abrir un Excel de exógena con openpyxl carga el libro entero en RAM. En el
+# plan de 512 MB, varios parseos a la vez desbordaban la memoria y Render
+# reiniciaba la instancia. Este semáforo limita cuántas exógenas se parsean al
+# MISMO tiempo (las demás esperan su turno unos segundos), acotando el pico de
+# memoria sin bajar el throughput general de la app.
+_PARSE_SEM = threading.Semaphore(2)
 
 
 class ExogenaError(Exception):
@@ -342,7 +351,16 @@ _TOPES_RESUMEN = {
 
 
 def parsear_exogena(ruta, hoja: Optional[str] = None) -> ResultadoExogena:
-    """Punto de entrada del parser."""
+    """Punto de entrada del parser. Serializa el parseo (máximo 2 a la vez) y
+    libera memoria al terminar, para no desbordar la RAM del servicio."""
+    with _PARSE_SEM:
+        try:
+            return _parsear_exogena_impl(ruta, hoja)
+        finally:
+            gc.collect()
+
+
+def _parsear_exogena_impl(ruta, hoja: Optional[str] = None) -> ResultadoExogena:
     ruta = Path(ruta)
     if not ruta.exists():
         raise ExogenaError(f"El archivo no existe: {ruta}")
