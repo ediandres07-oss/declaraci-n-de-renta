@@ -155,8 +155,10 @@ def generar_resumen_pdf(
             from reportlab.lib.utils import ImageReader
             img = ImageReader(_io.BytesIO(logo_bytes))
             iw, ih = img.getSize()
-            alto = 13 * mm
-            ancho = min(alto * iw / ih, 45 * mm)
+            alto = 22 * mm
+            ancho = min(alto * iw / ih, 70 * mm)
+            if ancho == 70 * mm:                 # logos muy anchos: manda el ancho
+                alto = min(alto, 70 * mm * ih / iw)
             logo = Image(_io.BytesIO(logo_bytes), width=ancho, height=alto)
             cab = Table([[titulo_flow, logo]], colWidths=[None, ancho + 4])
             cab.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
