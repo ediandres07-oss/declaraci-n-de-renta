@@ -95,7 +95,8 @@ def _liquidar_ganancias_ocasionales(d: DatosDeclaracion, p: Parametros,
             f"{p.go_tarifa_loterias:.0%} loterías)")
 
 
-SALUD_387_TOPE_UVT = 192.0   # 16 UVT/mes × 12 (Art. 387 inc. 1 E.T.)
+SALUD_387_TOPE_UVT = 192.0        # 16 UVT/mes × 12 (Art. 387 inc. 1 E.T.)
+VIVIENDA_119_TOPE_UVT = 1200.0    # intereses de vivienda, tope anual (Art. 119 E.T.)
 
 
 def deduccion_salud_387(t, p: Parametros) -> float:
@@ -184,6 +185,24 @@ def calcular_depreciacion(datos: DatosDeclaracion) -> float:
 def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
     liq = Liquidacion()
     d = datos
+
+    # Intereses de vivienda — Art. 119 E.T.: deducibles sin exceder 1.200 UVT
+    # AL AÑO. El tope es del declarante (uno solo), no por cédula: si la suma en
+    # todas las subcédulas lo supera, se recorta a prorrata y se advierte. Se
+    # ajusta aquí (antes de liquidar) para que el recorte llegue igual a las
+    # casillas, al límite del 40% y a la base del 25%.
+    tope_viv = p.a_pesos(VIVIENDA_119_TOPE_UVT)
+    subcedulas = (d.trabajo, d.honorarios, d.capital, d.no_laboral)
+    total_viv = sum(sc.intereses_vivienda for sc in subcedulas)
+    if total_viv > tope_viv:
+        factor = tope_viv / total_viv
+        for sc in subcedulas:
+            sc.intereses_vivienda = round(sc.intereses_vivienda * factor)
+        liq.advertencias.append(
+            f"Intereses de vivienda por {total_viv:,.0f} superan el tope anual del "
+            f"Art. 119 E.T. (1.200 UVT = {tope_viv:,.0f}): se dedujo solo el tope"
+            + (", repartido a prorrata entre las cédulas."
+               if sum(1 for sc in subcedulas if sc.intereses_vivienda) > 1 else "."))
 
     # =============================== Patrimonio ==========================
     # El inventario final del comerciante es un activo a 31-dic → patrimonio bruto.
