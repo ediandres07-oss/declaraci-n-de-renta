@@ -150,8 +150,10 @@
         <div class="campo"><label>INCRNGO: aportes salud/pensión (R33)</label><input data-clave="trabajo.incrngo" data-tipo="monto"></div>
         <div class="campo"><label>Aportes AFC / FVP (R35)</label><input data-clave="trabajo.rentas_exentas_afc_fvp" data-tipo="monto"></div>
         <div class="campo"><label>Otras rentas exentas: cesantías… (R36, sin el 25%)</label><input data-clave="trabajo.otras_rentas_exentas" data-tipo="monto"></div>
-        <div class="campo"><label>Intereses de vivienda (R38)</label><input data-clave="trabajo.intereses_vivienda" data-tipo="monto"></div>
-        <div class="campo"><label>Otras deducciones: medicina prepagada… (R39)</label><input data-clave="trabajo.otras_deducciones" data-tipo="monto"></div>
+        <div class="campo"><label>Intereses hipotecarios / leasing habitacional (R38 — tope 1.200 UVT automático; codeudores: solo su proporción)</label><input data-clave="trabajo.intereses_vivienda" data-tipo="monto"></div>
+        <div class="campo"><label>Salud: prepagada / plan complementario / seguro (R39 — tope 16 UVT/mes automático)</label><input data-clave="trabajo.salud_prepagada" data-tipo="monto"></div>
+        <div class="campo"><label>Intereses ICETEX (R39 — tope 100 UVT automático)</label><input data-clave="intereses_icetex" data-tipo="monto"></div>
+        <div class="campo"><label>Otras deducciones imputables (R39)</label><input data-clave="trabajo.otras_deducciones" data-tipo="monto"></div>
         <div class="campo"><label>Renta exenta 25% automática</label>
           <select data-clave="aplicar_renta_exenta_25" data-tipo="bool"><option value="1">Sí</option><option value="0">No</option></select></div>
       </div>
