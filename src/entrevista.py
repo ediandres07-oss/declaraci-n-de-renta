@@ -273,8 +273,10 @@ SECCIONES: List[Dict[str, Any]] = [
         "titulo": "Costos, deducciones y rentas exentas no certificados",
         "preguntas": [
             Pregunta("trabajo.intereses_vivienda", "Intereses de crédito de vivienda pagados (certificado banco)", "monto"),
-            Pregunta("trabajo.otras_deducciones", "Otras deducciones imputables a rentas de trabajo "
-                     "(medicina prepagada hasta 16 UVT/mes, etc.)", "monto"),
+            Pregunta("trabajo.salud_prepagada", "Pagos por salud Art. 387: medicina prepagada, "
+                     "plan complementario o seguro de salud (el motor aplica solo el tope de "
+                     "16 UVT/mes = 192 UVT/año)", "monto"),
+            Pregunta("trabajo.otras_deducciones", "Otras deducciones imputables a rentas de trabajo", "monto"),
             Pregunta("honorarios.costos_deducciones", "Costos y gastos de honorarios / actividad independiente", "monto"),
             Pregunta("capital.costos_deducciones", "Costos y deducciones de rentas de capital", "monto"),
             Pregunta("no_laboral.costos_deducciones", "Costos y deducciones de rentas no laborales", "monto"),

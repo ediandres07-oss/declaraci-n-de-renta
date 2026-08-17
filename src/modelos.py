@@ -92,6 +92,10 @@ class SubcedulaGeneral:
     otras_rentas_exentas: float = 0.0
     intereses_vivienda: float = 0.0
     otras_deducciones: float = 0.0
+    # Pagos por salud del Art. 387 inc. 1 (medicina prepagada, plan
+    # complementario o seguro de salud a entidad vigilada): el motor les aplica
+    # el tope de 16 UVT/mes (192 UVT/año). Solo aplica en rentas de trabajo.
+    salud_prepagada: float = 0.0
     rentas_pasivas_ece: float = 0.0
     compensaciones: float = 0.0
 

@@ -95,6 +95,15 @@ def _liquidar_ganancias_ocasionales(d: DatosDeclaracion, p: Parametros,
             f"{p.go_tarifa_loterias:.0%} loterías)")
 
 
+SALUD_387_TOPE_UVT = 192.0   # 16 UVT/mes × 12 (Art. 387 inc. 1 E.T.)
+
+
+def deduccion_salud_387(t, p: Parametros) -> float:
+    """Pagos por salud (medicina prepagada / plan complementario / seguro de
+    salud) con el tope del Art. 387: 16 UVT mensuales = 192 UVT al año."""
+    return min(max(0.0, t.salud_prepagada), p.a_pesos(SALUD_387_TOPE_UVT))
+
+
 def calcular_renta_exenta_25(datos: DatosDeclaracion, p: Parametros,
                              exenta_extra: float = 0.0) -> float:
     """Renta exenta laboral del 25% (Art. 206 num. 10 E.T.).
@@ -112,7 +121,8 @@ def calcular_renta_exenta_25(datos: DatosDeclaracion, p: Parametros,
         ded_dep_387 = min(t.ingresos_brutos * p.dependientes_387_pct,
                           p.a_pesos(p.dependientes_387_tope_uvt))
     base = (t.ingresos_brutos - t.incrngo - t.total_rentas_exentas
-            - t.total_deducciones - ded_dep_387 - exenta_extra)
+            - t.total_deducciones - ded_dep_387 - deduccion_salud_387(t, p)
+            - exenta_extra)
     if base <= 0:
         return 0.0
     exenta = base * p.exenta_25_porcentaje
@@ -291,10 +301,18 @@ def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
     if d.dependientes >= 1 and t.ingresos_brutos > 0:
         ded_dep_387 = min(t.ingresos_brutos * p.dependientes_387_pct,
                           p.a_pesos(p.dependientes_387_tope_uvt))
-    r39 = t.otras_deducciones + ded_dep_387
+    ded_salud = deduccion_salud_387(t, p)
+    if t.salud_prepagada > p.a_pesos(SALUD_387_TOPE_UVT):
+        liq.advertencias.append(
+            f"Pagos por salud (prepagada/plan complementario) por "
+            f"{t.salud_prepagada:,.0f} superan el tope del Art. 387 "
+            f"(192 UVT = {p.a_pesos(SALUD_387_TOPE_UVT):,.0f}): se dedujo solo el tope.")
+    r39 = t.otras_deducciones + ded_dep_387 + ded_salud
     nota39 = "otras deducciones imputables"
     if ded_dep_387:
         nota39 += f" + dependientes Art.387 ({ded_dep_387:,.0f})"
+    if ded_salud:
+        nota39 += f" + salud prepagada Art.387 ({ded_salud:,.0f}, tope 192 UVT)"
     liq.set(39, r39, nota39)
     r40 = t.intereses_vivienda + r39
     liq.set(40, r40, "total deducciones imputables trabajo")
@@ -341,7 +359,20 @@ def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
     depreciacion = calcular_depreciacion(d)
     es_comerciante = (d.compras_mercancia or d.inventario_inicial
                       or d.inventario_final or depreciacion)
-    r77 = max(0.0, nl.costos_deducciones + cmv + depreciacion)
+    # PN sin actividad: los "otros costos/gastos" que llegan de la exógena
+    # (documento soporte, compras que le reportaron) NO van a la casilla 77 si no
+    # hay ingresos no laborales ni juego de inventarios — sin ingresos no hay
+    # relación de causalidad (Art. 107 E.T.). Solo el comerciante (o quien declare
+    # ingresos no laborales) los deduce.
+    costos_nl = nl.costos_deducciones
+    if not es_comerciante and nl.ingresos_brutos <= 0 and costos_nl > 0:
+        liq.advertencias.append(
+            f"Se omitieron 'otros costos/gastos' no laborales por {costos_nl:,.0f}: "
+            "no hay ingresos no laborales ni actividad comercial que los soporte "
+            "(Art. 107 E.T.). Si el cliente sí tiene negocio, regístrelo como "
+            "comerciante o declare los ingresos de la actividad.")
+        costos_nl = 0.0
+    r77 = max(0.0, costos_nl + cmv + depreciacion)
     if es_comerciante:
         liq.set(77, r77, "costos no laborales — otros costos + CMV + depreciación")
         liq.detalle.append(
