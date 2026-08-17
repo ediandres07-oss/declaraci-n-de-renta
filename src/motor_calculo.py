@@ -199,12 +199,23 @@ def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
     # mayores ingresos brutos (llega a la casilla de "otras deducciones").
     if d.gmf_pagado > 0:
         ded_gmf = round(d.gmf_pagado * 0.5)
-        destino = max((d.trabajo, d.honorarios, d.capital, d.no_laboral),
-                      key=lambda sc: sc.ingresos_brutos)
+        # El Art. 115 no exige causalidad: el GMF puede imputarse a cualquier
+        # cédula. Se prefiere una DISTINTA de rentas de trabajo cuando exista
+        # otra con ingresos, porque toda deducción imputada a trabajo detrae la
+        # base del 25% exento (Art. 206-10 inc. 2) — así se protege el beneficio.
+        otras = [sc for sc in (d.honorarios, d.capital, d.no_laboral)
+                 if sc.ingresos_brutos > 0]
+        if otras:
+            destino = max(otras, key=lambda sc: sc.ingresos_brutos)
+            donde = "imputado a una cédula distinta de trabajo para no detraer el 25% exento"
+        else:
+            destino = d.trabajo
+            donde = ("imputado a rentas de trabajo (única cédula con ingresos); "
+                     "detrae la base del 25% como ordena el Art. 206-10 inc. 2")
         destino.otras_deducciones += ded_gmf
         liq.detalle.append(
             f"4×1000: GMF certificado {d.gmf_pagado:,.0f} → deducible el 50% "
-            f"(Art. 115) = {ded_gmf:,.0f}, imputado a la cédula con mayores ingresos. "
+            f"(Art. 115) = {ded_gmf:,.0f}, {donde}. "
             "Conserve el certificado tributario del banco: es requisito expreso del Art. 115.")
 
     tope_viv = p.a_pesos(VIVIENDA_119_TOPE_UVT)
