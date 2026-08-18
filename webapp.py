@@ -1172,6 +1172,14 @@ def contadores():
                            chat_ia_nombre=IA_CFG.get("nombre_asistente", "Asistente Contadores"))
 
 
+@app.get("/contadores/contabilidad")
+def contadores_contabilidad():
+    """Planes y precios del software de contabilidad para contadores
+    (Gratis / Emprende / Contador / Firma). Vitrina pública; el botón lleva
+    a la app en contabilidad-tributando.onrender.com."""
+    return render_template("planes_contabilidad.html")
+
+
 @app.post("/api/pase-contador/crear")
 def crear_pase_contador():
     """Crea la orden del pase de temporada de un contador (sin exógena y SIN
