@@ -90,6 +90,24 @@
     <p class="sub">La automatización de la DIAN directo a tu contabilidad —lo que otros cobran solo en su plan más costoso— aquí viene incluida en <b>todos</b>, desde el gratis. Un plan y atiendes a toda tu cartera. Empieza gratis.</p>
   </header>
 
+  {% set g_dian = {"g":"Contabilizador DIAN","items":["Baja las facturas de la DIAN automáticamente","Las contabiliza solas en partida doble (sin un clic)","Revisa el correo cada hora y causa lo nuevo","Aprende la cuenta contable de cada proveedor"]} %}
+  {% set g_conta = {"g":"Contabilidad","items":["IVA discriminado y las 3 retenciones (fuente, IVA, ICA)","Notas crédito y débito","Libro auxiliar y de movimientos","Documento soporte y eventos DIAN"]} %}
+  {% set g_plano = {"g":"Planos y exportación","items":["Arma el plano para Siigo, Contai, Helisa y World Office","Exporta a Excel"]} %}
+  {% set g_info = {"g":"Informes y estados","items":["Balance y estado de resultados","Informes financieros y tributarios"]} %}
+  {% set g_ia = {"g":"Contador IA","items":["Chat contable con IA (Contador Virtual)","Análisis e interpretación de tus cifras"]} %}
+  {% set g_imp = {"g":"Impuestos y conciliación","items":["Borradores de impuestos y exógena","Conciliación bancaria"]} %}
+  {% macro det(grupos) %}
+  <details style="margin:2px 0 14px;text-align:left">
+    <summary style="cursor:pointer;color:var(--oro);font-weight:700;font-size:.85rem;padding:6px 0">Ver todo lo que incluye</summary>
+    <div style="padding:4px 0 2px">
+    {% for gr in grupos %}
+      <div style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--tenue);font-weight:700;margin:10px 0 3px">{{ gr.g }}</div>
+      {% for it in gr['items'] %}<div style="display:flex;gap:7px;align-items:flex-start;font-size:.82rem;color:var(--suave);margin:3px 0"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="flex:none;margin-top:2px"><path d="M5 12.5l4.5 4.5L19 7" stroke="#37d38f" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>{{ it }}</div>{% endfor %}
+    {% endfor %}
+    </div>
+  </details>
+  {% endmacro %}
+
   <div class="grid">
 
     <!-- GRATIS -->
@@ -105,6 +123,7 @@
         <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#37d38f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Exportar a Siigo/Contai/Helisa</li>
         <li class="off"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M8 8l8 8M16 8l-8 8" stroke="#6b7488" stroke-width="2" stroke-linecap="round"/></svg>Sin informes ni Contador IA</li>
       </ul>
+      {{ det([g_dian, g_conta, g_plano, {"g":"Empresas y soporte","items":["1 empresa"]}]) }}
       <a class="cta" href="https://contabilidad-tributando.onrender.com" target="_blank" rel="noopener">Empezar gratis</a>
     </div>
 
@@ -121,6 +140,7 @@
         <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#37d38f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Contador IA + análisis</li>
         <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#37d38f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>2 meses de prueba premium</li>
       </ul>
+      {{ det([g_dian, g_conta, g_plano, g_info, g_ia, g_imp, {"g":"Empresas y soporte","items":["Hasta 3 empresas","2 meses de prueba premium"]}]) }}
       <a class="cta" href="https://contabilidad-tributando.onrender.com" target="_blank" rel="noopener">Elegir Emprende</a>
     </div>
 
@@ -138,6 +158,7 @@
         <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#37d38f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Conciliación bancaria</li>
         <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#37d38f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Soporte por chat</li>
       </ul>
+      {{ det([g_dian, g_conta, g_plano, g_info, g_ia, g_imp, {"g":"Empresas y soporte","items":["Hasta 10 empresas","Soporte por chat"]}]) }}
       <a class="cta pri" href="https://contabilidad-tributando.onrender.com" target="_blank" rel="noopener">Elegir Contador</a>
     </div>
 
@@ -154,6 +175,7 @@
         <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#37d38f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Soporte prioritario</li>
         <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#37d38f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Varios usuarios del equipo</li>
       </ul>
+      {{ det([g_dian, g_conta, g_plano, g_info, g_ia, g_imp, {"g":"Empresas y soporte","items":["Empresas ilimitadas","Soporte prioritario","Varios usuarios del equipo"]}]) }}
       <a class="cta" href="https://contabilidad-tributando.onrender.com" target="_blank" rel="noopener">Elegir Firma</a>
     </div>
 
