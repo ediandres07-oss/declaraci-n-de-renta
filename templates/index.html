@@ -278,6 +278,8 @@
         </div>
         <button class="btn2" id="btnPdf" disabled>📄 Resumen ejecutivo PDF</button>
         <button class="btn2" id="btnExcel" disabled title="Papel de trabajo en Excel (patrimonio, ingresos y deducciones por tercero + liquidación)">📊 Papel de trabajo (Excel)</button>
+        <label class="btn2" id="lblPlantilla" style="cursor:pointer" title="Sube TU papel de trabajo con los años anteriores y le agrego la columna de este año, con todo montado">📎 Actualizar mi papel de trabajo
+          <input type="file" id="plantillaFile" accept=".xlsx,.xlsm" style="display:none"></label>
         <button class="btn2" id="btnLogo" type="button" title="El logo sale en el encabezado del resumen ejecutivo">🖼️ Logo de tu firma</button>
         <input type="file" id="logoFile" accept="image/png,image/jpeg" style="display:none">
         <button class="btn2" id="btnF210Pdf" disabled>🧾 Formulario 210 PDF</button>
@@ -562,6 +564,22 @@ if ($("#btnAddActivo")) $("#btnAddActivo").addEventListener("click", () => {
 
 $("#btnPdf").addEventListener("click", () => descargarPdf("/api/resumen-pdf", "ResumenEjecutivo.pdf"));
 if ($("#btnExcel")) $("#btnExcel").addEventListener("click", () => descargarPdf("/api/resumen-excel", "PapelTrabajo_Renta.xlsx"));
+if ($("#plantillaFile")) $("#plantillaFile").addEventListener("change", async () => {
+  const f = $("#plantillaFile").files[0]; if (!f) return;
+  volcarFormularioADatos();
+  const lbl = $("#lblPlantilla"); const txt0 = lbl.textContent; lbl.textContent = "Procesando…";
+  const fd = new FormData();
+  fd.append("plantilla", f); fd.append("datos", JSON.stringify(datos)); fd.append("token", token || "");
+  try {
+    const r = await fetch("/api/resumen-excel-plantilla", {method: "POST", body: fd});
+    if (!r.ok) { const j = await r.json().catch(() => ({})); alert(j.error || "No pude procesar el Excel"); return; }
+    const blob = await r.blob(); const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    const cd = r.headers.get("Content-Disposition") || "";
+    a.download = (cd.match(/filename="?([^";]+)/) || [, "PapelTrabajo_actualizado.xlsx"])[1];
+    a.click(); URL.revokeObjectURL(a.href);
+  } finally { lbl.textContent = txt0; $("#plantillaFile").value = ""; }
+});
 $("#btnLogo").addEventListener("click", () => $("#logoFile").click());
 $("#logoFile").addEventListener("change", async () => {
   const f = $("#logoFile").files[0];

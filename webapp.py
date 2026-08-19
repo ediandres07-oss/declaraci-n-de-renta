@@ -2392,6 +2392,35 @@ def resumen_excel():
     )
 
 
+@app.post("/api/resumen-excel-plantilla")
+@pro_requerido
+def resumen_excel_plantilla():
+    """Recibe el papel de trabajo del contador (con años anteriores) y le AGREGA
+    la columna del año actual, conservando su historial."""
+    import json as _json
+    from src.resumen_pdf import rellenar_papel_trabajo
+    archivo = request.files.get("plantilla")
+    if archivo is None or not (archivo.filename or "").lower().endswith((".xlsx", ".xlsm")):
+        return jsonify({"error": "Sube tu papel de trabajo en Excel (.xlsx)."}), 400
+    try:
+        datos = DatosDeclaracion.from_dict(_json.loads(request.form.get("datos") or "{}"))
+    except (TypeError, KeyError, ValueError) as exc:
+        return jsonify({"error": f"Datos inválidos: {exc}"}), 400
+    exogena = _exogena_de(request.form.get("token", ""))
+    liq = calcular(datos, PARAMS)
+    try:
+        contenido = rellenar_papel_trabajo(archivo.read(), datos, liq, PARAMS, exogena)
+    except Exception as exc:
+        return jsonify({"error": f"No pude procesar tu Excel: {exc}"}), 422
+    nit = datos.contribuyente.nit or "sin_nit"
+    return send_file(
+        io.BytesIO(contenido),
+        as_attachment=True,
+        download_name=f"PapelTrabajo_{nit}_actualizado.xlsx",
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+
+
 # ======================================================================
 # Landing comercial: verificación + valor a pagar + planes con pago
 # ======================================================================

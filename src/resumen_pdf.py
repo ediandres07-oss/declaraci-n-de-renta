@@ -529,3 +529,126 @@ def generar_resumen_excel(
         ws.column_dimensions[coln].width = w
     wb.save(str(ruta))
     return ruta
+
+
+def rellenar_papel_trabajo(entrada, datos, liq, p, exogena=None) -> bytes:
+    """Recibe el papel de trabajo del contador (Excel con años anteriores) y le
+    AGREGA la columna del año actual, conservando el historial y recalculando los
+    totales. Empareja cada entidad por nombre; las nuevas las agrega como filas."""
+    import io as _io
+    import re
+    import unicodedata
+    import openpyxl
+    from openpyxl.styles import Font, PatternFill, Border, Side
+    from openpyxl.utils import get_column_letter
+
+    R = liq.r
+    data = entrada.read() if hasattr(entrada, "read") else (
+        Path(entrada).read_bytes() if not isinstance(entrada, bytes) else entrada)
+
+    def _norm(s):
+        s = str(s or "").upper()
+        s = "".join(c for c in unicodedata.normalize("NFD", s)
+                    if unicodedata.category(c) != "Mn")
+        s = re.sub(r"\b(SAS|SA|LTDA|EU)\b", "", s)
+        return re.sub(r"[^A-Z0-9]", "", s)
+
+    def _agg(parts):
+        d = {}
+        for a, _b, v in parts:
+            d[a] = d.get(a, 0) + v
+        return list(d.items())
+
+    patr = _agg(_partidas_renglon(exogena, 29)) if exogena else []
+    deud = _agg(_partidas_renglon(exogena, 30)) if exogena else []
+    ing = _agg([(q, "", v) for q, _c, v in _top_terceros(exogena, {32, 43, 58, 74, 99, 104})]) \
+        if exogena else []
+    val25 = max(0.0, R(41) - R(28) - R(139))
+    costos = [("SEGURIDADSOCIAL", R(33)), ("INCRNGO", R(33)), ("BENEFICIODIAN", R(28)),
+              ("1FE", R(28)), ("FACTURAELECTR", R(28)), ("25", val25)]
+
+    wb = openpyxl.load_workbook(_io.BytesIO(data))
+    wbv = openpyxl.load_workbook(_io.BytesIO(data), data_only=True)
+    ws, wsv = wb.worksheets[0], wbv.worksheets[0]
+    # aplanar fórmulas -> su valor cacheado (para que insertar filas no rompa nada)
+    for row in ws.iter_rows():
+        for c in row:
+            if isinstance(c.value, str) and c.value.startswith("="):
+                c.value = wsv[c.coordinate].value
+
+    NAVY = PatternFill("solid", fgColor="1E2432")
+    BAND = PatternFill("solid", fgColor="F4F1EA")
+    thin = Side(style="thin", color="D9CFB8")
+    BOR = Border(left=thin, right=thin, top=thin, bottom=thin)
+
+    def _fill(titulo, items, kw=False):
+        ft = None
+        for r in range(1, ws.max_row + 1):
+            if str(ws.cell(r, 1).value or "").strip().upper() == titulo:
+                ft = r
+                break
+        if not ft:
+            return
+        fh = ft + 1
+        ycols = [c for c in range(3, ws.max_column + 2)
+                 if isinstance(ws.cell(fh, c).value, (int, float))]
+        col = (max(ycols) + 1) if ycols else 3
+        ftot = None
+        for r in range(fh + 1, ws.max_row + 2):
+            if str(ws.cell(r, 1).value or "").upper().startswith("TOTAL"):
+                ftot = r
+                break
+        if not ftot:
+            return
+        ws.cell(fh, col, (max(ws.cell(fh, c).value for c in ycols) + 1) if ycols else 2025)
+        if kw:
+            for r in range(fh + 1, ftot):
+                clave = _norm(ws.cell(r, 1).value) + _norm(ws.cell(r, 2).value)
+                for k, v in items:
+                    if k in clave:
+                        ws.cell(r, col, round(v))
+                        break
+        else:
+            idx = {}
+            for r in range(fh + 1, ftot):
+                if ws.cell(r, 1).value:
+                    idx.setdefault(_norm(ws.cell(r, 1).value), r)
+            ult = max(range(fh + 1, ftot)) if ftot > fh + 1 else fh
+            for nombre, valor in items:
+                if not valor:
+                    continue
+                r = idx.get(_norm(nombre))
+                if r is None:
+                    r = ult + 1
+                    if r >= ftot:
+                        ws.insert_rows(ftot)
+                        ftot += 1
+                    ws.cell(r, 1, nombre)
+                    ult = r
+                    idx[_norm(nombre)] = r
+                ws.cell(r, col, round(valor))
+        L = get_column_letter(col)
+        ws.cell(ftot, col, f"=SUM({L}{fh + 1}:{L}{ftot - 1})")
+        # tabla elegante en la columna nueva
+        hc = ws.cell(fh, col)
+        hc.font = Font(name="Arial", bold=True, color="FFFFFF")
+        hc.fill = NAVY
+        for i, r in enumerate(range(fh + 1, ftot)):
+            cc = ws.cell(r, col)
+            cc.number_format = "#,##0"
+            cc.border = BOR
+            if i % 2:
+                cc.fill = BAND
+        tc = ws.cell(ftot, col)
+        tc.font = Font(name="Arial", bold=True)
+        tc.number_format = "#,##0"
+        tc.border = BOR
+
+    _fill("PATRIMONIO", patr)
+    _fill("PASIVOS", deud)
+    _fill("INGRESOS", ing)
+    _fill("COSTOS Y DEDUCCIONES", costos, kw=True)
+
+    buf = _io.BytesIO()
+    wb.save(buf)
+    return buf.getvalue()
