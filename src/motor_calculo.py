@@ -513,22 +513,26 @@ def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
     liq.set(91, r91, "renta líquida cédula general")
 
     # R139: adición por dependientes (72 UVT c/u, máx. 4, fuera del límite 40%).
-    # Solo procede para quien percibe RENTAS DE TRABAJO (incluida la subcédula
-    # de honorarios): el Art. 336 num. 3 la concede a "el trabajador" y así lo
-    # sostiene la doctrina DIAN sobre la Ley 2277. Sin rentas de trabajo, no hay
-    # deducción (ni la del 387, que ya exige ingresos laborales).
-    hay_trabajo = (t.ingresos_brutos + h.ingresos_brutos) > 0
-    n_dep = min(d.dependientes, p.dependientes_max) if hay_trabajo else 0
+    # Es una deducción de la CÉDULA GENERAL completa (Art. 336 num. 3 E.T., Ley
+    # 2277/2022): procede sobre cualquier ingreso de esa cédula —trabajo,
+    # honorarios, capital o NO laborales (p. ej. un comerciante o arrendador)—, no
+    # solo para asalariados. Lo único que exige es que exista renta en la cédula
+    # general contra la cual detraerla. (La OTRA deducción por dependientes, la del
+    # 10% del Art. 387, sí requiere ingresos laborales y va aparte en R39.)
+    hay_cedula_general = (t.ingresos_brutos + h.ingresos_brutos
+                          + c.ingresos_brutos + nl.ingresos_brutos) > 0
+    n_dep = min(d.dependientes, p.dependientes_max) if hay_cedula_general else 0
     r139 = _round_mil(n_dep * p.a_pesos(p.dependientes_uvt))
     liq.set(138, d.dependientes, "número de dependientes")
     nota139 = (f"deducción adicional por {n_dep} dependiente(s) x "
-               f"{p.dependientes_uvt:,.0f} UVT")
-    if d.dependientes and not hay_trabajo:
-        nota139 = "dependientes SIN rentas de trabajo: no procede la deducción de 72 UVT"
+               f"{p.dependientes_uvt:,.0f} UVT (Art. 336 num. 3, cédula general)")
+    if d.dependientes and not hay_cedula_general:
+        nota139 = ("dependientes sin renta en la cédula general: no hay base "
+                   "contra la cual aplicar la deducción de 72 UVT")
         liq.advertencias.append(
-            "Registró dependientes pero no hay rentas de trabajo: la deducción de "
-            "72 UVT por dependiente (R139) solo procede para quien percibe rentas "
-            "de trabajo (Art. 336 num. 3 E.T.).")
+            "Registró dependientes pero no hay ingresos en la cédula general "
+            "(trabajo, honorarios, capital o no laborales): la deducción de 72 UVT "
+            "por dependiente (R139) se aplica sobre esa cédula (Art. 336 num. 3 E.T.).")
     liq.set(139, r139, nota139)
 
     # R92: exentas y deducciones imputables limitadas + R28 + R139
