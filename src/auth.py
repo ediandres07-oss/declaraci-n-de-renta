@@ -494,6 +494,40 @@ def agente_set(licencia: str, activo: bool) -> dict:
     return {"ok": True, "agente": sus.agente}
 
 
+# Correos del DUEÑO: su licencia del Lector es permanente + ilimitada y no se
+# bloquea por equipo (nunca se queda "sin licencia"). Configurable por env
+# LECTOR_OWNER_EMAILS (coma-separado); por defecto los dos correos de Edison.
+_OWNER_EMAILS_LECTOR = {
+    e.strip().lower() for e in
+    os.environ.get("LECTOR_OWNER_EMAILS",
+                   "ediandres07@gmail.com,contacto@tributando.co").split(",")
+    if e.strip()
+}
+
+
+def _es_owner_lector(email: str) -> bool:
+    return (email or "").strip().lower() in _OWNER_EMAILS_LECTOR
+
+
+def _asegurar_owner_permanente(sus) -> bool:
+    """Si la suscripción es del dueño, la deja permanente + ilimitada (activa,
+    empresas_max=0, vence a 10 años, agente ON). Devuelve True si es del dueño."""
+    if not sus or not _es_owner_lector(sus.email):
+        return False
+    cambio = False
+    if not sus.activa:
+        sus.activa = True; cambio = True
+    if sus.empresas_max != 0:                    # 0 = ilimitado
+        sus.empresas_max = 0; cambio = True
+    if (not sus.vence) or (sus.vence - date.today()).days < 3000:
+        sus.vence = date.today() + timedelta(days=3650); cambio = True
+    if not sus.agente:
+        sus.agente = True; cambio = True
+    if cambio:
+        db.session.commit()
+    return True
+
+
 def estado_licencia(licencia: str, equipo: str | None = None) -> dict:
     """Estado de una licencia. Si se pasa `equipo`, amarra la licencia a esa
     máquina en la primera activación; si ya está amarrada a OTRA, la rechaza
@@ -501,6 +535,7 @@ def estado_licencia(licencia: str, equipo: str | None = None) -> dict:
     sus = SuscripcionLector.query.filter_by(licencia=(licencia or "").strip()).first()
     if not sus:
         return {"valida": False, "error": "Licencia no encontrada"}
+    es_owner = _asegurar_owner_permanente(sus)   # el dueño nunca pierde la licencia
     vencida = bool(sus.vence and date.today() > sus.vence)
     equipo = (equipo or "").strip()
     if equipo:
@@ -508,9 +543,13 @@ def estado_licencia(licencia: str, equipo: str | None = None) -> dict:
             sus.equipo = equipo
             db.session.commit()
         elif sus.equipo != equipo:             # ya está en otro equipo
-            return {"valida": False, "otro_equipo": True,
-                    "error": "Esta licencia ya está activa en otro equipo. "
-                             "Escríbenos para trasladarla."}
+            if es_owner:                       # el dueño puede cambiar de equipo libre
+                sus.equipo = equipo
+                db.session.commit()
+            else:
+                return {"valida": False, "otro_equipo": True,
+                        "error": "Esta licencia ya está activa en otro equipo. "
+                                 "Escríbenos para trasladarla."}
     usadas = EmpresaLector.query.filter_by(licencia=sus.licencia).count()
     # Subida directa por API (Siigo/Helisa/Alegra/World Office): incluida en Pro o
     # superior (25+ empresas, o ilimitado). El Excel de todos los sistemas va en
@@ -535,6 +574,7 @@ def registrar_empresa_lector(licencia: str, nit: str, nombre: str, sistema: str)
     sus = SuscripcionLector.query.filter_by(licencia=(licencia or "").strip()).first()
     if not sus:
         return {"ok": False, "error": "Licencia no encontrada"}
+    _asegurar_owner_permanente(sus)              # el dueño no se frena por vencida/tope
     if not sus.activa or (sus.vence and date.today() > sus.vence):
         return {"ok": False, "error": "Suscripción vencida o inactiva"}
     nit = "".join(ch for ch in str(nit or "") if ch.isdigit())
