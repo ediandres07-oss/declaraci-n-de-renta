@@ -185,5 +185,16 @@
   </div>
 
 </div>
+<script>
+  // Acordeón: en cada tarjeta, solo un módulo abierto a la vez.
+  document.querySelectorAll('.card').forEach(function(card){
+    var ds = card.querySelectorAll('details');
+    ds.forEach(function(d){
+      d.addEventListener('toggle', function(){
+        if(d.open) ds.forEach(function(o){ if(o!==d) o.open=false; });
+      });
+    });
+  });
+</script>
 </body>
 </html>
