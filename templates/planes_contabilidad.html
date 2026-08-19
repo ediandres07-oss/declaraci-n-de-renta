@@ -97,15 +97,16 @@
   {% set g_ia = {"g":"Contador IA","items":["Chat contable con IA (Contador Virtual)","Análisis e interpretación de tus cifras"]} %}
   {% set g_imp = {"g":"Impuestos y conciliación","items":["Borradores de impuestos y exógena","Conciliación bancaria"]} %}
   {% macro det(grupos) %}
-  <details style="margin:2px 0 14px;text-align:left">
-    <summary style="cursor:pointer;color:var(--oro);font-weight:700;font-size:.85rem;padding:6px 0">Ver todo lo que incluye</summary>
-    <div style="padding:4px 0 2px">
-    {% for gr in grupos %}
-      <div style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--tenue);font-weight:700;margin:10px 0 3px">{{ gr.g }}</div>
-      {% for it in gr['items'] %}<div style="display:flex;gap:7px;align-items:flex-start;font-size:.82rem;color:var(--suave);margin:3px 0"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="flex:none;margin-top:2px"><path d="M5 12.5l4.5 4.5L19 7" stroke="#37d38f" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>{{ it }}</div>{% endfor %}
-    {% endfor %}
-    </div>
-  </details>
+  <div style="margin:6px 0 14px;text-align:left;flex:1">
+  {% for gr in grupos %}
+    <details style="border-top:1px solid var(--borde-soft)">
+      <summary style="cursor:pointer;padding:9px 4px;font-size:.85rem;font-weight:600;color:var(--texto)">{{ gr.g }} <span style="color:var(--tenue);font-weight:600;font-size:.73rem">· {{ gr['items']|length }}</span></summary>
+      <div style="padding:1px 0 9px 18px">
+      {% for it in gr['items'] %}<div style="display:flex;gap:7px;align-items:flex-start;font-size:.81rem;color:var(--suave);margin:3px 0"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" style="flex:none;margin-top:2px"><path d="M5 12.5l4.5 4.5L19 7" stroke="#37d38f" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>{{ it }}</div>{% endfor %}
+      </div>
+    </details>
+  {% endfor %}
+  </div>
   {% endmacro %}
 
   <div class="grid">
@@ -117,12 +118,6 @@
       <div class="price"><span class="amt" style="color:var(--verde)">$0</span><span class="per">para siempre</span></div>
       <div class="year">&nbsp;</div>
       <div class="cap"><b>1</b>&nbsp;empresa</div>
-      <ul>
-        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#37d38f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Automatización DIAN → contabilidad (sin clic)</li>
-        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#37d38f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Causar y armar el plano contable</li>
-        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#37d38f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Exportar a Siigo/Contai/Helisa</li>
-        <li class="off"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M8 8l8 8M16 8l-8 8" stroke="#6b7488" stroke-width="2" stroke-linecap="round"/></svg>Sin informes ni Contador IA</li>
-      </ul>
       {{ det([g_dian, g_conta, g_plano, {"g":"Empresas y soporte","items":["1 empresa"]}]) }}
       <a class="cta" href="https://contabilidad-tributando.onrender.com" target="_blank" rel="noopener">Empezar gratis</a>
     </div>
@@ -134,12 +129,6 @@
       <div class="price"><span class="amt">$49.900</span><span class="per">/mes</span></div>
       <div class="year">Anual: $499.000 · 2 meses gratis</div>
       <div class="cap"><b>3</b>&nbsp;empresas</div>
-      <ul>
-        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#37d38f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Todo lo de Gratis, hasta 3 empresas</li>
-        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#37d38f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Informes y estados financieros</li>
-        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#37d38f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Contador IA + análisis</li>
-        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#37d38f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>2 meses de prueba premium</li>
-      </ul>
       {{ det([g_dian, g_conta, g_plano, g_info, g_ia, g_imp, {"g":"Empresas y soporte","items":["Hasta 3 empresas","2 meses de prueba premium"]}]) }}
       <a class="cta" href="https://contabilidad-tributando.onrender.com" target="_blank" rel="noopener">Elegir Emprende</a>
     </div>
@@ -152,12 +141,6 @@
       <div class="price"><span class="amt">$99.900</span><span class="per">/mes</span></div>
       <div class="year">Anual: $999.000 · 2 meses gratis</div>
       <div class="cap"><b>10</b>&nbsp;empresas</div>
-      <ul>
-        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#37d38f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Todo lo de Emprende</li>
-        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#37d38f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Borradores de impuestos y exógena</li>
-        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#37d38f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Conciliación bancaria</li>
-        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#37d38f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Soporte por chat</li>
-      </ul>
       {{ det([g_dian, g_conta, g_plano, g_info, g_ia, g_imp, {"g":"Empresas y soporte","items":["Hasta 10 empresas","Soporte por chat"]}]) }}
       <a class="cta pri" href="https://contabilidad-tributando.onrender.com" target="_blank" rel="noopener">Elegir Contador</a>
     </div>
@@ -169,12 +152,6 @@
       <div class="price"><span style="text-decoration:line-through;opacity:.5;font-size:1rem;margin-right:7px">$299.000</span><span class="amt">$149.900</span><span class="per">/mes</span></div>
       <div class="year">Anual: $1.499.000 · 2 meses gratis</div>
       <div class="cap"><b>Ilimitadas</b>&nbsp;empresas</div>
-      <ul>
-        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#37d38f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Todo lo de Contador</li>
-        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#37d38f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Empresas ilimitadas</li>
-        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#37d38f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Soporte prioritario</li>
-        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#37d38f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Varios usuarios del equipo</li>
-      </ul>
       {{ det([g_dian, g_conta, g_plano, g_info, g_ia, g_imp, {"g":"Empresas y soporte","items":["Empresas ilimitadas","Soporte prioritario","Varios usuarios del equipo"]}]) }}
       <a class="cta" href="https://contabilidad-tributando.onrender.com" target="_blank" rel="noopener">Elegir Firma</a>
     </div>
