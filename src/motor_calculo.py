@@ -232,30 +232,25 @@ def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
     liq.set(31, max(0.0, patrimonio_bruto - d.deudas), "patrimonio líquido")
 
     # ===================== Renglón 28: 1% factura electrónica ============
-    # Art. 336 num. 5, req. 5.1: la adquisición NO puede haber sido solicitada como
-    # costo o deducción (prohibición de doble beneficio). El comerciante deduce sus
-    # compras como CMV (costo) → esas compras NO dan el 1%. Si usa el módulo de
-    # comerciante (deduce compras/inventarios), R28 = 0.
+    # El 1% de compras con factura electrónica (Art. 336 num. 5) aplica por igual,
+    # sea comerciante o no: el motor NO decide por el contador. Siempre calcula el
+    # 1% sobre lo reportado como compras con factura electrónica (tope 240 UVT) y lo
+    # deja en R28. Solo ADVIERTE del posible doble beneficio (req. 5.1: una compra
+    # ya deducida como costo/CMV no puede dar también el 1%) para que el contador
+    # ajuste si esas mismas compras están dentro del costo. La decisión es del
+    # contador, no del programa.
+    r28 = _round_mil(min(d.compras_factura_electronica * p.factura_electronica_pct,
+                         p.a_pesos(p.factura_electronica_tope_uvt)))
+    liq.set(28, r28, "1% compras con factura electrónica (tope "
+            f"{p.factura_electronica_tope_uvt:,.0f} UVT)")
     deduce_compras_costo = bool(d.compras_mercancia or d.inventario_inicial
                                 or d.inventario_final)
-    if deduce_compras_costo:
-        r28 = 0.0
-        liq.set(28, r28, "1% factura electrónica: NO aplica — las compras se deducen "
-                "como costo/CMV (Art. 336-5 req. 5.1, doble beneficio)")
+    if r28 > 0 and (deduce_compras_costo or d.no_laboral.ingresos_brutos > 0):
         liq.advertencias.append(
-            "El 1% de compras con factura electrónica (R28) NO se aplicó: como "
-            "comerciante deduce las compras como costo (CMV), esas adquisiciones no "
-            "dan el beneficio del 1% (Art. 336 num. 5, prohibición de doble beneficio).")
-    else:
-        r28 = _round_mil(min(d.compras_factura_electronica * p.factura_electronica_pct,
-                             p.a_pesos(p.factura_electronica_tope_uvt)))
-        liq.set(28, r28, "1% compras con factura electrónica (tope "
-                f"{p.factura_electronica_tope_uvt:,.0f} UVT)")
-        if d.no_laboral.ingresos_brutos > 0 and r28 > 0:
-            liq.advertencias.append(
-                "Detectamos rentas no laborales (posible comerciante): si esas compras "
-                "con factura electrónica se deducen como costo/CMV, el 1% (R28) NO aplica "
-                "(Art. 336 num. 5). Al cargar las compras en el módulo, R28 se pone en cero.")
+            "Se aplicó el 1% de compras con factura electrónica (R28). Verifique "
+            "(Art. 336 num. 5, req. 5.1): las compras que ya dedujo como costo o CMV "
+            "NO pueden dar también el 1% (doble beneficio). Si el 1% incluye compras "
+            "que ya están en el costo, ajústelo o quítelo; la decisión es suya.")
 
     # Venta de activos fijos (Art. 300): aviso al contador para clasificar bien.
     if getattr(d, "venta_activos_fijos", 0) > 0:

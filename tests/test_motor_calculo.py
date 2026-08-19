@@ -511,9 +511,11 @@ def test_comerciante_lista_activos_depreciacion_y_patrimonio(parametros):
     assert calcular_depreciacion(d2) == 10_000_000
 
 
-def test_comerciante_no_descuenta_1pct_factura(parametros):
-    """Art. 336-5 req 5.1: si el comerciante deduce las compras como costo (CMV),
-    esas adquisiciones NO dan el 1% de factura electrónica (R28 = 0)."""
+def test_comerciante_si_trae_1pct_factura_y_advierte(parametros):
+    """El motor NO decide por el contador: el 1% de factura electrónica (R28) se
+    aplica sea comerciante o no, y se emite la advertencia del posible doble
+    beneficio (Art. 336-5 req. 5.1) para que el contador ajuste si esas compras ya
+    están en el costo/CMV."""
     from src.modelos import DatosDeclaracion, SubcedulaGeneral
     d = DatosDeclaracion(
         no_laboral=SubcedulaGeneral(ingresos_brutos=200_000_000),
@@ -522,7 +524,9 @@ def test_comerciante_no_descuenta_1pct_factura(parametros):
         patrimonio_bruto=1,
     )
     liq = calcular(d, parametros)
-    assert liq.r(28) == 0
+    tope = round(240 * parametros.uvt / 1000) * 1000
+    assert liq.r(28) == tope                       # trae el 1% (capado a 240 UVT)
+    assert any("doble beneficio" in a for a in liq.advertencias)
 
 
 def test_venta_activo_fijo_nota_por_fechas():
