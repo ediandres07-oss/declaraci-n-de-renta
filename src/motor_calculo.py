@@ -243,9 +243,14 @@ def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
                          p.a_pesos(p.factura_electronica_tope_uvt)))
     liq.set(28, r28, "1% compras con factura electrónica (tope "
             f"{p.factura_electronica_tope_uvt:,.0f} UVT)")
+    # El aviso de posible doble beneficio SOLO le sale a quien de verdad es
+    # comerciante (cargó compras/inventarios en el módulo). Tener rentas no
+    # laborales NO significa ser comerciante: la mayoría de personas naturales
+    # (arrendadores, rendimientos, honorarios ocasionales) las traen y no dedujeron
+    # compras como costo, así que reciben su 1% limpio, sin avisos que no aplican.
     deduce_compras_costo = bool(d.compras_mercancia or d.inventario_inicial
                                 or d.inventario_final)
-    if r28 > 0 and (deduce_compras_costo or d.no_laboral.ingresos_brutos > 0):
+    if r28 > 0 and deduce_compras_costo:
         liq.advertencias.append(
             "Se aplicó el 1% de compras con factura electrónica (R28). Verifique "
             "(Art. 336 num. 5, req. 5.1): las compras que ya dedujo como costo o CMV "
