@@ -374,3 +374,158 @@ def generar_resumen_pdf(
 
     doc.build(e)
     return ruta
+
+
+def generar_resumen_excel(
+    ruta: Path,
+    datos: DatosDeclaracion,
+    liq: Liquidacion,
+    p: Parametros,
+    exogena: Optional[ResultadoExogena] = None,
+    razones_obligado=None,
+    preparado_por: str = "",
+    fecha_lim=None,
+) -> Path:
+    """Papel de trabajo en Excel (misma info del resumen ejecutivo), por cliente.
+
+    Reutiliza los mismos helpers que el PDF (_partidas_renglon, _top_terceros,
+    _retenciones_por_tercero) para que los números coincidan exactos."""
+    import openpyxl
+    from openpyxl.styles import Font, PatternFill
+
+    ruta = Path(ruta)
+    ruta.parent.mkdir(parents=True, exist_ok=True)
+    R = liq.r
+    con = datos.contribuyente
+    nombre = " ".join(x for x in (con.primer_nombre, con.otros_nombres,
+                                  con.primer_apellido, con.segundo_apellido) if x) \
+        or (exogena.nombre if exogena else "")
+    NEG, HDR = "1E2432", PatternFill("solid", fgColor="1E2432")
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Papel de trabajo 210"
+    fila_actual = [1]
+
+    def _cel(txt, col=1, bold=False, size=11, color="000000", fill=None, white=False):
+        c = ws.cell(row=fila_actual[0], column=col, value=txt)
+        c.font = Font(name="Arial", size=size, bold=bold,
+                      color=("FFFFFF" if white else color))
+        if fill:
+            c.fill = fill
+        if isinstance(txt, (int, float)):
+            c.number_format = "#,##0"
+        return c
+
+    def salto(n=1):
+        fila_actual[0] += n
+
+    def titulo(t):
+        _cel(t, bold=True, size=12, color=NEG); salto()
+
+    def encab(cols):
+        for i, t in enumerate(cols, 1):
+            _cel(t, col=i, bold=True, white=True, fill=HDR)
+        salto()
+
+    def fila(cols, bold=False):
+        for i, t in enumerate(cols, 1):
+            _cel(t, col=i, bold=bold)
+        salto()
+
+    _cel("Resumen Ejecutivo — Declaración de Renta (Formulario 210)",
+         bold=True, size=14, color=NEG); salto()
+    _cel(f"Año Gravable {p.anio_gravable} · UVT {int(p.uvt)}"
+         + (f" · Preparado por {preparado_por}" if preparado_por else ""),
+         size=10, color="808080"); salto(2)
+
+    titulo("1. Datos del declarante")
+    fila(["Contribuyente", nombre])
+    fila(["Identificación", con.nit or ""])
+    if getattr(con, "dv", ""):
+        fila(["DV", con.dv])
+    salto()
+
+    titulo("2. Patrimonio")
+    encab(["Bien / derecho (reportado por)", "Detalle", "Valor"])
+    bienes = _partidas_renglon(exogena, 29) if exogena else []
+    for a, b, v in bienes:
+        fila([a, b, round(v)])
+    suma_rep = sum(v for *_, v in bienes)
+    if R(29) - suma_rep > 0.5:
+        fila(["Otros activos no reportados en exógena",
+              "(vehículos, inmuebles, efectivo, ajustes)", round(R(29) - suma_rep)])
+    fila(["TOTAL PATRIMONIO BRUTO (R29)", "", round(R(29))], bold=True)
+    salto()
+    encab(["Deuda (reportada por)", "Detalle", "Valor"])
+    deudas = _partidas_renglon(exogena, 30) if exogena else []
+    for a, b, v in deudas:
+        fila([a, b, round(v)])
+    suma_d = sum(v for *_, v in deudas)
+    if R(30) - suma_d > 0.5:
+        fila(["Otras deudas no reportadas en exógena", "", round(R(30) - suma_d)])
+    fila(["TOTAL DEUDAS (R30)", "", round(R(30))], bold=True)
+    salto()
+    fila(["Patrimonio bruto (R29)", "", round(R(29))])
+    fila(["(−) Deudas (R30)", "", round(R(30))])
+    fila(["Patrimonio líquido (R31)", "", round(R(31))], bold=True)
+    salto()
+
+    titulo("3. Composición de las rentas")
+    encab(["Cédula / concepto", "Ingresos", "INCRNGO/costos", "Exentas y deduc.", "Renta líquida"])
+
+    def ced(nom, ing, incr, exen, liqd):
+        fila([nom, round(ing), round(incr), round(exen), round(liqd)])
+
+    ced("Rentas de trabajo", R(32), R(33), R(41), R(42))
+    if R(43):
+        ced("Honorarios", R(43), R(44) + R(45), R(53), R(57))
+    if R(58):
+        ced("Rentas de capital", R(58), R(59) + R(60), R(69), R(73))
+    if R(74):
+        ced("Rentas no laborales", R(74), R(76) + R(77), R(86), R(90))
+    if R(99):
+        ced("Pensiones", R(99), R(100), R(102), R(103))
+    fila(["Renta líquida gravable (general + pensiones)", "", "", "", round(R(97) + R(103))], bold=True)
+    fila(["Deducción dependientes (R139)", "", "", "", round(R(139))])
+    fila(["Deducción 1% factura electrónica (R28)", "", "", "", round(R(28))])
+    salto()
+
+    if exogena:
+        top = _top_terceros(exogena, {32, 43, 58, 74, 99, 104})
+        if top:
+            titulo("3b. Principales ingresos reportados por terceros")
+            encab(["Quién reportó", "Concepto", "Valor"])
+            for a, b, v in top:
+                fila([a, b, round(v)])
+            fila(["TOTAL ingresos reportados (principales)", "",
+                  round(sum(v for *_, v in top))], bold=True)
+            salto()
+
+    titulo("4. Liquidación del impuesto")
+    encab(["Concepto", "Renglón", "Valor"])
+    fila(["Impuesto sobre rentas líquidas (Art. 241)", "116/117", round(R(116) + R(117))])
+    fila(["Impuesto neto de renta", "126", round(R(126))])
+    fila(["Total impuesto a cargo", "129", round(R(129))], bold=True)
+    fila(["(−) Retenciones que le practicaron", "132", round(R(132))])
+    fila(["(−) Saldo a favor y anticipo del año anterior", "130-131", round(R(130) + R(131))])
+    fila(["(+) Anticipo de renta año siguiente", "133", round(R(133))])
+    if R(136) > 0:
+        fila(["TOTAL SALDO A PAGAR (R136)", "", round(R(136))], bold=True)
+    else:
+        fila(["TOTAL SALDO A FAVOR (R137)", "", round(R(137))], bold=True)
+    salto()
+
+    if exogena:
+        rets = _retenciones_por_tercero(exogena)
+        if rets:
+            titulo("4b. Retenciones certificadas por terceros (R132)")
+            encab(["Agente retenedor", "Retención"])
+            for a, v in rets:
+                fila([a, round(v)])
+            fila(["Total retenciones tomadas en la declaración", round(R(132))], bold=True)
+
+    for coln, w in (("A", 46), ("B", 30), ("C", 16), ("D", 16), ("E", 16)):
+        ws.column_dimensions[coln].width = w
+    wb.save(str(ruta))
+    return ruta

@@ -277,6 +277,7 @@
             style="width:100%;border:1px solid var(--linea,#dbe3ec);border-radius:9px;padding:10px 12px;font:inherit"></textarea>
         </div>
         <button class="btn2" id="btnPdf" disabled>📄 Resumen ejecutivo PDF</button>
+        <button class="btn2" id="btnExcel" disabled title="Papel de trabajo en Excel (patrimonio, ingresos y deducciones por tercero + liquidación)">📊 Papel de trabajo (Excel)</button>
         <button class="btn2" id="btnLogo" type="button" title="El logo sale en el encabezado del resumen ejecutivo">🖼️ Logo de tu firma</button>
         <input type="file" id="logoFile" accept="image/png,image/jpeg" style="display:none">
         <button class="btn2" id="btnF210Pdf" disabled>🧾 Formulario 210 PDF</button>
@@ -528,6 +529,7 @@ async function recalcular() {
   });
   $("#btnDescargar").disabled = false;
   $("#btnPdf").disabled = false;
+  if ($("#btnExcel")) $("#btnExcel").disabled = false;
   $("#btnF210Pdf").disabled = false;
   if ($("#btnDocsCliente")) $("#btnDocsCliente").disabled = false;
   if ($("#btnDocsWpp")) $("#btnDocsWpp").disabled = false;
@@ -559,6 +561,7 @@ if ($("#btnAddActivo")) $("#btnAddActivo").addEventListener("click", () => {
 });
 
 $("#btnPdf").addEventListener("click", () => descargarPdf("/api/resumen-pdf", "ResumenEjecutivo.pdf"));
+if ($("#btnExcel")) $("#btnExcel").addEventListener("click", () => descargarPdf("/api/resumen-excel", "PapelTrabajo_Renta.xlsx"));
 $("#btnLogo").addEventListener("click", () => $("#logoFile").click());
 $("#logoFile").addEventListener("change", async () => {
   const f = $("#logoFile").files[0];

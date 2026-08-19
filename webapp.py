@@ -2350,6 +2350,48 @@ def resumen_pdf():
     )
 
 
+@app.post("/api/resumen-excel")
+@pro_requerido
+def resumen_excel():
+    """Papel de trabajo en Excel (misma info del resumen), por cliente."""
+    from src.resumen_pdf import generar_resumen_excel
+    cuerpo = request.get_json(silent=True) or {}
+    try:
+        datos = DatosDeclaracion.from_dict(cuerpo.get("datos", {}))
+    except (TypeError, KeyError) as exc:
+        return jsonify({"error": f"Datos inválidos: {exc}"}), 400
+    exogena = _exogena_de(cuerpo.get("token", ""))
+    liq = calcular(datos, PARAMS)
+    razones = []
+    if exogena is not None:
+        topes = exogena.topes_dian or calcular_topes_propios(exogena)
+        razones = evaluar_obligacion_declarar(topes, PARAMS)
+    with tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False) as tmp:
+        salida = Path(tmp.name)
+    try:
+        u = usuario_actual()
+        fl = None
+        try:
+            nit_dec = (datos.contribuyente.nit or (exogena.identificacion if exogena else ""))
+            if nit_dec:
+                fl = fecha_limite(nit_dec, PLANTILLA)
+        except Exception:
+            pass
+        generar_resumen_excel(salida, datos, liq, PARAMS, exogena, razones,
+                              preparado_por=(getattr(u, "nombre", "") or "").strip(),
+                              fecha_lim=fl)
+        contenido = salida.read_bytes()
+    finally:
+        salida.unlink(missing_ok=True)
+    nit = datos.contribuyente.nit or "sin_nit"
+    return send_file(
+        io.BytesIO(contenido),
+        as_attachment=True,
+        download_name=f"PapelTrabajo_Renta_{nit}.xlsx",
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+
+
 # ======================================================================
 # Landing comercial: verificación + valor a pagar + planes con pago
 # ======================================================================
