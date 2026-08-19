@@ -232,30 +232,28 @@ def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
     liq.set(31, max(0.0, patrimonio_bruto - d.deudas), "patrimonio líquido")
 
     # ===================== Renglón 28: 1% factura electrónica ============
-    # El 1% de compras con factura electrónica (Art. 336 num. 5) aplica por igual,
-    # sea comerciante o no: el motor NO decide por el contador. Siempre calcula el
-    # 1% sobre lo reportado como compras con factura electrónica (tope 240 UVT) y lo
-    # deja en R28. Solo ADVIERTE del posible doble beneficio (req. 5.1: una compra
-    # ya deducida como costo/CMV no puede dar también el 1%) para que el contador
-    # ajuste si esas mismas compras están dentro del costo. La decisión es del
-    # contador, no del programa.
-    r28 = _round_mil(min(d.compras_factura_electronica * p.factura_electronica_pct,
-                         p.a_pesos(p.factura_electronica_tope_uvt)))
-    liq.set(28, r28, "1% compras con factura electrónica (tope "
-            f"{p.factura_electronica_tope_uvt:,.0f} UVT)")
-    # El aviso de posible doble beneficio SOLO le sale a quien de verdad es
-    # comerciante (cargó compras/inventarios en el módulo). Tener rentas no
-    # laborales NO significa ser comerciante: la mayoría de personas naturales
-    # (arrendadores, rendimientos, honorarios ocasionales) las traen y no dedujeron
-    # compras como costo, así que reciben su 1% limpio, sin avisos que no aplican.
+    # Art. 336 num. 5, req. 5.1: la adquisición NO puede haber sido solicitada como
+    # costo o deducción (prohibición de doble beneficio). El comerciante deduce sus
+    # compras como CMV (costo) → esas compras NO dan el 1%. Cuando el contador marca
+    # a su cliente como comerciante (usa el módulo: compras/inventarios), R28 = 0.
+    # Tener rentas no laborales NO lo hace comerciante: una PN normal (arrendador,
+    # rendimientos, honorarios ocasionales) que no dedujo compras como costo recibe
+    # su 1% limpio, sin avisos.
     deduce_compras_costo = bool(d.compras_mercancia or d.inventario_inicial
                                 or d.inventario_final)
-    if r28 > 0 and deduce_compras_costo:
+    if deduce_compras_costo:
+        r28 = 0.0
+        liq.set(28, r28, "1% factura electrónica: NO aplica — las compras se deducen "
+                "como costo/CMV (Art. 336-5 req. 5.1, doble beneficio)")
         liq.advertencias.append(
-            "Se aplicó el 1% de compras con factura electrónica (R28). Verifique "
-            "(Art. 336 num. 5, req. 5.1): las compras que ya dedujo como costo o CMV "
-            "NO pueden dar también el 1% (doble beneficio). Si el 1% incluye compras "
-            "que ya están en el costo, ajústelo o quítelo; la decisión es suya.")
+            "El 1% de compras con factura electrónica (R28) NO se aplicó: como "
+            "comerciante deduce las compras como costo (CMV), esas adquisiciones no "
+            "dan el beneficio del 1% (Art. 336 num. 5, prohibición de doble beneficio).")
+    else:
+        r28 = _round_mil(min(d.compras_factura_electronica * p.factura_electronica_pct,
+                             p.a_pesos(p.factura_electronica_tope_uvt)))
+        liq.set(28, r28, "1% compras con factura electrónica (tope "
+                f"{p.factura_electronica_tope_uvt:,.0f} UVT)")
 
     # Venta de activos fijos (Art. 300): aviso al contador para clasificar bien.
     if getattr(d, "venta_activos_fijos", 0) > 0:
@@ -513,26 +511,26 @@ def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
     liq.set(91, r91, "renta líquida cédula general")
 
     # R139: adición por dependientes (72 UVT c/u, máx. 4, fuera del límite 40%).
-    # Es una deducción de la CÉDULA GENERAL completa (Art. 336 num. 3 E.T., Ley
-    # 2277/2022): procede sobre cualquier ingreso de esa cédula —trabajo,
-    # honorarios, capital o NO laborales (p. ej. un comerciante o arrendador)—, no
-    # solo para asalariados. Lo único que exige es que exista renta en la cédula
-    # general contra la cual detraerla. (La OTRA deducción por dependientes, la del
-    # 10% del Art. 387, sí requiere ingresos laborales y va aparte en R39.)
-    hay_cedula_general = (t.ingresos_brutos + h.ingresos_brutos
-                          + c.ingresos_brutos + nl.ingresos_brutos) > 0
-    n_dep = min(d.dependientes, p.dependientes_max) if hay_cedula_general else 0
+    # Solo procede sobre RENTAS DE TRABAJO (incluida la subcédula de honorarios sin
+    # costos). El Decreto 2231 de 2023 (Art. 1.2.1.20.3 del DUR 1625/2016, que
+    # reglamentó el Art. 336 num. 3 E.T.) dispone que tanto esta deducción como la
+    # del 10% del Art. 387 "aplican únicamente respecto de los ingresos provenientes
+    # de rentas de trabajo". Un comerciante, o quien solo tenga rentas de capital /
+    # no laborales / pensiones, NO puede deducir dependientes.
+    hay_trabajo = (t.ingresos_brutos + h.ingresos_brutos) > 0
+    n_dep = min(d.dependientes, p.dependientes_max) if hay_trabajo else 0
     r139 = _round_mil(n_dep * p.a_pesos(p.dependientes_uvt))
     liq.set(138, d.dependientes, "número de dependientes")
     nota139 = (f"deducción adicional por {n_dep} dependiente(s) x "
-               f"{p.dependientes_uvt:,.0f} UVT (Art. 336 num. 3, cédula general)")
-    if d.dependientes and not hay_cedula_general:
-        nota139 = ("dependientes sin renta en la cédula general: no hay base "
-                   "contra la cual aplicar la deducción de 72 UVT")
+               f"{p.dependientes_uvt:,.0f} UVT (Art. 336 num. 3; solo rentas de trabajo)")
+    if d.dependientes and not hay_trabajo:
+        nota139 = ("dependientes SIN rentas de trabajo: no procede la deducción de "
+                   "72 UVT (Decreto 2231/2023: solo aplica a rentas de trabajo)")
         liq.advertencias.append(
-            "Registró dependientes pero no hay ingresos en la cédula general "
-            "(trabajo, honorarios, capital o no laborales): la deducción de 72 UVT "
-            "por dependiente (R139) se aplica sobre esa cédula (Art. 336 num. 3 E.T.).")
+            "Registró dependientes pero no hay rentas de trabajo: la deducción de "
+            "72 UVT por dependiente (R139) solo procede sobre rentas de trabajo "
+            "(Decreto 2231 de 2023, reglamentario del Art. 336 num. 3 E.T.). Un "
+            "comerciante o quien solo tenga rentas de capital/no laborales no la lleva.")
     liq.set(139, r139, nota139)
 
     # R92: exentas y deducciones imputables limitadas + R28 + R139

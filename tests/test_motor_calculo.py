@@ -511,11 +511,9 @@ def test_comerciante_lista_activos_depreciacion_y_patrimonio(parametros):
     assert calcular_depreciacion(d2) == 10_000_000
 
 
-def test_comerciante_si_trae_1pct_factura_y_advierte(parametros):
-    """El motor NO decide por el contador: el 1% de factura electrónica (R28) se
-    aplica sea comerciante o no, y se emite la advertencia del posible doble
-    beneficio (Art. 336-5 req. 5.1) para que el contador ajuste si esas compras ya
-    están en el costo/CMV."""
+def test_comerciante_no_descuenta_1pct_factura(parametros):
+    """Art. 336-5 req 5.1: si el comerciante deduce las compras como costo (CMV),
+    esas adquisiciones NO dan el 1% de factura electrónica → R28 = 0, con aviso."""
     from src.modelos import DatosDeclaracion, SubcedulaGeneral
     d = DatosDeclaracion(
         no_laboral=SubcedulaGeneral(ingresos_brutos=200_000_000),
@@ -524,9 +522,29 @@ def test_comerciante_si_trae_1pct_factura_y_advierte(parametros):
         patrimonio_bruto=1,
     )
     liq = calcular(d, parametros)
-    tope = round(240 * parametros.uvt / 1000) * 1000
-    assert liq.r(28) == tope                       # trae el 1% (capado a 240 UVT)
+    assert liq.r(28) == 0
     assert any("doble beneficio" in a for a in liq.advertencias)
+
+
+def test_dependientes_solo_rentas_de_trabajo(parametros):
+    """Decreto 2231/2023 (regl. Art. 336 num. 3): la deducción por dependientes
+    (72 UVT) solo aplica a rentas de trabajo. Un comerciante / rentas no laborales
+    NO la lleva → R139 = 0 aunque tenga dependientes; con rentas de trabajo, sí."""
+    from src.modelos import DatosDeclaracion, SubcedulaGeneral
+    # comerciante (no laboral) con 2 dependientes → 0
+    com = DatosDeclaracion(
+        no_laboral=SubcedulaGeneral(ingresos_brutos=120_000_000),
+        dependientes=2, dependientes_detalle=["D1", "D2"], patrimonio_bruto=1)
+    liq_com = calcular(com, parametros)
+    assert liq_com.r(139) == 0
+    assert any("rentas de trabajo" in a for a in liq_com.advertencias)
+    # asalariado con 2 dependientes → 2 x 72 UVT
+    asa = DatosDeclaracion(
+        trabajo=SubcedulaGeneral(ingresos_brutos=120_000_000),
+        aplicar_renta_exenta_25=False,
+        dependientes=2, dependientes_detalle=["D1", "D2"], patrimonio_bruto=1)
+    liq_asa = calcular(asa, parametros)
+    assert liq_asa.r(139) == round(2 * 72 * parametros.uvt / 1000) * 1000
 
 
 def test_venta_activo_fijo_nota_por_fechas():
