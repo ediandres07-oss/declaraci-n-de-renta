@@ -195,7 +195,17 @@
       </div>
     </section>
 
-    <section class="tarjeta">
+    <section class="tarjeta" id="secTipoContribuyente">
+      <h2>Tipo de contribuyente</h2>
+      <label style="display:flex;gap:12px;align-items:flex-start;cursor:pointer;font-size:.95rem;line-height:1.4">
+        <input type="checkbox" id="chkComerciante" style="width:20px;height:20px;margin-top:2px;cursor:pointer;flex:none">
+        <span><b>Mi cliente es comerciante</b> (persona natural que lleva inventario o vende mercancía).
+        Actívalo solo si maneja <b>compras de mercancía, inventarios o CMV</b>. Si lo dejas apagado, se
+        trata como <b>persona natural normal</b> y no verás nada del módulo de comerciante. Tú decides.</span>
+      </label>
+    </section>
+
+    <section class="tarjeta oculto" id="secComerciante">
       <h2>🏪 Comerciante (PN) — Inventarios y CMV <small>· Arts. 62/63</small></h2>
       <p style="font-size:.85rem;color:#5a6272;margin:-4px 0 10px">
         Para comerciantes con inventario, lo que va como <b>costo (R77) es el CMV</b> — no las compras sueltas
@@ -419,7 +429,54 @@ function volcarDatosAFormulario() {
     else el.value = (v === null || v === undefined) ? "" : v;
   });
   renderActivos();
+  autodetectarTipoContribuyente();
 }
+
+// ---- Separación persona natural / comerciante (módulo aparte) ----
+// El módulo de comerciante (inventarios, CMV, activos, informes 2517) solo se ve
+// si el contador marca que su cliente ES comerciante. Por defecto es persona
+// natural y no ve nada de eso. Tener rentas no laborales NO lo hace comerciante.
+function esComercianteDatos() {
+  if (!datos) return false;
+  if ((datos.compras_mercancia||0) || (datos.inventario_inicial||0)
+      || (datos.inventario_final||0) || (datos.depreciacion_manual||0)
+      || (datos.activo_vehiculos||0) || (datos.activo_maquinaria||0)
+      || (datos.activo_muebles||0) || (datos.activo_equipo_computo||0)) return true;
+  return (datos.activos_fijos||[]).some(a =>
+    (a.categoria && a.categoria !== "no_deprecia") || (!a.en_exogena && (a.valor||0)));
+}
+function aplicarTipoContribuyente() {
+  const chk = document.getElementById("chkComerciante");
+  const mostrar = !!(chk && chk.checked);
+  const sec = document.getElementById("secComerciante");
+  if (sec) sec.classList.toggle("oculto", !mostrar);
+  ["btnComerciante2517","btnInformeComerciante"].forEach(id => {
+    const b = document.getElementById(id);
+    if (b) b.style.display = mostrar ? "" : "none";
+  });
+}
+function autodetectarTipoContribuyente() {
+  const chk = document.getElementById("chkComerciante");
+  if (chk) chk.checked = esComercianteDatos();
+  aplicarTipoContribuyente();
+}
+if (document.getElementById("chkComerciante"))
+  document.getElementById("chkComerciante").addEventListener("change", () => {
+    const chk = document.getElementById("chkComerciante");
+    if (!chk.checked && datos) {
+      // Volver a persona natural: limpiar lo del comerciante para que no afecte el cálculo.
+      ["inventario_inicial","compras_mercancia","inventario_final","depreciacion_manual",
+       "activo_vehiculos","activo_maquinaria","activo_muebles","activo_equipo_computo"].forEach(k => {
+        datos[k] = 0;
+        const el = document.querySelector(`[data-clave="${k}"]`);
+        if (el) el.value = "0";
+      });
+      datos.activos_fijos = [];
+      renderActivos();
+    }
+    aplicarTipoContribuyente();
+    if (datos) recalcular();
+  });
 
 function volcarFormularioADatos() {
   document.querySelectorAll("[data-clave]").forEach(el => {
