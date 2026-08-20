@@ -1,3 +1,14 @@
+{% set _p = {
+  'doc':'<path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2Z"/><path d="M9 13h6"/><path d="M9 17h6"/>',
+  'brief':'<rect width="20" height="14" x="2" y="7" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',
+  'filedown':'<path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2Z"/><path d="M12 11v6"/><path d="m9 14 3 3 3-3"/>',
+  'users':'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  'user':'<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+  'calc':'<rect width="16" height="20" x="4" y="2" rx="2"/><path d="M8 6h8"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/>',
+  'book':'<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>',
+  'ticket':'<path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v14"/>'
+} %}
+{% macro ic(n, s=false) %}<svg class="ic{{ ' s' if s else '' }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">{{ _p[n]|safe }}</svg>{% endmacro %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -6,7 +17,7 @@
 <meta name="robots" content="noindex">
 <title>Panel · Tributando</title>
 <style>
-  :root{ --navy:#1e2432; --oro:#c8991f; --dorado:#cdab7e; --tx:#2b3242; --tx2:#6a7482;
+  :root{ --navy:#1e2432; --oro:#c9a75a; --dorado:#e0c584; --tx:#2b3242; --tx2:#6a7482;
          --ln:#e6e2d8; --bg:#f4f2ee; --card:#fff; --verde:#1a7f37; }
   *{ box-sizing:border-box; margin:0; padding:0; }
   body{ font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
@@ -17,7 +28,9 @@
   header.top .marca{ font-weight:800; color:var(--navy); }
   header.top .marca span{ color:var(--dorado); }
   .sub{ color:var(--tx2); font-size:.9rem; margin-bottom:22px; }
-  h2{ font-size:1.05rem; color:var(--navy); margin:26px 0 12px; display:flex; align-items:center; gap:8px; }
+  h2{ font-size:1.05rem; color:var(--navy); margin:26px 0 12px; display:flex; align-items:center; gap:9px; }
+  .ic{ width:20px; height:20px; color:var(--oro); flex:0 0 auto; }
+  .ic.s{ width:14px; height:14px; color:var(--dorado); vertical-align:-2px; margin-right:3px; }
   .grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; }
   .card{ background:var(--card); border:1px solid var(--ln); border-radius:14px; padding:16px 18px;
          box-shadow:0 3px 12px rgba(20,26,40,.05); }
@@ -33,7 +46,7 @@
   .funnel{ display:flex; flex-direction:column; gap:8px; }
   .step{ background:#fff; border:1px solid var(--ln); border-radius:12px; padding:12px 16px;
          display:flex; align-items:center; justify-content:space-between; }
-  .step .barra{ height:12px; background:linear-gradient(90deg,#cdab7e,#c8991f); border-radius:8px; }
+  .step .barra{ height:12px; background:linear-gradient(90deg,var(--dorado),var(--oro)); border-radius:8px; }
   .step .et{ font-size:.9rem; color:var(--tx); font-weight:600; }
   .step .v{ font-weight:800; color:var(--navy); }
   nav.links{ margin-top:26px; font-size:.9rem; }
@@ -62,7 +75,7 @@
     </div>
   </div>
 
-  <h2>🧾 Funnel B2C — Declaración de renta</h2>
+  <h2>{{ ic('doc') }} Funnel B2C — Declaración de renta</h2>
   <div class="funnel">
     <div class="step">
       <span class="et"><a href="/admin/exogenas" style="color:inherit">Exógenas del cálculo gratis (landing) → ver leads</a></span>
@@ -87,7 +100,7 @@
     <div class="card oro"><div class="n">${{ '{:,.0f}'.format(m.b2c_ingreso)|replace(',', '.') }}</div><div class="l">Ingreso renta</div></div>
   </div>
 
-  <h2>👔 Pase de temporada — Contadores</h2>
+  <h2>{{ ic('brief') }} Pase de temporada — Contadores</h2>
   <div class="grid">
     <div class="card"><div class="n">{{ m.pase_creadas }}</div><div class="l">Órdenes de pase</div></div>
     <div class="card verde"><div class="n">{{ m.pase_pagadas }}</div><div class="l">Pases vendidos</div></div>
@@ -95,22 +108,22 @@
     <div class="card"><div class="n">{{ m.pase_accesos }}</div><div class="l">Accesos activos</div></div>
   </div>
 
-  <h2>🤖 Lector XML DIAN</h2>
+  <h2>{{ ic('filedown') }} Lector XML DIAN</h2>
   <div class="grid">
     <div class="card oro"><div class="n">{{ m.lector_pruebas_activas }}</div><div class="l">Pruebas activas</div></div>
     <div class="card verde"><div class="n">{{ m.lector_pagadas_activas }}</div><div class="l">Suscripciones pagadas</div></div>
     <div class="card"><div class="n">{{ m.lector_empresas }}</div><div class="l">Empresas registradas</div></div>
   </div>
 
-  <h2>📇 Contactos por audiencia <span style="font-size:.72rem;color:var(--tx2);font-weight:400">(para campañas)</span></h2>
+  <h2>{{ ic('users') }} Contactos por audiencia <span style="font-size:.72rem;color:var(--tx2);font-weight:400">(para campañas)</span></h2>
   <div class="grid">
     <div class="card"><div class="n">{{ cont.todos }}</div><div class="l">Todos (únicos)</div></div>
-    <div class="card"><div class="n">{{ cont.personas }}</div><div class="l">👤 Personas naturales</div></div>
-    <div class="card oro"><div class="n">{{ cont.calculo }}</div><div class="l">🧮 Dejaron correo en el cálculo</div></div>
-    <div class="card"><div class="n">{{ cont.guia }}</div><div class="l">🎁 Leads de la guía</div></div>
-    <div class="card"><div class="n">{{ cont.contadores }}</div><div class="l">👔 Contadores</div></div>
-    <div class="card verde"><div class="n">{{ cont.cortesia }}</div><div class="l">🎟️ Contadores con cortesía</div></div>
-    <div class="card verde"><div class="n">{{ cont.lector }}</div><div class="l">🤖 Lector (con licencia)</div></div>
+    <div class="card"><div class="n">{{ cont.personas }}</div><div class="l">{{ ic('user', true) }} Personas naturales</div></div>
+    <div class="card oro"><div class="n">{{ cont.calculo }}</div><div class="l">{{ ic('calc', true) }} Dejaron correo en el cálculo</div></div>
+    <div class="card"><div class="n">{{ cont.guia }}</div><div class="l">{{ ic('book', true) }} Leads de la guía</div></div>
+    <div class="card"><div class="n">{{ cont.contadores }}</div><div class="l">{{ ic('brief', true) }} Contadores</div></div>
+    <div class="card verde"><div class="n">{{ cont.cortesia }}</div><div class="l">{{ ic('ticket', true) }} Contadores con cortesía</div></div>
+    <div class="card verde"><div class="n">{{ cont.lector }}</div><div class="l">{{ ic('filedown', true) }} Lector (con licencia)</div></div>
   </div>
   <p style="text-align:center;margin:14px 0 0"><a href="/admin/campana" style="color:var(--oro);font-weight:700;text-decoration:none">Enviar una campaña a estas audiencias →</a></p>
 
