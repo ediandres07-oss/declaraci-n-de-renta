@@ -573,6 +573,7 @@ def rellenar_papel_trabajo(entrada, datos, liq, p, exogena=None) -> bytes:
     val25 = max(0.0, R(41) - R(28) - R(139))
     costos = [("SEGURIDADSOCIAL", R(33)), ("INCRNGO", R(33)), ("BENEFICIODIAN", R(28)),
               ("1FE", R(28)), ("FACTURAELECTR", R(28)), ("25", val25)]
+    ret = _retenciones_por_tercero(exogena) if exogena else []
 
     wb = openpyxl.load_workbook(_io.BytesIO(data))
     wbv = openpyxl.load_workbook(_io.BytesIO(data), data_only=True)
@@ -668,6 +669,7 @@ def rellenar_papel_trabajo(entrada, datos, liq, p, exogena=None) -> bytes:
     _fill(("PASIVOS", "DEUDAS"), deud)
     _fill("INGRESOS", ing)
     _fill("COSTOS Y DEDUCCIONES", costos, kw=True)
+    _fill("RETENCIONES", ret)
 
     # ---- Formato de marca Tributando en TODA la hoja ----
     from openpyxl.styles import Alignment
