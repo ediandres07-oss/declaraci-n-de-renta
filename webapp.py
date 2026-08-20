@@ -814,6 +814,30 @@ def admin_lector():
     return render_template_string(html, filas=filas)
 
 
+@app.get("/admin/muestra/reset")
+@autorizado_requerido
+def admin_muestra_reset():
+    """Reinicia la prueba gratis de un correo (para volver a probar). Uso:
+    /admin/muestra/reset?email=tucorreo@x.com"""
+    from src.auth import (MuestraContadorEmail, CodigoMuestra, MuestraContador,
+                          SeguimientoContador)
+    email = (request.args.get("email") or "").strip().lower()
+    if not _EMAIL_RE.match(email):
+        return jsonify({"ok": False, "error": "Falta ?email= con un correo válido."}), 400
+    borrados = 0
+    for M in (MuestraContadorEmail, CodigoMuestra, SeguimientoContador):
+        row = db.session.get(M, email)
+        if row is not None:
+            db.session.delete(row)
+            borrados += 1
+    for m in MuestraContador.query.filter_by(email=email).all():
+        db.session.delete(m)
+        borrados += 1
+    db.session.commit()
+    return jsonify({"ok": True, "email": email, "borrados": borrados,
+                    "mensaje": "Prueba reiniciada — ese correo ya puede hacer la muestra otra vez."})
+
+
 @app.post("/admin/lector/borrar")
 @autorizado_requerido
 def admin_lector_borrar():
