@@ -203,6 +203,7 @@ class MuestraContadorEmail(db.Model):
     __tablename__ = "muestras_contador_email"
     email = db.Column(db.String(200), primary_key=True)   # en minúsculas
     nombre = db.Column(db.String(200))
+    telefono = db.Column(db.String(30))                   # WhatsApp para el seguimiento comercial
     token = db.Column(db.String(80))                      # token de la carga usada
     nit_muestra = db.Column(db.String(30))
     origen = db.Column(db.String(30))                     # de dónde llegó (ads/instagram/…)
@@ -214,12 +215,20 @@ def muestra_email_usada(email: str) -> bool:
     return bool(email) and db.session.get(MuestraContadorEmail, email) is not None
 
 
-def registrar_muestra_email(email: str, token: str = "", nit: str = "", nombre: str = "") -> None:
+def registrar_muestra_email(email: str, token: str = "", nit: str = "",
+                            nombre: str = "", telefono: str = "") -> None:
     email = (email or "").strip().lower()
     if not email or db.session.get(MuestraContadorEmail, email) is not None:
         return
+    # Completa nombre/teléfono desde el código (los dejó al pedir la prueba).
+    if not nombre or not telefono:
+        cm = db.session.get(CodigoMuestra, email)
+        if cm is not None:
+            nombre = nombre or (cm.nombre or "")
+            telefono = telefono or (cm.telefono or "")
     try:
-        db.session.add(MuestraContadorEmail(email=email, token=token, nit_muestra=nit, nombre=nombre))
+        db.session.add(MuestraContadorEmail(email=email, token=token, nit_muestra=nit,
+                                            nombre=nombre, telefono=telefono))
         db.session.commit()
     except Exception:
         db.session.rollback()
@@ -256,12 +265,14 @@ class CodigoMuestra(db.Model):
     codigo_hash = db.Column(db.String(64))
     expira = db.Column(db.DateTime)
     intentos = db.Column(db.Integer, default=0)
+    nombre = db.Column(db.String(200))                    # datos del lead (prueba gratis)
+    telefono = db.Column(db.String(30))
     origen = db.Column(db.String(30))                     # de dónde llegó (ads/instagram/…)
 
 
-def generar_codigo_muestra(email: str) -> "str | None":
+def generar_codigo_muestra(email: str, nombre: str = "", telefono: str = "") -> "str | None":
     """Genera y guarda (hasheado, 15 min) un código de 6 dígitos para ese correo.
-    Devuelve el código en claro para enviarlo por correo."""
+    Guarda también nombre y teléfono (datos del lead). Devuelve el código en claro."""
     email = (email or "").strip().lower()
     if not email:
         return None
@@ -273,6 +284,10 @@ def generar_codigo_muestra(email: str) -> "str | None":
     row.codigo_hash = _hash_codigo(codigo)
     row.expira = datetime.utcnow() + timedelta(minutes=15)
     row.intentos = 0
+    if nombre:
+        row.nombre = nombre[:200]
+    if telefono:
+        row.telefono = telefono[:30]
     db.session.commit()
     return codigo
 
@@ -884,6 +899,19 @@ def _migrar_columnas_faltantes():
             if "origen" not in cols:
                 with db.engine.begin() as con:
                     con.execute(text(f"ALTER TABLE {tabla} ADD COLUMN origen VARCHAR(30)"))
+    # Datos del lead de la prueba gratis: teléfono (y nombre en codigos_muestra).
+    if "muestras_contador_email" in insp.get_table_names():
+        cols = {c["name"] for c in insp.get_columns("muestras_contador_email")}
+        if "telefono" not in cols:
+            with db.engine.begin() as con:
+                con.execute(text("ALTER TABLE muestras_contador_email ADD COLUMN telefono VARCHAR(30)"))
+    if "codigos_muestra" in insp.get_table_names():
+        cols = {c["name"] for c in insp.get_columns("codigos_muestra")}
+        with db.engine.begin() as con:
+            if "nombre" not in cols:
+                con.execute(text("ALTER TABLE codigos_muestra ADD COLUMN nombre VARCHAR(200)"))
+            if "telefono" not in cols:
+                con.execute(text("ALTER TABLE codigos_muestra ADD COLUMN telefono VARCHAR(30)"))
 
 
 auth_bp = Blueprint("auth", __name__)

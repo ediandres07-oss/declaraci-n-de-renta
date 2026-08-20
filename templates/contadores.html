@@ -309,7 +309,7 @@
     <div class="contenedor">
       <h2 class="titulo">Pruébalo gratis con un cliente real</h2>
       <p class="sub-sec">Sube la exógena de un cliente y mira el resultado y su Formulario 210.
-        <b>Sin registrarte</b> — subes la exógena, ves el resultado, y solo dejas tu correo al descargar.</p>
+        <b>Sin registrarte</b> — subes la exógena, ves el resultado, y dejas tus datos (nombre, WhatsApp y correo) para enviarte el código y el acceso.</p>
         <div class="prueba-caja">
           <div id="dz" class="dz">
             <div style="font-size:2rem">📄</div>
@@ -360,6 +360,10 @@
           </div>
 
           <div id="dzAcc" hidden style="text-align:center;margin-top:18px">
+            <input id="muestraNombre" type="text" placeholder="Tu nombre" autocomplete="name"
+              style="width:100%;max-width:340px;padding:12px 14px;border-radius:12px;border:1px solid rgba(230,196,131,.4);background:rgba(255,255,255,.06);color:#fff;font-size:1rem;outline:none;margin-bottom:10px"><br>
+            <input id="muestraTel" type="tel" inputmode="tel" placeholder="Tu WhatsApp (celular)" autocomplete="tel"
+              style="width:100%;max-width:340px;padding:12px 14px;border-radius:12px;border:1px solid rgba(230,196,131,.4);background:rgba(255,255,255,.06);color:#fff;font-size:1rem;outline:none;margin-bottom:10px"><br>
             <input id="muestraEmail" type="email" placeholder="Tu correo" autocomplete="email"
               style="width:100%;max-width:340px;padding:12px 14px;border-radius:12px;border:1px solid rgba(230,196,131,.4);background:rgba(255,255,255,.06);color:#fff;font-size:1rem;outline:none;margin-bottom:12px"><br>
             <button class="btn-hero" id="btnEnviarCodigo">✉️ Enviarme el código</button>
@@ -661,12 +665,18 @@
     if (btnCod) btnCod.onclick = async function(){
       var emailEl = document.getElementById("muestraEmail");
       var email = ((emailEl && emailEl.value) || "").trim();
+      var nombreEl = document.getElementById("muestraNombre");
+      var telEl = document.getElementById("muestraTel");
+      var nombre = ((nombreEl && nombreEl.value) || "").trim();
+      var tel = ((telEl && telEl.value) || "").replace(/[^\d+]/g, "");
       var msg = msgEl();
+      if (!nombre) { if(msg){msg.style.color="#ff9a9a";msg.textContent="Escribe tu nombre.";} if(nombreEl) nombreEl.focus(); return; }
+      if (tel.replace(/\D/g,"").length < 7) { if(msg){msg.style.color="#ff9a9a";msg.textContent="Escribe tu WhatsApp.";} if(telEl) telEl.focus(); return; }
       if (!okEmail(email)) { if(msg){msg.style.color="#ff9a9a";msg.textContent="Escribe un correo válido.";} if(emailEl) emailEl.focus(); return; }
       btnCod.disabled = true; btnCod.textContent = "Enviando…";
       try {
         var r = await fetch("/api/muestra/codigo", {method:"POST",
-          headers:{"Content-Type":"application/json"}, body: JSON.stringify({email: email})});
+          headers:{"Content-Type":"application/json"}, body: JSON.stringify({email: email, nombre: nombre, telefono: tel})});
         var j = await r.json();
         if (r.ok && j.ok) {
           document.getElementById("muestraCodigoBox").hidden = false;

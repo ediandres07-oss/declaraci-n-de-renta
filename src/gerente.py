@@ -13,6 +13,7 @@ El dueño solo lee el correo; nada se publica solo.
 from __future__ import annotations
 
 import json
+import re
 from datetime import date, datetime, timedelta
 
 from src.auth import db, OrdenRegistro, SuscripcionLector, LeadEspera, Usuario
@@ -808,21 +809,26 @@ def seguimientos_pendientes() -> list[dict]:
     # descargaron la muestra (con o sin registro)
     descargaron = {}
     origenes = {}
+    telefonos = {}
     for m in MuestraContadorEmail.query.all():
         if m.email:
             descargaron[m.email.lower()] = (m.creado or hoy, m.nombre or "")
             origenes[m.email.lower()] = m.origen or ""
+            telefonos[m.email.lower()] = m.telefono or ""
     for m in MuestraContador.query.all():
         if m.email:
             descargaron.setdefault(m.email.lower(), (getattr(m, "creado", None) or hoy, ""))
 
     # pidieron código pero nunca descargaron (fecha ≈ expira - 15 min)
     pidieron = {}
+    nombres = {}
     for c in CodigoMuestra.query.all():
         e = (c.email or "").lower()
         if e and e not in descargaron and c.expira:
             pidieron[e] = c.expira - timedelta(minutes=15)
             origenes.setdefault(e, c.origen or "")
+            telefonos.setdefault(e, c.telefono or "")
+            nombres[e] = getattr(c, "nombre", "") or ""
 
     ya = {s.email: {p for p in (s.enviados or "").split(",") if p}
           for s in SeguimientoContador.query.all()}
@@ -833,8 +839,8 @@ def seguimientos_pendientes() -> list[dict]:
             continue
         dias = (hoy - fecha).days
         if 1 <= dias <= 4 and "codigo" not in ya.get(email, ()):
-            out.append({"email": email, "nombre": "", "paso": "codigo",
-                        "origen": origenes.get(email, ""),
+            out.append({"email": email, "nombre": nombres.get(email, ""), "paso": "codigo",
+                        "origen": origenes.get(email, ""), "telefono": telefonos.get(email, ""),
                         "motivo": f"pidió código hace {dias} día(s), no descargó"})
     for email, (fecha, nombre) in descargaron.items():
         if _es_propio(email) or email in compradores:
@@ -845,11 +851,11 @@ def seguimientos_pendientes() -> list[dict]:
         dias = (hoy - fecha).days
         if 2 <= dias <= 6 and "valor" not in hechos:
             out.append({"email": email, "nombre": nombre, "paso": "valor",
-                        "origen": origenes.get(email, ""),
+                        "origen": origenes.get(email, ""), "telefono": telefonos.get(email, ""),
                         "motivo": f"descargó la muestra hace {dias} día(s), sin compra"})
         elif 7 <= dias <= 14 and "cierre" not in hechos:
             out.append({"email": email, "nombre": nombre, "paso": "cierre",
-                        "origen": origenes.get(email, ""),
+                        "origen": origenes.get(email, ""), "telefono": telefonos.get(email, ""),
                         "motivo": f"descargó hace {dias} día(s), sin compra"})
     return out
 
@@ -868,12 +874,22 @@ def seguimiento_contadores() -> int:
         asunto, _ = _correo_seguimiento(p["paso"], p["nombre"])
         aprobar = (f"https://tributando.co/admin/seguimiento/aprobar"
                    f"?email={quote(p['email'])}&paso={p['paso']}")
+        tel = re.sub(r"[^\d+]", "", str(p.get("telefono") or ""))
+        wa_num = tel.lstrip("+")
+        if wa_num and not wa_num.startswith("57") and len(wa_num) == 10:
+            wa_num = "57" + wa_num              # Colombia por defecto
+        quien = p.get("nombre") or p["email"]
+        wa_btn = (f'<a href="https://wa.me/{wa_num}" style="display:inline-block;background:#25D366;'
+                  f'color:#fff;font-weight:800;text-decoration:none;padding:9px 18px;border-radius:9px;'
+                  f'margin-left:8px">💬 WhatsApp {tel}</a>' if wa_num else
+                  '<span style="color:#b9433a;font-size:12px;margin-left:8px">sin teléfono</span>')
         bloques.append(f"""
         <div style="border:1px solid #e2ddd2;border-radius:10px;padding:14px;margin:10px 0">
-          <div style="font-weight:800">{p['email']}</div>
+          <div style="font-weight:800">{quien}</div>
+          <div style="font-size:12px;color:#5a6272">{p['email']}{(' · ' + tel) if tel else ''}</div>
           <div style="color:#8a6d3b;font-size:13px">{_SEG_PASOS[p['paso']]} — {p['motivo']}{(' · llegó por ' + p['origen']) if p.get('origen') else ''}</div>
           <div style="font-size:14px;margin:6px 0">Asunto: <i>{asunto}</i></div>
-          <a href="{aprobar}" style="display:inline-block;background:#c8991f;color:#fff;font-weight:800;text-decoration:none;padding:9px 18px;border-radius:9px">✅ Aprobar y enviar</a>
+          <a href="{aprobar}" style="display:inline-block;background:#c8991f;color:#fff;font-weight:800;text-decoration:none;padding:9px 18px;border-radius:9px">✅ Aprobar y enviar</a>{wa_btn}
         </div>""")
     html = f"""
     <div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:640px;margin:auto;color:#2b3242">

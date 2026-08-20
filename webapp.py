@@ -1835,8 +1835,12 @@ def api_muestra_codigo():
     from src.auth import MuestraContadorEmail, generar_codigo_muestra
     b = request.get_json(silent=True) or {}
     email = (b.get("email") or "").strip().lower()
+    nombre_lead = (b.get("nombre") or "").strip()[:200]
+    telefono_lead = re.sub(r"[^\d+]", "", str(b.get("telefono") or ""))[:30]
     if not _EMAIL_RE.match(email):
         return jsonify({"ok": False, "error": "Escribe un correo válido."}), 400
+    if not nombre_lead or len(telefono_lead) < 7:
+        return jsonify({"ok": False, "error": "Déjanos tu nombre y tu WhatsApp para enviarte el código."}), 400
     if db.session.get(MuestraContadorEmail, email) is not None:
         # Ya conoció la herramienta: en vez de solo rechazarlo, se le ofrece el
         # bono de $30.000 para el pase (se reusa si ya tiene uno vigente).
@@ -1855,7 +1859,7 @@ def api_muestra_codigo():
         return jsonify({"ok": False, "error": "Ese correo ya usó su muestra gratis. "
                         "Activa tu pase de temporada para declaraciones ilimitadas.",
                         "bono": bono_cod, "descuento": 30000}), 402
-    codigo = generar_codigo_muestra(email)
+    codigo = generar_codigo_muestra(email, nombre=nombre_lead, telefono=telefono_lead)
     try:
         from src.auth import CodigoMuestra
         fila = db.session.get(CodigoMuestra, email)
