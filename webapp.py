@@ -747,22 +747,11 @@ def admin_lector():
                       "agente": bool(s.agente)})
     html = """<!doctype html><html><head><meta charset="utf-8">
     <title>Suscripciones Lector</title><meta name="viewport" content="width=device-width,initial-scale=1">
-    <style>body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;background:#f5f7fa;margin:0;padding:24px;color:#1e2432}
-    h1{font-size:1.3rem}table{border-collapse:collapse;width:100%;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.05)}
-    th,td{padding:10px 12px;text-align:left;border-bottom:1px solid #eee;font-size:.9rem}th{background:#1e2432;color:#fff}
-    .est{font-weight:700}a{color:#b8955f}
-    .nav-admin{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 20px}
-    .nav-admin a{display:inline-flex;align-items:center;gap:6px;background:#1e2432;color:#fff;
-      text-decoration:none;padding:9px 16px;border-radius:8px;font-size:.9rem;font-weight:600}
-    .nav-admin a.actual{background:#e8eef5;color:#1e2432;cursor:default;pointer-events:none}</style></head><body>
-    <h1>🔑 Suscripciones — Lector XML ({{filas|length}})</h1>
-    <div class="nav-admin">
-      <a href="/admin">🏠 Órdenes y usuarios</a>
-      <a class="actual">🔑 Suscripciones Lector XML</a>
-      <a href="/vencimientos">📅 Gestor de vencimientos</a>
-    </div>
-    <div style="background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05);padding:14px 16px;margin-bottom:18px">
-      <b style="font-size:1rem">🎁 Regalar / activar licencia (gratis)</b>
+    {{ css|safe }}</head><body>
+    <h1>{{ aic('key')|safe }} Suscripciones — Lector XML ({{filas|length}})</h1>
+    {{ nav|safe }}
+    <div class="panel">
+      <b style="font-size:1rem">{{ aic('plus')|safe }} Regalar / activar licencia (gratis)</b>
       <div style="color:#8a919c;font-size:.82rem;margin:4px 0 10px">Crea o renueva la licencia de un contador sin pago. Luego él entra con su <b>correo + código</b> (no necesita clave).</div>
       <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end">
         <div><label style="font-size:.75rem;display:block;color:#5b6472">Correo del contador</label><input id="czEmail" type="email" placeholder="correo@ejemplo.com" style="padding:8px;border:1px solid #d7dbe2;border-radius:8px;min-width:220px"></div>
@@ -773,7 +762,7 @@ def admin_lector():
             <option value="max_anual">Max (ilimitado)</option>
           </select></div>
         <div><label style="font-size:.75rem;display:block;color:#5b6472">Días</label><input id="czDias" type="number" value="365" style="padding:8px;border:1px solid #d7dbe2;border-radius:8px;width:90px"></div>
-        <label style="font-size:.82rem;display:flex;align-items:center;gap:5px;color:#1e2432"><input id="czAgente" type="checkbox"> con Agente 🤖</label>
+        <label style="font-size:.82rem;display:flex;align-items:center;gap:5px;color:#1e2432"><input id="czAgente" type="checkbox"> con Agente</label>
         <button onclick="cortesia()" style="background:#1f8a5f;color:#fff;border:0;padding:9px 16px;border-radius:8px;font-weight:600;cursor:pointer">Crear/activar gratis</button>
       </div>
       <div id="czMsg" style="font-size:.85rem;margin-top:8px"></div>
@@ -781,13 +770,13 @@ def admin_lector():
     <table><tr><th>Correo</th><th>Plan</th><th>Vence</th><th>Estado</th><th>Empresas</th><th>Equipo</th><th>Agente</th><th></th></tr>
     {% for f in filas %}<tr><td>{{f.email}}</td><td>{{f.plan}}</td><td>{{f.vence or '—'}}</td>
     <td class="est" style="color:{{f.color}}">{{f.estado}}</td><td>{{f.empresas}}</td><td>{{f.equipo}}</td>
-    <td><button onclick="agente('{{f.licencia}}',{{ 'false' if f.agente else 'true' }})" title="Activar/desactivar el complemento Asistente IA (agente)" style="border:0;background:none;cursor:pointer;font-size:1rem">{{ '🤖✅' if f.agente else '➕' }}</button></td>
+    <td><button onclick="agente('{{f.licencia}}',{{ 'false' if f.agente else 'true' }})" title="Activar/desactivar el complemento Asistente IA (agente)" style="border:0;background:none;cursor:pointer;color:{{ '#1a7f37' if f.agente else '#123f6b' }}">{{ (aic('check',True) if f.agente else aic('plus',True))|safe }}</button></td>
     <td style="white-space:nowrap">
-    {% if f.equipo == 'sí' %}<button onclick="liberar('{{f.licencia}}','{{f.email}}')" title="Liberar el equipo amarrado para que el contador active en otra máquina" style="border:0;background:none;cursor:pointer;font-size:1rem">🔓</button>{% endif %}
-    <button onclick="borrar('{{f.licencia}}')" title="Borrar suscripción" style="border:0;background:none;cursor:pointer;color:#b91c1c">🗑</button></td></tr>{% endfor %}
+    {% if f.equipo == 'sí' %}<button onclick="liberar('{{f.licencia}}','{{f.email}}')" title="Liberar el equipo amarrado para que el contador active en otra máquina" style="border:0;background:none;cursor:pointer;color:#123f6b">{{ aic('unlock',True)|safe }}</button>{% endif %}
+    <button onclick="borrar('{{f.licencia}}')" title="Borrar suscripción" style="border:0;background:none;cursor:pointer;color:#b91c1c">{{ aic('trash',True)|safe }}</button></td></tr>{% endfor %}
     {% if not filas %}<tr><td colspan="8" style="color:#8a919c">Aún no hay suscripciones.</td></tr>{% endif %}
     </table>
-    <p style="color:#8a919c;font-size:.82rem;margin-top:10px">🔓 Liberar equipo = desamarra la licencia de su máquina actual; el contador la puede reactivar en otra (se re-amarra sola en la próxima activación).<br>🤖 Agente = complemento de pago (Asistente IA que ejecuta 350/300, revisa clientes, calcula). Actívalo a quien pague el add-on; tope 150 acciones/mes por contador.</p>
+    <p style="color:#8a919c;font-size:.82rem;margin-top:10px">{{ aic('unlock',True)|safe }} Liberar equipo = desamarra la licencia de su máquina actual; el contador la puede reactivar en otra (se re-amarra sola en la próxima activación).<br>Agente = complemento de pago (Asistente IA que ejecuta 350/300, revisa clientes, calcula). Actívalo a quien pague el add-on; tope 150 acciones/mes por contador.</p>
     <script>async function borrar(lic){ if(!confirm('¿Borrar esta suscripción de prueba?'))return;
       await fetch('/admin/lector/borrar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({licencia:lic})});
       location.reload();}
@@ -808,10 +797,11 @@ def admin_lector():
       const r=await fetch('/admin/lector/cortesia',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,plan,dias,agente})});
       const d=await r.json();
       if(!d.ok){ msg.style.color='#b91c1c'; msg.textContent=d.error||'No se pudo.'; return; }
-      msg.style.color='#1f8a5f'; msg.textContent='✓ Licencia activa para '+d.email+' (vence '+d.vence+'). Que entre al Lector con su correo + código.';
+      msg.style.color='#1f8a5f'; msg.textContent='Licencia activa para '+d.email+' (vence '+d.vence+'). Que entre al Lector con su correo + código.';
       setTimeout(()=>location.reload(),1800);
     }</script></body></html>"""
-    return render_template_string(html, filas=filas)
+    return render_template_string(html, filas=filas, css=_ADMIN_CSS,
+                                  nav=_admin_nav("lector"), aic=_aic)
 
 
 @app.get("/admin/muestra/reset")
@@ -866,7 +856,8 @@ def admin_campana():
     """Panel de campañas: redactar, elegir público, preview, enviar e historial."""
     from src import gerente as _ger
     return render_template("admin_campana.html", historial=_ger.historial_campanas(),
-                           cont=_ger.metricas_contactos())
+                           cont=_ger.metricas_contactos(),
+                           nav=_admin_nav("campana"), aic=_aic)
 
 
 @app.get("/admin/telegram/probar")
@@ -991,14 +982,15 @@ def admin_gestor():
                       f"<td style='text-align:center'>{f['n']}</td><td>{ult}</td></tr>")
     if not cuerpo:
         cuerpo = ["<tr><td colspan=4 style='color:#8a919c'>Nadie ha cargado clientes todavía.</td></tr>"]
-    return (f"<div style='font-family:sans-serif;max-width:720px;margin:30px auto;color:#1e2432'>"
-            f"<h2>📅 Uso del Gestor de Vencimientos ({len(filas)} contador(es))</h2>"
-            f"<p style='color:#5a6272'>Contadores con clientes cargados en /vencimientos. "
-            f"<a href='/admin'>🏠 Órdenes</a> · <a href='/admin/dashboard'>📊 Panel del negocio</a> · "
-            f"<a href='/admin/exogenas'>🧾 Leads del cálculo</a></p>"
-            f"<table cellpadding=8 style='border-collapse:collapse;width:100%'>"
-            f"<tr style='text-align:left;background:#f3ede1'><th>Contador</th><th>Correo</th>"
-            f"<th>Clientes</th><th>Último cargado</th></tr>{''.join(cuerpo)}</table></div>")
+    return (f"<!doctype html><html lang='es'><head><meta charset='utf-8'>"
+            f"<meta name='viewport' content='width=device-width,initial-scale=1'>"
+            f"<title>Uso del Gestor</title>{_ADMIN_CSS}</head><body>"
+            f"<h1>{_aic('calendar')} Uso del Gestor de Vencimientos "
+            f"<span style='color:#6a7482;font-weight:600;font-size:.92rem'>({len(filas)} contador(es))</span></h1>"
+            f"{_admin_nav('gestor')}"
+            f"<p>Contadores con clientes cargados en /vencimientos.</p>"
+            f"<table><tr><th>Contador</th><th>Correo</th><th>Clientes</th>"
+            f"<th>Último cargado</th></tr>{''.join(cuerpo)}</table></body></html>")
 
 
 @app.get("/admin/exogenas")
@@ -1033,21 +1025,26 @@ def admin_exogenas():
             "compro": correo in compradores,
         })
     cargas.sort(key=lambda c: c["fecha"], reverse=True)
-    filas = "".join(
-        f"<tr><td>{c['fecha']}</td><td>{c['nombre'] or '—'}</td><td>{c['nit'] or '—'}</td>"
-        f"<td>{c['correo']}</td>"
-        f"<td>{'✅' if c['compro'] else '—'}</td></tr>" for c in cargas)
+    filas_l = []
+    for c in cargas:
+        compro = (f"<span style='color:#1a7f37;font-weight:700'>{_aic('check', True)} sí</span>"
+                  if c["compro"] else "<span style='color:#9db0c4'>—</span>")
+        filas_l.append(
+            f"<tr><td>{c['fecha']}</td><td>{c['nombre'] or '—'}</td><td>{c['nit'] or '—'}</td>"
+            f"<td>{c['correo']}</td><td>{compro}</td></tr>")
+    filas = "".join(filas_l)
     if not filas:
         filas = "<tr><td colspan=5 style='color:#8a919c'>Aún no hay leads con correo — desde hoy el resultado pide el correo antes de mostrarse, aquí irán apareciendo.</td></tr>"
-    return (f"<div style='font-family:sans-serif;max-width:760px;margin:30px auto;color:#1e2432'>"
-            f"<h2>🧾 Leads del cálculo de renta ({len(cargas)})</h2>"
-            f"<p style='color:#5a6272'>Solo se listan los que dejaron correo (sin tus cargas de prueba). "
-            f"Subidas históricas sin correo: {sin_correo}. "
-            f"<a href='/admin'>🏠 Órdenes</a> · <a href='/admin/dashboard'>📊 Panel del negocio</a> · "
-            f"<a href='/admin/gestor'>📅 Uso del Gestor</a></p>"
-            f"<table border=0 cellpadding=8 style='border-collapse:collapse;width:100%'>"
-            f"<tr style='text-align:left;background:#f3ede1'><th>Fecha</th><th>Nombre</th>"
-            f"<th>NIT/Cédula</th><th>Correo (lead)</th><th>Compró</th></tr>{filas}</table></div>")
+    return (f"<!doctype html><html lang='es'><head><meta charset='utf-8'>"
+            f"<meta name='viewport' content='width=device-width,initial-scale=1'>"
+            f"<title>Leads del cálculo</title>{_ADMIN_CSS}</head><body>"
+            f"<h1>{_aic('receipt')} Leads del cálculo de renta "
+            f"<span style='color:#6a7482;font-weight:600;font-size:.92rem'>({len(cargas)})</span></h1>"
+            f"{_admin_nav('exogenas')}"
+            f"<p>Solo se listan los que dejaron correo (sin tus cargas de prueba). "
+            f"Subidas históricas sin correo: {sin_correo}.</p>"
+            f"<table><tr><th>Fecha</th><th>Nombre</th>"
+            f"<th>NIT/Cédula</th><th>Correo (lead)</th><th>Compró</th></tr>{filas}</table></body></html>")
 
 
 @app.get("/admin/seguimiento/aprobar")
@@ -3558,6 +3555,15 @@ _AIC_P = {
     'reset': '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>',
     'x': '<path d="M18 6 6 18M6 6l12 12"/>',
     'plus': '<path d="M12 5v14M5 12h14"/>',
+    'user': '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+    'ticket': '<path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v14"/>',
+    'gift': '<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/><path d="M7.5 8a2.5 2.5 0 1 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/>',
+    'globe': '<circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/>',
+    'edit': '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
+    'eye': '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',
+    'send': '<path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4Z"/>',
+    'clock': '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>',
+    'calc': '<rect width="16" height="20" x="4" y="2" rx="2"/><path d="M8 6h8M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/>',
 }
 
 
@@ -3565,6 +3571,74 @@ def _aic(n, s=False):
     return (f'<svg class="aic{" s" if s else ""}" viewBox="0 0 24 24" fill="none" '
             f'stroke="currentColor" stroke-width="1.9" stroke-linecap="round" '
             f'stroke-linejoin="round">{_AIC_P[n]}</svg>')
+
+
+# CSS y navegación compartidos por TODOS los paneles admin (mismo look navy/dorado).
+_ADMIN_CSS = """<style>
+:root{--navy:#1e2432;--oro:#c9a75a;--oro-c:#e0c584;--tx:#2b3242;--tx2:#6a7482;
+  --ln:#e7e2d6;--bg:#f5f3ee;--card:#fff;--band:#faf7f0;--verde:#1a7f37;--rojo:#b3372f}
+*{box-sizing:border-box}
+body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;margin:0 auto;max-width:1180px;
+  padding:26px 22px 64px;color:var(--tx);background:var(--bg)}
+h1{font-size:1.5rem;color:var(--navy);margin:0 0 16px;display:flex;align-items:center;gap:9px}
+h2{font-size:1.12rem;color:var(--navy);margin:36px 0 12px;display:flex;align-items:center;
+  gap:9px;scroll-margin-top:16px}
+p{color:var(--tx2);font-size:.9rem;line-height:1.5}
+a{color:#0f6b4f}
+.aic{width:18px;height:18px;color:var(--oro);flex:0 0 auto;vertical-align:-3px}
+.aic.s{width:15px;height:15px;vertical-align:-3px}
+.nav-admin{display:flex;flex-wrap:wrap;gap:9px;margin:0 0 24px}
+.nav-admin a{display:inline-flex;align-items:center;gap:7px;background:var(--navy);color:#fff;
+  text-decoration:none;padding:10px 16px;border-radius:10px;font-size:.9rem;font-weight:600;
+  transition:transform .15s ease, box-shadow .15s ease}
+.nav-admin a .aic{color:var(--oro-c)}
+.nav-admin a:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(10,25,45,.22)}
+.nav-admin a.actual{background:var(--oro);color:var(--navy);cursor:default;pointer-events:none}
+.nav-admin a.actual .aic{color:var(--navy)}
+.resumen{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:14px;margin:0 0 30px}
+.card{background:var(--card);border:1px solid var(--ln);border-radius:14px;padding:16px 18px;
+  text-decoration:none;display:block;box-shadow:0 3px 12px rgba(20,26,40,.05);
+  transition:transform .15s ease, box-shadow .15s ease}
+.card:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(20,26,40,.12)}
+.card .n{font-size:1.9rem;font-weight:800;line-height:1;color:var(--navy)}
+.card .l{font-size:.82rem;color:var(--tx2);margin-top:7px;display:flex;align-items:center;gap:6px}
+.card .l .aic{color:var(--oro)}
+.panel{background:var(--card);border:1px solid var(--ln);border-radius:14px;padding:16px 18px;
+  margin-bottom:22px;box-shadow:0 3px 12px rgba(20,26,40,.05)}
+table{border-collapse:separate;border-spacing:0;width:100%;font-size:.9rem;background:var(--card);
+  border:1px solid var(--ln);border-radius:14px;overflow:hidden;margin-bottom:30px;
+  box-shadow:0 3px 12px rgba(20,26,40,.05)}
+th,td{padding:11px 14px;text-align:left;vertical-align:top;border-bottom:1px solid #eef0f3}
+th{background:var(--navy);color:var(--oro-c);font-size:.72rem;letter-spacing:.04em;text-transform:uppercase}
+tbody tr:nth-child(even) td,tr:nth-child(even) td{background:var(--band)}
+tr:last-child td{border-bottom:0}
+code{background:#eef1f5;padding:2px 6px;border-radius:5px;font-size:.82rem}
+.est{font-weight:700}
+button{transition:transform .15s ease, box-shadow .15s ease;cursor:pointer;font-weight:600}
+button:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 14px rgba(10,25,45,.16)}
+input,select{font-size:.95rem;padding:8px 10px;border:1px solid #d7dbe2;border-radius:8px}
+label{font-size:.78rem}
+</style>"""
+
+_ADMIN_TABS = [
+    ("ordenes", "/admin", "home", "Órdenes y usuarios"),
+    ("negocio", "/admin/dashboard", "chart", "Panel del negocio"),
+    ("campana", "/admin/campana", "mega", "Campañas"),
+    ("lector", "/admin/lector", "key", "Suscripciones Lector XML"),
+    ("exogenas", "/admin/exogenas", "receipt", "Leads del cálculo"),
+    ("gestor", "/admin/gestor", "calendar", "Uso del Gestor"),
+    ("vencimientos", "/vencimientos", "calendar", "Gestor de vencimientos"),
+]
+
+
+def _admin_nav(actual=""):
+    links = []
+    for key, href, icon, label in _ADMIN_TABS:
+        if key == actual:
+            links.append(f'<a class="actual">{_aic(icon)} {label}</a>')
+        else:
+            links.append(f'<a href="{href}">{_aic(icon)} {label}</a>')
+    return '<div class="nav-admin">' + "".join(links) + "</div>"
 
 
 @app.get("/admin")

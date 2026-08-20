@@ -6,14 +6,23 @@
 <meta name="robots" content="noindex">
 <title>Campañas · Tributando</title>
 <style>
-  :root{ --navy:#1e2432; --oro:#c8991f; --dorado:#cdab7e; --tx:#2b3242; --tx2:#6a7482;
+  :root{ --navy:#1e2432; --oro:#c9a75a; --dorado:#e0c584; --tx:#2b3242; --tx2:#6a7482;
          --ln:#e6e2d8; --bg:#f4f2ee; --card:#fff; --verde:#1a7f37; --rojo:#b3372f; }
   *{ box-sizing:border-box; margin:0; padding:0; }
   body{ font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; color:var(--tx); background:var(--bg); }
-  .wrap{ max-width:820px; margin:0 auto; padding:24px 18px 60px; }
-  h1{ font-size:1.5rem; color:var(--navy); margin-bottom:4px; }
+  .wrap{ max-width:900px; margin:0 auto; padding:24px 18px 60px; }
+  h1{ font-size:1.5rem; color:var(--navy); margin-bottom:4px; display:flex; align-items:center; gap:9px; }
   .sub{ color:var(--tx2); font-size:.9rem; margin-bottom:18px; }
-  nav a{ color:var(--oro); text-decoration:none; font-size:.88rem; margin-right:14px; }
+  .aic{ width:18px; height:18px; color:var(--oro); flex:0 0 auto; vertical-align:-3px; }
+  .aic.s{ width:15px; height:15px; vertical-align:-3px; }
+  .nav-admin{ display:flex; flex-wrap:wrap; gap:9px; margin:0 0 22px; }
+  .nav-admin a{ display:inline-flex; align-items:center; gap:7px; background:var(--navy); color:#fff;
+    text-decoration:none; padding:10px 16px; border-radius:10px; font-size:.9rem; font-weight:600;
+    transition:transform .15s ease, box-shadow .15s ease; }
+  .nav-admin a .aic{ color:var(--dorado); }
+  .nav-admin a:hover{ transform:translateY(-2px); box-shadow:0 8px 20px rgba(10,25,45,.22); }
+  .nav-admin a.actual{ background:var(--oro); color:var(--navy); pointer-events:none; }
+  .nav-admin a.actual .aic{ color:var(--navy); }
   .card{ background:var(--card); border:1px solid var(--ln); border-radius:14px; padding:20px; margin-bottom:18px; box-shadow:0 3px 12px rgba(20,26,40,.05); }
   label{ display:block; font-size:.8rem; font-weight:700; color:var(--tx2); margin:12px 0 5px; }
   input[type=text], textarea, select{ width:100%; padding:11px; border:1px solid var(--ln); border-radius:9px; font-size:.95rem; font-family:inherit; }
@@ -27,6 +36,9 @@
   .btn{ border:0; border-radius:10px; padding:12px 22px; font-weight:800; cursor:pointer; font-size:.95rem; }
   .btn.prev{ background:#e8eef5; color:var(--navy); }
   .btn.send{ background:var(--oro); color:#fff; }
+  .btn{ display:inline-flex; align-items:center; gap:7px; }
+  .btn .aic{ color:inherit; }
+  .aud label .aic{ color:var(--oro); }
   .btn:disabled{ opacity:.5; cursor:default; }
   #prevMsg{ font-size:.95rem; margin-top:10px; }
   table{ width:100%; border-collapse:collapse; font-size:.85rem; margin-top:6px; }
@@ -37,21 +49,21 @@
 </head>
 <body>
 <div class="wrap">
-  <h1>📣 Campañas</h1>
+  <h1>{{ aic('mega')|safe }} Campañas</h1>
   <div class="sub">Redacta, elige el público, mira el preview y envía. Queda en el historial.</div>
-  <nav style="margin-bottom:16px"><a href="/admin">← Panel admin</a><a href="/admin/dashboard">📊 Panel del negocio</a></nav>
+  {{ nav|safe }}
 
   <div class="card">
     <label>1 · Público</label>
     <div class="aud">
-      <label><input type="radio" name="pub" value="personas" checked> 👤 Personas naturales <b style="margin-left:auto">{{ cont.personas }}</b></label>
-      <label><input type="radio" name="pub" value="contadores"> 👔 Contadores <b style="margin-left:auto">{{ cont.contadores }}</b></label>
-      <label><input type="radio" name="pub" value="pase"> 🎫 Solo pase de temporada <b style="margin-left:auto">{{ cont.pase }}</b></label>
-      <label><input type="radio" name="pub" value="cortesia"> 🎟️ Contadores con cortesía <b style="margin-left:auto">{{ cont.cortesia }}</b></label>
-      <label><input type="radio" name="pub" value="guia"> 🎁 Leads de la guía <b style="margin-left:auto">{{ cont.guia }}</b></label>
-      <label><input type="radio" name="pub" value="calculo"> 🧮 Leads del cálculo <b style="margin-left:auto">{{ cont.calculo }}</b></label>
-      <label><input type="radio" name="pub" value="todos"> 🌐 Todos <b style="margin-left:auto">{{ cont.todos }}</b></label>
-      <label><input type="radio" name="pub" value="lista"> ✍️ Lista a la medida</label>
+      <label><input type="radio" name="pub" value="personas" checked> {{ aic('user')|safe }} Personas naturales <b style="margin-left:auto">{{ cont.personas }}</b></label>
+      <label><input type="radio" name="pub" value="contadores"> {{ aic('brief')|safe }} Contadores <b style="margin-left:auto">{{ cont.contadores }}</b></label>
+      <label><input type="radio" name="pub" value="pase"> {{ aic('card')|safe }} Solo pase de temporada <b style="margin-left:auto">{{ cont.pase }}</b></label>
+      <label><input type="radio" name="pub" value="cortesia"> {{ aic('ticket')|safe }} Contadores con cortesía <b style="margin-left:auto">{{ cont.cortesia }}</b></label>
+      <label><input type="radio" name="pub" value="guia"> {{ aic('gift')|safe }} Leads de la guía <b style="margin-left:auto">{{ cont.guia }}</b></label>
+      <label><input type="radio" name="pub" value="calculo"> {{ aic('calc')|safe }} Leads del cálculo <b style="margin-left:auto">{{ cont.calculo }}</b></label>
+      <label><input type="radio" name="pub" value="todos"> {{ aic('globe')|safe }} Todos <b style="margin-left:auto">{{ cont.todos }}</b></label>
+      <label><input type="radio" name="pub" value="lista"> {{ aic('edit')|safe }} Lista a la medida</label>
     </div>
     <div id="listaBox" style="display:none">
       <label>Correos (separados por coma, espacio o salto de línea)</label>
@@ -75,14 +87,14 @@
     </div>
 
     <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-      <button class="btn prev" id="btnPrev" type="button">👁 Ver destinatarios</button>
-      <button class="btn send" id="btnSend" type="button">📤 Enviar campaña</button>
+      <button class="btn prev" id="btnPrev" type="button">{{ aic('eye')|safe }} Ver destinatarios</button>
+      <button class="btn send" id="btnSend" type="button">{{ aic('send')|safe }} Enviar campaña</button>
       <span id="prevMsg"></span>
     </div>
   </div>
 
   <div class="card">
-    <label style="margin-top:0">🕓 Historial de campañas</label>
+    <label style="margin-top:0;display:flex;align-items:center;gap:6px">{{ aic('clock','s')|safe }} Historial de campañas</label>
     <table>
       <thead><tr><th>Fecha</th><th>Asunto</th><th>Público</th><th>Total</th><th>Enviados</th><th>Fallidos</th></tr></thead>
       <tbody id="histBody">
@@ -164,7 +176,7 @@ $("#btnSend").addEventListener("click", async () => {
     if (j.ok) { msg.style.color = "var(--verde)"; msg.innerHTML = `✓ Enviada: <b>${j.enviados}</b> enviados, ${j.fallidos} fallidos. Recarga para ver el historial.`; }
     else { msg.style.color = "var(--rojo)"; msg.textContent = "⚠ " + (j.error || "No se pudo enviar."); }
   } catch(e){ msg.style.color = "var(--rojo)"; msg.textContent = "Error de red al enviar."; }
-  btn.disabled = false; btn.textContent = "📤 Enviar campaña";
+  btn.disabled = false; btn.textContent = "Enviar campaña";
 });
 </script>
 </body>
