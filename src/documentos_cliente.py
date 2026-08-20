@@ -81,8 +81,6 @@ _REGLAS = [
 ]
 
 _BASICOS = [
-    "Cédula de ciudadanía (copia legible).",
-    "RUT actualizado con la responsabilidad de renta.",
     "Usuario y clave del portal DIAN (o disposición para crear la firma electrónica).",
 ]
 
@@ -146,9 +144,6 @@ def documentos_de(exogena) -> List[dict]:
             or not any(e in d["documento"] for e in entidades_con_doc)]
 
     basicos = list(_BASICOS)
-    if declaro_antes:
-        basicos.append("Copia de la declaración de renta del año anterior "
-                       "(la exógena muestra que ya declaró).")
     out = [{"categoria": "Básicos", "documento": b} for b in basicos]
     out += sorted(({"categoria": d["categoria"], "documento": d["documento"]}
                    for d in docs), key=lambda d: d["categoria"])
