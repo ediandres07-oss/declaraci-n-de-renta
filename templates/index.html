@@ -598,8 +598,9 @@ async function recalcular() {
 
 async function descargarPdf(url, nombreDefecto) {
   volcarFormularioADatos();
+  const obs = ($("#obsContador") && $("#obsContador").value) || "";
   const r = await fetch(url, {method: "POST",
-    headers: {"Content-Type": "application/json"}, body: JSON.stringify({token, datos})});
+    headers: {"Content-Type": "application/json"}, body: JSON.stringify({token, datos, observaciones: obs})});
   if (!r.ok) { const j = await r.json().catch(() => ({})); alert(j.error || "Error generando el PDF"); return; }
   const blob = await r.blob();
   const a = document.createElement("a");

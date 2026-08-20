@@ -2389,7 +2389,7 @@ def resumen_pdf():
         generar_resumen_pdf(salida, datos, liq, PARAMS, exogena, razones,
                             preparado_por=(getattr(u, "nombre", "") or "").strip(),
                             fecha_lim=fl,
-                            observaciones=str(cuerpo.get("observaciones") or "")[:4000],
+                            observaciones=str(cuerpo.get("observaciones") or "")[:8000],
                             liq_base=liq_base, logo_bytes=logo_bytes)
         contenido = salida.read_bytes()
     finally:
