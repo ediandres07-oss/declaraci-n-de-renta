@@ -3535,6 +3535,38 @@ def desbloquear_pase():
     return jsonify({"ok": True})
 
 
+_AIC_P = {
+    'home': '<path d="M3 9.5 12 3l9 6.5"/><path d="M5 10v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V10"/>',
+    'chart': '<path d="M3 3v18h18"/><rect x="7" y="10" width="3" height="8"/><rect x="12" y="6" width="3" height="12"/><rect x="17" y="13" width="3" height="5"/>',
+    'mega': '<path d="m3 11 15-5v12L3 13v-2Z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/>',
+    'key': '<circle cx="7.5" cy="15.5" r="4.5"/><path d="m10.5 12.5 8-8"/><path d="m17 5 2 2"/><path d="m14 8 2 2"/>',
+    'receipt': '<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1V2l-2 1-2-1-2 1-2-1-2 1-2-1Z"/><path d="M8 7h8"/><path d="M8 11h8"/>',
+    'calendar': '<rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/>',
+    'card': '<rect width="20" height="14" x="2" y="5" rx="2"/><path d="M2 10h20"/>',
+    'flag': '<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1Z"/><path d="M4 22v-7"/>',
+    'users': '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+    'brief': '<rect width="20" height="14" x="2" y="7" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',
+    'flask': '<path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"/><path d="M7 15h10"/>',
+    'mail': '<rect width="20" height="16" x="2" y="4" rx="2"/><path d="m2 6 10 7L22 6"/>',
+    'check': '<path d="M20 6 9 17l-5-5"/>',
+    'lock': '<rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+    'unlock': '<rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/>',
+    'trash': '<path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>',
+    'bell': '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
+    'phone': '<path d="M13.8 10.2a6 6 0 0 0 0 3.6M16.5 7.5a10 10 0 0 1 0 9M4 4h3l2 5-2.5 1.5a11 11 0 0 0 5 5L15 18l2 3v-2"/>',
+    'chat': '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/>',
+    'reset': '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>',
+    'x': '<path d="M18 6 6 18M6 6l12 12"/>',
+    'plus': '<path d="M12 5v14M5 12h14"/>',
+}
+
+
+def _aic(n, s=False):
+    return (f'<svg class="aic{" s" if s else ""}" viewBox="0 0 24 24" fill="none" '
+            f'stroke="currentColor" stroke-width="1.9" stroke-linecap="round" '
+            f'stroke-linejoin="round">{_AIC_P[n]}</svg>')
+
+
 @app.get("/admin")
 @autorizado_requerido
 def admin():
@@ -3562,16 +3594,16 @@ def admin():
         if estado in ("pendiente_pago", "pago_reportado"):
             acciones = (f"<button onclick=\"confirmar('{oid}')\" "
                         f"style='background:#1e7d43;color:#fff;border:0;border-radius:6px;"
-                        f"padding:6px 10px;cursor:pointer'>✓ Confirmar pago</button>")
+                        f"padding:6px 10px;cursor:pointer'>{_aic('check', True)} Confirmar pago</button>")
             if o.get("plan") == "contadores":
                 acciones += ("<br><small style='color:#1e7d43'>al confirmar se le "
                              "habilita el liquidador solo (con su correo)</small>")
         elif o.get("plan") == "contadores":
-            correo_ok = ("📧 correo de acceso enviado" if o.get("bienvenida_pase_enviada")
+            correo_ok = (f"{_aic('mail', True)} correo de acceso enviado" if o.get("bienvenida_pase_enviada")
                          else (f"<button onclick=\"confirmar('{oid}')\" "
                                f"style='background:#123f6b;color:#fff;border:0;border-radius:6px;"
-                               f"padding:5px 9px;cursor:pointer'>📧 Enviar correo de acceso</button>"))
-            acciones = (f"<small style='color:#1e7d43'>✓ acceso al liquidador habilitado</small>"
+                               f"padding:5px 9px;cursor:pointer'>{_aic('mail', True)} Enviar correo de acceso</button>"))
+            acciones = (f"<small style='color:#1e7d43'>{_aic('check', True)} acceso al liquidador habilitado</small>"
                         f"<br>{correo_ok}")
             # candado de login: si el contador se bloqueó por códigos fallidos,
             # mostrarlo aquí con botón para liberarlo sin esperar los 15 min
@@ -3580,23 +3612,23 @@ def admin():
                       if correo_pase else None)
             if u_pase and esta_bloqueado(u_pase):
                 restante = int((u_pase.bloqueado_hasta - datetime.utcnow()).total_seconds() // 60) + 1
-                acciones += (f"<br><small style='color:#b3372f'>🔒 login bloqueado "
+                acciones += (f"<br><small style='color:#b3372f'>{_aic('lock', True)} login bloqueado "
                              f"{restante} min (códigos fallidos)</small> "
                              f"<button onclick=\"desbloquear('{correo_pase}')\" "
                              f"style='background:#b3372f;color:#fff;border:0;border-radius:6px;"
-                             f"padding:4px 8px;cursor:pointer;font-size:12px'>🔓 Desbloquear</button>")
+                             f"padding:4px 8px;cursor:pointer;font-size:12px'>{_aic('unlock', True)} Desbloquear</button>")
         else:
             acciones = (f"<a href='/api/orden/{oid}/formulario.pdf'>F210 PDF</a> · "
                         f"<a href='/api/orden/{oid}/documentos.pdf'>Checklist</a> · "
                         f"<a href='/api/orden/{oid}/exogena.xlsx'>Exógena</a>")
         acciones += (f"<br><button onclick=\"borrarOrden('{oid}')\" "
                      f"style='margin-top:4px;background:none;border:0;color:#b3372f;"
-                     f"cursor:pointer;font-size:12px'>🗑 Eliminar</button>")
+                     f"cursor:pointer;font-size:12px'>{_aic('trash', True)} Eliminar</button>")
         filas.append(
             f"<tr><td>{o.get('fecha','')}<br><small style='color:#8a919c'>"
             f"{horas.get(oid, '')}</small></td><td><code>{oid}</code></td>"
             f"<td>{o.get('nombre','')}<br><small>{o.get('nit','')}</small></td>"
-            f"<td>{('👔 ' + _CFG_PRECIOS.get('contadores',{}).get('nombre','Pase de temporada')) if o.get('plan')=='contadores' else PLANES.get(o.get('plan',''),{}).get('nombre', o.get('plan',''))}</td>"
+            f"<td>{(_aic('brief', True) + ' ' + _CFG_PRECIOS.get('contadores',{}).get('nombre','Pase de temporada')) if o.get('plan')=='contadores' else PLANES.get(o.get('plan',''),{}).get('nombre', o.get('plan',''))}</td>"
             f"<td style='text-align:right'>${o.get('precio',0):,.0f}</td>"
             f"<td>{c.get('nombre','')}<br><small>{c.get('email','')} {c.get('telefono','')}</small></td>"
             f"<td style='color:{color};font-weight:700'>{estado.replace('_',' ')}</td>"
@@ -3613,24 +3645,25 @@ def admin():
         if u.fecha_limite:
             n = (u.fecha_limite - date.today()).days
             dias = f" <small>({n} días)</small>" if n >= 0 else f" <small style='color:#b3372f'>(venció)</small>"
-        rec = "🔔 sí" if d["acepta_recordatorios"] else "🔕 no"
+        rec = (f"{_aic('bell', True)} sí" if d["acepta_recordatorios"]
+               else "<span style='color:#9db0c4'>no</span>")
         if d["quiere_asesor"]:
             n_asesor += 1
             wa = (u.asesor_whatsapp or "").strip()
             wa_num = "".join(ch for ch in wa if ch.isdigit())
             if wa_num and not wa_num.startswith("57") and len(wa_num) == 10:
                 wa_num = "57" + wa_num
-            wa_html = (f"<br>📱 <a href='https://wa.me/{wa_num}' target='_blank' "
+            wa_html = (f"<br>{_aic('phone', True)} <a href='https://wa.me/{wa_num}' target='_blank' "
                        f"style='color:#1e7d43;font-weight:700'>{wa}</a>" if wa_num else
                        "<br><small style='color:#9db0c4'>sin WhatsApp</small>")
             mot = (u.asesor_motivo or "").strip()
-            mot_html = (f"<br><span style='color:#5a6b7f'>💬 {mot}</span>" if mot else
+            mot_html = (f"<br><span style='color:#5a6b7f'>{_aic('chat', True)} {mot}</span>" if mot else
                         "<br><small style='color:#9db0c4'>sin motivo</small>")
-            asesor = ("<b style='color:#b3372f'>⚑ PIDIÓ ASESOR</b>"
+            asesor = (f"<b style='color:#b3372f'>{_aic('flag', True)} PIDIÓ ASESOR</b>"
                       f"{wa_html}{mot_html}<br>"
                       f"<button onclick=\"atender({u.id})\" "
                       f"style='margin-top:4px;background:none;border:0;color:#1e7d43;"
-                      f"cursor:pointer;font-size:12px'>✓ Atendido / quitar</button>")
+                      f"cursor:pointer;font-size:12px'>{_aic('check', True)} Atendido / quitar</button>")
             fila_bg = " style='background:#fff6f5'"
         else:
             asesor = "<span style='color:#9db0c4'>—</span>"
@@ -3648,7 +3681,7 @@ def admin():
             f"<td>{asesor}</td></tr>")
 
     aviso_asesor = (f"<p style='background:#fff6f5;border:1px solid #f0c8c4;padding:10px 14px;"
-                    f"border-radius:8px'>⚑ <b>{n_asesor}</b> usuario(s) solicitaron que un asesor "
+                    f"border-radius:8px'>{_aic('flag', True)} <b>{n_asesor}</b> usuario(s) solicitaron que un asesor "
                     f"los contacte.</p>" if n_asesor else "")
 
     # ---- contadores que usaron su muestra gratis (termómetro + reinicio) ----
@@ -3662,7 +3695,7 @@ def admin():
             f"<td>{m.nit_muestra or '—'}</td>"
             f"<td><button onclick=\"reiniciar({m.usuario_id})\" "
             f"style='background:#b3372f;color:#fff;border:0;border-radius:6px;"
-            f"padding:6px 10px;cursor:pointer'>↺ Reiniciar prueba</button></td></tr>")
+            f"padding:6px 10px;cursor:pointer'>{_aic('reset', True)} Reiniciar prueba</button></td></tr>")
     # muestras del flujo por correo + código (sin registro OAuth)
     from src.auth import MuestraContadorEmail as _MCE
     for m in _MCE.query.order_by(_MCE.creado.desc()).all():
@@ -3675,7 +3708,7 @@ def admin():
             f"<td>{m.nit_muestra or '—'}</td>"
             f"<td><button onclick=\"reiniciarEmail('{m.email}')\" "
             f"style='background:#b3372f;color:#fff;border:0;border-radius:6px;"
-            f"padding:6px 10px;cursor:pointer'>↺ Reiniciar prueba</button></td></tr>")
+            f"padding:6px 10px;cursor:pointer'>{_aic('reset', True)} Reiniciar prueba</button></td></tr>")
 
     # ---- contadores habilitados al liquidador (pase de temporada) ----
     filas_a = []
@@ -3686,7 +3719,7 @@ def admin():
             f"<td>{a.nota or ''}</td><td>{fecha_a}</td>"
             f"<td><button onclick=\"revocar('{a.email}')\" "
             f"style='background:#b3372f;color:#fff;border:0;border-radius:6px;"
-            f"padding:6px 10px;cursor:pointer'>✕ Quitar acceso</button></td></tr>")
+            f"padding:6px 10px;cursor:pointer'>{_aic('x', True)} Quitar acceso</button></td></tr>")
 
     # ---- resumen (tarjetas) ----
     n_pend = sum(1 for o in ordenes.values() if o.get("tipo") == "orden"
@@ -3697,73 +3730,96 @@ def admin():
         n_susc = 0
     def _card(valor, etiqueta, ancla, urgente=False):
         bg = "#fff6f5" if urgente and valor else "#fff"
-        bd = "#f0c8c4" if urgente and valor else "#dbe3ec"
-        col = "#b3372f" if urgente and valor else "#123f6b"
+        bd = "#f0c8c4" if urgente and valor else "#e7e2d6"
+        col = "#b3372f" if urgente and valor else "#1e2432"
         return (f"<a href='{ancla}' class='card' style='background:{bg};border-color:{bd}'>"
                 f"<div class='n' style='color:{col}'>{valor}</div>"
                 f"<div class='l'>{etiqueta}</div></a>")
     resumen = (
-        _card(n_pend, "💳 Pagos por confirmar", "#ordenes", urgente=True) +
-        _card(n_asesor, "⚑ Piden asesor", "#usuarios", urgente=True) +
-        _card(len(filas_u), "👥 Usuarios", "#usuarios") +
-        _card(n_susc, "🔑 Suscripciones Lector", "/admin/lector") +
-        _card(len(filas_a), "👔 Pases activos", "#acceso") +
-        _card(len(filas_m), "🧪 Probaron gratis", "#prueba"))
+        _card(n_pend, f"{_aic('card', True)} Pagos por confirmar", "#ordenes", urgente=True) +
+        _card(n_asesor, f"{_aic('flag', True)} Piden asesor", "#usuarios", urgente=True) +
+        _card(len(filas_u), f"{_aic('users', True)} Usuarios", "#usuarios") +
+        _card(n_susc, f"{_aic('key', True)} Suscripciones Lector", "/admin/lector") +
+        _card(len(filas_a), f"{_aic('brief', True)} Pases activos", "#acceso") +
+        _card(len(filas_m), f"{_aic('flask', True)} Probaron gratis", "#prueba"))
 
     return f"""<!DOCTYPE html><html lang="es"><head><meta charset="utf-8">
 <title>Admin — Panel</title>
-<style>body{{font-family:-apple-system,sans-serif;margin:24px;color:#1e2b3a}}
-table{{border-collapse:collapse;width:100%;font-size:.85rem;margin-bottom:34px}}
-th,td{{border-bottom:1px solid #dbe3ec;padding:8px;text-align:left;vertical-align:top}}
-th{{background:#123f6b;color:#fff}}
-h2{{margin-top:10px;scroll-margin-top:16px;border-top:2px solid #eef2f7;padding-top:18px}}
-button{{transition:transform .15s ease, box-shadow .15s ease; cursor:pointer}}
-button:hover:not(:disabled){{transform:translateY(-2px); box-shadow:0 8px 18px rgba(10,25,45,.18)}}
-.nav-admin{{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 18px}}
-.nav-admin a{{display:inline-flex;align-items:center;gap:6px;background:#123f6b;color:#fff;
-  text-decoration:none;padding:9px 16px;border-radius:8px;font-size:.9rem;font-weight:600;
+<style>
+:root{{--navy:#1e2432;--oro:#c9a75a;--oro-c:#e0c584;--tx:#2b3242;--tx2:#6a7482;
+  --ln:#e7e2d6;--bg:#f5f3ee;--card:#fff;--band:#faf7f0;--verde:#1a7f37;--rojo:#b3372f}}
+*{{box-sizing:border-box}}
+body{{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;margin:0 auto;max-width:1180px;
+  padding:26px 22px 64px;color:var(--tx);background:var(--bg)}}
+h1{{font-size:1.5rem;color:var(--navy);margin:0 0 16px}}
+h2{{font-size:1.12rem;color:var(--navy);margin:36px 0 12px;display:flex;align-items:center;
+  gap:9px;scroll-margin-top:16px}}
+p{{color:var(--tx2);font-size:.9rem;line-height:1.5}}
+a{{color:#0f6b4f}}
+.aic{{width:18px;height:18px;color:var(--oro);flex:0 0 auto;vertical-align:-3px}}
+.aic.s{{width:15px;height:15px;vertical-align:-3px}}
+.nav-admin{{display:flex;flex-wrap:wrap;gap:9px;margin:0 0 24px}}
+.nav-admin a{{display:inline-flex;align-items:center;gap:7px;background:var(--navy);color:#fff;
+  text-decoration:none;padding:10px 16px;border-radius:10px;font-size:.9rem;font-weight:600;
   transition:transform .15s ease, box-shadow .15s ease}}
-.nav-admin a:hover{{transform:translateY(-2px);box-shadow:0 8px 18px rgba(10,25,45,.18)}}
-.nav-admin a.actual{{background:#e8eef5;color:#123f6b;cursor:default;pointer-events:none}}
-.resumen{{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:0 0 28px}}
-.card{{border:1px solid #dbe3ec;border-radius:12px;padding:14px 16px;text-decoration:none;
-  display:block;transition:transform .15s ease, box-shadow .15s ease}}
-.card:hover{{transform:translateY(-2px);box-shadow:0 8px 18px rgba(10,25,45,.14)}}
-.card .n{{font-size:1.7rem;font-weight:800;line-height:1}}
-.card .l{{font-size:.8rem;color:#5a6b7d;margin-top:4px}}
+.nav-admin a .aic{{color:var(--oro-c)}}
+.nav-admin a:hover{{transform:translateY(-2px);box-shadow:0 8px 20px rgba(10,25,45,.22)}}
+.nav-admin a.actual{{background:var(--oro);color:var(--navy);cursor:default;pointer-events:none}}
+.nav-admin a.actual .aic{{color:var(--navy)}}
+.resumen{{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:14px;margin:0 0 30px}}
+.card{{background:var(--card);border:1px solid var(--ln);border-radius:14px;padding:16px 18px;
+  text-decoration:none;display:block;box-shadow:0 3px 12px rgba(20,26,40,.05);
+  transition:transform .15s ease, box-shadow .15s ease}}
+.card:hover{{transform:translateY(-2px);box-shadow:0 10px 24px rgba(20,26,40,.12)}}
+.card .n{{font-size:1.9rem;font-weight:800;line-height:1;color:var(--navy)}}
+.card .l{{font-size:.82rem;color:var(--tx2);margin-top:7px;display:flex;align-items:center;gap:6px}}
+.card .l .aic{{color:var(--oro)}}
+table{{border-collapse:separate;border-spacing:0;width:100%;font-size:.9rem;background:var(--card);
+  border:1px solid var(--ln);border-radius:14px;overflow:hidden;margin-bottom:30px;
+  box-shadow:0 3px 12px rgba(20,26,40,.05)}}
+th,td{{padding:11px 14px;text-align:left;vertical-align:top;border-bottom:1px solid #eef0f3}}
+th{{background:var(--navy);color:var(--oro-c);font-size:.72rem;letter-spacing:.04em;text-transform:uppercase}}
+tbody tr:nth-child(even) td,tr:nth-child(even) td{{background:var(--band)}}
+tr:last-child td{{border-bottom:0}}
+code{{background:#eef1f5;padding:2px 6px;border-radius:5px;font-size:.82rem}}
+button{{transition:transform .15s ease, box-shadow .15s ease;cursor:pointer;font-weight:600;
+  display:inline-flex;align-items:center;gap:5px}}
+button:hover:not(:disabled){{transform:translateY(-1px);box-shadow:0 6px 14px rgba(10,25,45,.16)}}
+input{{font-size:.95rem}}
 </style></head><body>
+<h1>Panel admin</h1>
 <div class="nav-admin">
-  <a class="actual">🏠 Órdenes y usuarios</a>
-  <a href="/admin/dashboard" style="background:#1e2432">📊 Panel del negocio</a>
-  <a href="/admin/campana" style="background:#8a4b1e">📣 Campañas</a>
-  <a href="/admin/lector">🔑 Suscripciones Lector XML</a>
-  <a href="/admin/exogenas">🧾 Leads del cálculo</a>
-  <a href="/admin/gestor">📅 Uso del Gestor</a>
-  <a href="/vencimientos">📅 Gestor de vencimientos</a>
+  <a class="actual">{_aic('home')} Órdenes y usuarios</a>
+  <a href="/admin/dashboard">{_aic('chart')} Panel del negocio</a>
+  <a href="/admin/campana">{_aic('mega')} Campañas</a>
+  <a href="/admin/lector">{_aic('key')} Suscripciones Lector XML</a>
+  <a href="/admin/exogenas">{_aic('receipt')} Leads del cálculo</a>
+  <a href="/admin/gestor">{_aic('calendar')} Uso del Gestor</a>
+  <a href="/vencimientos">{_aic('calendar')} Gestor de vencimientos</a>
 </div>
 <div class="resumen">{resumen}</div>
 
-<h2 id="ordenes">💳 Órdenes — verificación de consignaciones</h2>
+<h2 id="ordenes">{_aic('card')} Órdenes — verificación de consignaciones</h2>
 <p>Cuenta de recaudo: <b>{cuenta}</b>. Verifique en su app Bancolombia que la
 consignación llegó (valor y referencia) antes de confirmar.</p>
 <table><tr><th>Fecha</th><th>Orden</th><th>Cliente</th><th>Plan</th><th>Valor</th>
 <th>Contacto</th><th>Estado</th><th>Acciones</th></tr>{''.join(filas) or
 '<tr><td colspan=8>Sin órdenes todavía.</td></tr>'}</table>
 
-<h2 id="usuarios">👥 Usuarios registrados ({len(filas_u)})</h2>
+<h2 id="usuarios">{_aic('users')} Usuarios registrados ({len(filas_u)})</h2>
 <p>Personas que ingresaron con Google/Microsoft (o demo) y dejaron sus datos.</p>
 {aviso_asesor}
 <table><tr><th>Nombre</th><th>Correo</th><th>Cédula/NIT</th><th>Vencimiento</th>
 <th>Recordatorios</th><th>Asesor</th></tr>{''.join(filas_u) or
 '<tr><td colspan=6>Aún no hay usuarios registrados.</td></tr>'}</table>
 
-<h2 id="prueba">👔 Contadores que probaron gratis ({len(filas_m)})</h2>
+<h2 id="prueba">{_aic('brief')} Contadores que probaron gratis ({len(filas_m)})</h2>
 <p>Cada uno ya usó su declaración de muestra (termómetro de interés).
 "Reiniciar" le devuelve su prueba gratis — útil para demos.</p>
 <table><tr><th>Fecha</th><th>Contador</th><th>NIT muestra</th><th>Acción</th></tr>{''.join(filas_m) or
 '<tr><td colspan=4>Ningún contador ha probado todavía.</td></tr>'}</table>
 
-<h2 id="acceso">🔑 Acceso al liquidador — contadores con pase ({len(filas_a)})</h2>
+<h2 id="acceso">{_aic('key')} Acceso al liquidador — contadores con pase ({len(filas_a)})</h2>
 <p>Habilita a un contador que pagó el pase de temporada. Usa el <b>mismo correo</b>
 con el que él entra por Google o Microsoft. Le da acceso a <code>/liquidador</code>
 (declaraciones ilimitadas), <b>NO</b> a este panel de pagos.</p>
@@ -3775,7 +3831,7 @@ con el que él entra por Google o Microsoft. Le da acceso a <code>/liquidador</c
     <input id="acNombre" placeholder="Nombre del contador"
       style="padding:8px;border:1px solid #dbe3ec;border-radius:6px;width:200px"></label>
   <button onclick="otorgar()" style="background:#1e7d43;color:#fff;border:0;
-    border-radius:6px;padding:10px 18px;cursor:pointer;font-weight:700">+ Dar acceso</button>
+    border-radius:6px;padding:10px 18px;cursor:pointer;font-weight:700">{_aic('plus', True)} Dar acceso</button>
 </div>
 <table><tr><th>Correo</th><th>Nombre</th><th>Nota</th><th>Desde</th><th>Acción</th></tr>{''.join(filas_a) or
 '<tr><td colspan=5>Ningún contador habilitado todavía.</td></tr>'}</table>
