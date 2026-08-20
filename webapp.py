@@ -2998,6 +2998,10 @@ def _finalizar_pago_orden(orden_id: str, orden: dict, ordenes: dict) -> None:
     exógena y genera el checklist para el trámite. Idempotente."""
     orden["estado"] = ("pagada" if orden["plan"] in ("pdf", "contadores", "lector")
                        else "pagada_en_tramite")
+    # Fecha REAL del pago (para el informe del gerente): así un re-guardado masivo
+    # de la tabla —que bumpea `actualizado`— no hace que órdenes viejas aparezcan
+    # como ventas nuevas. Se conserva la primera (idempotente).
+    orden.setdefault("pagado_en", datetime.utcnow().isoformat())
 
     # Bono canjeado: quemarlo (un solo uso). Idempotente.
     if orden.get("bono"):

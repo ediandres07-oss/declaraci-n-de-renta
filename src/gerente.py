@@ -282,18 +282,26 @@ def informe_diario() -> bool:
     hoy = date.today()
     ayer = hoy - timedelta(days=1)
 
-    # Pagos: órdenes en estado "pagada" actualizadas ayer.
+    # Pagos: órdenes cuya FECHA DE PAGO (pagado_en) fue ayer. Antes se filtraba por
+    # `actualizado`, y un re-guardado masivo de la tabla hacía aparecer órdenes
+    # viejas como ventas nuevas (falso positivo). Ahora manda la fecha real del pago.
     pagos, total = [], 0.0
-    for o in OrdenRegistro.query.filter(OrdenRegistro.actualizado >= ayer,
-                                        OrdenRegistro.actualizado < hoy).all():
+    for o in OrdenRegistro.query.filter(OrdenRegistro.actualizado >= ayer).all():
         try:
             d = json.loads(o.data)
         except Exception:
             continue
-        if d.get("estado") == "pagada":
-            valor = float(d.get("precio") or d.get("valor") or 0)
-            total += valor
-            pagos.append(f"{d.get('plan', '?')} · {d.get('email', '')} · {_pesos(valor)}")
+        if d.get("estado") != "pagada":
+            continue
+        pe = d.get("pagado_en")
+        try:
+            if not pe or datetime.fromisoformat(pe).date() != ayer:
+                continue
+        except ValueError:
+            continue
+        valor = float(d.get("precio") or d.get("valor") or 0)
+        total += valor
+        pagos.append(f"{d.get('plan', '?')} · {d.get('email', '')} · {_pesos(valor)}")
 
     # Licencias del Lector.
     nuevas = SuscripcionLector.query.filter(SuscripcionLector.creado >= ayer,
