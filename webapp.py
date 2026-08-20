@@ -1172,6 +1172,15 @@ def contadores():
                            chat_ia_nombre=IA_CFG.get("nombre_asistente", "Asistente Contadores"))
 
 
+@app.get("/contadores/demo")
+def contadores_demo():
+    """Demo pública del tablero del liquidador (datos de ejemplo, sin login ni
+    consumir la prueba). Para que el contador vea cómo funciona antes de comprar."""
+    return render_template("contadores_demo.html",
+                           whatsapp=re.sub(r"\D", "", str(_CONTACTO.get("whatsapp", ""))),
+                           pase=_CFG_PRECIOS.get("contadores", {}))
+
+
 @app.get("/contadores/contabilidad")
 def contadores_contabilidad():
     """Planes y precios del software de contabilidad para contadores
