@@ -559,6 +559,13 @@ def rellenar_papel_trabajo(entrada, datos, liq, p, exogena=None) -> bytes:
             d[a] = d.get(a, 0) + v
         return list(d.items())
 
+    def _anio_col(v):
+        """Año de un encabezado de columna: numérico (2024) o texto ('AÑO 2024')."""
+        if isinstance(v, (int, float)) and 1990 <= v <= 2100:
+            return int(v)
+        m = re.search(r"(19|20)\d{2}", str(v or ""))
+        return int(m.group(0)) if m else None
+
     patr = _agg(_partidas_renglon(exogena, 29)) if exogena else []
     deud = _agg(_partidas_renglon(exogena, 30)) if exogena else []
     ing = _agg([(q, "", v) for q, _c, v in _top_terceros(exogena, {32, 43, 58, 74, 99, 104})]) \
@@ -582,21 +589,26 @@ def rellenar_papel_trabajo(entrada, datos, liq, p, exogena=None) -> bytes:
     BOR = Border(left=thin, right=thin, top=thin, bottom=thin)
 
     def _fill(titulo, items, kw=False):
+        titset = ((titulo,) if isinstance(titulo, str) else tuple(titulo))
+        titset = tuple(t.upper() for t in titset)
         ft = None
         for r in range(1, ws.max_row + 1):
-            if str(ws.cell(r, 1).value or "").strip().upper() == titulo:
+            if str(ws.cell(r, 1).value or "").strip().upper() in titset:
                 ft = r
                 break
         if not ft:
             return
         fh = ft + 1
-        ycols = [c for c in range(3, ws.max_column + 2)
-                 if isinstance(ws.cell(fh, c).value, (int, float))]
+        # columnas que YA son de un año (numérico o texto 'AÑO 2024') — historial
+        ycols = [(c, _anio_col(ws.cell(fh, c).value))
+                 for c in range(3, ws.max_column + 2)]
+        ycols = [(c, y) for c, y in ycols if y is not None]
         anio = int(getattr(p, "anio_gravable", 2025))      # año gravable REAL (2025)
-        # si ya existe la columna de ese año, se reusa; si no, la siguiente
-        col = next((c for c in ycols if int(ws.cell(fh, c).value) == anio), None)
+        # si ya existe la columna de ESE año se reusa; si no, se AGREGA una nueva a
+        # la derecha SIN tocar los años anteriores (es un histórico).
+        col = next((c for c, y in ycols if y == anio), None)
         if col is None:
-            col = (max(ycols) + 1) if ycols else 3
+            col = (max(c for c, _ in ycols) + 1) if ycols else 3
         ftot = None
         for r in range(fh + 1, ws.max_row + 2):
             if str(ws.cell(r, 1).value or "").upper().startswith("TOTAL"):
@@ -653,7 +665,7 @@ def rellenar_papel_trabajo(entrada, datos, liq, p, exogena=None) -> bytes:
         tc.border = BOR
 
     _fill("PATRIMONIO", patr)
-    _fill("PASIVOS", deud)
+    _fill(("PASIVOS", "DEUDAS"), deud)
     _fill("INGRESOS", ing)
     _fill("COSTOS Y DEDUCCIONES", costos, kw=True)
 
