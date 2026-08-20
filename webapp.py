@@ -2045,21 +2045,18 @@ def muestra_contador_zip(token):
         except Exception:
             exogena = None
 
+    # La muestra baja el PANEL + el Formulario 210 (SIN papeles de trabajo Excel:
+    # ese entregable queda solo para el pase de temporada).
     with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as t1:
         ruta_pdf = Path(t1.name)
-    with tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False) as t2:
-        ruta_xlsx = Path(t2.name)
     with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as t3:
         ruta_panel = Path(t3.name)
     panel_bytes = None
     try:
         generar_formulario_pdf(ruta_pdf, datos, liq, PARAMS, marca="MUESTRA · TRIBUTANDO.CO")
         pdf_bytes = ruta_pdf.read_bytes()
-        escribir_formulario(PLANTILLA, ruta_xlsx, datos, liq, exogena)
-        _marcar_muestra_excel(ruta_xlsx)
-        xlsx_bytes = ruta_xlsx.read_bytes()
         # Panel/resumen: topes, "obligado a declarar" y la liquidación (lo que se ve
-        # en pantalla). Si falla, no rompe la descarga: igual van el 210 y el Excel.
+        # en pantalla). Si falla, no rompe la descarga: igual va el 210.
         try:
             razones, fl = [], None
             if exogena is not None:
@@ -2079,7 +2076,6 @@ def muestra_contador_zip(token):
             panel_bytes = None
     finally:
         ruta_pdf.unlink(missing_ok=True)
-        ruta_xlsx.unlink(missing_ok=True)
         ruta_panel.unlink(missing_ok=True)
 
     buf = io.BytesIO()
@@ -2087,7 +2083,6 @@ def muestra_contador_zip(token):
         if panel_bytes:
             z.writestr(f"MUESTRA_Panel_resumen_{nit}.pdf", panel_bytes)
         z.writestr(f"MUESTRA_Formulario210_{nit}.pdf", pdf_bytes)
-        z.writestr(f"MUESTRA_Papeles_de_trabajo_{nit}.xlsx", xlsx_bytes)
     buf.seek(0)
 
     registrar_muestra_email(email, token=token, nit=nit,
