@@ -550,8 +550,9 @@ def rellenar_papel_trabajo(entrada, datos, liq, p, exogena=None) -> bytes:
         s = str(s or "").upper()
         s = "".join(c for c in unicodedata.normalize("NFD", s)
                     if unicodedata.category(c) != "Mn")
-        s = re.sub(r"\b(SAS|SA|LTDA|EU)\b", "", s)
-        return re.sub(r"[^A-Z0-9]", "", s)
+        s = re.sub(r"[^A-Z0-9]", "", s)                       # puntuación/espacios PRIMERO
+        s = re.sub(r"(SAS|SA|SCA|SENC|LTDA|EU)$", "", s)      # sufijo legal ('S.A.'->'SA'->'')
+        return s
 
     def _agg(parts):
         d = {}
@@ -634,7 +635,15 @@ def rellenar_papel_trabajo(entrada, datos, liq, p, exogena=None) -> bytes:
             for nombre, valor in items:
                 if not valor:
                     continue
-                r = idx.get(_norm(nombre))
+                nn = _norm(nombre)
+                r = idx.get(nn)
+                if r is None:
+                    # el contador suele abreviar ('RAPPIPAY' vs 'RAPPIPAY COMPAÑÍA…'):
+                    # empareja si su nombre corto (≥6) es prefijo del reportado.
+                    for k, rr in idx.items():
+                        if len(k) >= 6 and (nn.startswith(k) or k.startswith(nn)):
+                            r = rr
+                            break
                 if r is None:
                     r = ult + 1
                     if r >= ftot:
