@@ -2025,18 +2025,43 @@ def muestra_contador_zip(token):
         ruta_pdf = Path(t1.name)
     with tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False) as t2:
         ruta_xlsx = Path(t2.name)
+    with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as t3:
+        ruta_panel = Path(t3.name)
+    panel_bytes = None
     try:
         generar_formulario_pdf(ruta_pdf, datos, liq, PARAMS, marca="MUESTRA · TRIBUTANDO.CO")
         pdf_bytes = ruta_pdf.read_bytes()
         escribir_formulario(PLANTILLA, ruta_xlsx, datos, liq, exogena)
         _marcar_muestra_excel(ruta_xlsx)
         xlsx_bytes = ruta_xlsx.read_bytes()
+        # Panel/resumen: topes, "obligado a declarar" y la liquidación (lo que se ve
+        # en pantalla). Si falla, no rompe la descarga: igual van el 210 y el Excel.
+        try:
+            razones, fl = [], None
+            if exogena is not None:
+                topes = exogena.topes_dian or calcular_topes_propios(exogena)
+                razones = evaluar_obligacion_declarar(topes, PARAMS)
+            try:
+                nit_dec = (datos.contribuyente.nit or (exogena.identificacion if exogena else ""))
+                if nit_dec:
+                    fl = fecha_limite(nit_dec, PLANTILLA)
+            except Exception:
+                fl = None
+            generar_resumen_pdf(ruta_panel, datos, liq, PARAMS, exogena, razones,
+                                fecha_lim=fl, observaciones="MUESTRA · TRIBUTANDO.CO")
+            panel_bytes = ruta_panel.read_bytes()
+        except Exception:
+            app.logger.warning("muestra zip: no se pudo generar el panel/resumen", exc_info=True)
+            panel_bytes = None
     finally:
         ruta_pdf.unlink(missing_ok=True)
         ruta_xlsx.unlink(missing_ok=True)
+        ruta_panel.unlink(missing_ok=True)
 
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+        if panel_bytes:
+            z.writestr(f"MUESTRA_Panel_resumen_{nit}.pdf", panel_bytes)
         z.writestr(f"MUESTRA_Formulario210_{nit}.pdf", pdf_bytes)
         z.writestr(f"MUESTRA_Papeles_de_trabajo_{nit}.xlsx", xlsx_bytes)
     buf.seek(0)

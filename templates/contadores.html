@@ -376,7 +376,7 @@
             <div id="muestraCodigoBox" hidden style="margin-top:14px">
               <input id="muestraCodigo" inputmode="numeric" maxlength="6" placeholder="Código de 6 dígitos" autocomplete="one-time-code"
                 style="width:100%;max-width:260px;padding:12px 14px;border-radius:12px;border:1px solid rgba(230,196,131,.4);background:rgba(255,255,255,.06);color:#fff;font-size:1.2rem;letter-spacing:.2em;text-align:center;outline:none;margin-bottom:12px"><br>
-              <button class="btn-hero" id="btnMuestra">📄 Descargar muestra: 210 + papeles de trabajo</button>
+              <button class="btn-hero" id="btnMuestra">📄 Descargar: panel + 210 + papeles de trabajo</button>
             </div>
             <div id="muestraMsg" style="font-size:.85rem;margin-top:8px"></div>
             <p style="font-size:.75rem;color:var(--tenue);margin-top:8px">Sin registro — te enviamos un <b>código</b> a tu correo. El PDF va con marca "MUESTRA".
@@ -736,11 +736,11 @@
         } else {
           var j = await r.json().catch(function(){ return {}; });
           if (msg) { msg.style.color = "#ff9a9a"; msg.textContent = j.error || "No pudimos generar la muestra."; }
-          btnM.disabled = false; btnM.textContent = "📄 Descargar muestra: 210 + papeles de trabajo";
+          btnM.disabled = false; btnM.textContent = "📄 Descargar: panel + 210 + papeles de trabajo";
         }
       } catch(e) {
         if (msg) { msg.style.color = "#ff9a9a"; msg.textContent = "Problema de conexión. Intenta de nuevo."; }
-        btnM.disabled = false; btnM.textContent = "📄 Descargar muestra: 210 + papeles de trabajo";
+        btnM.disabled = false; btnM.textContent = "📄 Descargar: panel + 210 + papeles de trabajo";
       }
     };
   </script>
