@@ -592,7 +592,11 @@ def rellenar_papel_trabajo(entrada, datos, liq, p, exogena=None) -> bytes:
         fh = ft + 1
         ycols = [c for c in range(3, ws.max_column + 2)
                  if isinstance(ws.cell(fh, c).value, (int, float))]
-        col = (max(ycols) + 1) if ycols else 3
+        anio = int(getattr(p, "anio_gravable", 2025))      # año gravable REAL (2025)
+        # si ya existe la columna de ese año, se reusa; si no, la siguiente
+        col = next((c for c in ycols if int(ws.cell(fh, c).value) == anio), None)
+        if col is None:
+            col = (max(ycols) + 1) if ycols else 3
         ftot = None
         for r in range(fh + 1, ws.max_row + 2):
             if str(ws.cell(r, 1).value or "").upper().startswith("TOTAL"):
@@ -600,7 +604,7 @@ def rellenar_papel_trabajo(entrada, datos, liq, p, exogena=None) -> bytes:
                 break
         if not ftot:
             return
-        ws.cell(fh, col, (max(ws.cell(fh, c).value for c in ycols) + 1) if ycols else 2025)
+        ws.cell(fh, col, anio)                             # SIEMPRE el año gravable, no max+1
         if kw:
             for r in range(fh + 1, ftot):
                 clave = _norm(ws.cell(r, 1).value) + _norm(ws.cell(r, 2).value)
@@ -627,6 +631,10 @@ def rellenar_papel_trabajo(entrada, datos, liq, p, exogena=None) -> bytes:
                     ult = r
                     idx[_norm(nombre)] = r
                 ws.cell(r, col, round(valor))
+        # rellenar con 0 las celdas vacías del año (todos los campos llenos)
+        for r in range(fh + 1, ftot):
+            if ws.cell(r, 1).value and ws.cell(r, col).value in (None, ""):
+                ws.cell(r, col, 0)
         L = get_column_letter(col)
         ws.cell(ftot, col, f"=SUM({L}{fh + 1}:{L}{ftot - 1})")
         # tabla elegante en la columna nueva
@@ -648,6 +656,60 @@ def rellenar_papel_trabajo(entrada, datos, liq, p, exogena=None) -> bytes:
     _fill("PASIVOS", deud)
     _fill("INGRESOS", ing)
     _fill("COSTOS Y DEDUCCIONES", costos, kw=True)
+
+    # ---- Formato de marca Tributando en TODA la hoja ----
+    from openpyxl.styles import Alignment
+    TITULOS = ("PATRIMONIO", "DEUDAS", "PASIVOS", "INGRESOS", "COSTOS Y DEDUCCIONES",
+               "COSTOS", "DEDUCCIONES", "LIQUIDACION", "LIQUIDACIÓN", "RENTA",
+               "GANANCIAS", "DONACIONES", "RETENCIONES", "DECLARACION", "DECLARACIÓN")
+    HEADERS = ("DESCRIPCION", "DESCRIPCIÓN", "NOMBRE", "IDENTIFICACION",
+               "IDENTIFICACIÓN", "CONCEPTO", "IDENTIFICACIÓN DEL BIEN", "RENGLON", "RENGLÓN")
+    # última columna CON datos (para no bordear columnas vacías a la derecha)
+    maxc = 3
+    for r in range(1, ws.max_row + 1):
+        for c in range(1, ws.max_column + 1):
+            if ws.cell(r, c).value not in (None, ""):
+                maxc = max(maxc, c)
+    izq = Alignment(horizontal="left"); der = Alignment(horizontal="right")
+    cen = Alignment(horizontal="center")
+    for r in range(1, ws.max_row + 1):
+        a = str(ws.cell(r, 1).value or "").strip().upper()
+        b = str(ws.cell(r, 2).value or "").strip().upper()
+        fila_vacia = not any(ws.cell(r, c).value not in (None, "") for c in range(1, maxc + 1))
+        es_titulo = (not any(ch.isdigit() for ch in a)) and any(
+            a == t or (a.startswith(t) and len(a) - len(t) < 12) for t in TITULOS)
+        es_header = a in HEADERS or b in HEADERS
+        es_total = a.startswith("TOTAL")
+        if fila_vacia and not es_titulo:
+            continue
+        for c in range(1, maxc + 1):
+            cell = ws.cell(r, c)
+            cell.border = BOR
+            if es_titulo:
+                cell.fill = NAVY
+                cell.font = Font(name="Arial", bold=True, color="C9A75A", size=11)
+            elif es_header:
+                cell.fill = NAVY
+                cell.font = Font(name="Arial", bold=True, color="FFFFFF")
+                cell.alignment = cen if c >= 3 else izq
+            elif es_total:
+                cell.fill = BAND
+                cell.font = Font(name="Arial", bold=True)
+            else:
+                if r % 2 == 0:
+                    cell.fill = BAND
+                cell.font = Font(name="Arial", size=10)
+            if isinstance(cell.value, (int, float)):
+                # los años (encabezado) van sin separador de miles: 2025, no 2.025
+                if es_header or (1990 <= cell.value <= 2100 and float(cell.value).is_integer()):
+                    cell.number_format = "0"
+                else:
+                    cell.number_format = "#,##0"
+                    cell.alignment = der
+    for c in range(3, maxc + 1):
+        ws.column_dimensions[get_column_letter(c)].width = 15
+    ws.column_dimensions["A"].width = 30
+    ws.column_dimensions["B"].width = 30
 
     buf = _io.BytesIO()
     wb.save(buf)
