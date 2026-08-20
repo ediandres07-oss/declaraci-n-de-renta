@@ -5,35 +5,19 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Demo del liquidador — Tributando.co para contadores</title>
 <style>
-  :root{--navy:#1e2432;--dorado:#b8955f;--dorado2:#caa46b;--tenue:#5a6b7f;--gris:#f5f7fa;--linea:#e6ebf1;}
+  :root{--navy:#1e2432;--dorado:#b8955f;--dorado2:#caa46b;--tenue:#5a6b7f;--gris:#f5f7fa;}
   *{box-sizing:border-box;}
   body{margin:0;background:var(--gris);font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:#1e2b3a;}
   .top{background:var(--navy);color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
   .top b{color:var(--dorado2);}
-  .wrap{max-width:920px;margin:0 auto;padding:20px 16px 60px;}
+  .wrap{max-width:960px;margin:0 auto;padding:20px 16px 60px;}
   .demo-cinta{background:linear-gradient(90deg,#b8955f,#caa46b);color:#1e2432;font-weight:800;text-align:center;
-    padding:9px;border-radius:10px;margin-bottom:16px;letter-spacing:.02em;}
-  .card{background:#fff;border-radius:14px;box-shadow:0 4px 16px rgba(18,63,107,.06);padding:20px 22px;margin-bottom:16px;}
-  .aviso{background:#fff8e8;border:1px solid #f0e2b8;border-radius:10px;padding:10px 14px;font-size:.85rem;color:#7a5f1e;margin-bottom:16px;}
-  .dz{border:2px dashed #cbd6e2;border-radius:14px;padding:26px;text-align:center;color:var(--tenue);background:#fbfcfe;}
-  .dz b{color:#2f7d4f;}
-  h2{margin:0 0 4px;font-size:1.15rem;}
-  .sub{color:var(--tenue);font-size:.9rem;margin:0 0 12px;}
-  .pill{display:inline-block;background:#eef3f8;border-radius:20px;padding:5px 12px;margin:3px 4px 3px 0;font-size:.82rem;}
-  .obligado{background:#b3372f;color:#fff;border-radius:12px;padding:14px 18px;margin:12px 0;text-align:center;font-weight:800;font-size:1.15rem;}
-  .obligado .fl{font-size:.9rem;font-weight:600;margin-top:4px;}
-  ul.raz{font-size:.85rem;color:#3a4a5c;margin:8px 0 0 18px;padding:0;}
-  table{width:100%;border-collapse:collapse;font-size:.86rem;}
-  td,th{padding:8px 6px;border-bottom:1px solid var(--linea);text-align:left;}
-  .campo{display:inline-block;background:#f5f7fa;border-radius:8px;padding:4px 10px;margin:3px 6px 3px 0;font-size:.85rem;}
-  .campo span{color:var(--tenue);font-size:.72rem;display:block;}
-  .liq{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:2px;background:var(--navy);border-radius:12px;overflow:hidden;}
-  .liq>div{padding:14px 16px;}
-  .liq .et{color:#9db0c4;font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;}
-  .liq .val{font-size:1.25rem;font-weight:800;color:#fff;margin-top:3px;}
-  .liq .rojo{color:#ff8f8f;} .liq .verde{color:#7ee0a3;}
+    padding:10px;border-radius:10px;margin-bottom:8px;letter-spacing:.02em;}
+  .aviso{background:#fff8e8;border:1px solid #f0e2b8;border-radius:10px;padding:10px 14px;font-size:.86rem;color:#7a5f1e;margin-bottom:16px;}
+  .foto{width:100%;border-radius:12px;box-shadow:0 8px 28px rgba(18,63,107,.14);display:block;}
   .cta{background:#fff;border-radius:14px;box-shadow:0 4px 16px rgba(18,63,107,.06);padding:26px;text-align:center;margin-top:20px;}
-  .cta h3{margin:0 0 6px;font-size:1.25rem;}
+  .cta h3{margin:0 0 6px;font-size:1.3rem;}
+  .sub{color:var(--tenue);font-size:.92rem;}
   .btn{display:inline-block;background:var(--dorado);color:#fff;text-decoration:none;padding:14px 30px;border-radius:12px;font-weight:800;margin:8px 6px;}
   .btn.wa{background:#25D366;}
   .btn.ghost{background:#fff;color:var(--navy);border:1.5px solid var(--navy);}
@@ -46,70 +30,19 @@
 </div>
 
 <div class="wrap">
-  <div class="demo-cinta">DEMO · Así se ve con la exógena de un cliente (datos de ejemplo)</div>
-  <div class="aviso">Esto es una <b>demostración</b> con un caso de ejemplo. Con tu pase haces esto <b>ilimitado</b> con las exógenas reales de tus clientes — sin bloqueos.</div>
+  <div class="demo-cinta">Así se ve el liquidador con la exógena de un cliente (datos de ejemplo)</div>
+  <div class="aviso">Subes la exógena de tu cliente → la app cruza y evalúa topes, prellena todas las cédulas y calcula el
+    Formulario 210. Con tu <b>pase de temporada</b> lo haces <b>ilimitado</b>, sin la restricción de una sola prueba.</div>
 
-  <div class="card">
-    <div class="dz"><div style="font-size:1.5rem">⬇</div>
-      <b>✔ reporteExogena2025.xlsx</b> — cargada<br>
-      <span style="font-size:.82rem">Consulta de información reportada por terceros (portal DIAN)</span></div>
-  </div>
-
-  <div class="card">
-    <h2>Exógena cargada</h2>
-    <p class="sub"><b>Cliente de ejemplo</b> — C.C. 10••••••8 · Año 2025 · 27 partidas
-      <span style="font-size:.75rem;opacity:.7">(datos ocultos en la demo)</span></p>
-    <div>
-      <span class="pill">Tope 1 Ingresos: $129.601.000</span>
-      <span class="pill">Tope 2 Patrimonio: $139.943.008</span>
-      <span class="pill">Tope 3 TC: $20.075.208</span>
-      <span class="pill">Tope 4 Consignaciones: $127.931.696</span>
-      <span class="pill">Tope 5 Compras: $60.782.180</span>
-    </div>
-    <div class="obligado">⚠️ SÍ ESTÁ OBLIGADO A DECLARAR
-      <div class="fl">Vence el 01/09/2026 — quedan 12 día(s)</div></div>
-    <ul class="raz">
-      <li>Ingresos brutos $129.601.000 alcanzan 1.400 UVT ($69.718.600)</li>
-      <li>Consignaciones/inversiones $127.931.696 superan 1.400 UVT ($69.718.600)</li>
-    </ul>
-  </div>
-
-  <div class="card">
-    <h2>Datos del declarante</h2>
-    <p class="sub">Se prellenan desde la exógena — el contador ajusta lo que falte. <b>(Ocultos en la demo por privacidad.)</b></p>
-    <span class="campo"><span>NIT / Cédula</span>10••••••8</span>
-    <span class="campo"><span>DV</span>•</span>
-    <span class="campo"><span>Primer apellido</span>••••••</span>
-    <span class="campo"><span>Segundo apellido</span>••••••</span>
-    <span class="campo"><span>Primer nombre</span>••••••</span>
-    <span class="campo"><span>Otros nombres</span>••••••</span>
-  </div>
-
-  <div class="card">
-    <h2>Liquidación — Formulario 210</h2>
-    <p class="sub">Calculada automáticamente. Descargable en PDF y Excel con papeles de trabajo.</p>
-    <div class="liq">
-      <div><div class="et">Renta líq. gravable (R97+R103)</div><div class="val">$70.945.000</div></div>
-      <div><div class="et">Impuesto a cargo (R129)</div><div class="val">$3.512.000</div></div>
-      <div><div class="et">Retenciones (R132)</div><div class="val">$1.480.000</div></div>
-      <div><div class="et">Saldo a pagar (R136)</div><div class="val rojo">$2.032.000</div></div>
-      <div><div class="et">Saldo a favor (R137)</div><div class="val verde">$0</div></div>
-    </div>
-    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
-      <span class="pill" style="opacity:.6">Formulario 210 (PDF) 🔒</span>
-      <span class="pill" style="opacity:.6">Papeles de trabajo (Excel) 🔒</span>
-      <span class="pill" style="opacity:.6">Anexo cruce exógena → 210 🔒</span>
-      <span style="font-size:.82rem;color:var(--tenue);align-self:center">— con el pase, las descargas quedan habilitadas.</span>
-    </div>
-  </div>
+  <img class="foto" src="/static/img/demo_liquidador.png"
+       alt="Panel del liquidador con todas las cédulas — datos de ejemplo">
 
   <div class="cta">
     <h3>Así de rápido, con cada cliente</h3>
-    <p class="sub">Sube la exógena → la app cruza y evalúa topes → descargas el 210 con papeles de trabajo.
-      Con el pase de temporada lo haces <b>ilimitado</b>, sin la restricción de una sola prueba.</p>
+    <p class="sub">Sube la exógena → revisa el panel → descarga el 210 con papeles de trabajo. Tú firmas y presentas.</p>
     <a class="btn" href="/contadores#pase">Comprar el pase de temporada</a>
     {% if whatsapp %}<a class="btn wa" href="https://wa.me/{{ whatsapp }}">Preguntar por WhatsApp</a>{% endif %}
-    <a class="btn ghost" href="/contadores">Probar 1 gratis con mi cliente</a>
+    <a class="btn ghost" href="/contadores#prueba">Probar 1 gratis con mi cliente</a>
   </div>
 </div>
 </body>
