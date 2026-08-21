@@ -438,12 +438,15 @@ def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
     liq.set(85, r85, "total deducciones no laborales")
 
     # ================= Límite 40% / 1.340 UVT (Art. 336 E.T.) ============
+    # La base del 40% es el resultado del numeral 2 del Art. 336: ingresos brutos
+    # menos ingresos no constitutivos (INCRNGO). Los costos y gastos (numeral 4) se
+    # restan APARTE en la depuración de cada cédula y NO reducen esta base — así lo
+    # calcula la Ayuda Renta de la DIAN. (Antes se restaban los costos, lo que topaba
+    # mal el renglón limitado cuando había costos altos, p. ej. venta de activos.)
     ingresos_cg = (t.ingresos_brutos + h.ingresos_brutos + c.ingresos_brutos
                    + nl.ingresos_brutos)
     incrngo_cg = t.incrngo + h.incrngo + c.incrngo + nl.incrngo
-    costos_cg = (t.costos_deducciones + h.costos_deducciones + c.costos_deducciones
-                 + nl.costos_deducciones)
-    base_limite = max(0.0, ingresos_cg - nl.devoluciones - incrngo_cg - costos_cg)
+    base_limite = max(0.0, ingresos_cg - nl.devoluciones - incrngo_cg)
     limite_40 = base_limite * p.limite_40_porcentaje
     limite_uvt = _round_mil(p.a_pesos(p.limite_40_tope_uvt))
     limite = min(limite_40, limite_uvt)
