@@ -284,6 +284,22 @@ for _ep in (BASE / "config" / "epayco.yaml", Path("/etc/secrets/epayco.yaml")):
             EPAYCO = yaml.safe_load(_fh) or EPAYCO
         break
 
+# App de contabilidad (cross-sell): al confirmarse el pago se le concede Premium
+# vía su endpoint /api/habilitar (A2) con el secreto compartido PASE_SECRET (la
+# MISMA env que ya está en el servicio de contabilidad). Sin el secreto, el pago
+# se registra pero la activación queda pendiente (se ve en el panel).
+CONTAB_URL = os.environ.get(
+    "CONTAB_URL", "https://contabilidad-tributando.onrender.com").rstrip("/")
+CONTAB_PASE_SECRET = os.environ.get("PASE_SECRET", "").strip()
+# Precios de contabilidad (fuente autoritativa del monto a cobrar; espejo de
+# planes_contabilidad.html). Anual = 10× mensual (2 meses gratis). tope = límite
+# de empresas que se envía a /api/habilitar.
+PRECIOS_CONTABILIDAD = {
+    "emprende": {"nombre": "Emprende", "empresas": 3,   "mensual": 49900,  "anual": 499000,  "tope": 3},
+    "contador": {"nombre": "Contador", "empresas": 10,  "mensual": 99900,  "anual": 999000,  "tope": 10},
+    "firma":    {"nombre": "Firma",    "empresas": 0,   "mensual": 149900, "anual": 1499000, "tope": 999999},
+}
+
 _REALMY_PATH = BASE / "config" / "realmy.yaml"
 REALMY = {"habilitado": False}
 if _REALMY_PATH.exists():
@@ -1243,6 +1259,41 @@ def crear_pase_contador():
                     "descuento": bono_desc, "pago_url": pago_url})
 
 
+@app.post("/api/orden-contabilidad")
+def crear_orden_contabilidad():
+    """Crea la orden de una suscripción de CONTABILIDAD (cross-sell). El contador
+    deja su correo; al confirmarse el pago se le concede Premium en la app
+    contable con ese mismo correo (vía /api/habilitar). No requiere registro."""
+    cuerpo = request.get_json(silent=True) or {}
+    email = (cuerpo.get("email") or "").strip().lower()
+    if not _EMAIL_RE.match(email):
+        return jsonify({"error": "Escribe un correo válido para activarte."}), 400
+    plan = (cuerpo.get("plan") or "").strip().lower()
+    if plan not in PRECIOS_CONTABILIDAD:
+        return jsonify({"error": "Plan inválido."}), 400
+    periodo = "anual" if (cuerpo.get("periodo") or "").lower() == "anual" else "mensual"
+    p = PRECIOS_CONTABILIDAD[plan]
+    precio = p["anual"] if periodo == "anual" else p["mensual"]   # monto autoritativo
+    meses = 12 if periodo == "anual" else 1
+    nombre = (str(cuerpo.get("nombre", "")).strip() or "Contador")
+    orden_id = uuid.uuid4().hex[:12]
+    ordenes = _leer_ordenes()
+    ordenes[orden_id] = {
+        "tipo": "orden", "plan": "contabilidad", "origen": _origen_actual(),
+        "contab_plan": plan, "periodo": periodo, "meses": meses, "tope": p["tope"],
+        "precio": precio, "estado": "pendiente_pago", "fecha": str(date.today()),
+        "nit": "", "nombre": nombre,
+        "contacto": {"email": email, "nombre": nombre,
+                     "telefono": str(cuerpo.get("telefono", "")).strip()},
+    }
+    _guardar_ordenes(ordenes)
+    from src import payu as _payu_mod
+    from src import epayco as _epayco_mod
+    pago_url = (f"/pagar/{orden_id}"
+                if (_epayco_mod.activo(EPAYCO) or _payu_mod.activo()) else "")
+    return jsonify({"orden_id": orden_id, "precio": precio, "pago_url": pago_url})
+
+
 # Precios de la suscripción al Lector XML (Tributando Contadores). Plana,
 # empresas ILIMITADAS, por debajo de Kontalid ($297.700/año). Editable;
 # idealmente mover a config/precios.yaml bloque `lector`.
@@ -1562,6 +1613,10 @@ def _descripcion_orden(orden: dict) -> str:
         return f"Suscripción Lector tributando.co — plan {orden.get('plan_lector', '')}"
     if plan == "contadores":
         return "Pase de temporada — tributando.co"
+    if plan == "contabilidad":
+        pl = (PRECIOS_CONTABILIDAD.get(orden.get("contab_plan", ""), {})
+              .get("nombre", orden.get("contab_plan", "")))
+        return f"Contabilidad Tributando — plan {pl} ({orden.get('periodo', 'mensual')})"
     return "Declaración de renta — tributando.co"
 
 
@@ -2907,6 +2962,96 @@ def _entregar_pdf_al_cliente(orden_id: str, orden: dict, ordenes: dict) -> None:
                            orden_id, e)
 
 
+def _entregar_contabilidad(orden_id: str, orden: dict) -> None:
+    """Al confirmarse el pago de una suscripción de contabilidad: (1) concede
+    Premium en la app contable llamando a su endpoint /api/habilitar (A2) con el
+    secreto compartido, y (2) envía correo de bienvenida. Idempotente (banderas).
+    Nunca lanza excepción."""
+    if orden.get("plan") != "contabilidad":
+        return
+    email = (orden.get("contacto") or {}).get("email", "").strip().lower()
+    if not email:
+        return
+    plan = orden.get("contab_plan", "")
+    nombre_plan = PRECIOS_CONTABILIDAD.get(plan, {}).get("nombre", plan)
+
+    # (1) Activar Premium en la app contable (A2). Idempotente por bandera; y el
+    # propio /api/habilitar también es idempotente (extiende, no duplica).
+    if not orden.get("contab_activado"):
+        if CONTAB_PASE_SECRET:
+            try:
+                import urllib.request
+                payload = json.dumps({
+                    "email": email, "plan": "contabilidad",
+                    "meses": int(orden.get("meses", 1) or 1),
+                    "tope": int(orden.get("tope", 1) or 1),
+                    "nota": f"Pago {nombre_plan} {orden.get('periodo', '')} (orden {orden_id})",
+                }).encode("utf-8")
+                req = urllib.request.Request(
+                    f"{CONTAB_URL}/api/habilitar", data=payload, method="POST",
+                    headers={"Content-Type": "application/json",
+                             "X-Pase-Secret": CONTAB_PASE_SECRET})
+                with urllib.request.urlopen(req, timeout=25) as r:
+                    r.read()
+                orden["contab_activado"] = True
+            except Exception:
+                # Si falla (app dormida, red), se reintenta cuando la pasarela
+                # repita el webhook; /api/habilitar es idempotente.
+                pass
+
+    # (2) Correo de bienvenida (idempotente por bandera).
+    if orden.get("contab_bienvenida_enviada"):
+        return
+    try:
+        from src.correo import cargar_config_email, enviar_email
+        cfg = cargar_config_email()
+        if not cfg.get("habilitado"):
+            return
+        nombre = ((orden.get("contacto") or {}).get("nombre", "") or orden.get("nombre", ""))
+        primer = nombre.split()[0].title() if nombre else ""
+        saludo = f"Hola {primer}," if primer else "Hola,"
+        meses = int(orden.get("meses", 1) or 1)
+        vigencia = "por 1 año" if meses >= 12 else "este mes"
+        navy, dorado = "#1e2432", "#b8955f"
+        app_url = CONTAB_URL
+        html = f"""<!DOCTYPE html><html><body style="margin:0;background:#f5f7fa;
+          font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:#1e2b3a">
+          <div style="max-width:560px;margin:0 auto;padding:24px">
+            <div style="background:#fff;border-radius:16px;overflow:hidden;
+              box-shadow:0 6px 20px rgba(18,63,107,.08)">
+              <div style="background:{navy};color:#fff;padding:24px 26px">
+                <div style="font-size:1.5rem">📊</div>
+                <div style="font-size:1.2rem;font-weight:800;margin-top:6px">
+                  Tu Contabilidad Premium está <span style="color:{dorado}">activa</span></div>
+              </div>
+              <div style="padding:24px 26px;font-size:.95rem;line-height:1.65">
+                <p>{saludo}</p>
+                <p>Confirmamos tu pago del <b>plan {nombre_plan}</b> ({vigencia}, orden
+                  <code>{orden_id}</code>). Tu <b>Contabilidad Tributando Premium</b> ya quedó
+                  activa con este correo (<b>{email}</b>).</p>
+                <div style="background:#f5f7fa;border-radius:12px;padding:18px 20px;margin:18px 0">
+                  <b>Para entrar:</b>
+                  <ol style="margin:10px 0 0 18px;padding:0">
+                    <li>Ve a <a href="{app_url}">{app_url.replace('https://','')}</a></li>
+                    <li>Entra con <b>este mismo correo</b> ({email})</li>
+                    <li>Ya tienes informes, Contador IA e impuestos desbloqueados</li>
+                  </ol>
+                </div>
+                <p style="text-align:center;margin:24px 0 8px">
+                  <a href="{app_url}" style="background:{dorado};color:#fff;
+                    text-decoration:none;padding:13px 28px;border-radius:10px;
+                    font-weight:700;display:inline-block">Entrar a mi contabilidad</a></p>
+              </div>
+              <div style="padding:16px 26px;border-top:1px solid #eef2f7;font-size:.72rem;color:#9db0c4">
+                Tributando.co · Contabilidad en la nube para contadores</div>
+            </div>
+          </div></body></html>"""
+        enviar_email(email, "✅ Tu Contabilidad Tributando Premium está activa", html, cfg)
+        orden["contab_bienvenida_enviada"] = True
+    except Exception:
+        pass
+
+
 def _entregar_pase_contador(orden_id: str, orden: dict) -> None:
     """Correo de bienvenida del pase de temporada: le dice al contador que su
     acceso al liquidador quedó habilitado y cómo entrar. Idempotente (bandera
@@ -3050,7 +3195,7 @@ def _entregar_licencia_lector(orden_id: str, orden: dict) -> None:
 def _finalizar_pago_orden(orden_id: str, orden: dict, ordenes: dict) -> None:
     """Marca la orden como pagada y, si es plan de presentación, conserva la
     exógena y genera el checklist para el trámite. Idempotente."""
-    orden["estado"] = ("pagada" if orden["plan"] in ("pdf", "contadores", "lector")
+    orden["estado"] = ("pagada" if orden["plan"] in ("pdf", "contadores", "lector", "contabilidad")
                        else "pagada_en_tramite")
     # Fecha REAL del pago (para el informe del gerente): así un re-guardado masivo
     # de la tabla —que bumpea `actualizado`— no hace que órdenes viejas aparezcan
@@ -3086,6 +3231,11 @@ def _finalizar_pago_orden(orden_id: str, orden: dict, ordenes: dict) -> None:
                 db.session.rollback()
         # correo de bienvenida con el acceso (idempotente)
         _entregar_pase_contador(orden_id, orden)
+
+    # Suscripción de CONTABILIDAD: concede Premium en la app contable
+    # automáticamente (sin que Edison active a mano). Idempotente.
+    if orden["plan"] == "contabilidad":
+        _entregar_contabilidad(orden_id, orden)
 
     # Aviso al negocio de que entró dinero confirmado. La bandera evita
     # reenviarlo cuando la pasarela repite el webhook (esta función es

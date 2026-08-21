@@ -163,7 +163,7 @@
       <div class="year">Anual: $499.000 · 2 meses gratis</div>
       <div class="cap"><b>3</b>&nbsp;empresas</div>
       {{ det([g_dian, g_conta, g_plano, g_info, g_ia, g_imp, {"g":"Empresas y soporte","ic":ic_emp,"items":["Hasta 3 empresas","2 meses de prueba premium"]}]) }}
-      <a class="cta" href="https://contabilidad-tributando.onrender.com" target="_blank" rel="noopener">Elegir Emprende</a>
+      <a class="cta" href="#" onclick="return pagarPlan('emprende')">Elegir Emprende</a>
     </div>
 
     <!-- CONTADOR -->
@@ -175,7 +175,7 @@
       <div class="year">Anual: $999.000 · 2 meses gratis</div>
       <div class="cap"><b>10</b>&nbsp;empresas</div>
       {{ det([g_dian, g_conta, g_plano, g_info, g_ia, g_imp, {"g":"Empresas y soporte","ic":ic_emp,"items":["Hasta 10 empresas","Soporte por chat"]}]) }}
-      <a class="cta pri" href="https://contabilidad-tributando.onrender.com" target="_blank" rel="noopener">Elegir Contador</a>
+      <a class="cta pri" href="#" onclick="return pagarPlan('contador')">Elegir Contador</a>
     </div>
 
     <!-- FIRMA -->
@@ -186,7 +186,7 @@
       <div class="year">Anual: $1.499.000 · 2 meses gratis</div>
       <div class="cap"><b>Ilimitadas</b>&nbsp;empresas</div>
       {{ det([g_dian, g_conta, g_plano, g_info, g_ia, g_imp, {"g":"Empresas y soporte","ic":ic_emp,"items":["Empresas ilimitadas","Soporte prioritario","Varios usuarios del equipo"]}]) }}
-      <a class="cta" href="https://contabilidad-tributando.onrender.com" target="_blank" rel="noopener">Elegir Firma</a>
+      <a class="cta" href="#" onclick="return pagarPlan('firma')">Elegir Firma</a>
     </div>
 
   </div>
@@ -211,6 +211,89 @@
   </div>
 
 </div>
+
+<!-- Modal de pago (contabilidad) -->
+<div id="payModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(20,26,40,.62);
+  align-items:center;justify-content:center;padding:16px">
+  <div style="background:#fff;border-radius:16px;max-width:420px;width:100%;padding:26px 24px;
+    box-shadow:0 20px 60px rgba(0,0,0,.35);font-family:inherit;color:#1e2b3a">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+      <div style="font-size:1.15rem;font-weight:800">Activar plan <span id="pmPlan"></span></div>
+      <span onclick="cerrarPago()" style="margin-left:auto;cursor:pointer;font-size:1.4rem;color:#9db0c4;line-height:1">×</span>
+    </div>
+    <p style="font-size:.85rem;color:#5a6b7f;margin:0 0 16px">Paga con tarjeta, PSE o Nequi. Al confirmarse el pago, tu contabilidad Premium queda activa al instante con este correo.</p>
+    <label style="font-size:.78rem;color:#5a6b7f;font-weight:600">Tu correo (con el que entrarás a la app)</label>
+    <input id="pmEmail" type="email" placeholder="tucorreo@ejemplo.com" autocomplete="email"
+      style="width:100%;box-sizing:border-box;border:1px solid #d8dee8;border-radius:10px;padding:11px 12px;font-size:.95rem;margin:5px 0 14px">
+    <div style="display:flex;gap:10px;margin-bottom:16px">
+      <label class="pmOpt" data-periodo="mensual" style="flex:1;border:2px solid var(--oro,#b8955f);border-radius:12px;padding:10px 12px;cursor:pointer">
+        <div style="font-weight:700;font-size:.9rem">Mensual</div>
+        <div id="pmMensual" style="font-size:.82rem;color:#5a6b7f"></div>
+      </label>
+      <label class="pmOpt" data-periodo="anual" style="flex:1;border:2px solid #e2e7ee;border-radius:12px;padding:10px 12px;cursor:pointer">
+        <div style="font-weight:700;font-size:.9rem">Anual <span style="color:#37a06b;font-size:.7rem">2 meses gratis</span></div>
+        <div id="pmAnual" style="font-size:.82rem;color:#5a6b7f"></div>
+      </label>
+    </div>
+    <button id="pmBtn" onclick="irAPagar()" style="width:100%;background:var(--oro,#b8955f);color:#fff;border:none;
+      border-radius:11px;padding:13px;font-weight:800;font-size:.98rem;cursor:pointer">Ir a pagar</button>
+    <div id="pmMsg" style="font-size:.8rem;color:#c15b5b;margin-top:8px;min-height:1em"></div>
+  </div>
+</div>
+
+<script>
+  // ---- Pago de planes de contabilidad ----
+  var PRECIOS_CONTAB = {
+    emprende: {nombre:"Emprende", mensual:49900,  anual:499000},
+    contador: {nombre:"Contador", mensual:99900,  anual:999000},
+    firma:    {nombre:"Firma",    mensual:149900, anual:1499000}
+  };
+  var pmPlan = "contador", pmPeriodo = "mensual";
+  function _cop(n){ return "$" + Number(n).toLocaleString("es-CO"); }
+  function pagarPlan(plan){
+    pmPlan = plan; pmPeriodo = "mensual";
+    var p = PRECIOS_CONTAB[plan];
+    document.getElementById("pmPlan").textContent = p.nombre;
+    document.getElementById("pmMensual").textContent = _cop(p.mensual) + "/mes";
+    document.getElementById("pmAnual").textContent = _cop(p.anual) + "/año";
+    document.getElementById("pmMsg").textContent = "";
+    _marcarPeriodo("mensual");
+    document.getElementById("payModal").style.display = "flex";
+    setTimeout(function(){ document.getElementById("pmEmail").focus(); }, 60);
+    return false;
+  }
+  function cerrarPago(){ document.getElementById("payModal").style.display = "none"; }
+  function _marcarPeriodo(per){
+    pmPeriodo = per;
+    document.querySelectorAll(".pmOpt").forEach(function(o){
+      o.style.borderColor = (o.dataset.periodo === per) ? "var(--oro,#b8955f)" : "#e2e7ee";
+    });
+  }
+  document.querySelectorAll(".pmOpt").forEach(function(o){
+    o.addEventListener("click", function(){ _marcarPeriodo(o.dataset.periodo); });
+  });
+  document.getElementById("payModal").addEventListener("click", function(e){
+    if(e.target === this) cerrarPago();
+  });
+  function irAPagar(){
+    var email = (document.getElementById("pmEmail").value || "").trim();
+    var msg = document.getElementById("pmMsg");
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ msg.textContent = "Escribe un correo válido."; return; }
+    var btn = document.getElementById("pmBtn"); btn.disabled = true; btn.textContent = "Un momento…";
+    fetch("/api/orden-contabilidad", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({plan: pmPlan, periodo: pmPeriodo, email: email})
+    }).then(function(r){ return r.json(); }).then(function(d){
+      if(d && d.pago_url){ window.location.href = d.pago_url; }
+      else { msg.textContent = (d && d.error) ? d.error : "El pago en línea no está disponible. Escríbenos por WhatsApp."; btn.disabled=false; btn.textContent="Ir a pagar"; }
+    }).catch(function(){ msg.textContent = "No se pudo iniciar el pago. Intenta de nuevo."; btn.disabled=false; btn.textContent="Ir a pagar"; });
+  }
+  // Si llega con ?plan= (desde la app de contabilidad), abre ese plan directo.
+  (function(){
+    var m = (location.search.match(/[?&]plan=([a-z]+)/) || [])[1];
+    if(m && PRECIOS_CONTAB[m]) pagarPlan(m);
+  })();
+</script>
 <script>
   // Acordeón: en cada tarjeta, solo un módulo abierto a la vez.
   document.querySelectorAll('.card').forEach(function(card){
