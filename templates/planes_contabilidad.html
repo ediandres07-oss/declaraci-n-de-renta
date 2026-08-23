@@ -84,6 +84,27 @@
   .mod .it svg{flex:none;margin-top:1px}
   @media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}.card.feat{order:-1}}
   @media(max-width:560px){.grid{grid-template-columns:1fr}}
+  .addon{background:var(--card);border:1px solid var(--borde);border-radius:18px;padding:20px;margin:14px 0}
+  .addon-h{display:flex;align-items:center;gap:13px;margin-bottom:14px}
+  .addon-ic{width:42px;height:42px;border-radius:12px;flex:none;display:flex;align-items:center;justify-content:center;background:rgba(230,196,131,.14);border:1px solid rgba(230,196,131,.28)}
+  .addon-nm{font-size:17px;font-weight:750}
+  .addon-gk{font-size:13px;color:var(--tenue);margin-top:2px}
+  .tiers{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:11px}
+  .tier{position:relative;background:#212838;border:1px solid var(--borde);border-radius:13px;padding:15px 14px;text-align:center}
+  .tier.tfeat{border-color:rgba(230,196,131,.55);background:linear-gradient(180deg,var(--card-hi),#212838)}
+  .tflag{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--oro);color:var(--navy);font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .tnm{font-weight:700;font-size:14px}
+  .ttope{font-size:12px;color:var(--tenue);margin:3px 0 8px;min-height:32px;display:flex;align-items:center;justify-content:center}
+  .tprice{display:flex;align-items:baseline;gap:4px;justify-content:center}
+  .tamt{font-size:22px;font-weight:770}
+  .addon-inc{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+  .chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--suave);background:#212838;border:1px solid var(--borde);border-radius:9px;padding:5px 9px}
+  .suite{display:grid;grid-template-columns:1.5fr 1fr;gap:18px;align-items:center;margin:20px 0 8px;
+    background:linear-gradient(180deg,var(--card-hi),var(--card));border:1px solid rgba(230,196,131,.5);border-radius:20px;padding:26px}
+  .suite-nm{font-size:22px;font-weight:770}
+  .suite-gk{font-size:14px;color:var(--suave);margin-top:6px}
+  .suite-r{text-align:center;background:#212838;border:1px solid var(--borde);border-radius:14px;padding:20px 16px}
+  @media(max-width:720px){.suite{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -198,6 +219,71 @@
     <div class="r"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#37d38f" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Actualizaciones y soporte por chat</div>
     <div class="r"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#37d38f" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Cancela cuando quieras, sin permanencia</div>
   </section>
+
+  {% set ic_nom = '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/>' %}
+  {% set ic_sst = '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>' %}
+  {% set ic_pos = '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M3 10h18M7 20h10"/>' %}
+  {% set _addons = [
+    {"ic":ic_nom,"nombre":"Nómina electrónica","gancho":"Liquida, provisiona y emite la nómina electrónica a la DIAN.",
+     "tiers":[{"n":"Nómina Básica","t":"Hasta 3 empleados","p":"$29.900"},{"n":"Nómina Pyme","t":"Hasta 10 empleados","p":"$49.900","f":true},{"n":"Nómina Plus","t":"Hasta 25 empleados","p":"$89.900"},{"n":"Nómina Ilimitada","t":"Empleados ilimitados","p":"$129.900"}],
+     "inc":["Liquidación con prestaciones y aportes","Colillas de pago por correo","Nómina electrónica DIAN (CUNE)","Provisiones y exoneración Ley 1607"]},
+    {"ic":ic_sst,"nombre":"SG-SST","gancho":"Cumple la Resolución 0312 sin consultor: autoevaluación y documentos.",
+     "tiers":[{"n":"SST Esencial","t":"Micro <10 · riesgo I–III","p":"$29.900"},{"n":"SST Pyme","t":"10–50 trabajadores","p":"$59.900","f":true},{"n":"SST Empresarial","t":">50 · o riesgo IV–V","p":"$99.900"}],
+     "inc":["Autoevaluación 0312 (60 estándares)","Política y reglamento de SST","Plan anual de trabajo","Comités (COPASST / convivencia)"]},
+    {"ic":ic_pos,"nombre":"Punto de venta (POS)","gancho":"Vende rápido con caja táctil; contabiliza e inventario solos.",
+     "tiers":[{"n":"POS 1 Caja","t":"1 terminal","p":"$29.900"},{"n":"POS Multicaja","t":"Hasta 3 cajas","p":"$49.900","f":true},{"n":"POS Ilimitado","t":"Cajas ilimitadas","p":"$79.900"}],
+     "inc":["Pantalla táctil + turnos de caja","Cobro con vuelto y pago combinado","Tirilla e inventario a costo promedio","Contabiliza cada venta automáticamente"]}
+  ] %}
+
+  <header class="hero" style="padding-top:38px">
+    <div class="eyebrow">Módulos adicionales</div>
+    <h1 style="max-width:22ch">Suma solo lo que tu cliente necesita.</h1>
+    <p class="sub">Nómina, Seguridad y Salud (SG-SST) y Punto de venta se activan aparte, cada uno con su propia escalera. Se integran a tu contabilidad: lo que vendes o liquidas se contabiliza solo.</p>
+  </header>
+
+  {% for a in _addons %}
+  <div class="addon">
+    <div class="addon-h">
+      <span class="addon-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e6c483" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">{{ a.ic|safe }}</svg></span>
+      <div><div class="addon-nm">{{ a.nombre }}</div><div class="addon-gk">{{ a.gancho }}</div></div>
+    </div>
+    <div class="tiers">
+      {% for t in a.tiers %}
+      <div class="tier {{ 'tfeat' if t.f }}">
+        {% if t.f %}<div class="tflag">Recomendado</div>{% endif %}
+        <div class="tnm">{{ t.n }}</div>
+        <div class="ttope">{{ t.t }}</div>
+        <div class="tprice"><span class="tamt">{{ t.p }}</span><span class="per">/mes</span></div>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="addon-inc">
+      {% for it in a.inc %}<span class="chip"><svg width="13" height="13" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#37d38f"/><path d="M7 12.4l3.2 3.2L17 8.6" stroke="#0e1220" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>{{ it }}</span>{% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+
+  <div class="suite">
+    <div>
+      <div class="eyebrow" style="margin-bottom:8px">Ahorra con el paquete</div>
+      <div class="suite-nm">Suite Tributando</div>
+      <p class="suite-gk">Todo incluido: Contabilidad Contador + Nómina Pyme + SST Esencial + POS 1 Caja.</p>
+      <ul style="margin-top:10px">
+        {% for it in ["Plan Contador (10 empresas)","Nómina Pyme (hasta 10 empleados)","SST Esencial","POS 1 Caja","Todo lo Premium: informes, Contador IA, impuestos"] %}
+        <li><svg width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#37d38f"/><path d="M7 12.4l3.2 3.2L17 8.6" stroke="#0e1220" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>{{ it }}</li>{% endfor %}
+      </ul>
+    </div>
+    <div class="suite-r">
+      <div class="price" style="justify-content:center"><span style="text-decoration:line-through;opacity:.5;font-size:1.1rem;margin-right:8px">$229.500</span><span class="amt">$149.900</span><span class="per">/mes</span></div>
+      <div class="year">Anual: $1.499.000 · 2 meses gratis</div>
+      <a class="cta pri" style="margin-top:14px;display:block" href="mailto:contacto@tributando.co?subject=Quiero%20la%20Suite%20Tributando">Quiero la Suite</a>
+    </div>
+  </div>
+
+  <div style="text-align:center;color:var(--tenue);font-size:13px;margin:6px 0 0">
+    Los módulos se suman a tu plan de contabilidad. Para activarlos, escríbenos a
+    <a href="mailto:contacto@tributando.co" style="color:var(--oro)">contacto@tributando.co</a>.
+  </div>
 
   <div class="close">
     <h2>Prueba gratis. Paga solo si te sirve.</h2>
