@@ -139,8 +139,10 @@
   {% set g_conta = {"g":"Contabilidad","ic":ic_conta,"items":["IVA discriminado y las 3 retenciones (fuente, IVA, ICA)","Notas crédito y débito","Libro auxiliar y de movimientos","Documento soporte y eventos DIAN"]} %}
   {% set g_plano = {"g":"Planos y exportación","ic":ic_plano,"items":["Arma el plano para Siigo, Contai, Helisa y World Office","Exporta a Excel"]} %}
   {% set g_info = {"g":"Informes y estados","ic":ic_info,"items":["Balance y estado de resultados","Informes financieros y tributarios"]} %}
-  {% set g_ia = {"g":"Contador IA","ic":ic_ia,"items":["Chat contable con IA (Contador Virtual)","Análisis e interpretación de tus cifras"]} %}
+  {% set g_ia = {"g":"Contador IA + conectar tu IA","ic":ic_ia,"items":["Contador Virtual: chat con IA usando tus cifras reales","9 asistentes expertos: renta, exógena, cierre, planeación, cesantías, nómina, POS, SG-SST y renta 210","Análisis e interpretación de tus estados financieros","Conecta tu IA por MCP: consulta desde ChatGPT, Claude o Perplexity"]} %}
   {% set g_imp = {"g":"Impuestos y conciliación","ic":ic_imp,"items":["Borradores de impuestos y exógena","Conciliación bancaria"]} %}
+  {% set ic_firma = '<path d="M3 17c3-1 5-6 7-6s2 4 4 4 3-3 3-3"/><path d="M3 21h18"/>' %}
+  {% set g_firma = {"g":"Firma electrónica","ic":ic_firma,"items":["Firma electrónica de documentos (estilo DocuSign)","Coloca la firma sobre el documento y envíalo por correo","Traza de auditoría: apertura, firma, fecha e IP","Aviso cuando todos firman + recordatorios"]} %}
   {% set g_dian_free = {"g":"Contabilizador DIAN","ic":ic_dian,"items":["Baja las facturas de la DIAN automáticamente","Las contabiliza en partida doble (sin un clic)"]} %}
   {% set g_conta_free = {"g":"Contabilidad","ic":ic_conta,"items":["IVA discriminado y las 3 retenciones","Libro auxiliar y de movimientos"]} %}
   {% macro det(grupos) %}
@@ -188,7 +190,7 @@
       <div class="year">Anual: $499.000 · 2 meses gratis</div>
       <div class="cap"><b>3</b>&nbsp;empresas</div>
       <div class="cap" style="margin-top:6px"><b>100</b>&nbsp;facturas electrónicas/mes</div>
-      {{ det([g_dian, g_conta, g_plano, g_info, g_ia, g_imp, {"g":"Empresas y soporte","ic":ic_emp,"items":["Hasta 3 empresas","100 facturas electrónicas/mes por empresa","2 meses de prueba premium"]}]) }}
+      {{ det([g_dian, g_conta, g_plano, g_info, g_ia, g_imp, g_firma, {"g":"Empresas y soporte","ic":ic_emp,"items":["Hasta 3 empresas","100 facturas electrónicas/mes por empresa","2 meses de prueba premium"]}]) }}
       <a class="cta" href="#" onclick="return pagarPlan('emprende')">Elegir Emprende</a>
     </div>
 
@@ -201,7 +203,7 @@
       <div class="year">Anual: $999.000 · 2 meses gratis</div>
       <div class="cap"><b>10</b>&nbsp;empresas</div>
       <div class="cap" style="margin-top:6px"><b>300</b>&nbsp;facturas electrónicas/mes</div>
-      {{ det([g_dian, g_conta, g_plano, g_info, g_ia, g_imp, {"g":"Empresas y soporte","ic":ic_emp,"items":["Hasta 10 empresas","300 facturas electrónicas/mes por empresa","Soporte por chat"]}]) }}
+      {{ det([g_dian, g_conta, g_plano, g_info, g_ia, g_imp, g_firma, {"g":"Empresas y soporte","ic":ic_emp,"items":["Hasta 10 empresas","300 facturas electrónicas/mes por empresa","Soporte por chat"]}]) }}
       <a class="cta pri" href="#" onclick="return pagarPlan('contador')">Elegir Contador</a>
     </div>
 
@@ -213,7 +215,7 @@
       <div class="year">Anual: $1.499.000 · 2 meses gratis</div>
       <div class="cap"><b>Ilimitadas</b>&nbsp;empresas</div>
       <div class="cap" style="margin-top:6px"><b>Ilimitadas</b>&nbsp;facturas electrónicas</div>
-      {{ det([g_dian, g_conta, g_plano, g_info, g_ia, g_imp, {"g":"Empresas y soporte","ic":ic_emp,"items":["Empresas ilimitadas","Facturas electrónicas ilimitadas","Soporte prioritario","Varios usuarios del equipo"]}]) }}
+      {{ det([g_dian, g_conta, g_plano, g_info, g_ia, g_imp, g_firma, {"g":"Empresas y soporte","ic":ic_emp,"items":["Empresas ilimitadas","Facturas electrónicas ilimitadas","Soporte prioritario","Varios usuarios del equipo"]}]) }}
       <a class="cta" href="#" onclick="return pagarPlan('firma')">Elegir Firma</a>
     </div>
 
@@ -233,17 +235,20 @@
   {% set gr_nom = [
     {"g":"Liquidación y prestaciones","ic":ic_nom,"items":["Liquidación con salario, horas extra y recargos","Prestaciones: prima, cesantías, intereses y vacaciones","Provisiones mensuales automáticas","Liquidación definitiva de cualquier empleado + PDF"]},
     {"g":"Seguridad social y parafiscales","ic":ic_conta,"items":["Aportes de salud, pensión y ARL","Parafiscales: SENA, ICBF y caja","Exoneración Ley 1607","Novedades: incapacidades, licencias, ausencias"]},
-    {"g":"Nómina electrónica DIAN","ic":ic_dian,"items":["Documento de Nómina Individual + CUNE","Colillas de pago enviadas por correo","Ajustes y notas de nómina"]}
+    {"g":"Nómina electrónica DIAN","ic":ic_dian,"items":["Documento de Nómina Individual + CUNE","Colillas de pago enviadas por correo","Ajustes y notas de nómina"]},
+    {"g":"Asistente IA","ic":ic_ia,"items":["Experto de nómina en el Contador IA (con tus datos)","Consultable también por MCP (ChatGPT/Claude)"]}
   ] %}
   {% set gr_sst = [
     {"g":"Autoevaluación Res. 0312","ic":ic_info,"items":["60 estándares mínimos evaluados","Puntaje automático y plan de mejora","Evidencias por estándar"]},
     {"g":"Documentos y política","ic":ic_conta,"items":["Política de Seguridad y Salud","Reglamento de higiene y seguridad","Matriz de requisitos legales"]},
-    {"g":"Gestión anual","ic":ic_imp,"items":["Plan anual de trabajo","Comités COPASST y de convivencia","Cronograma y seguimiento"]}
+    {"g":"Gestión anual","ic":ic_imp,"items":["Plan anual de trabajo","Comités COPASST y de convivencia","Cronograma y seguimiento"]},
+    {"g":"Asistente IA","ic":ic_ia,"items":["Experto de SG-SST en el Contador IA (con tu puntaje 0312)","Consultable también por MCP (ChatGPT/Claude)"]}
   ] %}
   {% set gr_pos = [
     {"g":"Venta rápida","ic":ic_pos,"items":["Pantalla táctil con grid de productos","Buscar y escanear código de barras","Venta simple por monto","Varias ventas en paralelo"]},
     {"g":"Caja y cobro","ic":ic_conta,"items":["Turnos de caja con arqueo","Cobro con vuelto y pago combinado","Efectivo, tarjetas y transferencia","Movimientos de efectivo (ingresos/retiros)"]},
-    {"g":"Integrado a tu contabilidad","ic":ic_dian,"items":["Cada venta se contabiliza sola","Inventario a costo promedio (kardex)","Tirilla PDF e historial de ventas"]}
+    {"g":"Integrado a tu contabilidad","ic":ic_dian,"items":["Cada venta se contabiliza sola","Inventario a costo promedio (kardex)","Tirilla PDF e historial de ventas"]},
+    {"g":"Asistente IA","ic":ic_ia,"items":["Experto de POS en el Contador IA (con tus ventas)","Consultable también por MCP (ChatGPT/Claude)"]}
   ] %}
   {% set _addons = [
     {"ic":ic_nom,"nombre":"Nómina electrónica","gancho":"Liquida, provisiona y emite la nómina electrónica a la DIAN.","grupos":gr_nom,
@@ -286,7 +291,7 @@
       <div class="suite-nm">Suite Tributando</div>
       <p class="suite-gk">Todo incluido: Contabilidad Contador + Nómina Pyme + SST Esencial + POS 1 Caja.</p>
       <ul style="margin-top:10px">
-        {% for it in ["Plan Contador (10 empresas)","Nómina Pyme (hasta 10 empleados)","SST Esencial","POS 1 Caja","Todo lo Premium: informes, Contador IA, impuestos"] %}
+        {% for it in ["Plan Contador (10 empresas)","Nómina Pyme (hasta 10 empleados)","SST Esencial","POS 1 Caja","Todo lo Premium: informes, impuestos y firma electrónica","Contador IA (9 expertos) + conectar tu IA por MCP"] %}
         <li><svg width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#37d38f"/><path d="M7 12.4l3.2 3.2L17 8.6" stroke="#0e1220" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>{{ it }}</li>{% endfor %}
       </ul>
     </div>
