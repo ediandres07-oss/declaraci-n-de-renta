@@ -122,6 +122,12 @@ def _bucle_avisos_vencimientos():
                             n = _ger.seguimiento_contadores()
                             if n:
                                 print(f"[gerente] seguimiento contadores: {n} propuesto(s)")
+                        # Agente del CRM: auto-correo de primer contacto a los que
+                        # pidieron asesor (envía solo; tope 1 por persona; apagable).
+                        if _candado(f"crm-asesor|{hoy}"):
+                            n = _agente_crm_asesor()
+                            if n:
+                                print(f"[agente-crm] {n} correo(s) a leads que pidieron asesor")
                         # Lunes: lote de contenido de marketing.
                         if ahora.weekday() == 0 and _candado(f"mkt|{hoy}"):
                             _ger.contenido_semanal(IA_CFG)
@@ -3963,6 +3969,89 @@ def admin_crm_redactar():
         return jsonify({"ok": False, "error": str(e)}), 502
 
 
+def _agente_crm_asesor(limite=None) -> int:
+    """Agente del CRM: auto-envía por CORREO el primer contacto a los que pidieron
+    asesor y aún no lo recibieron (tope 1 por persona; la IA redacta cada uno).
+    Apagable con env CRM_AGENTE_OFF. Corre dentro de app.app_context(). Nunca lanza.
+    Devuelve cuántos correos envió."""
+    if os.environ.get("CRM_AGENTE_OFF", "").strip():
+        return 0
+    if not asistente_ia_activo(IA_CFG):
+        return 0
+    from src.auth import Usuario, CrmLead
+    from src.correo import cargar_config_email, enviar_email
+    from src.gerente import _es_propio
+    from markupsafe import escape
+    cfg = cargar_config_email()
+    if not cfg.get("habilitado"):
+        return 0
+    wa = re.sub(r"\D", "", str(_CONTACTO.get("whatsapp", "")))
+    enviados = 0
+    for u in Usuario.query.filter_by(quiere_asesor=True).all():
+        email = (u.email or "").lower().strip()
+        if not email or "@" not in email or _es_propio(email):
+            continue
+        cl = db.session.get(CrmLead, email)
+        if cl and cl.agente_correo:
+            continue                                   # ya recibió el primer contacto (tope 1)
+        nombre = (u.nombre or email.split("@")[0]).strip()
+        primer = nombre.split()[0].title() if nombre else ""
+        motivo = (u.asesor_motivo or "").strip()
+        fl_txt = (f" Su fecha límite para declarar es el {u.fecha_limite.strftime('%d/%m/%Y')}."
+                  if u.fecha_limite else "")
+        sit = (f'pidió asesoría con su declaración de renta y escribió: "{motivo}".'
+               if motivo else "pidió que lo contactáramos para ayudarle con su declaración de renta.")
+        prompt = (
+            f"Eres Edison Monsalve, de Tributando.co (presentamos declaraciones de renta de "
+            f"personas naturales, rápido y sin filas). {nombre} {sit}{fl_txt} Redacta el CUERPO "
+            f"de un correo CORTO (máximo 6 líneas), cálido y profesional, en español colombiano "
+            f"de usted: salúdalo por su nombre ({primer or 'Hola'}), confirma que sí le podemos "
+            f"ayudar con lo que pide, dale el siguiente paso concreto (responder este correo o "
+            f"escribir al WhatsApp), y cierra. Sin asteriscos ni markdown. Devuelve solo el "
+            f"cuerpo, sin asunto ni firma.")
+        try:
+            texto = responder_ia([{"rol": "user", "texto": prompt}], IA_CFG,
+                                 system_extra="Devuelve únicamente el cuerpo del correo.",
+                                 max_tokens=380)
+        except Exception:
+            continue
+        cuerpo = str(escape((texto or "").strip())).replace("\n", "<br>")
+        if not cuerpo:
+            continue
+        html = (
+            "<div style='font-family:-apple-system,Segoe UI,Roboto,sans-serif;"
+            "color:#22303f;line-height:1.6;max-width:560px;font-size:15px'>"
+            f"<p>{cuerpo}</p><p style='margin-top:16px'>Un saludo,<br>"
+            "<b>Edison Monsalve</b> — Tributando.co"
+            + (f"<br><a href='https://wa.me/{wa}'>Escríbeme por WhatsApp</a>" if wa else "")
+            + "</p></div>")
+        try:
+            enviar_email(email, "Sobre tu declaración de renta — Tributando.co", html, cfg)
+            cl = cl or CrmLead(email=email)
+            cl.agente_correo = datetime.utcnow()
+            if cl.temp in (None, "", "tibio"):
+                cl.temp = "caliente"
+            db.session.add(cl)
+            db.session.commit()
+            enviados += 1
+            if limite and enviados >= limite:
+                break
+        except Exception:
+            db.session.rollback()
+    return enviados
+
+
+@app.post("/admin/crm/agente-ahora")
+@autorizado_requerido
+def admin_crm_agente_ahora():
+    """Corre el agente del CRM ahora (auto-correo a los que pidieron asesor)."""
+    try:
+        n = _agente_crm_asesor()
+        return jsonify({"ok": True, "enviados": n})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 502
+
+
 _CRM_HTML = r"""<!doctype html><html lang=es><head><meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1">
 <title>CRM · Tributando</title>{{ css|safe }}<style>
@@ -4007,6 +4096,8 @@ input[type=date]{border:1px solid #e2dcce;border-radius:8px;padding:5px 7px;font
   <div class=crm-kpi><div class=n style="color:#3aa06b">{{ resumen.cliente }}</div><div class=l>Clientes</div></div>
   <div class=crm-kpi><div class=n>{{ resumen.conv }}%</div><div class=l>Conversión</div></div>
 </div>
+{% if ia_on %}<div style="margin:-6px 0 16px"><button onclick="agenteAhora(this)" style="background:#6b46c1;color:#fff;border:none;border-radius:9px;padding:9px 16px;font-weight:700;cursor:pointer">▶ Correr agente ahora (auto-correo a los que pidieron asesor)</button>
+<span style="font-size:.75rem;color:#8a94a3;margin-left:8px">Envía 1 correo por persona, solo a quienes aún no lo recibieron.</span></div>{% endif %}
 {% macro etapa(lista, key, titulo) %}
 <div class=col>
   <h2><span class="dot {{key}}"></span>{{ titulo }}<span class=c>{{ lista|length }}</span></h2>
@@ -4064,6 +4155,12 @@ function redactar(btn,email){var o=btn.textContent;btn.disabled=true;btn.textCon
 function wapp(btn,num){var ta=btn.closest('.card').querySelector('textarea');
   var t=((ta&&ta.value)||'').trim();
   window.open('https://wa.me/'+num+(t?'?text='+encodeURIComponent(t):''),'_blank')}
+function agenteAhora(btn){if(!confirm('El agente enviará un primer correo (redactado por IA) a los que pidieron asesor y aún no lo recibieron. ¿Correr ahora?'))return;
+  btn.disabled=true;var o=btn.textContent;btn.textContent='Enviando…';
+  fetch('/admin/crm/agente-ahora',{method:'POST'}).then(function(r){return r.json()}).then(function(r){
+    btn.disabled=false;btn.textContent=o;
+    alert(r&&r.ok?('Agente ejecutado: '+r.enviados+' correo(s) enviados.'):('Error'+((r&&r.error)?': '+r.error:'')));
+    if(r&&r.ok&&r.enviados)location.reload();}).catch(function(){btn.disabled=false;btn.textContent=o;alert('Error')})}
 </script></body></html>"""
 
 

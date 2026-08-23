@@ -266,6 +266,7 @@ class CrmLead(db.Model):
     nota = db.Column(db.Text, default="")
     temp = db.Column(db.String(8), default="tibio")       # caliente|tibio|frio
     proxima = db.Column(db.Date)                          # próxima acción (recordatorio)
+    agente_correo = db.Column(db.DateTime)                # cuándo el agente le auto-envió el 1er correo (tope 1)
     actualizado = db.Column(db.DateTime, default=datetime.utcnow)
 
 
@@ -888,6 +889,12 @@ def _migrar_columnas_faltantes():
         if "equipo" not in cols:
             with db.engine.begin() as con:
                 con.execute(text("ALTER TABLE suscripciones_lector ADD COLUMN equipo VARCHAR(64)"))
+    # Columna 'agente_correo' en crm_leads (tope 1 auto-correo del agente del CRM).
+    if "crm_leads" in insp.get_table_names():
+        cols = {c["name"] for c in insp.get_columns("crm_leads")}
+        if "agente_correo" not in cols:
+            with db.engine.begin() as con:
+                con.execute(text(f"ALTER TABLE crm_leads ADD COLUMN agente_correo {marca_tiempo}"))
         # Acceso por correo (código temporal): otp_hash / otp_expira / otp_intentos.
         otp_cols = {"otp_hash": "VARCHAR(64)", "otp_expira": marca_tiempo,
                     "otp_intentos": "INTEGER DEFAULT 0"}
