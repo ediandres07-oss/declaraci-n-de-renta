@@ -3882,7 +3882,8 @@ def admin_crm():
     resumen = {"total": n, "asesor": len(cols["asesor"]), "cliente": len(cols["cliente"]),
                "conv": round(100 * len(cols["cliente"]) / n) if n else 0}
     return render_template_string(_CRM_HTML, css=_ADMIN_CSS, nav=_admin_nav("crm"),
-                                  cols=cols, resumen=resumen)
+                                  cols=cols, resumen=resumen,
+                                  ia_on=asistente_ia_activo(IA_CFG))
 
 
 @app.post("/admin/crm/guardar")
@@ -3910,6 +3911,56 @@ def admin_crm_guardar():
     db.session.add(c)
     db.session.commit()
     return jsonify({"ok": True})
+
+
+@app.post("/admin/crm/redactar")
+@autorizado_requerido
+def admin_crm_redactar():
+    """Agente del CRM: la IA redacta un WhatsApp de respuesta para un contacto
+    (sobre todo los que pidieron asesor), listo para que el dueño lo revise y
+    envíe. NO envía nada — solo devuelve el borrador."""
+    from src.auth import Usuario, LeadExogena
+    if not asistente_ia_activo(IA_CFG):
+        return jsonify({"ok": False, "error": "IA no configurada"}), 503
+    data = request.get_json(silent=True) or {}
+    email = (data.get("email") or "").lower().strip()
+    if not email:
+        return jsonify({"ok": False, "error": "sin correo"}), 400
+    u = Usuario.query.filter(db.func.lower(Usuario.email) == email).first()
+    l = db.session.get(LeadExogena, email)
+    nombre = ((u.nombre if u else "") or (l.nombre if l else "")
+              or email.split("@")[0]).strip()
+    primer = nombre.split()[0].title() if nombre else ""
+    motivo = (u.asesor_motivo if (u and u.asesor_motivo) else "").strip()
+    fl = None
+    if u and u.fecha_limite:
+        fl = u.fecha_limite
+    elif l and l.fecha_limite:
+        fl = l.fecha_limite
+    fl_txt = (f" Su fecha límite para declarar es el {fl.strftime('%d/%m/%Y')}."
+              if fl else "")
+    if motivo:
+        situacion = f'escribió pidiendo ayuda con su declaración de renta. Su mensaje fue: "{motivo}".'
+    else:
+        situacion = ("usó nuestro liquidador de renta gratis pero aún no ha comprado "
+                     "la presentación ni el PDF del formulario 210.")
+    prompt = (
+        f"Eres Edison Monsalve, de Tributando.co (hacemos y presentamos declaraciones "
+        f"de renta de personas naturales, rápido y sin filas). Un contacto llamado "
+        f"{nombre} {situacion}{fl_txt} "
+        f"Redacta UN mensaje de WhatsApp CORTO (máximo 5 líneas), cálido, cercano y "
+        f"profesional, en español colombiano de usted, que: salude por su nombre "
+        f"({primer or 'hola'}), confirme que sí le podemos ayudar con lo que necesita, "
+        f"dé el siguiente paso concreto, y cierre invitando a responder. Sin asteriscos "
+        f"ni markdown ni emojis excesivos. Devuelve SOLO el mensaje, sin comillas ni "
+        f"encabezados. Ciérralo con: Edison — Tributando.co")
+    try:
+        texto = responder_ia([{"rol": "user", "texto": prompt}], IA_CFG,
+                             system_extra="Devuelve únicamente el texto del mensaje de WhatsApp, listo para enviar.",
+                             max_tokens=350)
+        return jsonify({"ok": True, "texto": (texto or "").strip()})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 502
 
 
 _CRM_HTML = r"""<!doctype html><html lang=es><head><meta charset=utf-8>
@@ -3943,7 +3994,7 @@ textarea{width:100%;box-sizing:border-box;border:1px solid #e2dcce;border-radius
 input[type=date]{border:1px solid #e2dcce;border-radius:8px;padding:5px 7px;font:inherit;font-size:.8rem;background:#fbf9f4}
 .acc{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
 .acc a,.acc button{border:none;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:.78rem;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
-.wa{background:#25d366;color:#fff}.mail{background:#eef1f5;color:#5a6b7f}
+.wa{background:#25d366;color:#fff}.mail{background:#eef1f5;color:#5a6b7f}.redact{background:#efe7fb;color:#6b46c1}
 .save{background:#1e2432;color:#fff;margin-left:auto}
 .vacio{color:#a7afba;font-size:.85rem;text-align:center;padding:18px 8px}
 @media(max-width:860px){.board{grid-template-columns:1fr}}
@@ -3978,11 +4029,13 @@ input[type=date]{border:1px solid #e2dcce;border-radius:8px;padding:5px 7px;font
       <span class="tp tibio {{ 'on' if f.temp=='tibio' }}" title="Tibio" onclick="temp('{{f.email}}','tibio',this)"></span>
       <span class="tp frio {{ 'on' if f.temp=='frio' }}" title="Frío" onclick="temp('{{f.email}}','frio',this)"></span>
     </div>
-    <textarea placeholder="Nota…" data-email="{{f.email}}">{{ f.nota }}</textarea>
+    <textarea placeholder="Nota o mensaje…" data-email="{{f.email}}">{{ f.nota }}</textarea>
+    <div style="font-size:.7rem;color:#9db0c4;margin-top:2px">El botón WhatsApp envía este texto.</div>
     <div class=rowp><label>Próxima acción</label>
       <input type=date value="{{ f.proxima }}" data-email="{{f.email}}"></div>
     <div class=acc>
-      {% if f.wa_num %}<a class=wa href="https://wa.me/{{ f.wa_num }}" target=_blank rel=noopener>WhatsApp</a>{% endif %}
+      {% if ia_on %}<button class=redact onclick="redactar(this,'{{f.email}}')">✨ Redactar</button>{% endif %}
+      {% if f.wa_num %}<button class=wa onclick="wapp(this,'{{ f.wa_num }}')">WhatsApp</button>{% endif %}
       <a class=mail href="mailto:{{ f.email }}">Correo</a>
       <button class=save onclick="guardar(this,'{{f.email}}')">Guardar</button>
     </div>
@@ -4002,6 +4055,15 @@ function temp(email,val,el){var row=el.parentNode;row.querySelectorAll('.tp').fo
 function guardar(btn,email){var card=btn.closest('.card');btn.textContent='…';
   post({email:email,nota:card.querySelector('textarea').value,proxima:card.querySelector('input[type=date]').value},
     function(){btn.textContent='Guardado';setTimeout(function(){btn.textContent='Guardar'},1200)})}
+function redactar(btn,email){var o=btn.textContent;btn.disabled=true;btn.textContent='Redactando…';
+  fetch('/admin/crm/redactar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email})})
+    .then(function(r){return r.json()}).then(function(r){btn.disabled=false;btn.textContent=o;
+      if(r&&r.ok){var ta=btn.closest('.card').querySelector('textarea');ta.value=r.texto;ta.focus();}
+      else{alert('No se pudo redactar'+((r&&r.error)?': '+r.error:''))}})
+    .catch(function(){btn.disabled=false;btn.textContent=o;alert('Error al redactar')})}
+function wapp(btn,num){var ta=btn.closest('.card').querySelector('textarea');
+  var t=((ta&&ta.value)||'').trim();
+  window.open('https://wa.me/'+num+(t?'?text='+encodeURIComponent(t):''),'_blank')}
 </script></body></html>"""
 
 
