@@ -145,6 +145,12 @@ def _bucle_avisos_vencimientos():
                         n = _purgar_exogenas_viejas(60)
                         if n:
                             print(f"[purga] {n} exógena(s) de cálculo viejas borradas")
+                    # Borra leads del cálculo cuyo vencimiento ya pasó +30 días y
+                    # no compraron (conserva cuentas y compradores).
+                    if _candado(f"purga-leads|{ahora.date().isoformat()}"):
+                        n = _purgar_leads_vencidos(30)
+                        if n:
+                            print(f"[purga] {n} lead(s) del cálculo vencidos borrados")
         except Exception as exc:  # noqa: BLE001  — el hilo nunca debe morir
             print(f"[avisos-vencimientos] error: {exc}")
         time.sleep(1800)
@@ -367,6 +373,45 @@ def _guardar_archivo_bd(clave: str, nombre: str, datos: bytes) -> None:
     except Exception as e:
         db.session.rollback()
         app.logger.error("No se pudo guardar el Excel %s en la BD: %s", clave, e)
+
+
+def _purgar_leads_vencidos(dias: int = 30) -> int:
+    """Limpieza del CRM: borra los LEADS del cálculo (LeadExogena) cuya fecha
+    límite para declarar ya pasó hace más de `dias` y que NUNCA compraron — leads
+    muertos de la temporada — junto con su estado CRM (CrmLead). NUNCA borra:
+      - compradores (correo en una orden pagada), ni
+      - cuentas de usuario (Usuario / login): solo se limpian los leads del cálculo.
+    Devuelve cuántos borró. Corre dentro de app.app_context()."""
+    from datetime import timedelta, date as _date
+    from src.auth import LeadExogena, CrmLead
+    corte = _date.today() - timedelta(days=dias)
+    try:
+        compradores = set()
+        for _oid, d in _leer_ordenes().items():
+            if (isinstance(d, dict) and d.get("tipo") == "orden"
+                    and str(d.get("estado", "")).startswith("pagada")):
+                e = ((d.get("contacto") or {}).get("email") or "").lower().strip()
+                if e:
+                    compradores.add(e)
+        borrados = 0
+        viejos = LeadExogena.query.filter(
+            LeadExogena.fecha_limite.isnot(None),
+            LeadExogena.fecha_limite < corte).all()
+        for lead in viejos:
+            email = (lead.email or "").lower().strip()
+            if not email or email in compradores:
+                continue
+            db.session.delete(lead)
+            cl = db.session.get(CrmLead, email)
+            if cl:
+                db.session.delete(cl)
+            borrados += 1
+        if borrados:
+            db.session.commit()
+        return borrados
+    except Exception:
+        db.session.rollback()
+        return 0
 
 
 def _purgar_exogenas_viejas(dias: int = 60) -> int:
@@ -3869,8 +3914,16 @@ def admin_crm():
 
     crm = {x.email: x for x in CrmLead.query.all()}
     cols = {"nuevo": [], "asesor": [], "cliente": []}
+    hoy_d = _dt.now().date()
+    vencidos = 0
     for email, c in contactos.items():
-        if email in compradores:
+        es_cliente = email in compradores
+        # Ocultar del embudo a los que ya se les pasó el vencimiento y NO compraron
+        # (leads muertos de la temporada). Los clientes se conservan siempre.
+        if (not es_cliente and c["fecha_limite"] and c["fecha_limite"] < hoy_d):
+            vencidos += 1
+            continue
+        if es_cliente:
             etapa = "cliente"
             c["acts"].append("Compró: " + compradores[email])
         elif c["quiere_asesor"]:
@@ -3889,9 +3942,10 @@ def admin_crm():
     for k in cols:
         cols[k].sort(key=lambda x: (x["creado"] or _dt.min), reverse=True)
 
-    n = len(contactos)
-    resumen = {"total": n, "asesor": len(cols["asesor"]), "cliente": len(cols["cliente"]),
-               "conv": round(100 * len(cols["cliente"]) / n) if n else 0}
+    visibles = sum(len(v) for v in cols.values())
+    resumen = {"total": visibles, "asesor": len(cols["asesor"]), "cliente": len(cols["cliente"]),
+               "conv": round(100 * len(cols["cliente"]) / visibles) if visibles else 0,
+               "vencidos": vencidos}
     return render_template_string(_CRM_HTML, css=_ADMIN_CSS, nav=_admin_nav("crm"),
                                   cols=cols, resumen=resumen,
                                   ia_on=asistente_ia_activo(IA_CFG))
@@ -4177,6 +4231,7 @@ input[type=date]{border:1px solid #e2dcce;border-radius:8px;padding:5px 7px;font
   <div class=crm-kpi><div class=n style="color:#e07a5a">{{ resumen.asesor }}</div><div class=l>Pidieron asesor</div></div>
   <div class=crm-kpi><div class=n style="color:#3aa06b">{{ resumen.cliente }}</div><div class=l>Clientes</div></div>
   <div class=crm-kpi><div class=n>{{ resumen.conv }}%</div><div class=l>Conversión</div></div>
+  {% if resumen.vencidos %}<div class=crm-kpi><div class=n style="color:#9aa3b1">{{ resumen.vencidos }}</div><div class=l>Vencidos (ocultos)</div></div>{% endif %}
 </div>
 <div style="margin:-6px 0 16px"><button onclick="agenteAhora(this)" style="background:#6b46c1;color:#fff;border:none;border-radius:9px;padding:9px 16px;font-weight:700;cursor:pointer">▶ Correr agente ahora</button>
 <span style="font-size:.75rem;color:#8a94a3;margin-left:8px">Auto-correo a los que pidieron asesor + ofrece el Contabilizador/Contabilidad a los del pase. 1 por persona.</span></div>
