@@ -256,6 +256,19 @@ class SeguimientoContador(db.Model):
     creado = db.Column(db.DateTime, default=datetime.utcnow)
 
 
+class CrmLead(db.Model):
+    """Estado CRM manual de un contacto del embudo de renta (por correo): nota,
+    temperatura y próxima acción. El resto de datos (nombre, WhatsApp, fecha
+    límite, si pidió asesor, si compró) se derivan de Usuario/LeadExogena/órdenes;
+    aquí solo vive lo que el dueño edita a mano."""
+    __tablename__ = "crm_leads"
+    email = db.Column(db.String(200), primary_key=True)   # en minúsculas
+    nota = db.Column(db.Text, default="")
+    temp = db.Column(db.String(8), default="tibio")       # caliente|tibio|frio
+    proxima = db.Column(db.Date)                          # próxima acción (recordatorio)
+    actualizado = db.Column(db.DateTime, default=datetime.utcnow)
+
+
 class CodigoMuestra(db.Model):
     """Código de 6 dígitos para verificar el correo ANTES de descargar la muestra
     (sin registro): así 1 muestra = 1 correo verificado, y no basta con inventar

@@ -3772,6 +3772,7 @@ label{font-size:.78rem}
 
 _ADMIN_TABS = [
     ("ordenes", "/admin", "home", "Órdenes y usuarios"),
+    ("crm", "/admin/crm", "user", "CRM"),
     ("negocio", "/admin/dashboard", "chart", "Panel del negocio"),
     ("campana", "/admin/campana", "mega", "Campañas"),
     ("lector", "/admin/lector", "key", "Suscripciones Lector XML"),
@@ -3789,6 +3790,219 @@ def _admin_nav(actual=""):
         else:
             links.append(f'<a href="{href}">{_aic(icon)} {label}</a>')
     return '<div class="nav-admin">' + "".join(links) + "</div>"
+
+
+def _wa_num(raw):
+    """Normaliza un teléfono a formato wa.me (con indicativo 57 si es celular CO)."""
+    n = re.sub(r"\D", "", str(raw or ""))
+    if len(n) == 10 and not n.startswith("57"):
+        n = "57" + n
+    return n
+
+
+@app.get("/admin/crm")
+@autorizado_requerido
+def admin_crm():
+    """CRM / embudo de renta: unifica por correo los usuarios del liquidador y los
+    leads del cálculo gratis, marca quién pidió asesor y quién compró, y deja
+    gestionar cada contacto (nota, temperatura, próxima acción, WhatsApp)."""
+    from src.auth import Usuario, LeadExogena, CrmLead
+    from datetime import datetime as _dt
+    ordenes = _leer_ordenes()
+    compradores = {}
+    for _oid, d in ordenes.items():
+        if d.get("tipo") == "orden" and str(d.get("estado", "")).startswith("pagada"):
+            e = ((d.get("contacto") or {}).get("email") or "").lower().strip()
+            if e:
+                compradores[e] = _descripcion_orden(d)
+
+    contactos = {}
+
+    def _c(email):
+        email = (email or "").lower().strip()
+        if not email or "@" not in email or _es_propio(email):
+            return None
+        return contactos.setdefault(email, {
+            "email": email, "nombre": "", "wa": "", "cedula": "", "nit": "",
+            "fecha_limite": None, "quiere_asesor": False, "asesor_motivo": "",
+            "origen": "", "creado": None, "ultimo": None, "acts": []})
+
+    from src.gerente import _es_propio
+    for u in Usuario.query.all():
+        c = _c(u.email)
+        if not c:
+            continue
+        c["nombre"] = c["nombre"] or (u.nombre or "")
+        c["cedula"] = c["cedula"] or (u.cedula or "")
+        c["wa"] = c["wa"] or (u.asesor_whatsapp or "")
+        if u.fecha_limite:
+            c["fecha_limite"] = u.fecha_limite
+        if u.quiere_asesor:
+            c["quiere_asesor"] = True
+            c["asesor_motivo"] = u.asesor_motivo or c["asesor_motivo"]
+        c["ultimo"] = u.ultimo_acceso
+        c["creado"] = c["creado"] or u.creado
+        c["acts"].append("Usó el liquidador")
+
+    for l in LeadExogena.query.all():
+        c = _c(l.email)
+        if not c:
+            continue
+        c["nombre"] = c["nombre"] or (l.nombre or "")
+        c["nit"] = c["nit"] or (l.nit or "")
+        c["origen"] = c["origen"] or (l.origen or "")
+        if l.fecha_limite and not c["fecha_limite"]:
+            c["fecha_limite"] = l.fecha_limite
+        c["creado"] = c["creado"] or l.creado
+        c["acts"].append("Calculó exógena gratis")
+
+    crm = {x.email: x for x in CrmLead.query.all()}
+    cols = {"nuevo": [], "asesor": [], "cliente": []}
+    for email, c in contactos.items():
+        if email in compradores:
+            etapa = "cliente"
+            c["acts"].append("Compró: " + compradores[email])
+        elif c["quiere_asesor"]:
+            etapa = "asesor"
+        else:
+            etapa = "nuevo"
+        cx = crm.get(email)
+        c["nota"] = (cx.nota if cx else "") or ""
+        c["temp"] = (cx.temp if cx else "tibio") or "tibio"
+        c["proxima"] = cx.proxima.isoformat() if (cx and cx.proxima) else ""
+        c["wa_num"] = _wa_num(c["wa"])
+        c["fl"] = c["fecha_limite"].strftime("%d/%m/%Y") if c["fecha_limite"] else ""
+        c["ult"] = c["ultimo"].strftime("%d/%m/%Y") if c["ultimo"] else ""
+        c["acts_txt"] = " · ".join(dict.fromkeys(c["acts"]))
+        cols[etapa].append(c)
+    for k in cols:
+        cols[k].sort(key=lambda x: (x["creado"] or _dt.min), reverse=True)
+
+    n = len(contactos)
+    resumen = {"total": n, "asesor": len(cols["asesor"]), "cliente": len(cols["cliente"]),
+               "conv": round(100 * len(cols["cliente"]) / n) if n else 0}
+    return render_template_string(_CRM_HTML, css=_ADMIN_CSS, nav=_admin_nav("crm"),
+                                  cols=cols, resumen=resumen)
+
+
+@app.post("/admin/crm/guardar")
+@autorizado_requerido
+def admin_crm_guardar():
+    """Guarda la nota / temperatura / próxima acción de un contacto del CRM."""
+    from src.auth import CrmLead
+    from datetime import datetime as _dt
+    data = request.get_json(silent=True) or {}
+    email = (data.get("email") or "").lower().strip()
+    if not email:
+        return jsonify({"ok": False, "error": "sin correo"}), 400
+    c = db.session.get(CrmLead, email) or CrmLead(email=email)
+    if "nota" in data:
+        c.nota = (data.get("nota") or "")[:2000]
+    if "temp" in data and data.get("temp") in ("caliente", "tibio", "frio"):
+        c.temp = data["temp"]
+    if "proxima" in data:
+        p = (data.get("proxima") or "").strip()
+        try:
+            c.proxima = _dt.strptime(p, "%Y-%m-%d").date() if p else None
+        except ValueError:
+            pass
+    c.actualizado = _dt.utcnow()
+    db.session.add(c)
+    db.session.commit()
+    return jsonify({"ok": True})
+
+
+_CRM_HTML = r"""<!doctype html><html lang=es><head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>CRM · Tributando</title>{{ css|safe }}<style>
+.crm-kpis{display:flex;gap:12px;flex-wrap:wrap;margin:0 0 18px}
+.crm-kpi{background:#fff;border:1px solid var(--borde,#e7e1d3);border-radius:14px;padding:12px 18px;min-width:120px}
+.crm-kpi .n{font-size:1.5rem;font-weight:800;line-height:1;color:var(--navy,#1e2432)}
+.crm-kpi .l{font-size:.72rem;color:#8a94a3;text-transform:uppercase;letter-spacing:.4px;margin-top:4px}
+.board{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;align-items:start}
+.col{background:#efeadf;border-radius:16px;padding:12px}
+.col h2{margin:2px 4px 12px;font-size:.82rem;text-transform:uppercase;letter-spacing:.5px;color:#5a6b7f;display:flex;align-items:center;gap:8px}
+.col h2 .c{margin-left:auto;background:#fff;border-radius:20px;padding:1px 9px;font-size:.8rem;color:#5a6b7f}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+.dot.nuevo{background:#9aa3b1}.dot.asesor{background:#e07a5a}.dot.cliente{background:#3aa06b}
+.card{background:#fff;border:1px solid #e7e1d3;border-radius:13px;padding:14px;margin-bottom:11px}
+.nm{font-weight:700;font-size:.98rem;word-break:break-word}
+.em{color:#8a94a3;font-size:.8rem;margin:2px 0 6px;word-break:break-all}
+.badge{font-size:.62rem;font-weight:800;color:#fff;padding:2px 8px;border-radius:20px;text-transform:uppercase}
+.badge.asesor{background:#e07a5a}
+.acts{background:#f7f3ea;border:1px solid #eee6d6;border-radius:9px;padding:7px 10px;font-size:12px;color:#5a6b7f;margin:8px 0;line-height:1.4}
+.mot{background:#fdf1ec;border:1px solid #f3d9cd;border-radius:9px;padding:7px 10px;font-size:12px;color:#a3542f;margin:8px 0}
+.meta{font-size:.8rem;color:#5a6b7f;margin-bottom:8px}
+.temp{display:flex;gap:6px;margin:6px 0}
+.tp{width:15px;height:15px;border-radius:50%;cursor:pointer;border:2px solid transparent;opacity:.32}
+.tp.on{opacity:1;border-color:#fff;box-shadow:0 0 0 1px #cbb98f}
+.tp.caliente{background:#e07a5a}.tp.tibio{background:#d99a2b}.tp.frio{background:#6aa0e0}
+textarea{width:100%;box-sizing:border-box;border:1px solid #e2dcce;border-radius:9px;padding:8px;font:inherit;font-size:.84rem;resize:vertical;min-height:44px;background:#fbf9f4}
+.rowp{display:flex;align-items:center;gap:6px;margin-top:8px;flex-wrap:wrap}
+.rowp label{font-size:.72rem;color:#8a94a3}
+input[type=date]{border:1px solid #e2dcce;border-radius:8px;padding:5px 7px;font:inherit;font-size:.8rem;background:#fbf9f4}
+.acc{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
+.acc a,.acc button{border:none;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:.78rem;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+.wa{background:#25d366;color:#fff}.mail{background:#eef1f5;color:#5a6b7f}
+.save{background:#1e2432;color:#fff;margin-left:auto}
+.vacio{color:#a7afba;font-size:.85rem;text-align:center;padding:18px 8px}
+@media(max-width:860px){.board{grid-template-columns:1fr}}
+</style></head><body><div class="wrap">
+<h1>CRM — Embudo de renta</h1>
+{{ nav|safe }}
+<div class=crm-kpis>
+  <div class=crm-kpi><div class=n>{{ resumen.total }}</div><div class=l>Contactos</div></div>
+  <div class=crm-kpi><div class=n style="color:#e07a5a">{{ resumen.asesor }}</div><div class=l>Pidieron asesor</div></div>
+  <div class=crm-kpi><div class=n style="color:#3aa06b">{{ resumen.cliente }}</div><div class=l>Clientes</div></div>
+  <div class=crm-kpi><div class=n>{{ resumen.conv }}%</div><div class=l>Conversión</div></div>
+</div>
+{% macro etapa(lista, key, titulo) %}
+<div class=col>
+  <h2><span class="dot {{key}}"></span>{{ titulo }}<span class=c>{{ lista|length }}</span></h2>
+  {% for f in lista %}
+  <div class=card>
+    <div style="display:flex;align-items:flex-start;gap:8px">
+      <div style="flex:1"><div class=nm>{{ f.nombre or f.email.split('@')[0] }}</div></div>
+      {% if key=='asesor' %}<span class="badge asesor">Asesor</span>{% endif %}
+    </div>
+    <div class=em>{{ f.email }}</div>
+    {% if f.asesor_motivo %}<div class=mot>“{{ f.asesor_motivo }}”</div>{% endif %}
+    <div class=acts>{{ f.acts_txt }}</div>
+    <div class=meta>
+      {% if f.cedula or f.nit %}NIT/CC {{ f.cedula or f.nit }} · {% endif %}
+      {% if f.fl %}vence {{ f.fl }}{% endif %}
+      {% if f.ult %} · último acceso {{ f.ult }}{% endif %}
+    </div>
+    <div class=temp>
+      <span class="tp caliente {{ 'on' if f.temp=='caliente' }}" title="Caliente" onclick="temp('{{f.email}}','caliente',this)"></span>
+      <span class="tp tibio {{ 'on' if f.temp=='tibio' }}" title="Tibio" onclick="temp('{{f.email}}','tibio',this)"></span>
+      <span class="tp frio {{ 'on' if f.temp=='frio' }}" title="Frío" onclick="temp('{{f.email}}','frio',this)"></span>
+    </div>
+    <textarea placeholder="Nota…" data-email="{{f.email}}">{{ f.nota }}</textarea>
+    <div class=rowp><label>Próxima acción</label>
+      <input type=date value="{{ f.proxima }}" data-email="{{f.email}}"></div>
+    <div class=acc>
+      {% if f.wa_num %}<a class=wa href="https://wa.me/{{ f.wa_num }}" target=_blank rel=noopener>WhatsApp</a>{% endif %}
+      <a class=mail href="mailto:{{ f.email }}">Correo</a>
+      <button class=save onclick="guardar(this,'{{f.email}}')">Guardar</button>
+    </div>
+  </div>
+  {% else %}<div class=vacio>Nadie aquí.</div>{% endfor %}
+</div>
+{% endmacro %}
+<div class=board>
+  {{ etapa(cols.nuevo, 'nuevo', 'Nuevos leads') }}
+  {{ etapa(cols.asesor, 'asesor', 'Pidieron asesor') }}
+  {{ etapa(cols.cliente, 'cliente', 'Clientes') }}
+</div>
+</div>
+<script>
+function post(b,cb){fetch('/admin/crm/guardar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}).then(function(r){return r.json()}).then(cb||function(){})}
+function temp(email,val,el){var row=el.parentNode;row.querySelectorAll('.tp').forEach(function(x){x.classList.remove('on')});el.classList.add('on');post({email:email,temp:val})}
+function guardar(btn,email){var card=btn.closest('.card');btn.textContent='…';
+  post({email:email,nota:card.querySelector('textarea').value,proxima:card.querySelector('input[type=date]').value},
+    function(){btn.textContent='Guardado';setTimeout(function(){btn.textContent='Guardar'},1200)})}
+</script></body></html>"""
 
 
 @app.get("/admin")
