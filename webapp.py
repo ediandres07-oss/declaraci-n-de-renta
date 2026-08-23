@@ -128,6 +128,11 @@ def _bucle_avisos_vencimientos():
                             n = _agente_crm_asesor()
                             if n:
                                 print(f"[agente-crm] {n} correo(s) a leads que pidieron asesor")
+                        # Cross-sell: ofrecer Contabilizador/Contabilidad a los del pase.
+                        if _candado(f"crm-xsell|{hoy}"):
+                            n = _agente_crm_xsell_pase()
+                            if n:
+                                print(f"[agente-crm] {n} cross-sell a compradores del pase")
                         # Lunes: lote de contenido de marketing.
                         if ahora.weekday() == 0 and _candado(f"mkt|{hoy}"):
                             _ger.contenido_semanal(IA_CFG)
@@ -4041,13 +4046,90 @@ def _agente_crm_asesor(limite=None) -> int:
     return enviados
 
 
+def _agente_crm_xsell_pase(limite=None) -> int:
+    """Cross-sell del agente: ofrece por CORREO a los que compraron el PASE de
+    temporada el Contabilizador DIAN (plano) y la Contabilidad. Tope 1 por persona.
+    Apagable con CRM_AGENTE_OFF. Corre dentro de app.app_context(). Devuelve envíos."""
+    if os.environ.get("CRM_AGENTE_OFF", "").strip():
+        return 0
+    from src.auth import CrmLead
+    from src.correo import cargar_config_email, enviar_email
+    from src.gerente import _es_propio
+    cfg = cargar_config_email()
+    if not cfg.get("habilitado"):
+        return 0
+    sitio = URL_PUBLICA
+    wa = re.sub(r"\D", "", str(_CONTACTO.get("whatsapp", "")))
+    url_plano = f"{sitio}/contadores/lector"
+    url_conta = f"{sitio}/contadores/contabilidad"
+    # correos de los que compraron el pase (orden plan 'contadores' pagada)
+    pase_emails = {}
+    for _oid, d in _leer_ordenes().items():
+        if (d.get("tipo") == "orden" and d.get("plan") == "contadores"
+                and str(d.get("estado", "")).startswith("pagada")):
+            e = ((d.get("contacto") or {}).get("email") or "").lower().strip()
+            if e:
+                pase_emails[e] = (d.get("contacto") or {}).get("nombre", "") or d.get("nombre", "")
+    enviados = 0
+    navy, dorado = "#1e2432", "#b8955f"
+    for email, nombre in pase_emails.items():
+        if not email or "@" not in email or _es_propio(email):
+            continue
+        cl = db.session.get(CrmLead, email)
+        if cl and cl.xsell_conta:
+            continue
+        primer = (nombre or "").split()[0].title() if nombre else ""
+        saludo = f"Hola {primer}," if primer else "Hola,"
+        wa_snip = (f' o escríbeme por <a href="https://wa.me/{wa}">WhatsApp</a>') if wa else ''
+        html = f"""<!DOCTYPE html><html><body style="margin:0;background:#f5f7fa;
+          font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:#1e2b3a">
+          <div style="max-width:560px;margin:0 auto;padding:24px">
+            <div style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 6px 20px rgba(18,63,107,.08)">
+              <div style="background:{navy};color:#fff;padding:22px 26px">
+                <div style="font-size:1.2rem;font-weight:800">Ya declaras rápido… ahora <span style="color:{dorado}">contabiliza solo</span></div>
+              </div>
+              <div style="padding:22px 26px;font-size:.95rem;line-height:1.65">
+                <p>{saludo}</p>
+                <p>Como ya tienes tu <b>pase de temporada</b>, quería contarte que en Tributando
+                   también te <b>automatizamos la contabilidad</b> de tus clientes. Dos opciones:</p>
+                <div style="background:#f5f7fa;border-radius:12px;padding:16px 18px;margin:14px 0">
+                  <b>1. Contabilizador DIAN → tu plano</b><br>
+                  <span style="font-size:.9rem;color:#5a6b7f">Baja las facturas de la DIAN y arma el <b>plano</b> para Siigo, Contai, Helisa y World Office (IVA y retención discriminados), sin digitar.</span><br>
+                  <a href="{url_plano}" style="display:inline-block;margin-top:8px;background:{dorado};color:#fff;text-decoration:none;padding:9px 16px;border-radius:8px;font-weight:700">Ver el Contabilizador →</a>
+                </div>
+                <div style="background:#f5f7fa;border-radius:12px;padding:16px 18px;margin:14px 0">
+                  <b>2. Contabilidad completa en la nube</b><br>
+                  <span style="font-size:.9rem;color:#5a6b7f">Causa en partida doble, informes, impuestos y el Contador IA — todo en un plan, para toda tu cartera.</span><br>
+                  <a href="{url_conta}" style="display:inline-block;margin-top:8px;background:{navy};color:#fff;text-decoration:none;padding:9px 16px;border-radius:8px;font-weight:700">Ver Contabilidad →</a>
+                </div>
+                <p style="font-size:.85rem;color:#5a6b7f">¿Te muestro cuál te conviene? Respóndeme{wa_snip}.</p>
+                <p>Un saludo,<br><b>Edison Monsalve</b> — Tributando.co</p>
+              </div>
+            </div>
+          </div></body></html>"""
+        try:
+            enviar_email(email, "Ya declaras rápido — ahora contabiliza solo (para ti, que tienes el pase)", html, cfg)
+            cl = cl or CrmLead(email=email)
+            cl.xsell_conta = datetime.utcnow()
+            db.session.add(cl)
+            db.session.commit()
+            enviados += 1
+            if limite and enviados >= limite:
+                break
+        except Exception:
+            db.session.rollback()
+    return enviados
+
+
 @app.post("/admin/crm/agente-ahora")
 @autorizado_requerido
 def admin_crm_agente_ahora():
-    """Corre el agente del CRM ahora (auto-correo a los que pidieron asesor)."""
+    """Corre el agente del CRM ahora: auto-correo a los que pidieron asesor +
+    cross-sell del Contabilizador/Contabilidad a los que compraron el pase."""
     try:
         n = _agente_crm_asesor()
-        return jsonify({"ok": True, "enviados": n})
+        m = _agente_crm_xsell_pase()
+        return jsonify({"ok": True, "enviados": n, "xsell": m})
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)}), 502
 
@@ -4096,8 +4178,8 @@ input[type=date]{border:1px solid #e2dcce;border-radius:8px;padding:5px 7px;font
   <div class=crm-kpi><div class=n style="color:#3aa06b">{{ resumen.cliente }}</div><div class=l>Clientes</div></div>
   <div class=crm-kpi><div class=n>{{ resumen.conv }}%</div><div class=l>Conversión</div></div>
 </div>
-{% if ia_on %}<div style="margin:-6px 0 16px"><button onclick="agenteAhora(this)" style="background:#6b46c1;color:#fff;border:none;border-radius:9px;padding:9px 16px;font-weight:700;cursor:pointer">▶ Correr agente ahora (auto-correo a los que pidieron asesor)</button>
-<span style="font-size:.75rem;color:#8a94a3;margin-left:8px">Envía 1 correo por persona, solo a quienes aún no lo recibieron.</span></div>{% endif %}
+<div style="margin:-6px 0 16px"><button onclick="agenteAhora(this)" style="background:#6b46c1;color:#fff;border:none;border-radius:9px;padding:9px 16px;font-weight:700;cursor:pointer">▶ Correr agente ahora</button>
+<span style="font-size:.75rem;color:#8a94a3;margin-left:8px">Auto-correo a los que pidieron asesor + ofrece el Contabilizador/Contabilidad a los del pase. 1 por persona.</span></div>
 {% macro etapa(lista, key, titulo) %}
 <div class=col>
   <h2><span class="dot {{key}}"></span>{{ titulo }}<span class=c>{{ lista|length }}</span></h2>
@@ -4159,8 +4241,8 @@ function agenteAhora(btn){if(!confirm('El agente enviará un primer correo (reda
   btn.disabled=true;var o=btn.textContent;btn.textContent='Enviando…';
   fetch('/admin/crm/agente-ahora',{method:'POST'}).then(function(r){return r.json()}).then(function(r){
     btn.disabled=false;btn.textContent=o;
-    alert(r&&r.ok?('Agente ejecutado: '+r.enviados+' correo(s) enviados.'):('Error'+((r&&r.error)?': '+r.error:'')));
-    if(r&&r.ok&&r.enviados)location.reload();}).catch(function(){btn.disabled=false;btn.textContent=o;alert('Error')})}
+    alert(r&&r.ok?('Agente ejecutado:\n· '+r.enviados+' correo(s) a los que pidieron asesor\n· '+r.xsell+' cross-sell (Contabilizador/Contabilidad) a los del pase'):('Error'+((r&&r.error)?': '+r.error:'')));
+    if(r&&r.ok&&(r.enviados||r.xsell))location.reload();}).catch(function(){btn.disabled=false;btn.textContent=o;alert('Error')})}
 </script></body></html>"""
 
 
