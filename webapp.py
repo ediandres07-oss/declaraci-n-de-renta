@@ -4100,9 +4100,42 @@ def _agente_crm_asesor(limite=None) -> int:
     return enviados
 
 
+def _contador_emails() -> dict:
+    """Todos los correos IDENTIFICADOS como contadores, con su nombre. Señales:
+    compraron el pase (orden plan 'contadores'), pidieron la muestra de contadores
+    (con o sin registro), están habilitados al pase (AccesoAutorizado), o tienen
+    suscripción al Lector XML. Devuelve {email: nombre}."""
+    from src.auth import (MuestraContadorEmail, MuestraContador, AccesoAutorizado,
+                          SuscripcionLector)
+    contadores = {}
+
+    def _add(email, nombre=""):
+        email = (email or "").lower().strip()
+        if email and "@" in email:
+            if email not in contadores or (nombre and not contadores[email]):
+                contadores[email] = nombre or contadores.get(email, "")
+
+    for _oid, d in _leer_ordenes().items():
+        if (isinstance(d, dict) and d.get("tipo") == "orden"
+                and d.get("plan") == "contadores"
+                and str(d.get("estado", "")).startswith("pagada")):
+            _add((d.get("contacto") or {}).get("email"),
+                 (d.get("contacto") or {}).get("nombre") or d.get("nombre", ""))
+    for m in MuestraContadorEmail.query.all():
+        _add(m.email, m.nombre or "")
+    for m in MuestraContador.query.all():
+        _add(m.email, "")
+    for a in AccesoAutorizado.query.all():
+        _add(a.email, a.nombre or "")
+    for s in SuscripcionLector.query.all():
+        _add(s.email, "")
+    return contadores
+
+
 def _agente_crm_xsell_pase(limite=None) -> int:
-    """Cross-sell del agente: ofrece por CORREO a los que compraron el PASE de
-    temporada el Contabilizador DIAN (plano) y la Contabilidad. Tope 1 por persona.
+    """Cross-sell del agente: ofrece por CORREO el Contabilizador DIAN (plano) y la
+    Contabilidad a TODOS los contactos identificados como contadores (pase, muestra
+    de contadores, habilitados, suscriptores del Lector). Tope 1 por persona.
     Apagable con CRM_AGENTE_OFF. Corre dentro de app.app_context(). Devuelve envíos."""
     if os.environ.get("CRM_AGENTE_OFF", "").strip():
         return 0
@@ -4116,17 +4149,9 @@ def _agente_crm_xsell_pase(limite=None) -> int:
     wa = re.sub(r"\D", "", str(_CONTACTO.get("whatsapp", "")))
     url_plano = f"{sitio}/contadores/lector"
     url_conta = f"{sitio}/contadores/contabilidad"
-    # correos de los que compraron el pase (orden plan 'contadores' pagada)
-    pase_emails = {}
-    for _oid, d in _leer_ordenes().items():
-        if (d.get("tipo") == "orden" and d.get("plan") == "contadores"
-                and str(d.get("estado", "")).startswith("pagada")):
-            e = ((d.get("contacto") or {}).get("email") or "").lower().strip()
-            if e:
-                pase_emails[e] = (d.get("contacto") or {}).get("nombre", "") or d.get("nombre", "")
     enviados = 0
     navy, dorado = "#1e2432", "#b8955f"
-    for email, nombre in pase_emails.items():
+    for email, nombre in _contador_emails().items():
         if not email or "@" not in email or _es_propio(email):
             continue
         cl = db.session.get(CrmLead, email)
@@ -4144,8 +4169,8 @@ def _agente_crm_xsell_pase(limite=None) -> int:
               </div>
               <div style="padding:22px 26px;font-size:.95rem;line-height:1.65">
                 <p>{saludo}</p>
-                <p>Como ya tienes tu <b>pase de temporada</b>, quería contarte que en Tributando
-                   también te <b>automatizamos la contabilidad</b> de tus clientes. Dos opciones:</p>
+                <p>Sé que llevas la renta de varios clientes con Tributando. Quería contarte
+                   que también te <b>automatizamos la contabilidad</b> de tu cartera. Dos opciones:</p>
                 <div style="background:#f5f7fa;border-radius:12px;padding:16px 18px;margin:14px 0">
                   <b>1. Contabilizador DIAN → tu plano</b><br>
                   <span style="font-size:.9rem;color:#5a6b7f">Baja las facturas de la DIAN y arma el <b>plano</b> para Siigo, Contai, Helisa y World Office (IVA y retención discriminados), sin digitar.</span><br>
@@ -4162,7 +4187,7 @@ def _agente_crm_xsell_pase(limite=None) -> int:
             </div>
           </div></body></html>"""
         try:
-            enviar_email(email, "Ya declaras rápido — ahora contabiliza solo (para ti, que tienes el pase)", html, cfg)
+            enviar_email(email, "Ya declaras rápido — ahora contabiliza solo (Contabilizador DIAN)", html, cfg)
             cl = cl or CrmLead(email=email)
             cl.xsell_conta = datetime.utcnow()
             db.session.add(cl)
