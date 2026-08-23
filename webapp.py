@@ -5109,7 +5109,7 @@ _IA_CONTADOR = (
     "0,55% y 4,5% sobre ingresos brutos (comercio ≈1,2%; construcción 3,5%; hidrocarburos/carbón 4,5%).\n"
     "- Formulario 350: honorarios=casilla 54, comisiones=55, servicios=56, rendimientos=57, "
     "arrendamientos=58, compras=61, otros=66; reteIVA=79/82.\n"
-    "- Sanción mínima 2026 = 10 UVT = $523.740."
+    "- Sanción mínima 2026 = 10 UVT = $524.000 (10 × 52.374, redondeado al mil)."
 )
 
 

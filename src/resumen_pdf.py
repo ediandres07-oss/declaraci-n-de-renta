@@ -198,7 +198,7 @@ def generar_resumen_pdf(
             f"<b>{fecha_lim.strftime('%d/%m/%Y')}</b> "
             f"({'quedan <b>%d días</b>' % dias if dias >= 0 else '<b>VENCIDA hace %d días</b>' % -dias}). "
             f"Presentar después de la fecha causa sanción de extemporaneidad "
-            f"(mínima {_fmt(10 * p.uvt_presentacion)} = 10 UVT de {p.anio_gravable + 1}) "
+            f"(mínima {_fmt(round(10 * p.uvt_presentacion / 1000) * 1000)} = 10 UVT de {p.anio_gravable + 1}) "
             f"más intereses de mora.", st["normal"]))
 
     # ---------------- patrimonio ----------------
