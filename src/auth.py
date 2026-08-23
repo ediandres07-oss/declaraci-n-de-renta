@@ -884,35 +884,33 @@ def _migrar_columnas_faltantes():
         for nombre, tipo in nuevas.items():
             if nombre not in existentes:
                 con.execute(text(f"ALTER TABLE usuarios ADD COLUMN {nombre} {tipo}"))
-    # Columna 'equipo' en suscripciones_lector (amarre a una máquina).
+    # Columnas de suscripciones_lector (equipo, acceso por código OTP, agente).
     if "suscripciones_lector" in insp.get_table_names():
-        cols = {c["name"] for c in insp.get_columns("suscripciones_lector")}
-        if "equipo" not in cols:
-            with db.engine.begin() as con:
-                con.execute(text("ALTER TABLE suscripciones_lector ADD COLUMN equipo VARCHAR(64)"))
-    # Columna 'agente_correo' en crm_leads (tope 1 auto-correo del agente del CRM).
+        cols_sl = {c["name"] for c in insp.get_columns("suscripciones_lector")}
+        nuevas_sl = {
+            "equipo": "VARCHAR(64)",
+            "otp_hash": "VARCHAR(64)", "otp_expira": marca_tiempo,
+            "otp_intentos": "INTEGER DEFAULT 0",
+            "agente": f"BOOLEAN DEFAULT {falso}", "agente_periodo": "VARCHAR(7)",
+            "agente_usos": "INTEGER DEFAULT 0", "onboarding": "VARCHAR(40)",
+        }
+        for nombre, tipo in nuevas_sl.items():
+            if nombre not in cols_sl:
+                try:
+                    with db.engine.begin() as con:
+                        con.execute(text(f"ALTER TABLE suscripciones_lector ADD COLUMN {nombre} {tipo}"))
+                except Exception:
+                    pass
+    # Columnas de crm_leads (estado del CRM del agente).
     if "crm_leads" in insp.get_table_names():
-        cols = {c["name"] for c in insp.get_columns("crm_leads")}
-        with db.engine.begin() as con:
-            if "agente_correo" not in cols:
-                con.execute(text(f"ALTER TABLE crm_leads ADD COLUMN agente_correo {marca_tiempo}"))
-            if "xsell_conta" not in cols:
-                con.execute(text(f"ALTER TABLE crm_leads ADD COLUMN xsell_conta {marca_tiempo}"))
-        # Acceso por correo (código temporal): otp_hash / otp_expira / otp_intentos.
-        otp_cols = {"otp_hash": "VARCHAR(64)", "otp_expira": marca_tiempo,
-                    "otp_intentos": "INTEGER DEFAULT 0"}
-        with db.engine.begin() as con:
-            for nombre, tipo in otp_cols.items():
-                if nombre not in cols:
-                    con.execute(text(f"ALTER TABLE suscripciones_lector ADD COLUMN {nombre} {tipo}"))
-        # Complemento agente: agente / agente_periodo / agente_usos.
-        ag_cols = {"agente": f"BOOLEAN DEFAULT {falso}", "agente_periodo": "VARCHAR(7)",
-                   "agente_usos": "INTEGER DEFAULT 0",
-                   "onboarding": "VARCHAR(40)"}
-        with db.engine.begin() as con:
-            for nombre, tipo in ag_cols.items():
-                if nombre not in cols:
-                    con.execute(text(f"ALTER TABLE suscripciones_lector ADD COLUMN {nombre} {tipo}"))
+        cols_crm = {c["name"] for c in insp.get_columns("crm_leads")}
+        for nombre, tipo in {"agente_correo": marca_tiempo, "xsell_conta": marca_tiempo}.items():
+            if nombre not in cols_crm:
+                try:
+                    with db.engine.begin() as con:
+                        con.execute(text(f"ALTER TABLE crm_leads ADD COLUMN {nombre} {tipo}"))
+                except Exception:
+                    pass
 
 
     # Columna 'origen' (atribución ads/instagram/…) en las tablas del embudo.
