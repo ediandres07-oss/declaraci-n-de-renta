@@ -624,8 +624,12 @@ def api_chat():
         except (TypeError, KeyError, ValueError):
             liq = None                # datos incompletos: se responde sin contexto
 
+    # Agente-experto de renta dentro del liquidador 210 (pase de temporada):
+    # responde como experto usando la liquidación en pantalla.
+    ctx_resp = "agente_renta" if contexto == "agente_renta" else "cliente"
     try:
-        respuesta = responder_ia(mensajes, IA_CFG, usuario=usuario_actual(), liq=liq)
+        respuesta = responder_ia(mensajes, IA_CFG, usuario=usuario_actual(),
+                                 liq=liq, contexto=ctx_resp)
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
     except Exception as e:                       # nunca tumbar el chat por un fallo de la API
