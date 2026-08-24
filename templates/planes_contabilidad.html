@@ -254,9 +254,14 @@
     {"g":"Contador Virtual + expertos","ic":ic_ia,"items":["Chat con IA usando tus cifras reales","9 asistentes expertos (renta, exógena, cierre, planeación, cesantías, nómina, POS, SG-SST, renta 210)","Análisis e interpretación de tus estados financieros"]},
     {"g":"Conecta tu IA (MCP)","ic":ic_dian,"items":["Consulta desde ChatGPT, Claude o Perplexity","Tu IA lee tus datos y puede registrar (con tu confirmación)"]}
   ] %}
+  {% set gr_mcp = [
+    {"g":"Conecta tu IA (MCP)","ic":ic_dian,"items":["Tu ChatGPT / Claude / Perplexity habla con la contabilidad de tus clientes","Consulta balance, IVA, cartera, nómina, POS y SST en lenguaje natural","Puede registrar asientos, pagos y facturas (con tu confirmación)","Usas TU propia IA — no consume la del sistema"]}
+  ] %}
   {% set _addons = [
     {"ic":ic_ia,"nombre":"Contador IA","gancho":"El asistente que sabe la norma Y tus números — con tus cifras reales.","grupos":gr_ia,
      "tiers":[{"n":"Contador IA","t":"Con tus datos reales","p":"$19.900","pa":"$199.000","f":true}]},
+    {"ic":ic_dian,"nombre":"Conecta tu IA (MCP)","gancho":"Conecta TU ChatGPT, Claude o Perplexity a la contabilidad de tus clientes.","grupos":gr_mcp,
+     "tiers":[{"n":"Conecta tu IA","t":"Tu propia IA (ChatGPT/Claude)","p":"$9.900","pa":"$99.000"}]},
     {"ic":ic_nom,"nombre":"Nómina electrónica","gancho":"Liquida, provisiona y emite la nómina electrónica a la DIAN.","grupos":gr_nom,
      "tiers":[{"n":"Nómina Básica","t":"Hasta 3 empleados","p":"$29.900","pa":"$299.000"},{"n":"Nómina Pyme","t":"Hasta 10 empleados","p":"$49.900","pa":"$499.000","f":true},{"n":"Nómina Plus","t":"Hasta 25 empleados","p":"$89.900","pa":"$899.000"},{"n":"Nómina Ilimitada","t":"Empleados ilimitados","p":"$129.900","pa":"$1.299.000"}]},
     {"ic":ic_sst,"nombre":"SG-SST","gancho":"Cumple la Resolución 0312 sin consultor: autoevaluación y documentos.","grupos":gr_sst,
