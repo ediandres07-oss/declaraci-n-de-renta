@@ -229,6 +229,63 @@
     <div class="r"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#37d38f" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Cancela cuando quieras, sin permanencia</div>
   </section>
 
+  {% set ic_nom = '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/>' %}
+  {% set ic_sst = '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>' %}
+  {% set ic_pos = '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M3 10h18M7 20h10"/>' %}
+  {% set gr_nom = [
+    {"g":"Liquidación y prestaciones","ic":ic_nom,"items":["Liquidación con salario, horas extra y recargos","Prestaciones: prima, cesantías, intereses y vacaciones","Provisiones mensuales automáticas","Liquidación definitiva de cualquier empleado + PDF"]},
+    {"g":"Seguridad social y parafiscales","ic":ic_conta,"items":["Aportes de salud, pensión y ARL","Parafiscales: SENA, ICBF y caja","Exoneración Ley 1607","Novedades: incapacidades, licencias, ausencias"]},
+    {"g":"Nómina electrónica DIAN","ic":ic_dian,"items":["Documento de Nómina Individual + CUNE","Colillas de pago por correo","Ajustes y notas de nómina"]}
+  ] %}
+  {% set gr_sst = [
+    {"g":"Autoevaluación Res. 0312","ic":ic_info,"items":["60 estándares mínimos evaluados","Puntaje automático y plan de mejora","Evidencias por estándar"]},
+    {"g":"Documentos y política","ic":ic_conta,"items":["Política de Seguridad y Salud","Reglamento de higiene y seguridad","Matriz de requisitos legales"]},
+    {"g":"Gestión anual","ic":ic_imp,"items":["Plan anual de trabajo","Comités COPASST y de convivencia","Cronograma y seguimiento"]}
+  ] %}
+  {% set gr_pos = [
+    {"g":"Venta rápida","ic":ic_pos,"items":["Pantalla táctil con grid de productos","Buscar y escanear código de barras","Venta simple por monto","Varias ventas en paralelo"]},
+    {"g":"Caja y cobro","ic":ic_conta,"items":["Turnos de caja con arqueo","Cobro con vuelto y pago combinado","Efectivo, tarjetas y transferencia","Movimientos de efectivo (ingresos/retiros)"]},
+    {"g":"Integrado a tu contabilidad","ic":ic_dian,"items":["Cada venta se contabiliza sola","Inventario a costo promedio (kardex)","Tirilla PDF e historial de ventas"]}
+  ] %}
+  {% set _addons = [
+    {"ic":ic_nom,"nombre":"Nómina electrónica","gancho":"Liquida, provisiona y emite la nómina electrónica a la DIAN.","grupos":gr_nom,
+     "tiers":[{"n":"Nómina Básica","t":"Hasta 3 empleados","p":"$29.900","pa":"$299.000"},{"n":"Nómina Pyme","t":"Hasta 10 empleados","p":"$49.900","pa":"$499.000","f":true},{"n":"Nómina Plus","t":"Hasta 25 empleados","p":"$89.900","pa":"$899.000"},{"n":"Nómina Ilimitada","t":"Empleados ilimitados","p":"$129.900","pa":"$1.299.000"}]},
+    {"ic":ic_sst,"nombre":"SG-SST","gancho":"Cumple la Resolución 0312 sin consultor: autoevaluación y documentos.","grupos":gr_sst,
+     "tiers":[{"n":"SST Esencial","t":"Micro <10 · riesgo I–III","p":"$29.900","pa":"$299.000"},{"n":"SST Pyme","t":"10–50 trabajadores","p":"$59.900","pa":"$599.000","f":true},{"n":"SST Empresarial","t":">50 · o riesgo IV–V","p":"$99.900","pa":"$999.000"}]},
+    {"ic":ic_pos,"nombre":"Punto de venta (POS)","gancho":"Vende rápido con caja táctil; contabiliza e inventario solos.","grupos":gr_pos,
+     "tiers":[{"n":"POS 1 Caja","t":"1 terminal","p":"$29.900","pa":"$299.000"},{"n":"POS Multicaja","t":"Hasta 3 cajas","p":"$49.900","pa":"$499.000","f":true},{"n":"POS Ilimitado","t":"Cajas ilimitadas","p":"$79.900","pa":"$799.000"}]}
+  ] %}
+
+  <header class="hero" style="padding-top:38px">
+    <div class="eyebrow">Módulos adicionales</div>
+    <h1 style="max-width:22ch">Suma solo lo que tu cliente necesita.</h1>
+    <p class="sub">Nómina, Seguridad y Salud (SG-SST) y Punto de venta se activan aparte, cada uno con su propia escalera. Se integran a tu contabilidad. <b>La IA ya viene incluida en los planes Contador y Firma.</b></p>
+  </header>
+
+  {% for a in _addons %}
+  <div class="famh">
+    <span class="addon-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e6c483" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">{{ a.ic|safe }}</svg></span>
+    <div><div class="addon-nm">{{ a.nombre }}</div><div class="addon-gk">{{ a.gancho }}</div></div>
+  </div>
+  <div class="agrid">
+    {% for t in a.tiers %}
+    <div class="card {{ 'feat' if t.f }}">
+      {% if t.f %}<div class="flag">Recomendado</div>{% endif %}
+      <div class="pn">{{ t.n }}</div>
+      <div class="price"><span class="amt">{{ t.p }}</span><span class="per">/mes</span></div>
+      <div class="year">Anual: {{ t.pa }} · 2 meses gratis</div>
+      <div class="cap">{{ t.t }}</div>
+      {{ det(a.grupos) }}
+      <a class="cta {{ 'pri' if t.f }}" href="mailto:contacto@tributando.co?subject=Quiero {{ t.n }}">Activar {{ t.n }}</a>
+    </div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+
+  <div style="text-align:center;color:var(--tenue);font-size:13px;margin:6px 0 0">
+    Los módulos se suman a tu plan de contabilidad. Para activarlos, escríbenos a
+    <a href="mailto:contacto@tributando.co" style="color:var(--oro)">contacto@tributando.co</a>.
+  </div>
 
   <div class="close">
     <h2>Prueba gratis. Paga solo si te sirve.</h2>
