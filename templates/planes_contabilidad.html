@@ -172,8 +172,7 @@
       <div class="price"><span class="amt" style="color:var(--verde)">$0</span><span class="per">para siempre</span></div>
       <div class="year">&nbsp;</div>
       <div class="cap"><b>1</b>&nbsp;empresa</div>
-      <div class="cap" style="margin-top:6px"><b>5</b>&nbsp;facturas electrónicas/año</div>
-      {{ det([g_dian_free, g_conta_free, {"g":"Empresas y soporte","ic":ic_emp,"items":["1 empresa","5 facturas electrónicas al año"]}]) }}
+      {{ det([g_dian_free, g_conta_free, {"g":"Empresas y soporte","ic":ic_emp,"items":["1 empresa"]}]) }}
       <div style="margin:-8px 0 6px;padding-left:4px">
         {% for f in ["Sin planos ni exportar a Excel","Sin informes ni Contador IA","Sin impuestos ni conciliación"] %}
         <div style="display:flex;gap:7px;align-items:center;font-size:.79rem;color:var(--tenue);margin:4px 0"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" style="flex:none"><path d="M8 8l8 8M16 8l-8 8" stroke="#8b93a1" stroke-width="2" stroke-linecap="round"/></svg>{{ f }}</div>
@@ -189,8 +188,7 @@
       <div class="price"><span class="amt">$49.900</span><span class="per">/mes</span></div>
       <div class="year">Anual: $499.000 · 2 meses gratis</div>
       <div class="cap"><b>3</b>&nbsp;empresas</div>
-      <div class="cap" style="margin-top:6px"><b>100</b>&nbsp;facturas electrónicas/mes</div>
-      {{ det([g_dian, g_conta, g_plano, g_info, g_imp, g_firma, {"g":"Empresas y soporte","ic":ic_emp,"items":["Hasta 3 empresas","100 facturas electrónicas/mes por empresa","2 meses de prueba premium"]}]) }}
+      {{ det([g_dian, g_conta, g_plano, g_info, g_imp, g_firma, {"g":"Empresas y soporte","ic":ic_emp,"items":["Hasta 3 empresas","2 meses de prueba premium"]}]) }}
       <a class="cta" href="#" onclick="return pagarPlan('emprende')">Elegir Emprende</a>
     </div>
 
@@ -202,8 +200,7 @@
       <div class="price"><span class="amt">$199.900</span><span class="per">/mes</span></div>
       <div class="year">Anual: $1.999.000 · 2 meses gratis</div>
       <div class="cap"><b>10</b>&nbsp;empresas</div>
-      <div class="cap" style="margin-top:6px"><b>300</b>&nbsp;facturas electrónicas/mes</div>
-      {{ det([g_dian, g_conta, g_plano, g_info, g_imp, g_firma, {"g":"Contador IA + conectar tu IA","ic":ic_ia,"items":["9 asistentes expertos con tus cifras reales","Análisis con IA","Conecta tu IA (MCP): ChatGPT, Claude o Perplexity"]}, {"g":"Empresas y soporte","ic":ic_emp,"items":["Hasta 10 empresas","300 facturas electrónicas/mes por empresa","Soporte por chat"]}]) }}
+      {{ det([g_dian, g_conta, g_plano, g_info, g_imp, g_firma, {"g":"Contador IA + conectar tu IA","ic":ic_ia,"items":["9 asistentes expertos con tus cifras reales","Análisis con IA","Conecta tu IA (MCP): ChatGPT, Claude o Perplexity"]}, {"g":"Empresas y soporte","ic":ic_emp,"items":["Hasta 10 empresas","Soporte por chat"]}]) }}
       <a class="cta pri" href="#" onclick="return pagarPlan('contador')">Elegir Contador</a>
     </div>
 
@@ -214,8 +211,7 @@
       <div class="price"><span class="amt">$299.900</span><span class="per">/mes</span></div>
       <div class="year">Anual: $2.999.000 · 2 meses gratis</div>
       <div class="cap"><b>Ilimitadas</b>&nbsp;empresas</div>
-      <div class="cap" style="margin-top:6px"><b>Ilimitadas</b>&nbsp;facturas electrónicas</div>
-      {{ det([g_dian, g_conta, g_plano, g_info, g_imp, g_firma, {"g":"Contador IA + conectar tu IA","ic":ic_ia,"items":["9 asistentes expertos con tus cifras reales","Análisis con IA","Conecta tu IA (MCP): ChatGPT, Claude o Perplexity"]}, {"g":"Empresas y soporte","ic":ic_emp,"items":["Empresas ilimitadas","Facturas electrónicas ilimitadas","Soporte prioritario","Varios usuarios del equipo"]}]) }}
+      {{ det([g_dian, g_conta, g_plano, g_info, g_imp, g_firma, {"g":"Contador IA + conectar tu IA","ic":ic_ia,"items":["9 asistentes expertos con tus cifras reales","Análisis con IA","Conecta tu IA (MCP): ChatGPT, Claude o Perplexity"]}, {"g":"Empresas y soporte","ic":ic_emp,"items":["Empresas ilimitadas","Soporte prioritario","Varios usuarios del equipo"]}]) }}
       <a class="cta" href="#" onclick="return pagarPlan('firma')">Elegir Firma</a>
     </div>
 
