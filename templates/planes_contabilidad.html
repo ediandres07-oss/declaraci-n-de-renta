@@ -198,24 +198,24 @@
     <div class="card feat">
       <div class="flag">El más elegido</div>
       <div class="pn">Contador</div>
-      <div class="who">Para el contador con oficina y varios clientes activos.</div>
-      <div class="price"><span class="amt">$99.900</span><span class="per">/mes</span></div>
-      <div class="year">Anual: $999.000 · 2 meses gratis</div>
+      <div class="who">Todo incluido: contabilidad + IA + Nómina + SG-SST + POS para tu oficina.</div>
+      <div class="price"><span class="amt">$199.900</span><span class="per">/mes</span></div>
+      <div class="year">Anual: $1.999.000 · 2 meses gratis</div>
       <div class="cap"><b>10</b>&nbsp;empresas</div>
       <div class="cap" style="margin-top:6px"><b>300</b>&nbsp;facturas electrónicas/mes</div>
-      {{ det([g_dian, g_conta, g_plano, g_info, g_imp, g_firma, {"g":"Empresas y soporte","ic":ic_emp,"items":["Hasta 10 empresas","300 facturas electrónicas/mes por empresa","Soporte por chat"]}]) }}
+      {{ det([g_dian, g_conta, g_plano, g_info, g_imp, g_firma, {"g":"Todo incluido: IA, Nómina, SST y POS","ic":ic_ia,"items":["Contador IA (9 expertos) + conectar tu IA (MCP)","Nómina electrónica (hasta 25 empleados)","SG-SST (10–50 trabajadores)","Punto de venta (POS)"]}, {"g":"Empresas y soporte","ic":ic_emp,"items":["Hasta 10 empresas","300 facturas electrónicas/mes por empresa","Soporte por chat"]}]) }}
       <a class="cta pri" href="#" onclick="return pagarPlan('contador')">Elegir Contador</a>
     </div>
 
     <!-- FIRMA -->
     <div class="card">
       <div class="pn">Firma</div>
-      <div class="who">Empresas ilimitadas para firmas con alto volumen de clientes.</div>
-      <div class="price"><span style="text-decoration:line-through;opacity:.5;font-size:1rem;margin-right:7px">$299.000</span><span class="amt">$149.900</span><span class="per">/mes</span></div>
-      <div class="year">Anual: $1.499.000 · 2 meses gratis</div>
+      <div class="who">Todo ILIMITADO: empresas, Nómina, POS y SG-SST empresarial, con IA.</div>
+      <div class="price"><span class="amt">$299.900</span><span class="per">/mes</span></div>
+      <div class="year">Anual: $2.999.000 · 2 meses gratis</div>
       <div class="cap"><b>Ilimitadas</b>&nbsp;empresas</div>
       <div class="cap" style="margin-top:6px"><b>Ilimitadas</b>&nbsp;facturas electrónicas</div>
-      {{ det([g_dian, g_conta, g_plano, g_info, g_imp, g_firma, {"g":"Empresas y soporte","ic":ic_emp,"items":["Empresas ilimitadas","Facturas electrónicas ilimitadas","Soporte prioritario","Varios usuarios del equipo"]}]) }}
+      {{ det([g_dian, g_conta, g_plano, g_info, g_imp, g_firma, {"g":"Todo ILIMITADO: IA, Nómina, SST y POS","ic":ic_ia,"items":["Contador IA (9 expertos) + conectar tu IA (MCP)","Nómina electrónica ILIMITADA","SG-SST Empresarial (>50 o riesgo alto)","POS ilimitado (varias cajas)"]}, {"g":"Empresas y soporte","ic":ic_emp,"items":["Empresas ilimitadas","Facturas electrónicas ilimitadas","Soporte prioritario","Varios usuarios del equipo"]}]) }}
       <a class="cta" href="#" onclick="return pagarPlan('firma')">Elegir Firma</a>
     </div>
 
@@ -229,94 +229,6 @@
     <div class="r"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#37d38f" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Cancela cuando quieras, sin permanencia</div>
   </section>
 
-  {% set ic_nom = '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/>' %}
-  {% set ic_sst = '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>' %}
-  {% set ic_pos = '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M3 10h18M7 20h10"/>' %}
-  {% set gr_nom = [
-    {"g":"Liquidación y prestaciones","ic":ic_nom,"items":["Liquidación con salario, horas extra y recargos","Prestaciones: prima, cesantías, intereses y vacaciones","Provisiones mensuales automáticas","Liquidación definitiva de cualquier empleado + PDF"]},
-    {"g":"Seguridad social y parafiscales","ic":ic_conta,"items":["Aportes de salud, pensión y ARL","Parafiscales: SENA, ICBF y caja","Exoneración Ley 1607","Novedades: incapacidades, licencias, ausencias"]},
-    {"g":"Nómina electrónica DIAN","ic":ic_dian,"items":["Documento de Nómina Individual + CUNE","Colillas de pago enviadas por correo","Ajustes y notas de nómina"]},
-    {"g":"Asistente IA","ic":ic_ia,"items":["Experto de nómina en el Contador IA (con tus datos)","Consultable también por MCP (ChatGPT/Claude)"]}
-  ] %}
-  {% set gr_sst = [
-    {"g":"Autoevaluación Res. 0312","ic":ic_info,"items":["60 estándares mínimos evaluados","Puntaje automático y plan de mejora","Evidencias por estándar"]},
-    {"g":"Documentos y política","ic":ic_conta,"items":["Política de Seguridad y Salud","Reglamento de higiene y seguridad","Matriz de requisitos legales"]},
-    {"g":"Gestión anual","ic":ic_imp,"items":["Plan anual de trabajo","Comités COPASST y de convivencia","Cronograma y seguimiento"]},
-    {"g":"Asistente IA","ic":ic_ia,"items":["Experto de SG-SST en el Contador IA (con tu puntaje 0312)","Consultable también por MCP (ChatGPT/Claude)"]}
-  ] %}
-  {% set gr_pos = [
-    {"g":"Venta rápida","ic":ic_pos,"items":["Pantalla táctil con grid de productos","Buscar y escanear código de barras","Venta simple por monto","Varias ventas en paralelo"]},
-    {"g":"Caja y cobro","ic":ic_conta,"items":["Turnos de caja con arqueo","Cobro con vuelto y pago combinado","Efectivo, tarjetas y transferencia","Movimientos de efectivo (ingresos/retiros)"]},
-    {"g":"Integrado a tu contabilidad","ic":ic_dian,"items":["Cada venta se contabiliza sola","Inventario a costo promedio (kardex)","Tirilla PDF e historial de ventas"]},
-    {"g":"Asistente IA","ic":ic_ia,"items":["Experto de POS en el Contador IA (con tus ventas)","Consultable también por MCP (ChatGPT/Claude)"]}
-  ] %}
-  {% set gr_ia = [
-    {"g":"Contador Virtual + expertos","ic":ic_ia,"items":["Chat con IA usando tus cifras reales","9 asistentes expertos (renta, exógena, cierre, planeación, cesantías, nómina, POS, SG-SST, renta 210)","Análisis e interpretación de tus estados financieros"]},
-    {"g":"Conecta tu IA (MCP)","ic":ic_dian,"items":["Consulta desde ChatGPT, Claude o Perplexity","Tu IA lee tus datos y puede registrar (con tu confirmación)"]}
-  ] %}
-  {% set gr_mcp = [
-    {"g":"Conecta tu IA (MCP)","ic":ic_dian,"items":["Tu ChatGPT / Claude / Perplexity habla con la contabilidad de tus clientes","Consulta balance, IVA, cartera, nómina, POS y SST en lenguaje natural","Puede registrar asientos, pagos y facturas (con tu confirmación)","Usas TU propia IA — no consume la del sistema"]}
-  ] %}
-  {% set _addons = [
-    {"ic":ic_ia,"nombre":"Contador IA","gancho":"El asistente que sabe la norma Y tus números — con tus cifras reales.","grupos":gr_ia,
-     "tiers":[{"n":"Contador IA","t":"Con tus datos reales","p":"$19.900","pa":"$199.000","f":true}]},
-    {"ic":ic_dian,"nombre":"Conecta tu IA (MCP)","gancho":"Conecta TU ChatGPT, Claude o Perplexity a la contabilidad de tus clientes.","grupos":gr_mcp,
-     "tiers":[{"n":"Conecta tu IA","t":"Tu propia IA (ChatGPT/Claude)","p":"$9.900","pa":"$99.000"}]},
-    {"ic":ic_nom,"nombre":"Nómina electrónica","gancho":"Liquida, provisiona y emite la nómina electrónica a la DIAN.","grupos":gr_nom,
-     "tiers":[{"n":"Nómina Básica","t":"Hasta 3 empleados","p":"$29.900","pa":"$299.000"},{"n":"Nómina Pyme","t":"Hasta 10 empleados","p":"$49.900","pa":"$499.000","f":true},{"n":"Nómina Plus","t":"Hasta 25 empleados","p":"$89.900","pa":"$899.000"},{"n":"Nómina Ilimitada","t":"Empleados ilimitados","p":"$129.900","pa":"$1.299.000"}]},
-    {"ic":ic_sst,"nombre":"SG-SST","gancho":"Cumple la Resolución 0312 sin consultor: autoevaluación y documentos.","grupos":gr_sst,
-     "tiers":[{"n":"SST Esencial","t":"Micro <10 · riesgo I–III","p":"$29.900","pa":"$299.000"},{"n":"SST Pyme","t":"10–50 trabajadores","p":"$59.900","pa":"$599.000","f":true},{"n":"SST Empresarial","t":">50 · o riesgo IV–V","p":"$99.900","pa":"$999.000"}]},
-    {"ic":ic_pos,"nombre":"Punto de venta (POS)","gancho":"Vende rápido con caja táctil; contabiliza e inventario solos.","grupos":gr_pos,
-     "tiers":[{"n":"POS 1 Caja","t":"1 terminal","p":"$29.900","pa":"$299.000"},{"n":"POS Multicaja","t":"Hasta 3 cajas","p":"$49.900","pa":"$499.000","f":true},{"n":"POS Ilimitado","t":"Cajas ilimitadas","p":"$79.900","pa":"$799.000"}]}
-  ] %}
-
-  <header class="hero" style="padding-top:38px">
-    <div class="eyebrow">Módulos adicionales</div>
-    <h1 style="max-width:22ch">Suma solo lo que tu cliente necesita.</h1>
-    <p class="sub">Nómina, Seguridad y Salud (SG-SST) y Punto de venta se activan aparte, cada uno con su propia escalera. Se integran a tu contabilidad: lo que vendes o liquidas se contabiliza solo.</p>
-  </header>
-
-  {% for a in _addons %}
-  <div class="famh">
-    <span class="addon-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e6c483" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">{{ a.ic|safe }}</svg></span>
-    <div><div class="addon-nm">{{ a.nombre }}</div><div class="addon-gk">{{ a.gancho }}</div></div>
-  </div>
-  <div class="agrid">
-    {% for t in a.tiers %}
-    <div class="card {{ 'feat' if t.f }}">
-      {% if t.f %}<div class="flag">Recomendado</div>{% endif %}
-      <div class="pn">{{ t.n }}</div>
-      <div class="price"><span class="amt">{{ t.p }}</span><span class="per">/mes</span></div>
-      <div class="year">Anual: {{ t.pa }} · 2 meses gratis</div>
-      <div class="cap">{{ t.t }}</div>
-      {{ det(a.grupos) }}
-      <a class="cta {{ 'pri' if t.f }}" href="mailto:contacto@tributando.co?subject=Quiero {{ t.n }}">Activar {{ t.n }}</a>
-    </div>
-    {% endfor %}
-  </div>
-  {% endfor %}
-
-  <div class="suite">
-    <div>
-      <div class="eyebrow" style="margin-bottom:8px">Ahorra con el paquete</div>
-      <div class="suite-nm">Suite Tributando</div>
-      <p class="suite-gk">Todo incluido: Contabilidad Contador + Nómina Pyme + SST Esencial + POS 1 Caja.</p>
-      <ul style="margin-top:10px">
-        {% for it in ["Plan Contador (10 empresas)","Nómina Pyme (hasta 10 empleados)","SST Esencial","POS 1 Caja","Todo lo Premium: informes, impuestos y firma electrónica","Contador IA (9 expertos) + conectar tu IA por MCP"] %}
-        <li><svg width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#37d38f"/><path d="M7 12.4l3.2 3.2L17 8.6" stroke="#0e1220" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>{{ it }}</li>{% endfor %}
-      </ul>
-    </div>
-    <div class="suite-r">
-      <div class="price" style="justify-content:center"><span style="text-decoration:line-through;opacity:.5;font-size:1.1rem;margin-right:8px">$229.500</span><span class="amt">$149.900</span><span class="per">/mes</span></div>
-      <div class="year">Anual: $1.499.000 · 2 meses gratis</div>
-      <a class="cta pri" style="margin-top:14px;display:block" href="mailto:contacto@tributando.co?subject=Quiero%20la%20Suite%20Tributando">Quiero la Suite</a>
-    </div>
-  </div>
-
-  <div style="text-align:center;color:var(--tenue);font-size:13px;margin:6px 0 0">
-    Los módulos se suman a tu plan de contabilidad. Para activarlos, escríbenos a
-    <a href="mailto:contacto@tributando.co" style="color:var(--oro)">contacto@tributando.co</a>.
-  </div>
 
   <div class="close">
     <h2>Prueba gratis. Paga solo si te sirve.</h2>
@@ -364,8 +276,8 @@
   // ---- Pago de planes de contabilidad ----
   var PRECIOS_CONTAB = {
     emprende: {nombre:"Emprende", mensual:49900,  anual:499000},
-    contador: {nombre:"Contador", mensual:99900,  anual:999000},
-    firma:    {nombre:"Firma",    mensual:149900, anual:1499000}
+    contador: {nombre:"Contador", mensual:199900, anual:1999000},
+    firma:    {nombre:"Firma",    mensual:299900, anual:2999000}
   };
   var pmPlan = "contador", pmPeriodo = "mensual";
   function _cop(n){ return "$" + Number(n).toLocaleString("es-CO"); }

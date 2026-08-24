@@ -313,8 +313,8 @@ CONTAB_PASE_SECRET = os.environ.get("PASE_SECRET", "").strip()
 # de empresas que se envía a /api/habilitar.
 PRECIOS_CONTABILIDAD = {
     "emprende": {"nombre": "Emprende", "empresas": 3,   "mensual": 49900,  "anual": 499000,  "tope": 3},
-    "contador": {"nombre": "Contador", "empresas": 10,  "mensual": 99900,  "anual": 999000,  "tope": 10},
-    "firma":    {"nombre": "Firma",    "empresas": 0,   "mensual": 149900, "anual": 1499000, "tope": 999999},
+    "contador": {"nombre": "Contador", "empresas": 10,  "mensual": 199900, "anual": 1999000, "tope": 10},
+    "firma":    {"nombre": "Firma",    "empresas": 0,   "mensual": 299900, "anual": 2999000, "tope": 999999},
 }
 
 _REALMY_PATH = BASE / "config" / "realmy.yaml"
