@@ -328,8 +328,12 @@ def responder(mensajes: list[dict], cfg: dict | None = None,
     except Exception:
         pass
 
+    # Blindaje de costo: solo modelos 'flash' (tier gratis/barato). Cualquier
+    # otro —incluido '*-pro'— se fuerza a flash para no disparar cobros.
+    _m = (cfg.get("modelo") or "").strip().lower()
+    modelo_seguro = _m if (_m and "flash" in _m and "pro" not in _m) else "gemini-2.5-flash"
     resp = cliente.models.generate_content(
-        model=cfg.get("modelo", "gemini-2.5-flash"),
+        model=modelo_seguro,
         contents=contenidos,
         config=config,
     )
