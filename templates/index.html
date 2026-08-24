@@ -601,6 +601,7 @@ async function recalcular() {
   if ($("#btnDocsWpp")) $("#btnDocsWpp").disabled = false;
   if ($("#btnComerciante2517")) $("#btnComerciante2517").disabled = false;
   if ($("#btnInformeComerciante")) $("#btnInformeComerciante").disabled = false;
+  if (window.__agenteResultado) window.__agenteResultado(R(136), R(137));
 }
 
 async function descargarPdf(url, nombreDefecto) {
@@ -687,7 +688,34 @@ $("#btnDescargar").addEventListener("click", async () => {
 /* ================= Agente de renta (chat experto sobre el 210) ================= */
 (function(){
   const hist = [];
+  let ultimo = null, avisado = false;
   const $ar = id => document.getElementById(id);
+  function sugerencias(){
+    if(ultimo && ultimo.pagar > 0)
+      return ['¿Por qué me da saldo a pagar?','¿Cómo puedo reducir el impuesto?','¿Me falta alguna deducción o exención?','¿Cuánto es el anticipo del otro año?'];
+    if(ultimo && ultimo.favor > 0)
+      return ['¿Por qué me da saldo a favor?','¿Puedo pedir la devolución?','¿Las retenciones están bien aplicadas?','¿Debo declarar aunque me dé a favor?'];
+    return ['¿Por qué me da ese saldo?','¿Puedo aplicar la renta exenta del 25%?','¿Cómo queda la renta presuntiva?','¿Qué deducciones me faltan?'];
+  }
+  function pintarSugs(){
+    const s=$ar('ar-sugs'); s.innerHTML='';
+    sugerencias().forEach(t=>{
+      const b=document.createElement('button'); b.type='button'; b.textContent=t;
+      b.style.cssText='font-size:.72rem;border:1px solid #d8cfba;background:#fff;color:#6b5a34;border-radius:14px;padding:4px 9px;cursor:pointer';
+      b.onclick=()=>{ $ar('ar-input').value=t; enviar(); }; s.appendChild(b);
+    });
+  }
+  // Aviso no invasivo cuando hay un resultado listo: pulsa el botón y muestra
+  // una burbujita una sola vez; NO abre el panel solo.
+  window.__agenteResultado = function(pagar, favor){
+    ultimo = {pagar: +pagar||0, favor: +favor||0};
+    if($ar('ar-panel').style.display==='flex') pintarSugs();
+    if(avisado || !(ultimo.pagar>0 || ultimo.favor>0)) return;
+    avisado = true;
+    const fab=$ar('ar-fab'); if(!fab) return;
+    fab.style.animation='arPulso 1.4s ease-in-out 3';
+    const n=$ar('ar-nudge'); if(n){ n.style.display='block'; setTimeout(()=>{ n.style.display='none'; }, 9000); }
+  };
   function burbuja(rol, texto){
     const box = $ar('ar-chat');
     const d = document.createElement('div');
@@ -701,15 +729,11 @@ $("#btnDescargar").addEventListener("click", async () => {
   function abrir(){
     $ar('ar-panel').style.display='flex';
     $ar('ar-fab').style.display='none';
+    const n=$ar('ar-nudge'); if(n) n.style.display='none';
     if(!hist.length){
       burbuja('bot','Soy tu Agente de Renta. Pregúntame sobre el 210 que estás armando: cédulas, rentas exentas, deducciones, ganancias ocasionales, presuntiva, anticipo… Uso los datos en pantalla.');
-      const s=$ar('ar-sugs');
-      ['¿Por qué me da ese saldo?','¿Puedo aplicar la renta exenta del 25%?','¿Cómo queda la renta presuntiva?','¿Qué deducciones me faltan?'].forEach(t=>{
-        const b=document.createElement('button'); b.type='button'; b.textContent=t;
-        b.style.cssText='font-size:.72rem;border:1px solid #d8cfba;background:#fff;color:#6b5a34;border-radius:14px;padding:4px 9px;cursor:pointer';
-        b.onclick=()=>{ $ar('ar-input').value=t; enviar(); }; s.appendChild(b);
-      });
     }
+    pintarSugs();
     setTimeout(()=>$ar('ar-input').focus(),80);
   }
   function cerrar(){ $ar('ar-panel').style.display='none'; $ar('ar-fab').style.display='flex'; }
@@ -736,6 +760,10 @@ $("#btnDescargar").addEventListener("click", async () => {
 </script>
 
 <!-- Agente de renta: botón flotante + panel -->
+<style>@keyframes arPulso{0%,100%{box-shadow:0 8px 24px rgba(0,0,0,.28)}50%{box-shadow:0 0 0 8px rgba(231,207,154,.45),0 8px 24px rgba(0,0,0,.28)}}</style>
+<div id="ar-nudge" style="display:none;position:fixed;right:20px;bottom:74px;z-index:9998;max-width:230px;
+  background:#fff;color:#26303c;border:1px solid #e2ddd2;border-radius:12px;padding:9px 12px;font-size:.8rem;line-height:1.35;
+  box-shadow:0 10px 30px rgba(0,0,0,.22)">Ya tengo tu resultado. ¿Te explico este 210 o cómo mejorarlo? 👇</div>
 <button id="ar-fab" title="Agente de renta"
   style="position:fixed;right:20px;bottom:20px;z-index:9998;display:flex;align-items:center;gap:8px;
   background:#1e2432;color:#e7cf9a;border:1px solid #a87c36;border-radius:26px;padding:11px 18px;
