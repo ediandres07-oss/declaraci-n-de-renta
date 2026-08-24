@@ -246,7 +246,7 @@
   ] %}
   {% set _addons = [
     {"ic":ic_nom,"nombre":"Nómina electrónica","gancho":"Liquida, provisiona y emite la nómina electrónica a la DIAN.","grupos":gr_nom,
-     "tiers":[{"n":"Nómina Básica","t":"Hasta 3 empleados","p":"$29.900","pa":"$299.000"},{"n":"Nómina Pyme","t":"Hasta 10 empleados","p":"$49.900","pa":"$499.000","f":true},{"n":"Nómina Plus","t":"Hasta 25 empleados","p":"$89.900","pa":"$899.000"},{"n":"Nómina Ilimitada","t":"Empleados ilimitados","p":"$129.900","pa":"$1.299.000"}]},
+     "tiers":[{"n":"Nómina Básica","t":"Hasta 3 empleados","d":"36 documentos de nómina electrónica al año","p":"$29.900","pa":"$299.000"},{"n":"Nómina Pyme","t":"Hasta 10 empleados","d":"120 documentos de nómina electrónica al año","p":"$49.900","pa":"$499.000","f":true},{"n":"Nómina Plus","t":"Hasta 25 empleados","d":"300 documentos de nómina electrónica al año","p":"$89.900","pa":"$899.000"},{"n":"Nómina Ilimitada","t":"Empleados ilimitados","d":"Documentos de nómina electrónica ilimitados","p":"$129.900","pa":"$1.299.000"}]},
     {"ic":ic_sst,"nombre":"SG-SST","gancho":"Cumple la Resolución 0312 sin consultor: autoevaluación y documentos.","grupos":gr_sst,
      "tiers":[{"n":"SST Esencial","t":"Micro <10 · riesgo I–III","p":"$29.900","pa":"$299.000"},{"n":"SST Pyme","t":"10–50 trabajadores","p":"$59.900","pa":"$599.000","f":true},{"n":"SST Empresarial","t":">50 · o riesgo IV–V","p":"$99.900","pa":"$999.000"}]},
     {"ic":ic_pos,"nombre":"Punto de venta (POS)","gancho":"Vende rápido con caja táctil; contabiliza e inventario solos.","grupos":gr_pos,
@@ -272,6 +272,7 @@
       <div class="price"><span class="amt">{{ t.p }}</span><span class="per">/mes</span></div>
       <div class="year">Anual: {{ t.pa }} · 2 meses gratis</div>
       <div class="cap">{{ t.t }}</div>
+      {% if t.d %}<div class="cap" style="margin-top:6px">{{ t.d }}</div>{% endif %}
       {{ det(a.grupos) }}
       <a class="cta {{ 'pri' if t.f }}" href="mailto:contacto@tributando.co?subject=Quiero {{ t.n }}">Activar {{ t.n }}</a>
     </div>
