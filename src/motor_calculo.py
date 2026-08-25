@@ -466,7 +466,9 @@ def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
     # Distribución en cascada (como la plantilla): trabajo → honorarios →
     # capital → no laborales. Cada subcédula toma del cupo disponible.
     reclamado = {
-        "trabajo": r37 + r40,
+        # El 50% docente (Art. 206-9) NO entra al límite del 40%/5.040 (Art. 336
+        # num. 3 lo excluye): se saca del cupo y se resta aparte, sin tope.
+        "trabajo": (r37 - exenta_50) + r40,
         "honorarios": r49 + r52,
         "capital": r65 + r68,
         "no_laboral": r82 + r85,
@@ -477,13 +479,16 @@ def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
         limitado[clave] = min(reclamado[clave], disponible)
         disponible -= limitado[clave]
 
-    liq.set(41, limitado["trabajo"], "rentas exentas/deducciones limitadas trabajo")
+    # Trabajo: a lo limitado se le suma el 50% docente SIN tope (Art. 206-9).
+    r41_trabajo = limitado["trabajo"] + exenta_50
+    liq.set(41, r41_trabajo, "rentas exentas/deducciones limitadas trabajo "
+            "(incluye 50% docente sin tope)")
     liq.set(53, limitado["honorarios"], "rentas exentas/deducciones limitadas honorarios")
     liq.set(69, limitado["capital"], "rentas exentas/deducciones limitadas capital")
     liq.set(86, limitado["no_laboral"], "rentas exentas/deducciones limitadas no laborales")
 
     # --- rentas líquidas ordinarias por subcédula ---
-    r42 = max(0.0, r34 - limitado["trabajo"])
+    r42 = max(0.0, r34 - r41_trabajo)
     liq.set(42, r42, "renta líquida ordinaria trabajo")
 
     r54 = max(0.0, r46 - limitado["honorarios"])
@@ -517,7 +522,7 @@ def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
     # ==================== Totales cédula general (R91-R98) ===============
     # R91: renta líquida de la cédula general (la plantilla suma exentas
     # limitadas + renta ordinaria por subcédula = renta antes del límite)
-    r91 = _round_mil((limitado["trabajo"] + r42) + (limitado["honorarios"] + r54)
+    r91 = _round_mil((r41_trabajo + r42) + (limitado["honorarios"] + r54)
                      + (limitado["capital"] + r70) + (limitado["no_laboral"] + r87))
     liq.set(91, r91, "renta líquida cédula general")
 
@@ -545,7 +550,7 @@ def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
     liq.set(139, r139, nota139)
 
     # R92: exentas y deducciones imputables limitadas + R28 + R139
-    r92 = (limitado["trabajo"] + limitado["honorarios"] + limitado["capital"]
+    r92 = (r41_trabajo + limitado["honorarios"] + limitado["capital"]
            + limitado["no_laboral"] + r28 + r139)
     liq.set(92, r92, "rentas exentas y deducciones imputables (incluye R28 y R139)")
 
