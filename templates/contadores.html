@@ -412,7 +412,12 @@
             <div class="ed-fila" style="border-top:1px solid var(--borde);margin-top:12px;padding-top:12px">
               <label style="display:flex;align-items:center;gap:8px;font-size:.86rem;font-weight:700;cursor:pointer">
                 <input type="checkbox" id="docPublico" style="width:17px;height:17px;cursor:pointer"> 🎓 Docente / rector de universidad pública</label>
-              <div style="font-size:.74rem;color:var(--suave);margin:4px 0 0">Aplica el <b>50% del salario</b> como renta exenta (Art. 206 num. 9), con el tope del Art. 336.</div>
+              <div style="font-size:.74rem;color:var(--suave);margin:4px 0 0">Renta exenta de <b>gastos de representación</b> (Art. 206 num. 9), <b>hasta el 50% del salario</b>. No entra al límite del 40%/5.040 UVT.</div>
+              <div id="grWrap" style="display:none;margin:8px 0 0">
+                <label style="font-size:.8rem;color:var(--suave);display:block;margin-bottom:3px">Valor de gastos de representación (del certificado). Déjalo en 0 para aplicar el 50% completo.</label>
+                <input type="text" id="gastosRepr" inputmode="numeric" placeholder="0"
+                       style="width:180px;text-align:right;padding:6px 8px;border:1px solid var(--borde);border-radius:8px">
+              </div>
               <span id="docOk" style="font-size:.82rem;color:var(--verde);font-weight:700"></span>
             </div>
           </div>
@@ -709,12 +714,20 @@
       });
     };
     var docChk = document.getElementById("docPublico");
-    if (docChk) docChk.onchange = function(){
-      recalc({docente_publico: docChk.checked}, function(){
+    var grWrap = document.getElementById("grWrap");
+    var grInp = document.getElementById("gastosRepr");
+    function enviarDocente(){
+      var gr = grInp ? nMoneda(grInp.value) : 0;
+      recalc({docente_publico: docChk.checked, gastos_representacion: docChk.checked ? gr : 0}, function(){
         document.getElementById("docOk").textContent = docChk.checked
-          ? "✓ 50% de renta exenta aplicado" : "";
+          ? (gr > 0 ? "✓ Gastos de representación aplicados (hasta 50%)" : "✓ 50% de renta exenta aplicado") : "";
       });
+    }
+    if (docChk) docChk.onchange = function(){
+      if (grWrap) grWrap.style.display = docChk.checked ? "block" : "none";
+      enviarDocente();
     };
+    if (grInp) grInp.addEventListener("change", function(){ if (docChk && docChk.checked) enviarDocente(); });
 
     var msgEl = function(){ return document.getElementById("muestraMsg"); };
     var okEmail = function(e){ return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e); };

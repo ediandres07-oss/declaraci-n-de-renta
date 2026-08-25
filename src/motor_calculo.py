@@ -270,10 +270,18 @@ def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
     # recálculo no lo acumula.
     exenta_50 = 0.0
     if getattr(d, "docente_publico", False):
-        exenta_50 = max(0.0, 0.5 * d.trabajo.ingresos_brutos)
+        tope_50 = max(0.0, 0.5 * d.trabajo.ingresos_brutos)   # límite: 50% del salario
+        gr = max(0.0, getattr(d, "gastos_representacion", 0.0) or 0.0)
+        # Si se informa el valor de gastos de representación, se exenta ese valor
+        # limitado al 50% del salario; si no, se asume el 50% completo.
+        exenta_50 = min(gr, tope_50) if gr > 0 else tope_50
         if exenta_50 > 0:
+            det = (f"Gastos de representación docente ({gr:,.0f}) exentos hasta el 50% "
+                   f"del salario ({tope_50:,.0f})" if gr > 0
+                   else "50% del salario")
             liq.detalle.append(
-                f"Renta exenta 50% docente universidad oficial (Art. 206-9): {exenta_50:,.0f}")
+                f"Renta exenta docente universidad oficial (Art. 206-9): "
+                f"{exenta_50:,.0f} — {det}")
 
     # Cesantías e intereses exentos (Art. 206-4): se detraen de la base del 25%
     # (son "demás rentas exentas", Art. 206-10) y se suman a R36. La DIAN en su

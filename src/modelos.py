@@ -163,6 +163,9 @@ class DatosDeclaracion:
     aplicar_renta_exenta_25: bool = True     # calcula automáticamente el 25% laboral
     docente_publico: bool = False            # rector/profesor de universidad oficial:
     #                                          50% del salario exento (Art. 206 num. 9)
+    # Valor de gastos de representación del certificado. Exento hasta el 50% del
+    # salario; si es 0 y docente_publico=True, se asume el 50% completo.
+    gastos_representacion: float = 0.0
     # Cesantías e intereses pagados: son renta exenta (Art. 206 num. 4), con % según
     # el salario mensual promedio. Ya están incluidas en trabajo.ingresos_brutos (R32);
     # aquí se guardan aparte para calcular su exención y detraerlas de la base del 25%.
