@@ -2796,6 +2796,11 @@ def recalcular_landing():
             datos.gastos_representacion = _monto_valido(cuerpo["gastos_representacion"])
         except (TypeError, ValueError):
             datos.gastos_representacion = 0.0
+    if "salario_base_docente" in cuerpo:
+        try:
+            datos.salario_base_docente = _monto_valido(cuerpo["salario_base_docente"])
+        except (TypeError, ValueError):
+            datos.salario_base_docente = 0.0
 
     # El "ahorro" por dependientes se calcula contra el mismo escenario sin ellos.
     dependientes_elegidos = datos.dependientes

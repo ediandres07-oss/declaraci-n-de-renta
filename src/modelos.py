@@ -166,6 +166,9 @@ class DatosDeclaracion:
     # Valor de gastos de representación del certificado. Exento hasta el 50% del
     # salario; si es 0 y docente_publico=True, se asume el 50% completo.
     gastos_representacion: float = 0.0
+    # Salario base (estricto sentido) sobre el que se calcula el tope del 50%.
+    # 0 = usar los ingresos brutos de trabajo (R32).
+    salario_base_docente: float = 0.0
     # Cesantías e intereses pagados: son renta exenta (Art. 206 num. 4), con % según
     # el salario mensual promedio. Ya están incluidas en trabajo.ingresos_brutos (R32);
     # aquí se guardan aparte para calcular su exención y detraerlas de la base del 25%.

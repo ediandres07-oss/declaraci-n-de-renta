@@ -417,6 +417,9 @@
                 <label style="font-size:.8rem;color:var(--suave);display:block;margin-bottom:3px">Valor de gastos de representación (del certificado). Déjalo en 0 para aplicar el 50% completo.</label>
                 <input type="text" id="gastosRepr" inputmode="numeric" placeholder="0"
                        style="width:180px;text-align:right;padding:6px 8px;border:1px solid var(--borde);border-radius:8px">
+                <label style="font-size:.8rem;color:var(--suave);display:block;margin:8px 0 3px">Salario base para el 50% (solo lo que es salario; 0 = usa R32). El exceso queda gravado.</label>
+                <input type="text" id="salarioBase" inputmode="numeric" placeholder="0"
+                       style="width:180px;text-align:right;padding:6px 8px;border:1px solid var(--borde);border-radius:8px">
               </div>
               <span id="docOk" style="font-size:.82rem;color:var(--verde);font-weight:700"></span>
             </div>
@@ -716,9 +719,12 @@
     var docChk = document.getElementById("docPublico");
     var grWrap = document.getElementById("grWrap");
     var grInp = document.getElementById("gastosRepr");
+    var sbInp = document.getElementById("salarioBase");
     function enviarDocente(){
       var gr = grInp ? nMoneda(grInp.value) : 0;
-      recalc({docente_publico: docChk.checked, gastos_representacion: docChk.checked ? gr : 0}, function(){
+      var sb = sbInp ? nMoneda(sbInp.value) : 0;
+      recalc({docente_publico: docChk.checked, gastos_representacion: docChk.checked ? gr : 0,
+              salario_base_docente: docChk.checked ? sb : 0}, function(){
         document.getElementById("docOk").textContent = docChk.checked
           ? (gr > 0 ? "✓ Gastos de representación aplicados (hasta 50%)" : "✓ 50% de renta exenta aplicado") : "";
       });
@@ -728,6 +734,7 @@
       enviarDocente();
     };
     if (grInp) grInp.addEventListener("change", function(){ if (docChk && docChk.checked) enviarDocente(); });
+    if (sbInp) sbInp.addEventListener("change", function(){ if (docChk && docChk.checked) enviarDocente(); });
 
     var msgEl = function(){ return document.getElementById("muestraMsg"); };
     var okEmail = function(e){ return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e); };

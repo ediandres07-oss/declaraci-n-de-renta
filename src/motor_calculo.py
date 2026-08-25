@@ -270,7 +270,12 @@ def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
     # recálculo no lo acumula.
     exenta_50 = 0.0
     if getattr(d, "docente_publico", False):
-        tope_50 = max(0.0, 0.5 * d.trabajo.ingresos_brutos)   # límite: 50% del salario
+        # Tope = 50% del SALARIO (estricto sentido). Si no se informa el salario
+        # base, se usa R32 (ingresos brutos de trabajo).
+        base_sal = getattr(d, "salario_base_docente", 0.0) or 0.0
+        if base_sal <= 0:
+            base_sal = d.trabajo.ingresos_brutos
+        tope_50 = max(0.0, 0.5 * base_sal)
         gr = max(0.0, getattr(d, "gastos_representacion", 0.0) or 0.0)
         # Si se informa el valor de gastos de representación, se exenta ese valor
         # limitado al 50% del salario; si no, se asume el 50% completo.
