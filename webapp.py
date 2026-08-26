@@ -1832,6 +1832,11 @@ _EPAYCO_CHECKOUT_HTML = """<!doctype html><html><head><meta charset="utf-8">
 <p style="color:#8a919c;font-size:.85rem;max-width:420px;margin:18px auto">Si tu banco rechaza el
   primer intento, vuelve a intentarlo: es una verificación normal de seguridad y el segundo
   intento suele pasar sin problema.</p>
+<div style="max-width:420px;margin:10px auto;background:#fff6e8;border:1px solid #e0b34c;border-radius:12px;padding:12px 14px;font-size:.9rem;text-align:left">
+  <b>¿Vas a pagar con Nequi (PSE)?</b> El pago <b>no termina solo</b>: Nequi te manda una
+  notificación a su app — <b>ábrela y aprueba la compra</b> antes de 10 minutos, o el banco
+  la marcará "rechazada". Si prefieres algo más directo, paga con <b>tarjeta</b> (un solo paso)
+  o usa la transferencia de abajo.</div>
 <div style="max-width:420px;margin:10px auto;background:#faf7f0;border:1px dashed #c8991f;border-radius:12px;padding:14px;font-size:.9rem;text-align:left">
   <b>¿Prefieres pagar por transferencia?</b><br>
   {{ d.banco }} {{ d.tipo_cuenta }} <b>{{ d.numero_cuenta }}</b>{% if d.nequi %} · Nequi <b>{{ d.nequi }}</b>{% endif %}<br>
