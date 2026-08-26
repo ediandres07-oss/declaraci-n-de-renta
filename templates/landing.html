@@ -766,7 +766,10 @@ async function cargar(archivo) {
     dz.querySelector("b").textContent = "✔ " + archivo.name + " — puedes subir otro para reemplazar";
   } catch (err) {
     dz.querySelector("b").textContent = "Arrastra aquí tu archivo de exógena (.xlsx)";
-    const e = $("#errorCarga"); e.textContent = "⚠ " + err.message; e.classList.remove("oculto");
+    const amable = (err && err.name === "TypeError")
+      ? "Tuvimos un detalle mostrando el resultado. Recarga la página (Ctrl+Shift+R) y vuelve a subir el archivo."
+      : err.message;
+    const e = $("#errorCarga"); if (e) { e.textContent = "⚠ " + amable; e.classList.remove("oculto"); }
   }
 }
 

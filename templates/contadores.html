@@ -680,12 +680,15 @@
     }
     function pintarValor(pagar, favor){
       var el = document.getElementById("rVal");
+      if (!el) return;
       var lbl = el.previousElementSibling;
       if (favor && Number(favor) > 0) {
-        lbl.textContent = "Saldo a favor"; el.style.color = "var(--verde)";
+        if (lbl) lbl.textContent = "Saldo a favor";
+        el.style.color = "var(--verde)";
         el.textContent = "$" + Number(favor).toLocaleString("es-CO");
       } else {
-        lbl.textContent = "Valor estimado a pagar"; el.style.color = "";
+        if (lbl) lbl.textContent = "Valor estimado a pagar";
+        el.style.color = "";
         el.textContent = "$" + Number(pagar || 0).toLocaleString("es-CO");
       }
     }

@@ -352,7 +352,12 @@ async function cargar(archivo) {
     await recalcular();
   } catch (err) {
     dz.querySelector("b").textContent = "Arrastre aquí el archivo de exógena (.xlsx)";
-    const e = $("#errorCarga"); e.textContent = "⚠ " + err.message; e.classList.remove("oculto");
+    // Un TypeError es un detalle interno de la página (no del archivo): mensaje
+    // amable en vez del error técnico crudo.
+    const amable = (err && err.name === "TypeError")
+      ? "Tuvimos un detalle mostrando el resultado. Recarga la página (Ctrl+Shift+R) y vuelve a subir el archivo."
+      : err.message;
+    const e = $("#errorCarga"); if (e) { e.textContent = "⚠ " + amable; e.classList.remove("oculto"); }
   }
 }
 
