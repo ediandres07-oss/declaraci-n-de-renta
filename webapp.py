@@ -1908,9 +1908,51 @@ def epayco_confirmacion():
         elif not _epayco_mod.aprobada(params):
             orden["estado"] = "pago_" + _epayco_mod.estado_texto(params)
             _guardar_ordenes(ordenes)
+            # RESCATE AUTOMÁTICO: cada rechazo le llega a Edison con los datos
+            # del cliente y el correo de rescate YA REDACTADO (él decide enviarlo).
+            try:
+                _avisar_rechazo_pago(orden_id, orden, params)
+            except Exception as e2:
+                app.logger.warning("Aviso rechazo: %s", e2)
     except Exception as e:
         app.logger.warning("ePayco confirmación: %s", e)
     return "ok", 200
+
+
+def _avisar_rechazo_pago(orden_id, orden, params):
+    """Correo inmediato al dueño cuando un pago es rechazado: quién era, qué
+    compraba, el motivo del banco, y el correo de rescate listo para copiar."""
+    from src import correo as _correo
+    cont = orden.get("contacto") or {}
+    email_cli = cont.get("email", "") or "(sin correo)"
+    nombre_cli = cont.get("nombre", "") or "cliente"
+    desc = _descripcion_orden(orden)
+    valor = orden.get("precio", 0) or 0
+    motivo = params.get("x_response_reason_text") or params.get("x_response") or "rechazado"
+    banco = params.get("x_bank_name", "")
+    pago_url = f"{_base_url_publica()}/pagar/{orden_id}"
+    rescate = (
+        f"Hola {nombre_cli.split(' ')[0].title() if nombre_cli != 'cliente' else ''},\n\n"
+        f"Vi que el banco rechazó tu pago de {desc} (les pasa seguido, sobre todo con "
+        f"Nequi/PSE — no se hizo ningún cobro). Tienes dos opciones:\n\n"
+        f"1. Intentar de nuevo con TARJETA o PSE de tu banco: {pago_url}\n"
+        f"2. O transferencia directa: Bancolombia Ahorros 00514294607 (Edison Andrés "
+        f"Monsalve Loaiza) por ${valor:,.0f} — me respondes con el comprobante y te "
+        f"activo de inmediato.\n\nUn saludo,\nEdison Monsalve — Tributando.co").replace(",", ".")
+    html = (
+        f"<div style='font-family:sans-serif;max-width:560px;margin:auto;color:#22303f'>"
+        f"<h2 style='color:#b3261e'>Pago RECHAZADO — cliente caliente para rescatar</h2>"
+        f"<p><b>{nombre_cli}</b> &lt;{email_cli}&gt;<br>"
+        f"{desc} · <b>${valor:,.0f}</b><br>"
+        f"Motivo del banco: {motivo}{(' · ' + banco) if banco else ''}<br>"
+        f"Orden: {orden_id}</p>"
+        f"<p><b>Correo de rescate listo (cópialo y envíaselo):</b></p>"
+        f"<pre style='background:#faf6ec;border:1px solid #C9A75A;border-radius:9px;"
+        f"padding:12px;white-space:pre-wrap;font-family:inherit;font-size:13px'>{rescate}</pre>"
+        f"<p style='color:#8a94a3;font-size:12px'>Aviso automático del webhook de ePayco.</p></div>")
+    _correo.enviar_email("ediandres07@gmail.com",
+                         f"$ Pago rechazado: {nombre_cli} · {desc} · ${valor:,.0f}",
+                         html)
 
 
 @app.route("/epayco/respuesta")
