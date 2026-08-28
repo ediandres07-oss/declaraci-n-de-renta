@@ -204,14 +204,28 @@ def escribir_borrador_comerciante(salida: Path, datos: DatosDeclaracion,
         c.font = Font(color=ORO_CLARO, bold=True, size=12)
         c.border = box
     NOM = {29: "Patrimonio bruto", 30: "Deudas", 31: "Patrimonio líquido",
+           32: "Ingresos brutos rentas de trabajo/honorarios", 33: "INCRNGO trabajo",
+           36: "Rentas exentas trabajo (incluye 25% Art. 206-10)", 42: "Renta líquida trabajo",
            74: "Ingresos no laborales", 75: "Devoluciones/rebajas", 76: "INCRNGO",
            77: "Costos y deducciones (CMV + depreciación)", 78: "Renta líquida no laboral",
            91: "Renta líquida cédula general", 97: "Renta líquida gravable",
            116: "Impuesto rentas líquidas", 126: "Impuesto neto de renta",
-           129: "Total impuesto a cargo", 132: "Retenciones", 133: "Anticipo 2026",
+           129: "Total impuesto a cargo",
+           130: "Anticipo renta liquidado año gravable anterior",
+           131: "Saldo a favor año gravable anterior",
+           132: "Retenciones", 133: "Anticipo año gravable siguiente",
            136: "Saldo a pagar", 137: "Saldo a favor"}
     destacar = {97, 129, 136, 137}
-    for r in (29, 30, 31, 74, 75, 76, 77, 78, 91, 97, 116, 126, 129, 132, 133, 136, 137):
+    filas_reng = [29, 30, 31]
+    if (datos.trabajo.ingresos_brutos or 0) > 0:
+        filas_reng += [32, 33, 36, 42]
+    filas_reng += [74, 75, 76, 77, 78, 91, 97, 116, 126, 129]
+    if (datos.anticipo_anterior or 0) > 0:
+        filas_reng.append(130)
+    if (datos.saldo_favor_anterior or 0) > 0:
+        filas_reng.append(131)
+    filas_reng += [132, 133, 136, 137]
+    for r in filas_reng:
         if r in liq.renglones:
             ws.append([f"R{r}", NOM.get(r, ""), round(liq.renglones[r])])
             fila = ws[ws.max_row]
