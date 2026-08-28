@@ -350,7 +350,11 @@ def _hoja_comerciante(wb, datos, liq) -> None:
     titulo("GUÍA F2517 — lleve estos valores a la hoja H3 (ERI) del prevalidador")
     encab(["Destino en el formato 2517 (hoja · fila · concepto)", "Valor fiscal",
            "Valor contable (llene)", "Diferencia"])
-    guia = [
+    guia = []
+    if (datos.trabajo.ingresos_brutos or 0) > 0:
+        guia.append(("H3 ERI · fila 12 · Honorarios (rentas de trabajo)",
+                     liq.renglones.get(32, 0)))
+    guia += [
         ("H3 ERI · fila 40 · Venta de bienes (Al territorio nacional)",
          liq.renglones.get(74, 0)),
         ("H3 ERI · fila 150 · Costo bienes vendidos (comerciantes): Inventario inicial",
