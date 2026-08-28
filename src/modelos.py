@@ -161,6 +161,14 @@ class DatosDeclaracion:
     no_laboral: SubcedulaGeneral = field(default_factory=SubcedulaGeneral)
 
     aplicar_renta_exenta_25: bool = True     # calcula automáticamente el 25% laboral
+    # Art. 206 num. 10 E.T., inc. 2: la exención del 25% también cubre los
+    # honorarios/compensación por servicios personales de un independiente que
+    # NO contrató 2 o más trabajadores/contratistas por 90 días o más en el año
+    # (y que no optó por restar costos y gastos reales de esa actividad). Un
+    # certificado de ingresos y retenciones Formulario 220 del pagador es
+    # indicio de que la relación se trató como renta de trabajo. Compartida con
+    # 'trabajo' el mismo tope de 790 UVT/año (es una sola bolsa por contribuyente).
+    honorarios_sin_empleados: bool = False
     docente_publico: bool = False            # rector/profesor de universidad oficial:
     #                                          50% del salario exento (Art. 206 num. 9)
     # Valor de gastos de representación del certificado. Exento hasta el 50% del

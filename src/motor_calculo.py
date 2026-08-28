@@ -108,13 +108,23 @@ def deduccion_salud_387(t, p: Parametros) -> float:
 
 def calcular_renta_exenta_25(datos: DatosDeclaracion, p: Parametros,
                              exenta_extra: float = 0.0) -> float:
-    """Renta exenta laboral del 25% (Art. 206 num. 10 E.T.).
+    """Renta exenta del 25% de 'trabajo' (Art. 206 num. 10 E.T.). Para el total
+    combinado con honorarios (cuando aplica), ver `calcular_renta_exenta_25_total`.
 
     Se calcula sobre el ingreso laboral depurado (ingresos - INCRNGO - demás
     rentas exentas - deducciones imputables), con tope anual en UVT. `exenta_extra`
     resta otras rentas exentas ya aplicadas (p. ej. el 50% de docentes públicos),
     para que el 25% no recaiga sobre la parte ya exenta.
     """
+    base = _base_exenta_25_trabajo(datos, p, exenta_extra)
+    if base <= 0:
+        return 0.0
+    exenta = base * p.exenta_25_porcentaje
+    return min(exenta, p.a_pesos(p.exenta_25_tope_uvt))
+
+
+def _base_exenta_25_trabajo(datos: DatosDeclaracion, p: Parametros,
+                            exenta_extra: float = 0.0) -> float:
     t = datos.trabajo
     # Dependientes Art. 387: deducción imputable a rentas de trabajo → también
     # detrae la base del 25% (Art. 206-10 inc. 2, mod. Ley 2277 de 2022).
@@ -123,13 +133,34 @@ def calcular_renta_exenta_25(datos: DatosDeclaracion, p: Parametros,
         ded_dep_387 = min(t.ingresos_brutos * p.dependientes_387_pct,
                           p.a_pesos(p.dependientes_387_tope_uvt))
     ded_icetex = min(max(0.0, datos.intereses_icetex), p.a_pesos(ICETEX_119_TOPE_UVT))
-    base = (t.ingresos_brutos - t.incrngo - t.total_rentas_exentas
+    return (t.ingresos_brutos - t.incrngo - t.total_rentas_exentas
             - t.total_deducciones - ded_dep_387 - deduccion_salud_387(t, p)
             - ded_icetex - exenta_extra)
-    if base <= 0:
+
+
+def _base_exenta_25_honorarios(datos: DatosDeclaracion, p: Parametros) -> float:
+    """Base depurada de honorarios para el 25%, SOLO si `honorarios_sin_empleados`
+    (Art. 206-10 inc. 2: independiente que no contrató 2+ trabajadores/
+    contratistas por 90 días o más, y que no optó por restar costos reales)."""
+    if not datos.honorarios_sin_empleados:
         return 0.0
-    exenta = base * p.exenta_25_porcentaje
-    return min(exenta, p.a_pesos(p.exenta_25_tope_uvt))
+    h = datos.honorarios
+    return h.ingresos_brutos - h.incrngo - h.total_rentas_exentas - h.total_deducciones
+
+
+def calcular_renta_exenta_25_total(datos: DatosDeclaracion, p: Parametros,
+                                   exenta_extra: float = 0.0) -> Tuple[float, float]:
+    """Exención del 25% combinando 'trabajo' y (si aplica) 'honorarios' — Art.
+    206-10 es UNA sola bolsa de 790 UVT/año por contribuyente, no una por cédula.
+    Devuelve (exenta_trabajo, exenta_honorarios), repartida proporcional a la
+    base depurada de cada una."""
+    base_t = max(0.0, _base_exenta_25_trabajo(datos, p, exenta_extra))
+    base_h = max(0.0, _base_exenta_25_honorarios(datos, p))
+    base_total = base_t + base_h
+    if base_total <= 0:
+        return 0.0, 0.0
+    exenta_total = min(base_total * p.exenta_25_porcentaje, p.a_pesos(p.exenta_25_tope_uvt))
+    return (exenta_total * base_t / base_total, exenta_total * base_h / base_total)
 
 
 # Tabla del Art. 206 num. 4 E.T.: % exento de las cesantías e intereses según el
@@ -302,12 +333,16 @@ def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
     # Renta exenta 25% laboral automática (se agrega a 'otras rentas exentas').
     # Se le restan el 50% docente y las cesantías para no exentar dos veces la
     # misma porción (Art. 206-10 inc. 2: la base se depura de las demás exentas).
-    exenta_25 = 0.0
+    exenta_25 = exenta_25_honorarios = 0.0
     if d.aplicar_renta_exenta_25:
-        exenta_25 = calcular_renta_exenta_25(
+        exenta_25, exenta_25_honorarios = calcular_renta_exenta_25_total(
             d, p, exenta_extra=exenta_50 + exenta_cesantias)
         if exenta_25 > 0:
             liq.detalle.append(f"Renta exenta 25% laboral (Art. 206-10): {exenta_25:,.0f}")
+        if exenta_25_honorarios > 0:
+            liq.detalle.append(
+                f"Renta exenta 25% de honorarios sin empleados (Art. 206-10 inc. "
+                f"2): {exenta_25_honorarios:,.0f}")
 
     # Aviso al contador: cómo la saca la DIAN (sugerida, sin cesantías) vs cómo es
     # correcto (con Art. 206-4). Solo cuando hay cesantías exentas de por medio.
@@ -377,8 +412,10 @@ def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
     r46 = max(0.0, h.ingresos_brutos - h.incrngo - h.costos_deducciones)
     liq.set(46, r46, "renta líquida honorarios")
     liq.set(47, h.rentas_exentas_afc_fvp, "aportes AFC/FVP honorarios")
-    liq.set(48, h.otras_rentas_exentas, "otras rentas exentas honorarios")
-    r49 = h.total_rentas_exentas
+    r48 = h.otras_rentas_exentas + exenta_25_honorarios
+    liq.set(48, r48, "otras rentas exentas honorarios (incluye 25% Art. 206-10 "
+            "inc. 2 si no tiene 2+ empleados)")
+    r49 = h.rentas_exentas_afc_fvp + r48
     liq.set(49, r49, "total rentas exentas honorarios")
     liq.set(50, h.intereses_vivienda, "intereses vivienda honorarios")
     liq.set(51, h.otras_deducciones, "otras deducciones honorarios")
