@@ -148,6 +148,33 @@ def _pide_humano(texto: str) -> bool:
     return any(f in t for f in _FRASES_HUMANO)
 
 
+# --- Escalado por TEMA: dinero, quejas o cancelaciones NO las contesta el bot;
+# avisa al dueño y se calla en ese chat (igual que el auto-responder del correo).
+_MSG_DELICADO = ("Gracias por escribirnos. 🙏 Este tema lo atiende *Edison* "
+                 "directamente; ya le aviso para que te responda personalmente y "
+                 "te ayude con esto lo antes posible.")
+_FRASES_DELICADAS = (
+    # dinero / facturación
+    "reembolso", "reembols", "devoluci", "devuélvanme", "devuelvanme",
+    "me devuelven", "devolver mi dinero", "me cobraron", "cobro doble",
+    "doble cobro", "cobraron de", "cobro indebido", "cobro mal",
+    "me facturaron mal", "factura mal", "pago doble", "cobro de más",
+    "cobro de mas",
+    # quejas / reclamos
+    "queja", "reclamo", "reclam", "estoy molesto", "muy molesto",
+    "inconforme", "demanda", "demandar", "estafa", "fraude", "pésimo",
+    "pesimo",
+    # cancelaciones
+    "quiero cancelar", "cancelar mi", "cancelar la suscrip", "cancelación de",
+    "cancelacion de", "dar de baja",
+)
+
+
+def _tema_delicado(texto: str) -> bool:
+    t = (texto or "").lower()
+    return any(f in t for f in _FRASES_DELICADAS)
+
+
 def _pausar(remitente: str) -> None:
     with _lock:
         _pausados[remitente] = time.time()
@@ -178,11 +205,14 @@ def atender(cfg: dict | None, payload: dict | None, generar_respuesta,
             if _en_pausa(remitente):
                 _agregar_turno(remitente, "user", texto)
                 continue
-            # ¿Pide hablar con una persona/el dueño? → traspaso a humano.
-            if _pide_humano(texto):
+            # ¿Pide hablar con una persona, o es un TEMA DELICADO (dinero, quejas,
+            # cancelaciones)? → no lo contesta el bot: avisa al dueño y se calla.
+            humano, delicado = _pide_humano(texto), _tema_delicado(texto)
+            if humano or delicado:
                 _agregar_turno(remitente, "user", texto)
-                enviar(cfg, remitente, _MSG_HANDOFF)
-                _agregar_turno(remitente, "assistant", _MSG_HANDOFF)
+                aviso = _MSG_HANDOFF if humano else _MSG_DELICADO
+                enviar(cfg, remitente, aviso)
+                _agregar_turno(remitente, "assistant", aviso)
                 _pausar(remitente)
                 if on_handoff:
                     try:
