@@ -204,8 +204,10 @@ def escribir_borrador_comerciante(salida: Path, datos: DatosDeclaracion,
         c.font = Font(color=ORO_CLARO, bold=True, size=12)
         c.border = box
     NOM = {29: "Patrimonio bruto", 30: "Deudas", 31: "Patrimonio líquido",
-           32: "Ingresos brutos rentas de trabajo/honorarios", 33: "INCRNGO trabajo",
+           32: "Ingresos brutos rentas de trabajo", 33: "INCRNGO trabajo",
            36: "Rentas exentas trabajo (incluye 25% Art. 206-10)", 42: "Renta líquida trabajo",
+           43: "Ingresos brutos honorarios", 44: "INCRNGO honorarios",
+           48: "Rentas exentas honorarios", 57: "Renta líquida honorarios",
            74: "Ingresos no laborales", 75: "Devoluciones/rebajas", 76: "INCRNGO",
            77: "Costos y deducciones (CMV + depreciación)", 78: "Renta líquida no laboral",
            91: "Renta líquida cédula general", 97: "Renta líquida gravable",
@@ -219,6 +221,8 @@ def escribir_borrador_comerciante(salida: Path, datos: DatosDeclaracion,
     filas_reng = [29, 30, 31]
     if (datos.trabajo.ingresos_brutos or 0) > 0:
         filas_reng += [32, 33, 36, 42]
+    if (datos.honorarios.ingresos_brutos or 0) > 0:
+        filas_reng += [43, 44, 48, 57]
     filas_reng += [74, 75, 76, 77, 78, 91, 97, 116, 126, 129]
     if (datos.anticipo_anterior or 0) > 0:
         filas_reng.append(130)

@@ -345,6 +345,8 @@ PLANES_LECTOR = {
     # 3 planes vigentes.
     # Prueba gratis self-serve: 1 empresa, 30 días (sin tarjeta).
     "prueba":                {"empresas_max": 1,  "nombre": "Prueba gratis",  "dias": 30},
+    "basico_mensual":        {"empresas_max": 3,  "nombre": "Básico",        "dias": 30},
+    "basico_anual":          {"empresas_max": 3,  "nombre": "Básico",        "dias": 365},
     "independiente_mensual": {"empresas_max": 10, "nombre": "Independiente", "dias": 30},
     "independiente_anual":   {"empresas_max": 10, "nombre": "Independiente", "dias": 365},
     "pro_mensual":           {"empresas_max": 25, "nombre": "Pro",           "dias": 30},

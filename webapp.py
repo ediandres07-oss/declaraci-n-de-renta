@@ -833,11 +833,16 @@ def admin_lector():
         <div><label style="font-size:.75rem;display:block;color:#5b6472">Correo del contador</label><input id="czEmail" type="email" placeholder="correo@ejemplo.com" style="padding:8px;border:1px solid #d7dbe2;border-radius:8px;min-width:220px"></div>
         <div><label style="font-size:.75rem;display:block;color:#5b6472">Plan</label>
           <select id="czPlan" style="padding:8px;border:1px solid #d7dbe2;border-radius:8px">
-            <option value="independiente_anual">Independiente (10 empresas)</option>
-            <option value="pro_anual">Pro (30 empresas)</option>
-            <option value="max_anual">Max (ilimitado)</option>
+            <option value="basico_mensual">Básico mensual (3 empresas)</option>
+            <option value="independiente_mensual">Independiente mensual (10 empresas)</option>
+            <option value="pro_mensual">Pro mensual (25 empresas)</option>
+            <option value="max_mensual">Max mensual (ilimitado)</option>
+            <option value="basico_anual">Básico anual (3 empresas)</option>
+            <option value="independiente_anual" selected>Independiente anual (10 empresas)</option>
+            <option value="pro_anual">Pro anual (25 empresas)</option>
+            <option value="max_anual">Max anual (ilimitado)</option>
           </select></div>
-        <div><label style="font-size:.75rem;display:block;color:#5b6472">Días</label><input id="czDias" type="number" value="365" style="padding:8px;border:1px solid #d7dbe2;border-radius:8px;width:90px"></div>
+        <div><label style="font-size:.75rem;display:block;color:#5b6472">Días</label><input id="czDias" type="number" value="365" title="Se ajusta solo al cambiar el plan: mensual 30, anual 365" style="padding:8px;border:1px solid #d7dbe2;border-radius:8px;width:90px"></div>
         <label style="font-size:.82rem;display:flex;align-items:center;gap:5px;color:#1e2432"><input id="czAgente" type="checkbox"> con Agente</label>
         <button onclick="cortesia()" style="background:#1f8a5f;color:#fff;border:0;padding:9px 16px;border-radius:8px;font-weight:600;cursor:pointer">Crear/activar gratis</button>
       </div>
@@ -853,7 +858,11 @@ def admin_lector():
     {% if not filas %}<tr><td colspan="8" style="color:#8a919c">Aún no hay suscripciones.</td></tr>{% endif %}
     </table>
     <p style="color:#8a919c;font-size:.82rem;margin-top:10px">{{ aic('unlock',True)|safe }} Liberar equipo = desamarra la licencia de su máquina actual; el contador la puede reactivar en otra (se re-amarra sola en la próxima activación).<br>Agente = complemento de pago (Asistente IA que ejecuta 350/300, revisa clientes, calcula). Actívalo a quien pague el add-on; tope 150 acciones/mes por contador.</p>
-    <script>async function borrar(lic){ if(!confirm('¿Borrar esta suscripción de prueba?'))return;
+    <script>
+    document.getElementById('czPlan').addEventListener('change',function(){
+      document.getElementById('czDias').value = this.value.endsWith('_mensual') ? 30 : 365;
+    });
+    async function borrar(lic){ if(!confirm('¿Borrar esta suscripción de prueba?'))return;
       await fetch('/admin/lector/borrar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({licencia:lic})});
       location.reload();}
     async function liberar(lic,email){ if(!confirm('¿Liberar el equipo de '+email+'?\\nQuedará libre para activarse en otra máquina.'))return;
@@ -866,7 +875,8 @@ def admin_lector():
       location.reload();}
     async function cortesia(){
       const email=document.getElementById('czEmail').value.trim();
-      const plan=document.getElementById('czPlan').value, dias=document.getElementById('czDias').value||365;
+      const plan=document.getElementById('czPlan').value;
+      const dias=document.getElementById('czDias').value||(plan.endsWith('_mensual')?30:365);
       const agente=document.getElementById('czAgente').checked;
       const msg=document.getElementById('czMsg');
       if(!email||!email.includes('@')){ msg.style.color='#b91c1c'; msg.textContent='Escribe un correo válido.'; return; }
