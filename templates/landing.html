@@ -83,12 +83,12 @@ button,input,select,textarea{font:inherit;color:inherit}
 .nav{position:sticky;top:0;z-index:60;border-bottom:1px solid transparent;transition:background .3s,border-color .3s}
 .nav.scrolled{background:rgba(7,10,18,.72);border-color:var(--line);
   -webkit-backdrop-filter:saturate(160%) blur(16px);backdrop-filter:saturate(160%) blur(16px)}
-.nav .wrap{display:flex;align-items:center;justify-content:space-between;height:72px;gap:20px}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;height:72px;gap:20px;max-width:1320px}
 .marca{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.15rem;letter-spacing:-.01em}
 .mono{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-style:normal;font-weight:800;font-size:1.05rem;color:#1a1407;background:linear-gradient(135deg,var(--oro3),var(--oro) 50%,var(--oro2));box-shadow:0 6px 18px -6px rgba(230,196,131,.6),inset 0 1px 0 rgba(255,255,255,.5)}
 .marca-txt{font-weight:800}
 .marca span{color:var(--oro)}
-.nav-links{display:flex;align-items:center;gap:30px;font-size:.95rem;color:var(--suave);font-weight:500}
+.nav-links{display:flex;align-items:center;gap:24px;font-size:.9rem;color:var(--suave);font-weight:500;white-space:nowrap}
 .nav-links a:hover{color:#fff}
 .nav-acc{display:flex;align-items:center;gap:10px}
 .nav-entrar{color:var(--suave);font-weight:600;font-size:.95rem;padding:10px 12px}
@@ -339,13 +339,8 @@ footer{border-top:1px solid var(--line);margin-top:104px;padding:60px 0 34px}
 }
 
 /* ---------- Responsive ---------- */
-@media (max-width:1080px){
-  .servicio{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .b-a,.b-f{grid-column:span 6}.b-b,.b-c,.b-d,.b-e{grid-column:span 3}
-  .perfiles{grid-template-columns:1fr 1fr}.perfil.suave{grid-column:1/-1}
-  .pie{grid-template-columns:1fr 1fr}
-}
-@media (max-width:920px){
+@media (max-width:1279px){ .nav-links a.nav-serv{display:none} }
+@media (max-width:1180px){
   .nav-links,.nav-entrar{display:none}
   .menu-btn{display:grid}
   .menu-mov{position:absolute;top:72px;left:0;right:0;background:rgba(7,10,18,.96);border-bottom:1px solid var(--line);padding:14px 24px 22px;
@@ -353,6 +348,14 @@ footer{border-top:1px solid var(--line);margin-top:104px;padding:60px 0 34px}
   .menu-mov.abierto{display:grid;gap:4px}
   .menu-mov a{padding:13px 4px;border-bottom:1px solid var(--line);color:var(--suave);font-weight:600}
   .menu-mov a:last-child{border-bottom:0}
+}
+@media (max-width:1080px){
+  .servicio{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .b-a,.b-f{grid-column:span 6}.b-b,.b-c,.b-d,.b-e{grid-column:span 3}
+  .perfiles{grid-template-columns:1fr 1fr}.perfil.suave{grid-column:1/-1}
+  .pie{grid-template-columns:1fr 1fr}
+}
+@media (max-width:920px){
   .hero{padding-top:44px}
   .hero .wrap{grid-template-columns:1fr;gap:64px}
   .mock{transform:none}
@@ -519,8 +522,8 @@ footer{border-top:1px solid var(--line);margin-top:104px;padding:60px 0 34px}
     <div class="nav-links">
       <a href="#plataforma">App contable, POS y nómina</a>
       <a href="#ia">Contador Auxiliar IA</a>
-      <a href="#otros">Otros programas</a>
-      <a href="#servicio">Servicio</a>
+      <a href="#otros">Automatizar otros programas contables</a>
+      <a class="nav-serv" href="#servicio">Servicio</a>
     </div>
     <div class="nav-acc">
       <a class="nav-entrar" href="{{ app_url }}/login">Entrar</a>
@@ -531,7 +534,7 @@ footer{border-top:1px solid var(--line);margin-top:104px;padding:60px 0 34px}
   <div class="menu-mov" id="menuMov">
     <a href="#plataforma">App contable, POS y nómina</a>
     <a href="#ia">Contador Auxiliar IA</a>
-    <a href="#otros">Otros programas</a>
+    <a href="#otros">Automatizar otros programas contables</a>
     <a href="#servicio">Servicio</a>
     <a href="/contadores">Renta: pase de temporada</a>
     <a href="{{ app_url }}/login">Entrar a la plataforma</a>
@@ -974,7 +977,7 @@ footer{border-top:1px solid var(--line);margin-top:104px;padding:60px 0 34px}
           <li><a href="#plataforma">App contable</a></li>
           <li><a href="#plataforma">POS y nómina</a></li>
           <li><a href="#ia">Contador Auxiliar IA</a></li>
-          <li><a href="#otros">Otros programas</a></li>
+          <li><a href="#otros">Automatizar otros programas contables</a></li>
         </ul>
       </div>
       <div>
