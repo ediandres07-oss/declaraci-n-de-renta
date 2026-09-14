@@ -1684,10 +1684,10 @@ LECTOR_VERSION_LATEST = os.environ.get("LECTOR_VERSION", "1.2.3")
 # dentro del Lector). Se puede sobrescribir con la variable de entorno del mismo
 # nombre sin recompilar el servidor. Usa saltos de línea para viñetas.
 LECTOR_NOVEDADES = os.environ.get("LECTOR_NOVEDADES",
-    "• Un solo botón «Exportar a mi programa»: revisas la cuenta de cada proveedor antes de generar el plano.\n"
-    "• Lo que corriges queda aprendido para ese cliente y no se borra al volver a subir el balance.\n"
-    "• Los consecutivos avanzan solos y nada se exporta dos veces.\n"
-    "• Descarga de documentos soporte y POS.")
+    "• Exporta a Syscafé: el movimiento contable y la plantilla de terceros, listos para importar (Excel 5.0/95).\n"
+    "• Aprende las cuentas de un cliente de Syscafé subiendo su movimiento en «Perfil del cliente».\n"
+    "• World Office, Helisa, Genérico, Alegra y Loggro: el plano ya sale con gastos y notas crédito, no solo compras.\n"
+    "• «Exportar a mi programa» revisa y aprende la cuenta de cada proveedor; nada se exporta dos veces.")
 
 
 @app.post("/api/lector-suscripcion/crear")
