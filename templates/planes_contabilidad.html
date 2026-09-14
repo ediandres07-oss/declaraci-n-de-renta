@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <title>Planes de contabilidad para contadores | Tributando.co</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Lleva la contabilidad de todos tus clientes con un solo plan: descarga automática de la DIAN, informes y Contador IA. Desde $49.900/mes. Empieza gratis.">
+<meta name="description" content="Contabilidad para contadores a un solo precio por empresa: descarga automática de la DIAN, impuestos, informes y Contador IA. $69.900 por empresa al mes, con descuento por volumen. Prueba 1 mes.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://tributando.co/contadores/contabilidad">
-<meta property="og:title" content="Un solo plan para la contabilidad de todos tus clientes">
-<meta property="og:description" content="Descarga automática de la DIAN, informes y Contador IA. Gratis con 1 empresa. Planes desde $49.900/mes.">
+<meta property="og:title" content="Un solo precio por empresa, todo incluido">
+<meta property="og:description" content="Descarga automática de la DIAN, impuestos, informes y Contador IA. $69.900 por empresa al mes. Prueba 1 mes con 1 empresa.">
 <style>
   :root{
     --navy:#1e2432; --card:#252d3f; --card-hi:#2b3348;
@@ -82,7 +82,24 @@
   .mod .items{padding:2px 12px 11px;background:rgba(0,0,0,.14)}
   .mod .it{display:flex;gap:9px;align-items:flex-start;font-size:12.8px;color:var(--suave);margin:7px 0;line-height:1.35}
   .mod .it svg{flex:none;margin-top:1px}
-  @media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}.card.feat{order:-1}}
+  .grid2{display:grid;grid-template-columns:1fr 1.55fr;gap:15px;max-width:980px;margin:28px auto 8px;align-items:stretch}
+  .calc{margin:16px 0 4px;padding:16px;border-radius:14px;background:rgba(0,0,0,.18);border:1px solid var(--borde)}
+  .calc label{display:block;font-size:13px;color:var(--suave);font-weight:600;margin-bottom:10px}
+  .calc-fila{display:flex;align-items:center;gap:12px}
+  .calc-fila button{width:38px;height:38px;border-radius:10px;border:1px solid var(--borde);background:#1e2432;color:#fff;font-size:20px;cursor:pointer}
+  .calc-fila input[type=number]{width:84px;height:38px;border-radius:10px;border:1px solid var(--borde);background:#1e2432;color:#fff;
+    font-size:18px;font-weight:800;text-align:center}
+  .calc input[type=range]{width:100%;margin:14px 0 6px;accent-color:#e6c483}
+  .calc-tot{display:flex;justify-content:space-between;align-items:baseline;margin-top:8px;font-size:13px;color:var(--suave)}
+  .calc-tot b{font-size:24px;color:#fff;letter-spacing:-.01em}
+  .calc-tot.anual b{font-size:15px;color:var(--verde)}
+  .tramos{margin:14px 0 2px;border:1px solid var(--borde);border-radius:12px;overflow:hidden}
+  .tramos div{display:flex;justify-content:space-between;padding:8px 12px;font-size:13px;color:var(--suave);border-top:1px solid var(--borde);transition:background .2s}
+  .tramos div:first-child{border-top:0}
+  .tramos div b{color:#fff}
+  .tramos div.on{background:rgba(230,196,131,.12);color:#fff}
+  .tramos div.on b{color:var(--oro)}
+  @media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}.card.feat{order:-1}.grid2{grid-template-columns:1fr}}
   @media(max-width:560px){.grid{grid-template-columns:1fr}}
   .addon{background:var(--card);border:1px solid var(--borde);border-radius:18px;padding:20px;margin:14px 0}
   .addon-h{display:flex;align-items:center;gap:13px;margin-bottom:14px}
@@ -124,8 +141,8 @@
 
   <header class="hero">
     <div class="eyebrow">Contabilidad · Planes y precios</div>
-    <h1>El automatizador incluido, no en el plan caro.</h1>
-    <p class="sub">La automatización de la DIAN directo a tu contabilidad —lo que otros cobran solo en su plan más costoso— aquí viene incluida en <b>todos</b>, desde el gratis. Un plan y atiendes a toda tu cartera. Empieza gratis.</p>
+    <h1>Un solo precio por empresa. Todo incluido.</h1>
+    <p class="sub">Automatización de la DIAN, contabilidad, impuestos, informes y Contador IA para cada cliente. Pagas solo por las empresas que llevas, con un equipo contable detrás. Empieza con un mes de prueba.</p>
   </header>
 
   {% set ic_dian = '<path d="M13 2 4.1 12.1a1 1 0 0 0 .8 1.6H11l-1 8 8.9-10.1a1 1 0 0 0-.8-1.6H13z"/>' %}
@@ -163,62 +180,79 @@
   </div>
   {% endmacro %}
 
-  <div class="grid">
+  <div class="grid2">
 
-    <!-- GRATIS -->
+    <!-- PRUEBA -->
     <div class="card">
-      <div class="pn free">Gratis</div>
-      <div class="who">Para empezar o para llevar una sola empresa, sin costo.</div>
-      <div class="price"><span class="amt" style="color:var(--verde)">$0</span><span class="per">para siempre</span></div>
+      <div class="pn free">Prueba gratis</div>
+      <div class="who">Todo el software con 1 empresa durante un mes. Sin tarjeta.</div>
+      <div class="price"><span class="amt" style="color:var(--verde)">$0</span><span class="per">1 mes</span></div>
       <div class="year">&nbsp;</div>
       <div class="cap"><b>1</b>&nbsp;empresa</div>
-      {{ det([g_dian_free, g_conta_free, {"g":"Empresas y soporte","ic":ic_emp,"items":["1 empresa"]}]) }}
-      <div style="margin:-8px 0 6px;padding-left:4px">
-        {% for f in ["Sin planos ni exportar a Excel","Sin informes ni Contador IA","Sin impuestos ni conciliación"] %}
-        <div style="display:flex;gap:7px;align-items:center;font-size:.79rem;color:var(--tenue);margin:4px 0"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" style="flex:none"><path d="M8 8l8 8M16 8l-8 8" stroke="#8b93a1" stroke-width="2" stroke-linecap="round"/></svg>{{ f }}</div>
-        {% endfor %}
-      </div>
-      <a class="cta" href="https://contabilidad-tributando.onrender.com" target="_blank" rel="noopener">Empezar gratis</a>
+      {{ det([g_dian, g_conta, g_plano, g_info, g_imp, g_firma, {"g":"Contador IA","ic":ic_ia,"items":["9 asistentes expertos con tus cifras reales","Análisis con IA","Conecta tu IA (MCP): ChatGPT, Claude o Perplexity"]}]) }}
+      <a class="cta" href="https://contabilidad-tributando.onrender.com" target="_blank" rel="noopener">Empezar la prueba</a>
     </div>
 
-    <!-- EMPRENDE -->
-    <div class="card">
-      <div class="pn">Emprende</div>
-      <div class="who">Desbloquea informes, impuestos y planos para tu cartera chica.</div>
-      <div class="price"><span class="amt">$49.900</span><span class="per">/mes</span></div>
-      <div class="year">Anual: $499.000 · 2 meses gratis</div>
-      <div class="cap"><b>3</b>&nbsp;empresas</div>
-      {{ det([g_dian, g_conta, g_plano, g_info, g_imp, g_firma, {"g":"Empresas y soporte","ic":ic_emp,"items":["Hasta 3 empresas","2 meses de prueba premium"]}]) }}
-      <a class="cta" href="#" onclick="return pagarPlan('emprende')">Elegir Emprende</a>
-    </div>
-
-    <!-- CONTADOR -->
+    <!-- POR EMPRESA -->
     <div class="card feat">
-      <div class="flag">El más elegido</div>
-      <div class="pn">Contador</div>
-      <div class="who">Contabilidad completa + Contador IA Plus para tu oficina.</div>
-      <div class="price"><span class="amt">$109.900</span><span class="per">/mes</span></div>
-      <div class="year">Anual: $1.099.000 · 2 meses gratis</div>
-      <div class="cap"><b>10</b>&nbsp;empresas</div>
-      {{ det([g_dian, g_conta, g_plano, g_info, g_imp, g_firma, {"g":"Contador IA Plus","ic":ic_ia,"items":["Hasta 150 consultas de IA al mes","9 asistentes expertos con tus cifras reales","Análisis con IA","Conecta tu IA (MCP): ChatGPT, Claude o Perplexity"]}, {"g":"Empresas y soporte","ic":ic_emp,"items":["Hasta 10 empresas","Soporte por chat"]}]) }}
-      <a class="cta pri" href="#" onclick="return pagarPlan('contador')">Elegir Contador</a>
-    </div>
-
-    <!-- FIRMA -->
-    <div class="card">
-      <div class="pn">Firma</div>
-      <div class="who">Empresas ILIMITADAS + Contador IA Ilimitada para firmas de alto volumen.</div>
-      <div class="price"><span class="amt">$149.900</span><span class="per">/mes</span></div>
-      <div class="year">Anual: $1.499.000 · 2 meses gratis</div>
-      <div class="cap"><b>Ilimitadas</b>&nbsp;empresas</div>
-      {{ det([g_dian, g_conta, g_plano, g_info, g_imp, g_firma, {"g":"Contador IA Ilimitada","ic":ic_ia,"items":["Consultas de IA ilimitadas","9 asistentes expertos con tus cifras reales","Análisis con IA","Conecta tu IA (MCP): ChatGPT, Claude o Perplexity"]}, {"g":"Empresas y soporte","ic":ic_emp,"items":["Empresas ilimitadas","Soporte prioritario","Varios usuarios del equipo"]}]) }}
-      <a class="cta" href="#" onclick="return pagarPlan('firma')">Elegir Firma</a>
+      <div class="flag">Un solo precio</div>
+      <div class="pn">Por empresa</div>
+      <div class="who">Pagas solo por las empresas que llevas. Cada cliente (NIT) cuenta como una empresa.</div>
+      <div class="price"><span class="amt">$69.900</span><span class="per">por empresa al mes</span></div>
+      <div class="tramos" id="calcTramos">
+        <div data-desde="1"><span>De 1 a 10 empresas</span><b>$69.900</b></div>
+        <div data-desde="11"><span>De la 11 a la 30</span><b>$59.900</b></div>
+        <div data-desde="31"><span>De la 31 en adelante</span><b>$49.900</b></div>
+      </div>
+      <div class="calc">
+        <label for="calcN">¿Cuántas empresas llevas?</label>
+        <div class="calc-fila">
+          <button type="button" onclick="calcSumar(-1)" aria-label="Una empresa menos">−</button>
+          <input id="calcN" type="number" min="1" max="500" value="10" inputmode="numeric">
+          <button type="button" onclick="calcSumar(1)" aria-label="Una empresa más">+</button>
+        </div>
+        <input id="calcR" type="range" min="1" max="100" value="10" aria-label="Empresas">
+        <div class="calc-tot"><span>Total al mes</span><b id="calcMes">$699.000</b></div>
+        <div class="calc-tot"><span>Promedio por empresa</span><span id="calcProm" style="color:#fff;font-weight:700">$69.900</span></div>
+        <div class="calc-tot anual"><span>Pago anual · 2 meses gratis</span><b id="calcAnual">$6.990.000</b></div>
+      </div>
+      {{ det([g_dian, g_conta, g_plano, g_info, g_imp, g_firma, {"g":"Contador IA","ic":ic_ia,"items":["Hasta 100 consultas por empresa al mes","9 asistentes expertos con tus cifras reales","Análisis con IA","Conecta tu IA (MCP): ChatGPT, Claude o Perplexity"]}, {"g":"Empresas y soporte","ic":ic_emp,"items":["Las empresas que necesites","Soporte con un contador"]}]) }}
+      <a class="cta pri" href="#" onclick="return pagarEmpresas()">Elegir <span id="calcCta">10 empresas</span></a>
     </div>
 
   </div>
+  <script>
+    (function(){
+      var TRAMOS = [[10, 69900], [30, 59900], [Infinity, 49900]], n = document.getElementById("calcN"), r = document.getElementById("calcR");
+      function cop(v){ return "$" + Math.round(v).toLocaleString("es-CO"); }
+      function totalTramos(v, tramos){
+        var t = 0, previo = 0;
+        for (var i = 0; i < tramos.length && v > previo; i++){
+          var hasta = Math.min(v, tramos[i][0]); t += (hasta - previo) * tramos[i][1]; previo = hasta;
+        }
+        return t;
+      }
+      function pintar(v){
+        v = Math.max(1, Math.min(500, parseInt(v, 10) || 1));
+        n.value = v; r.value = Math.min(v, 100);
+        var mes = totalTramos(v, TRAMOS);
+        document.getElementById("calcMes").textContent = cop(mes);
+        document.getElementById("calcProm").textContent = cop(mes / v);
+        document.getElementById("calcAnual").textContent = cop(mes * 10);
+        document.querySelectorAll("#calcTramos div").forEach(function(d){
+          var desde = +d.getAttribute("data-desde"); d.classList.toggle("on", v >= desde);
+        });
+        document.getElementById("calcCta").textContent = v + (v === 1 ? " empresa" : " empresas");
+      }
+      window.calcSumar = function(d){ pintar((parseInt(n.value, 10) || 1) + d); };
+      n.addEventListener("input", function(){ pintar(n.value); });
+      r.addEventListener("input", function(){ pintar(r.value); });
+      pintar(10);
+    })();
+  </script>
 
   <section class="incl">
-    <div class="h">Incluido en todos los planes</div>
+    <div class="h">Incluido en cada empresa</div>
     <div class="r"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#37d38f" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Descarga automática de la DIAN</div>
     <div class="r"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#37d38f" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Causar y armar el plano contable</div>
     <div class="r"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#37d38f" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Actualizaciones y soporte por chat</div>
@@ -328,20 +362,26 @@
 </div>
 
 <script>
-  // ---- Pago de planes de contabilidad ----
-  var PRECIOS_CONTAB = {
-    emprende: {nombre:"Emprende", mensual:49900,  anual:499000},
-    contador: {nombre:"Contador", mensual:199900, anual:1999000},
-    firma:    {nombre:"Firma",    mensual:299900, anual:2999000}
-  };
-  var pmPlan = "contador", pmPeriodo = "mensual";
-  function _cop(n){ return "$" + Number(n).toLocaleString("es-CO"); }
-  function pagarPlan(plan){
-    pmPlan = plan; pmPeriodo = "mensual";
-    var p = PRECIOS_CONTAB[plan];
-    document.getElementById("pmPlan").textContent = p.nombre;
-    document.getElementById("pmMensual").textContent = _cop(p.mensual) + "/mes";
-    document.getElementById("pmAnual").textContent = _cop(p.anual) + "/año";
+  // ---- Pago por empresa (el monto lo calcula el servidor; aquí solo se muestra) ----
+  var TRAMOS_CONTAB = [[10, 69900], [30, 59900], [null, 49900]];
+  var pmPlan = "empresas", pmPeriodo = "mensual", pmEmpresas = 10;
+  function _cop(n){ return "$" + Math.round(Number(n)).toLocaleString("es-CO"); }
+  function _totalEmpresas(v){
+    var t = 0, previo = 0;
+    for (var i = 0; i < TRAMOS_CONTAB.length && v > previo; i++){
+      var h = TRAMOS_CONTAB[i][0] === null ? v : Math.min(v, TRAMOS_CONTAB[i][0]);
+      t += (h - previo) * TRAMOS_CONTAB[i][1]; previo = h;
+    }
+    return t;
+  }
+  function pagarEmpresas(n){
+    var inp = document.getElementById("calcN");
+    n = Math.max(1, Math.min(500, parseInt(n || (inp && inp.value), 10) || 1));
+    pmPlan = "empresas"; pmEmpresas = n; pmPeriodo = "mensual";
+    var mes = _totalEmpresas(n);
+    document.getElementById("pmPlan").textContent = "· " + n + (n === 1 ? " empresa" : " empresas");
+    document.getElementById("pmMensual").textContent = _cop(mes) + "/mes";
+    document.getElementById("pmAnual").textContent = _cop(mes * 10) + "/año";
     document.getElementById("pmMsg").textContent = "";
     _marcarPeriodo("mensual");
     document.getElementById("payModal").style.display = "flex";
@@ -368,16 +408,21 @@
     var btn = document.getElementById("pmBtn"); btn.disabled = true; btn.textContent = "Un momento…";
     fetch("/api/orden-contabilidad", {
       method:"POST", headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({plan: pmPlan, periodo: pmPeriodo, email: email})
+      body: JSON.stringify({plan: pmPlan, empresas: pmEmpresas, periodo: pmPeriodo, email: email})
     }).then(function(r){ return r.json(); }).then(function(d){
       if(d && d.pago_url){ window.location.href = d.pago_url; }
       else { msg.textContent = (d && d.error) ? d.error : "El pago en línea no está disponible. Escríbenos por WhatsApp."; btn.disabled=false; btn.textContent="Ir a pagar"; }
     }).catch(function(){ msg.textContent = "No se pudo iniciar el pago. Intenta de nuevo."; btn.disabled=false; btn.textContent="Ir a pagar"; });
   }
-  // Si llega con ?plan= (desde la app de contabilidad), abre ese plan directo.
+  // Si llega desde la app (?plan=empresas&empresas=N), abre el pago con esas empresas.
   (function(){
     var m = (location.search.match(/[?&]plan=([a-z]+)/) || [])[1];
-    if(m && PRECIOS_CONTAB[m]) pagarPlan(m);
+    if (!m) return;
+    var n = parseInt((location.search.match(/[?&]empresas=(\d+)/) || [])[1], 10)
+            || ({emprende: 3, contador: 10}[m] || 10);
+    var inp = document.getElementById("calcN");
+    if (inp){ inp.value = n; inp.dispatchEvent(new Event("input")); }
+    pagarEmpresas(n);
   })();
 </script>
 <script>

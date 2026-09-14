@@ -316,6 +316,47 @@ PRECIOS_CONTABILIDAD = {
     "contador": {"nombre": "Contador", "empresas": 10,  "mensual": 109900, "anual": 1099000, "tope": 10},
     "firma":    {"nombre": "Firma",    "empresas": 0,   "mensual": 149900, "anual": 1499000, "tope": 999999},
 }
+# Precio POR EMPRESA desde el 13-sep-2026 (Edison), escalera por volumen, COP/mes.
+# Espejo de contabilidad/planes.py TRAMOS_EMPRESA y de las plantillas de precios.
+# Los planes de arriba (y los del Lector) quedan SOLO para renovar a quien ya los
+# pagó: esos clientes conservan su precio.
+TRAMOS_CONTABILIDAD = [(10, 69900), (30, 59900), (None, 49900)]
+TRAMOS_LECTOR = [(10, 49900), (30, 39900), (None, 29900)]
+EMPRESAS_MAX = 500
+
+
+def precio_por_empresas(tramos, n: int) -> int:
+    """Total mensual por N empresas con la escalera por volumen."""
+    n = max(1, min(EMPRESAS_MAX, int(n)))
+    total, previo = 0, 0
+    for hasta, precio in tramos:
+        tope = n if hasta is None else min(n, hasta)
+        if tope > previo:
+            total += (tope - previo) * precio
+            previo = tope
+        if hasta is None or n <= hasta:
+            break
+    return total
+
+
+def _empresas_validas(valor):
+    """Número de empresas pedido (1..EMPRESAS_MAX) o None si no es válido."""
+    try:
+        n = int(str(valor).strip())
+    except (TypeError, ValueError):
+        return None
+    return n if 1 <= n <= EMPRESAS_MAX else None
+
+
+def _renueva_contabilidad(email: str, plan: str) -> bool:
+    """¿Este correo ya pagó (y se activó) ese plan anterior? Solo así se le deja
+    renovar a su precio de antes."""
+    for o in _leer_ordenes().values():
+        if (o.get("plan") == "contabilidad" and o.get("contab_plan") == plan
+                and o.get("contab_activado")
+                and ((o.get("contacto") or {}).get("email", "").strip().lower() == email)):
+            return True
+    return False
 
 _REALMY_PATH = BASE / "config" / "realmy.yaml"
 REALMY = {"habilitado": False}
@@ -1343,10 +1384,19 @@ def crear_orden_contabilidad():
     if not _EMAIL_RE.match(email):
         return jsonify({"error": "Escribe un correo válido para activarte."}), 400
     plan = (cuerpo.get("plan") or "").strip().lower()
-    if plan not in PRECIOS_CONTABILIDAD:
-        return jsonify({"error": "Plan inválido."}), 400
     periodo = "anual" if (cuerpo.get("periodo") or "").lower() == "anual" else "mensual"
-    p = PRECIOS_CONTABILIDAD[plan]
+    n_empresas = None
+    if plan == "empresas":
+        n_empresas = _empresas_validas(cuerpo.get("empresas"))
+        if not n_empresas:
+            return jsonify({"error": f"Escribe cuántas empresas llevas (de 1 a {EMPRESAS_MAX})."}), 400
+        mensual = precio_por_empresas(TRAMOS_CONTABILIDAD, n_empresas)
+        p = {"nombre": f"{n_empresas} empresa{'s' if n_empresas != 1 else ''}",
+             "mensual": mensual, "anual": mensual * 10, "tope": n_empresas}
+    elif plan in PRECIOS_CONTABILIDAD and _renueva_contabilidad(email, plan):
+        p = PRECIOS_CONTABILIDAD[plan]          # cliente anterior: conserva su precio
+    else:
+        return jsonify({"error": "Plan inválido."}), 400
     precio = p["anual"] if periodo == "anual" else p["mensual"]   # monto autoritativo
     meses = 12 if periodo == "anual" else 1
     nombre = (str(cuerpo.get("nombre", "")).strip() or "Contador")
@@ -1354,7 +1404,7 @@ def crear_orden_contabilidad():
     ordenes = _leer_ordenes()
     ordenes[orden_id] = {
         "tipo": "orden", "plan": "contabilidad", "origen": _origen_actual(),
-        "contab_plan": plan, "periodo": periodo, "meses": meses, "tope": p["tope"],
+        "contab_plan": plan, "empresas": n_empresas, "periodo": periodo, "meses": meses, "tope": p["tope"],
         "precio": precio, "estado": "pendiente_pago", "fecha": str(date.today()),
         "nit": "", "nombre": nombre,
         "contacto": {"email": email, "nombre": nombre,
@@ -1398,7 +1448,8 @@ PROMO_LECTOR = {
 }
 
 # Planes que incluyen el agente IA sin costo extra.
-_PLANES_CON_AGENTE = {"pro_mensual", "pro_anual", "max_mensual", "max_anual"}
+_PLANES_CON_AGENTE = {"pro_mensual", "pro_anual", "max_mensual", "max_anual",
+                      "empresa_mensual", "empresa_anual"}
 
 
 def _promo_lector_activa() -> bool:
@@ -1646,18 +1697,31 @@ def crear_suscripcion_lector():
     la suscripción y se entrega la clave de licencia al correo del contador."""
     u = usuario_actual()
     cuerpo = request.get_json(silent=True) or {}
-    plan = (cuerpo.get("plan") or "independiente").lower()
-    if plan not in PRECIOS_LECTOR:
-        return jsonify({"error": "Plan inválido."}), 400
+    plan = (cuerpo.get("plan") or "empresa_mensual").lower()
     email = (u.email or "").strip()
     if not email:
         return jsonify({"error": "Tu cuenta no tiene correo."}), 400
-    precio = precio_lector(plan)
+    n_empresas = None
+    if plan in ("empresa_mensual", "empresa_anual"):
+        n_empresas = _empresas_validas(cuerpo.get("empresas"))
+        if not n_empresas:
+            return jsonify({"error": f"Escribe cuántas empresas llevas (de 1 a {EMPRESAS_MAX})."}), 400
+        mensual = precio_por_empresas(TRAMOS_LECTOR, n_empresas)
+        precio = mensual * 10 if plan == "empresa_anual" else mensual
+    else:
+        # Planes anteriores: solo quien ya los tiene los renueva a su precio.
+        previa = SuscripcionLector.query.filter(
+            db.func.lower(SuscripcionLector.email) == email.lower()).first()
+        base = (plan.rsplit("_", 1)[0] if "_" in plan else plan)
+        if (plan not in PRECIOS_LECTOR or previa is None
+                or (previa.plan or "").rsplit("_", 1)[0] != base):
+            return jsonify({"error": "Plan inválido."}), 400
+        precio = precio_lector(plan)
     orden_id = uuid.uuid4().hex[:12]
     ordenes = _leer_ordenes()
     ordenes[orden_id] = {
         "tipo": "orden", "plan": "lector", "plan_lector": plan, "origen": _origen_actual(),
-        "precio": precio,
+        "precio": precio, "empresas": n_empresas,
         "contacto": {"email": email, "nombre": (u.nombre or "").strip(),
                      "telefono": str(cuerpo.get("telefono", "")).strip()},
         "estado": "pendiente_pago", "fecha": str(date.today()),
@@ -1684,11 +1748,14 @@ def _descripcion_orden(orden: dict) -> str:
     """Texto para la pasarela según el producto de la orden."""
     plan = orden.get("plan", "")
     if plan == "lector":
+        if orden.get("empresas"):
+            return f"Suscripción Lector tributando.co — {orden['empresas']} empresas"
         return f"Suscripción Lector tributando.co — plan {orden.get('plan_lector', '')}"
     if plan == "contadores":
         return "Pase de temporada — tributando.co"
     if plan == "contabilidad":
-        pl = (PRECIOS_CONTABILIDAD.get(orden.get("contab_plan", ""), {})
+        pl = (f"{orden['empresas']} empresas" if orden.get("empresas") else
+              PRECIOS_CONTABILIDAD.get(orden.get("contab_plan", ""), {})
               .get("nombre", orden.get("contab_plan", "")))
         return f"Contabilidad Tributando — plan {pl} ({orden.get('periodo', 'mensual')})"
     return "Declaración de renta — tributando.co"
@@ -3105,7 +3172,8 @@ def _entregar_contabilidad(orden_id: str, orden: dict) -> None:
     if not email:
         return
     plan = orden.get("contab_plan", "")
-    nombre_plan = PRECIOS_CONTABILIDAD.get(plan, {}).get("nombre", plan)
+    nombre_plan = (f"por empresa ({orden.get('empresas')} empresas)" if plan == "empresas"
+                   else PRECIOS_CONTABILIDAD.get(plan, {}).get("nombre", plan))
 
     # (1) Activar Premium en la app contable (A2). Idempotente por bandera; y el
     # propio /api/habilitar también es idempotente (extiende, no duplica).
@@ -3114,7 +3182,7 @@ def _entregar_contabilidad(orden_id: str, orden: dict) -> None:
             try:
                 import urllib.request
                 payload = json.dumps({
-                    "email": email, "plan": "contabilidad",
+                    "email": email, "plan": "empresas" if plan == "empresas" else "contabilidad",
                     "meses": int(orden.get("meses", 1) or 1),
                     "tope": int(orden.get("tope", 1) or 1),
                     "nota": f"Pago {nombre_plan} {orden.get('periodo', '')} (orden {orden_id})",
@@ -3265,7 +3333,7 @@ def _entregar_licencia_lector(orden_id: str, orden: dict) -> None:
     if not email:
         return
     try:
-        sus = crear_suscripcion(email, plan)   # el período (30/365) sale del plan
+        sus = crear_suscripcion(email, plan, empresas_max=orden.get("empresas"))   # período (30/365) del plan
         orden["licencia_lector"] = sus.licencia
         # Add-on agente IA: se activa solo si el plan lo incluye (Pro/Max, o el
         # anual Independiente durante la promo). Sin toque manual del admin.
@@ -3280,7 +3348,7 @@ def _entregar_licencia_lector(orden_id: str, orden: dict) -> None:
             orden["licencia_lector_enviada"] = True   # generada; correo deshabilitado
             return
         info = PLANES_LECTOR.get(plan, {})
-        limite = info.get("empresas_max") or 0
+        limite = orden.get("empresas") or info.get("empresas_max") or 0
         cupo = "empresas ilimitadas" if not limite else f"hasta {limite} empresas"
         nombre = ((orden.get("contacto") or {}).get("nombre", "") or orden.get("nombre", ""))
         primer = nombre.split()[0].title() if nombre else ""

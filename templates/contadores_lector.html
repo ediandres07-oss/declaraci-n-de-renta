@@ -288,37 +288,66 @@
 
 <section id="planes" style="background:var(--gris);scroll-margin-top:70px">
   <div class="wrap">
-    <h2 class="titulo">Elige tu paquete <span style="color:var(--dorado2)">por número de empresas</span></h2>
-    {% if promo_activa %}
-    <div style="max-width:580px;margin:0 auto 20px;background:linear-gradient(90deg,#b8955f,#d9b877);
-      color:#1e2432;border-radius:14px;padding:12px 18px;text-align:center;font-weight:800;font-size:1rem">
-      🔥 {{ promo_etiqueta }} — termina el {{ promo_vence_txt }}{% if promo_dias > 0 %}
-      <span style="opacity:.85">· quedan {{ promo_dias }} días</span>{% endif %}
-    </div>
-    {% endif %}
-    <div style="text-align:center">
-      <div class="toggle-per">
-        <button id="perMes" class="on" onclick="setPeriodo('mensual')">Mensual</button>
-        <button id="perAno" onclick="setPeriodo('anual')">Anual <span class="ahorro">2 meses gratis</span></button>
+    <h2 class="titulo">Un solo precio <span style="color:var(--dorado2)">por empresa</span></h2>
+    <div class="plan" style="max-width:520px;margin:0 auto;text-align:center;border:1.5px solid var(--dorado);box-shadow:0 16px 44px rgba(201,162,90,.18)">
+      <h3>Lector XML DIAN</h3>
+      <div class="emp"><b>Pagas solo por las empresas que llevas</b><br>
+        <span style="color:var(--dorado2);font-weight:700">+ Calendario tributario · Agente IA incluido</span></div>
+      <div class="precio">$49.900<small> por empresa al mes</small></div>
+      <div id="lcTramos" style="width:100%;max-width:360px;box-sizing:border-box;margin:12px auto 0;border:1px solid var(--borde,rgba(255,255,255,.12));border-radius:12px;overflow:hidden;text-align:left;font-size:.9rem">
+        <div data-desde="1" style="display:flex;justify-content:space-between;gap:12px;padding:8px 12px"><span>De 1 a 10 empresas</span><b>$49.900</b></div>
+        <div data-desde="11" style="display:flex;justify-content:space-between;gap:12px;padding:8px 12px;border-top:1px solid rgba(255,255,255,.1)"><span>De la 11 a la 30</span><b>$39.900</b></div>
+        <div data-desde="31" style="display:flex;justify-content:space-between;gap:12px;padding:8px 12px;border-top:1px solid rgba(255,255,255,.1)"><span>De la 31 en adelante</span><b>$29.900</b></div>
       </div>
-    </div>
-    <div class="planes">
-      {% for p in planes %}
-      <div class="plan {% if p.destacado %}destacado{% endif %}">
-        <h3>{{ p.nombre }}</h3>
-        <div class="emp"><b>{{ p.empresas }}</b><br>
-          <span style="color:var(--dorado2);font-weight:700">+ Calendario tributario</span></div>
-        <div class="precio">
-          {% if p.promo_anual %}<span class="tachado" data-anual-normal="{{ p.anual_normal }}" style="color:var(--suave);text-decoration:line-through;font-size:1rem;font-weight:600;display:block">${{ "{:,}".format(p.anual_normal).replace(",", ".") }}</span>{% endif %}
-          <span class="valor" data-mensual="{{ p.mensual }}" data-anual="{{ p.anual }}">${{ "{:,}".format(p.mensual).replace(",", ".") }}</span><small class="per">/mes</small></div>
-        <div class="ahorro-lbl" style="display:none;color:var(--verde);font-weight:800;font-size:.8rem;margin-bottom:8px">≈ 2 meses gratis</div>
-        <div class="agente-lbl" data-agente-mensual="{{ 1 if p.agente_mensual else 0 }}" data-agente-anual="{{ 1 if p.agente_anual else 0 }}" style="color:var(--dorado2);font-weight:800;font-size:.82rem;margin-bottom:8px;display:{{ 'block' if p.agente_anual else 'none' }}">🤖 Agente IA incluido</div>
-        <button onclick="suscribir('{{ p.clave }}','{{ p.nombre }}', this)">Suscribirme</button>
+      <div style="margin:16px auto 6px;max-width:360px;text-align:left">
+        <label for="lcN" style="display:block;font-weight:700;margin-bottom:8px">¿Cuántas empresas llevas?</label>
+        <div style="display:flex;gap:10px;align-items:center">
+          <button type="button" onclick="lcSumar(-1)" style="width:40px;height:40px;border-radius:10px;font-size:20px">−</button>
+          <input id="lcN" type="number" min="1" max="500" value="10" inputmode="numeric" style="width:90px;height:40px;text-align:center;font-size:18px;font-weight:800;border-radius:10px">
+          <button type="button" onclick="lcSumar(1)" style="width:40px;height:40px;border-radius:10px;font-size:20px">+</button>
+        </div>
+        <input id="lcR" type="range" min="1" max="100" value="10" style="width:100%;margin:14px 0 6px;accent-color:#c9a25a" aria-label="Empresas">
+        <div style="display:flex;justify-content:space-between;align-items:baseline"><span>Total al mes</span><b id="lcMes" style="font-size:1.5rem">$499.000</b></div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline"><span>Promedio por empresa</span><b id="lcProm">$49.900</b></div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;color:var(--verde);font-weight:700"><span>Pago anual · 2 meses gratis</span><b id="lcAnual">$4.990.000</b></div>
       </div>
-      {% endfor %}
+      <div class="toggle-per" style="margin-top:14px">
+        <button type="button" id="lcMes1" class="on" onclick="lcPeriodo('mensual')">Mensual</button>
+        <button type="button" id="lcAno1" onclick="lcPeriodo('anual')">Anual <span class="ahorro">2 meses gratis</span></button>
+      </div>
+      <button type="button" onclick="suscribirEmpresas()" style="margin-top:12px">Suscribirme con <span id="lcCta">10 empresas</span></button>
     </div>
-    <p class="nota">Cada cliente (NIT) cuenta como una empresa. Sube de plan cuando crezcas ·
-       Prueba gratis · Cancela cuando quieras.</p>
+    <p class="nota">Cada cliente (NIT) cuenta como una empresa · Prueba gratis 1 mes con 1 empresa · Cancela cuando quieras.</p>
+    <script>
+      (function(){
+        var TRAMOS = [[10, 49900], [30, 39900], [Infinity, 29900]], n = document.getElementById("lcN"), r = document.getElementById("lcR");
+        function cop(v){ return "$" + Math.round(v).toLocaleString("es-CO"); }
+        function totalTramos(v, tramos){
+          var t = 0, previo = 0;
+          for (var i = 0; i < tramos.length && v > previo; i++){
+            var hasta = Math.min(v, tramos[i][0]); t += (hasta - previo) * tramos[i][1]; previo = hasta;
+          }
+          return t;
+        }
+        function pintar(v){
+          v = Math.max(1, Math.min(500, parseInt(v, 10) || 1));
+          n.value = v; r.value = Math.min(v, 100);
+          var mes = totalTramos(v, TRAMOS);
+          document.getElementById("lcMes").textContent = cop(mes);
+          document.getElementById("lcProm").textContent = cop(mes / v);
+          document.getElementById("lcAnual").textContent = cop(mes * 10);
+          document.querySelectorAll("#lcTramos div").forEach(function(d){
+            var on = v >= +d.getAttribute("data-desde");
+            d.style.background = on ? "rgba(201,162,90,.16)" : "transparent";
+          });
+          document.getElementById("lcCta").textContent = v + (v === 1 ? " empresa" : " empresas");
+        }
+        window.lcSumar = function(d){ pintar((parseInt(n.value, 10) || 1) + d); };
+        n.addEventListener("input", function(){ pintar(n.value); });
+        r.addEventListener("input", function(){ pintar(r.value); });
+        pintar(10);
+      })();
+    </script>
     <div style="max-width:640px;margin:26px auto 0;background:var(--vidrio);backdrop-filter:blur(12px);border:1.5px solid var(--dorado);
       border-radius:var(--radio);padding:22px;text-align:center">
       <div style="font-weight:800;font-size:1.05rem">✅ Tu suscripción también incluye</div>
@@ -532,10 +561,12 @@
   function fmt(n){ return "$" + n.toLocaleString("es-CO"); }
   function setPeriodo(p){
     _periodo = p;
-    document.getElementById("perMes").classList.toggle("on", p === "mensual");
-    document.getElementById("perAno").classList.toggle("on", p === "anual");
+    var bm = document.getElementById("perMes"), ba = document.getElementById("perAno");
+    if (bm) bm.classList.toggle("on", p === "mensual");
+    if (ba) ba.classList.toggle("on", p === "anual");
     document.querySelectorAll(".plan").forEach(function(card){
       var v = card.querySelector(".valor");
+      if (!v) return;
       var precio = +v.getAttribute(p === "mensual" ? "data-mensual" : "data-anual");
       v.textContent = fmt(precio);
       card.querySelector(".per").textContent = p === "mensual" ? "/mes" : "/año";
@@ -549,20 +580,24 @@
     });
   }
   setPeriodo("mensual");   // por defecto se muestran los planes MENSUALES
-  async function suscribir(clave, nombre, boton){
+  var _lcPer = "mensual";
+  function lcPeriodo(p){
+    _lcPer = p;
+    document.getElementById("lcMes1").classList.toggle("on", p === "mensual");
+    document.getElementById("lcAno1").classList.toggle("on", p === "anual");
+  }
+  async function suscribirEmpresas(){
     if (!logueado){ location.href = "/login?next=/contadores/lector"; return; }
-    var plan = clave + "_" + _periodo;
-    var v = boton.closest(".plan").querySelector(".valor");
-    var precio = +v.getAttribute(_periodo === "mensual" ? "data-mensual" : "data-anual");
+    var n = Math.max(1, Math.min(500, parseInt(document.getElementById("lcN").value, 10) || 1));
     try{
       var r = await fetch("/api/lector-suscripcion/crear", {method:"POST",
-        headers:{"Content-Type":"application/json"}, body: JSON.stringify({plan: plan})});
+        headers:{"Content-Type":"application/json"}, body: JSON.stringify({plan: "empresa_" + _lcPer, empresas: n})});
       var j = await r.json();
       if (!r.ok){ alert(j.error || "No pudimos crear la orden."); return; }
-      if (j.pago_url){ location.href = j.pago_url; return; }   // PayU: pago en línea
+      if (j.pago_url){ location.href = j.pago_url; return; }   // pago en línea
       ordenActual = j.orden_id;
-      document.getElementById("mPlan").textContent = nombre + " · " + (_periodo === "mensual" ? "mensual" : "anual");
-      document.getElementById("mPrecio").textContent = fmt(precio);
+      document.getElementById("mPlan").textContent = n + (n === 1 ? " empresa" : " empresas") + " · " + _lcPer;
+      document.getElementById("mPrecio").textContent = fmt(j.precio);
       document.getElementById("mRef").textContent = "LECTOR " + String(j.orden_id).toUpperCase();
       document.getElementById("paso1").hidden = false;
       document.getElementById("paso2").hidden = true;

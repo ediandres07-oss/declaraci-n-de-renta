@@ -345,6 +345,9 @@ PLANES_LECTOR = {
     # 3 planes vigentes.
     # Prueba gratis self-serve: 1 empresa, 30 días (sin tarjeta).
     "prueba":                {"empresas_max": 1,  "nombre": "Prueba gratis",  "dias": 30},
+    # Precio por empresa (13-sep-2026): el cupo real sale de la orden (empresas_max).
+    "empresa_mensual":       {"empresas_max": 1,  "nombre": "Por empresa",   "dias": 30},
+    "empresa_anual":         {"empresas_max": 1,  "nombre": "Por empresa",   "dias": 365},
     "basico_mensual":        {"empresas_max": 3,  "nombre": "Básico",        "dias": 30},
     "basico_anual":          {"empresas_max": 3,  "nombre": "Básico",        "dias": 365},
     "independiente_mensual": {"empresas_max": 10, "nombre": "Independiente", "dias": 30},
@@ -414,8 +417,10 @@ def generar_licencia() -> str:
     return f"TC-{bloques}"
 
 
-def crear_suscripcion(email: str, plan: str, dias: int | None = None) -> "SuscripcionLector":
-    """Crea (o renueva) la suscripción de un contador y devuelve la fila."""
+def crear_suscripcion(email: str, plan: str, dias: int | None = None,
+                      empresas_max: int | None = None) -> "SuscripcionLector":
+    """Crea (o renueva) la suscripción de un contador y devuelve la fila.
+    `empresas_max` (plan por empresa): cuántas empresas pagó; manda sobre el del plan."""
     plan = (plan or "").lower()
     info = PLANES_LECTOR.get(plan) or PLANES_LECTOR["mensual"]
     if dias is None:
@@ -427,6 +432,11 @@ def crear_suscripcion(email: str, plan: str, dias: int | None = None) -> "Suscri
         db.session.add(sus)
     sus.plan = plan
     sus.empresas_max = info["empresas_max"]
+    if empresas_max:
+        try:
+            sus.empresas_max = max(1, int(empresas_max))
+        except (TypeError, ValueError):
+            pass
     sus.activa = True
     sus.vence = date.today() + timedelta(days=dias)
     db.session.commit()
