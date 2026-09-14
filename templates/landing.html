@@ -1077,7 +1077,13 @@ window.addEventListener("load", function(){
     // el flotante de Google se desaparecía.
     google.accounts.id.prompt(function(m){
       try {
-        if (m.isSkippedMoment && m.isSkippedMoment()) mostrarTarjeta();
+        // Si la persona tocó la página o lo cerró, el flotante de Google DESAPARECE y no se
+        // pone nada encima. La tarjeta propia sale solo cuando Google no pudo mostrarlo
+        // (enfriamiento después de cerrarlo, Safari, sin sesión de Google).
+        if (m.isSkippedMoment && m.isSkippedMoment()) {
+          var motivo = m.getSkippedReason ? m.getSkippedReason() : "";
+          if (motivo !== "tap_outside" && motivo !== "user_cancel" && motivo !== "auto_cancel") mostrarTarjeta();
+        }
       } catch (e) {}
     });
   }
