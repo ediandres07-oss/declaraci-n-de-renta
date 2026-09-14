@@ -102,6 +102,10 @@ button,input,select,textarea{font:inherit;color:inherit}
 .g-flota .g-cerrar:hover{background:rgba(255,255,255,.08);color:#fff}
 .g-flota .g-boton{display:flex;justify-content:center;min-height:44px}
 .g-flota small{display:block;text-align:center;color:#9aa0a6;font-size:.76rem;margin-top:10px}
+.aviso-cuenta{position:sticky;top:72px;z-index:55;background:linear-gradient(90deg,rgba(255,107,107,.18),rgba(255,207,110,.14));border-bottom:1px solid rgba(255,207,110,.35);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.aviso-cuenta .wrap{display:flex;align-items:center;gap:14px;padding-top:12px;padding-bottom:12px;flex-wrap:wrap}
+.aviso-cuenta span{flex:1;min-width:240px;font-size:.95rem}
+.aviso-cuenta .cerrar-aviso{background:none;border:0;color:var(--suave);font-size:1.4rem;cursor:pointer;line-height:1;padding:4px 8px;border-radius:8px}
 .menu-btn{display:none;background:rgba(255,255,255,.06);border:1px solid var(--line2);border-radius:12px;width:44px;height:44px;place-items:center;cursor:pointer}
 .menu-mov{display:none}
 
@@ -583,6 +587,15 @@ footer{border-top:1px solid var(--line);margin-top:104px;padding:60px 0 34px}
   </div>
 </nav>
 
+{% if sin_cuenta %}
+<div class="aviso-cuenta" id="avisoCuenta" role="alert">
+  <div class="wrap">
+    <span><b>Ese correo de Google no tiene cuenta en Tributando.</b> Entra con el correo de tu cuenta o agenda una asesoría y te la creamos.</span>
+    <a class="btn btn-oro btn-sm" href="{{ app_url }}/login">Entrar con otra cuenta</a>
+    <button type="button" class="cerrar-aviso" aria-label="Cerrar" onclick="document.getElementById('avisoCuenta').remove()">&times;</button>
+  </div>
+</div>
+{% endif %}
 <!-- ================= HERO ================= -->
 <header class="hero">
   <div class="wrap">
