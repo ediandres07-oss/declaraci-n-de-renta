@@ -1326,15 +1326,14 @@ window.addEventListener("load", function(){
     });
     // El flotante nativo de Google tiene enfriamiento cuando alguien lo cierra;
     // cuando Google lo salta, sale la tarjeta propia con su botón oficial.
-    // Si Google no resuelve nada en 6 s (su flotante en enfriamiento o bloqueado),
-    // sale igual la tarjeta propia: el acceso con Google siempre queda a la vista.
-    var resuelto = false;
-    setTimeout(function(){ if (!resuelto) mostrarTarjeta(); }, 6000);
+    // Manda el flotante NATIVO de Google (el de las cuentas, como el de Alegra).
+    // La tarjeta propia sale SOLO si Google lo salta (enfriamiento, Safari): si la
+    // pintábamos por tiempo, su botón le quitaba la sesión de FedCM al nativo y
+    // el flotante de Google se desaparecía.
     google.accounts.id.prompt(function(m){
       try {
-        if (m.isDismissedMoment && m.isDismissedMoment()) { resuelto = true; return; }
-        if (m.isSkippedMoment && m.isSkippedMoment()) { resuelto = true; mostrarTarjeta(); }
-      } catch (e) { mostrarTarjeta(); }
+        if (m.isSkippedMoment && m.isSkippedMoment()) mostrarTarjeta();
+      } catch (e) {}
     });
   }
   iniciar();
