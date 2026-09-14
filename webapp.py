@@ -539,6 +539,10 @@ def landing():
         except Exception:
             app.logger.warning("landing: no se pudo crear el bono del usuario")
     return render_template("landing.html", anio=PARAMS.anio_gravable,
+                           app_url=os.environ.get("CONTABILIDAD_URL",
+                                                  "https://contabilidad-tributando.onrender.com").rstrip("/"),
+                           google_client_id=os.environ.get("GOOGLE_CLIENT_ID", "").strip(),
+                           sin_cuenta=request.args.get("sin_cuenta") == "1",
                            planes=PLANES,
                            bono_pdf=_canjear_bono("pdf")[1],
                            bono_presentacion=_canjear_bono("presentacion")[1],
@@ -5152,6 +5156,86 @@ def api_lector_demo():
     except Exception:
         pass
     return jsonify({"ok": True, "mensaje": "¡Solicitud enviada! Te contactamos pronto desde contacto@tributando.co para agendar tu demostración."})
+
+
+_asesoria_ips: dict[str, list[float]] = {}
+
+
+def _asesoria_permitida(ip: str, maximo: int = 5, ventana: float = 600.0) -> bool:
+    """Máximo 5 solicitudes de asesoría por IP cada 10 minutos (anti-spam)."""
+    import time as _t
+    ahora = _t.time()
+    marcas = [m for m in _asesoria_ips.get(ip, []) if ahora - m < ventana]
+    if len(marcas) >= maximo:
+        _asesoria_ips[ip] = marcas
+        return False
+    marcas.append(ahora)
+    _asesoria_ips[ip] = marcas
+    return True
+
+
+@app.route("/api/asesoria", methods=["POST"])
+def api_asesoria():
+    """«Agenda una asesoría» de la home: manda los datos del contador/firma a
+    contacto@tributando.co y le confirma por correo. Sin precios: la propuesta
+    se arma en la llamada. Honeypot `sitio_web` + tope por IP contra el spam."""
+    b = request.get_json(silent=True) or {}
+
+    def esc(v, tope=200):
+        return (str(v or "").replace("&", "&amp;").replace("<", "&lt;")
+                .replace(">", "&gt;").strip())[:tope]
+
+    if (b.get("sitio_web") or "").strip():            # bot: se le dice que sí y no se manda nada
+        return jsonify({"ok": True, "mensaje": "¡Solicitud enviada!"})
+    nombre = esc(b.get("nombre"), 120)
+    email = (b.get("email") or "").strip().lower()[:160]
+    telefono = esc(b.get("telefono"), 40)
+    perfil = esc(b.get("perfil"), 60)
+    empresas = esc(b.get("empresas"), 40)
+    software = esc(b.get("software"), 60)
+    preferencia = esc(b.get("preferencia"), 120)
+    mensaje = esc(b.get("mensaje"), 800)
+    _ints = b.get("intereses")
+    intereses = esc(", ".join(str(x) for x in _ints[:8]) if isinstance(_ints, list) else _ints, 300)
+    if len(nombre) < 2 or not _EMAIL_RE.match(email):
+        return jsonify({"ok": False, "error": "Escribe tu nombre y un correo válido."}), 400
+    if not telefono:
+        return jsonify({"ok": False, "error": "Déjanos tu WhatsApp para coordinar la asesoría."}), 400
+    if not _asesoria_permitida(_ip_cliente()):
+        return jsonify({"ok": False, "error": "Ya recibimos varias solicitudes desde aquí. "
+                                              "Espera unos minutos o escríbenos por WhatsApp."}), 429
+
+    from src.correo import enviar_email
+    html_admin = (
+        "<div style='font-family:sans-serif;max-width:520px'>"
+        "<h3 style='color:#1e2432'>Nueva solicitud de asesoría (home)</h3>"
+        f"<p><b>Nombre:</b> {nombre}<br>"
+        f"<b>Correo:</b> {esc(email)}<br>"
+        f"<b>WhatsApp:</b> {telefono}<br>"
+        f"<b>Perfil:</b> {perfil or '—'}<br>"
+        f"<b>Empresas que maneja:</b> {empresas or '—'}<br>"
+        f"<b>Le interesa:</b> {intereses or '—'}<br>"
+        f"<b>Software actual:</b> {software or '—'}<br>"
+        f"<b>Prefiere (día/hora):</b> {preferencia or '—'}</p>"
+        + (f"<p><b>Mensaje:</b><br>{mensaje}</p>" if mensaje else "")
+        + f"<p style='color:#7b7568'>Responde a <b>{esc(email)}</b> o por WhatsApp para agendar.</p></div>"
+    )
+    try:
+        enviar_email("contacto@tributando.co",
+                     f"Asesoría — {perfil or 'sin perfil'} — {nombre}", html_admin)
+    except Exception as e:
+        app.logger.warning("asesoria: no se pudo enviar a contacto@: %s", e)
+        return jsonify({"ok": False, "error": "No pudimos enviar la solicitud. "
+                                              "Intenta de nuevo o escríbenos por WhatsApp."}), 502
+    try:  # confirmación al contador (best-effort)
+        enviar_email(email, "Recibimos tu solicitud de asesoría — Tributando.co",
+                     f"<p>Hola {nombre}, recibimos tu solicitud. Un contador de nuestro equipo "
+                     "te escribe muy pronto para agendar la asesoría.</p>"
+                     "<p>— Equipo Tributando.co</p>")
+    except Exception:
+        pass
+    return jsonify({"ok": True, "mensaje": "¡Listo! Un contador de nuestro equipo te escribe "
+                                           "muy pronto para agendar tu asesoría."})
 
 
 @app.route("/api/lector/entrar", methods=["POST"])
