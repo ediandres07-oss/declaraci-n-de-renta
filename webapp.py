@@ -1684,10 +1684,10 @@ LECTOR_VERSION_LATEST = os.environ.get("LECTOR_VERSION", "1.2.3")
 # dentro del Lector). Se puede sobrescribir con la variable de entorno del mismo
 # nombre sin recompilar el servidor. Usa saltos de línea para viñetas.
 LECTOR_NOVEDADES = os.environ.get("LECTOR_NOVEDADES",
+    "• Declaración de IVA: las notas crédito ya no restan la compra ni la venta. La compra y la venta van completas y la nota crédito va en su casilla de devoluciones del 300 (56 y 66 en compras; 42 y 79 en ventas).\n"
     "• Cada proveedor se cruza con SU cuenta de pago (caja, banco o proveedores), aprendida del plano del cliente y editable en la revisión.\n"
     "• Syscafé: sube el plan de cuentas del cliente en «Perfil del cliente»; el plano sale con tercero solo donde la cuenta lo pide y sin cuentas que no existan.\n"
-    "• Exporta a Syscafé el movimiento y la plantilla de terceros (Excel 5.0/95).\n"
-    "• World Office, Helisa, Genérico, Alegra y Loggro: el plano sale con gastos y notas crédito, no solo compras.")
+    "• Exporta a Syscafé el movimiento y la plantilla de terceros (Excel 5.0/95).")
 
 
 @app.post("/api/lector-suscripcion/crear")
