@@ -1684,11 +1684,11 @@ LECTOR_VERSION_LATEST = os.environ.get("LECTOR_VERSION", "1.2.3")
 # dentro del Lector). Se puede sobrescribir con la variable de entorno del mismo
 # nombre sin recompilar el servidor. Usa saltos de línea para viñetas.
 LECTOR_NOVEDADES = os.environ.get("LECTOR_NOVEDADES",
-    "• Plano de Contai corregido: entra sin inconsistencias — 13 columnas en el orden que él lee, la fecha con barras (dd/mm/aaaa) y el TXT sin fila de encabezado.\n"
-    "• Lo que va a INVENTARIO entra como COMPRA (con su comprobante de compras), no como gasto.\n"
-    "• Las retenciones que parametrizas por proveedor ya salen en el plano, en compras y en gastos, cada una en la cuenta de su concepto.\n"
-    "• En «Cuentas del plano» escoges las cuentas de retención y los números de comprobante de tu Contai (ventas, NC, compras, gastos).\n"
-    "• Las notas crédito siguen sin restar la compra ni la venta: van en su casilla de devoluciones del 300 y en su renglón de renta.")
+    "• IVA sobre AIU (vigilancia, aseo y temporales): la base gravada ahora sale del XML y no del valor de la línea. Antes una factura de $98.051 con IVA de $1.863 mostraba los $98.051 como base al 19%.\n"
+    "• «Base IVA 19%» y «Base IVA 5%» quedan con la base real y el resto pasa a «Base IVA 0/excl.», así base × tarifa siempre da el IVA.\n"
+    "• El borrador del 300 toma esa misma base: ya no infla la base gravada de compras ni deja el no gravado en cero.\n"
+    "• La hoja «Detalle» del Excel trae la columna nueva «Base gravada IVA», al lado de «Base línea».\n"
+    "• Los planos (Contai, Syscafé y los demás) no cambian: siempre tomaron la base gravada exacta del XML.")
 
 
 @app.post("/api/lector-suscripcion/crear")
