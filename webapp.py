@@ -1684,10 +1684,10 @@ LECTOR_VERSION_LATEST = os.environ.get("LECTOR_VERSION", "1.2.3")
 # dentro del Lector). Se puede sobrescribir con la variable de entorno del mismo
 # nombre sin recompilar el servidor. Usa saltos de línea para viñetas.
 LECTOR_NOVEDADES = os.environ.get("LECTOR_NOVEDADES",
-    "• Las notas crédito ya no restan la compra ni la venta: en el IVA van en su casilla de devoluciones del 300 (56 y 66 compras; 42 y 79 ventas), en el plano de Siigo a sus cuentas de devolución y en el borrador de renta en su propio renglón.\n"
-    "• Cada proveedor se cruza con SU cuenta de pago (caja, banco o proveedores), aprendida del plano del cliente y editable en la revisión.\n"
-    "• Syscafé: sube el plan de cuentas del cliente en «Perfil del cliente»; el plano sale con tercero solo donde la cuenta lo pide y sin cuentas que no existan.\n"
-    "• Exporta a Syscafé el movimiento y la plantilla de terceros (Excel 5.0/95).")
+    "• El plano de Contai sale con el formato que Contai importa: el nombre del tercero va junto al NIT, y el TXT queda idéntico al Excel.\n"
+    "• Las retenciones que parametrizas por proveedor ya salen en el plano, en compras y en gastos, cada una en la cuenta de su concepto.\n"
+    "• En «Cuentas del plano» escoges las cuentas de retención y los números de comprobante de tu Contai (ventas, NC, compras, gastos).\n"
+    "• Las notas crédito siguen sin restar la compra ni la venta: van en su casilla de devoluciones del 300 y en su renglón de renta.")
 
 
 @app.post("/api/lector-suscripcion/crear")
