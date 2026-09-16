@@ -1684,7 +1684,8 @@ LECTOR_VERSION_LATEST = os.environ.get("LECTOR_VERSION", "1.2.3")
 # dentro del Lector). Se puede sobrescribir con la variable de entorno del mismo
 # nombre sin recompilar el servidor. Usa saltos de línea para viñetas.
 LECTOR_NOVEDADES = os.environ.get("LECTOR_NOVEDADES",
-    "• El plano de Contai sale con el formato que Contai importa: el nombre del tercero va junto al NIT, y el TXT queda idéntico al Excel.\n"
+    "• Plano de Contai corregido: entra sin inconsistencias — 13 columnas en el orden que él lee, la fecha con barras (dd/mm/aaaa) y el TXT sin fila de encabezado.\n"
+    "• Lo que va a INVENTARIO entra como COMPRA (con su comprobante de compras), no como gasto.\n"
     "• Las retenciones que parametrizas por proveedor ya salen en el plano, en compras y en gastos, cada una en la cuenta de su concepto.\n"
     "• En «Cuentas del plano» escoges las cuentas de retención y los números de comprobante de tu Contai (ventas, NC, compras, gastos).\n"
     "• Las notas crédito siguen sin restar la compra ni la venta: van en su casilla de devoluciones del 300 y en su renglón de renta.")
