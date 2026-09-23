@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Visitas · Tributando</title>
+<style>
+  :root{ --navy:#1e2432; --oro:#c9a75a; --dorado:#e0c584; --tx:#2b3242; --tx2:#6a7482; --ln:#e6e2d8; --bg:#f4f2ee; --card:#fff; --verde:#1a7f37; }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{ font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; color:var(--tx); background:var(--bg); }
+  .wrap{ max-width:960px; margin:0 auto; padding:26px 18px 60px; }
+  header.top{ display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:6px; }
+  h1{ font-size:1.5rem; color:var(--navy); }
+  .marca{ font-weight:800; color:var(--navy); text-decoration:none; }
+  .marca span{ color:var(--dorado); }
+  .sub{ color:var(--tx2); font-size:.9rem; margin-bottom:22px; }
+  h2{ font-size:1.05rem; color:var(--navy); margin:26px 0 12px; }
+  .grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; }
+  .card{ background:var(--card); border:1px solid var(--ln); border-radius:14px; padding:16px 18px; box-shadow:0 3px 12px rgba(20,26,40,.05); }
+  .card .n{ font-size:1.8rem; font-weight:800; color:var(--navy); line-height:1.1; }
+  .card .l{ font-size:.82rem; color:var(--tx2); margin-top:4px; }
+  .card.oro .n{ color:var(--oro); }
+  table{ width:100%; border-collapse:collapse; background:var(--card); border:1px solid var(--ln); border-radius:12px; overflow:hidden; }
+  th,td{ padding:9px 12px; border-bottom:1px solid var(--ln); font-size:.9rem; text-align:left; }
+  th{ background:#faf8f3; color:var(--tx2); font-size:.76rem; text-transform:uppercase; letter-spacing:.05em; }
+  td.r,th.r{ text-align:right; font-variant-numeric:tabular-nums; }
+  .bar{ display:inline-block; height:8px; background:var(--dorado); border-radius:4px; vertical-align:middle; margin-right:8px; }
+  .nav a{ color:var(--tx2); font-size:.85rem; margin-right:14px; }
+  .vacio{ color:var(--tx2); font-size:.9rem; padding:14px; }
+</style>
+</head>
+<body><div class="wrap">
+<header class="top"><a class="marca" href="/admin">Tributando<span>.co</span> · panel</a>
+  <div class="nav"><a href="/admin">Órdenes</a><a href="/admin/dashboard">Pulso</a><a href="/admin/lector">Lector</a></div></header>
+<h1>¿Cuántas personas entran a tributando.co?</h1>
+<p class="sub">Contador propio de las páginas públicas (no cuenta bots ni los previews de WhatsApp/Facebook). «Visitantes» = navegadores distintos por día; «vistas» = páginas abiertas. Desde el {{ desde.strftime('%d/%m/%Y') }}.</p>
+
+<div class="grid">
+  <div class="card oro"><div class="n">{{ hoy[1] }}</div><div class="l">visitantes hoy</div></div>
+  <div class="card"><div class="n">{{ hoy[0] }}</div><div class="l">vistas hoy</div></div>
+  <div class="card oro"><div class="n">{{ t30[1] }}</div><div class="l">visitantes en 30 días</div></div>
+  <div class="card"><div class="n">{{ t30[0] }}</div><div class="l">vistas en 30 días</div></div>
+</div>
+
+{% set maxo = (por_origen|map(attribute=1)|max) if por_origen else 1 %}
+<h2>De dónde llegan (30 días)</h2>
+{% if por_origen %}
+<table><tr><th>Origen</th><th class="r">Visitantes</th><th class="r">Vistas</th><th></th></tr>
+{% for o,v,u in por_origen %}<tr><td>{{ o }}</td><td class="r">{{ u }}</td><td class="r">{{ v }}</td><td><span class="bar" style="width:{{ (120*v/(maxo or 1))|int }}px"></span></td></tr>{% endfor %}
+</table>
+{% else %}<div class="vacio">Todavía no hay datos: el contador empezó a funcionar con este despliegue.</div>{% endif %}
+
+<h2>Qué páginas ven (30 días)</h2>
+{% if por_ruta %}
+<table><tr><th>Página</th><th class="r">Visitantes</th><th class="r">Vistas</th></tr>
+{% for r,v,u in por_ruta %}<tr><td>{{ r }}</td><td class="r">{{ u }}</td><td class="r">{{ v }}</td></tr>{% endfor %}
+</table>
+{% else %}<div class="vacio">Sin datos aún.</div>{% endif %}
+
+<h2>Día a día</h2>
+{% if por_dia %}
+<table><tr><th>Día</th><th class="r">Visitantes</th><th class="r">Vistas</th></tr>
+{% for d,v,u in por_dia %}<tr><td>{{ d.strftime('%a %d/%m') }}</td><td class="r">{{ u }}</td><td class="r">{{ v }}</td></tr>{% endfor %}
+</table>
+{% else %}<div class="vacio">Sin datos aún.</div>{% endif %}
+</div></body></html>

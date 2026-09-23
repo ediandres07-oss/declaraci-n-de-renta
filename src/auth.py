@@ -234,6 +234,20 @@ def registrar_muestra_email(email: str, token: str = "", nit: str = "",
         db.session.rollback()
 
 
+class VisitaWeb(db.Model):
+    """Contador propio de visitas a las páginas públicas (sin Google Analytics).
+    Una fila por día + página + origen; `vistas` = páginas vistas, `visitantes`
+    = navegadores distintos ese día (marca en la sesión)."""
+    __tablename__ = "visitas_web"
+    id = db.Column(db.Integer, primary_key=True)
+    dia = db.Column(db.Date, index=True)
+    ruta = db.Column(db.String(120))
+    origen = db.Column(db.String(40))
+    vistas = db.Column(db.Integer, default=0)
+    visitantes = db.Column(db.Integer, default=0)
+    __table_args__ = (db.UniqueConstraint("dia", "ruta", "origen", name="uq_visita_dia_ruta_origen"),)
+
+
 class Bono(db.Model):
     """Bono de descuento personal, de un solo uso, que reparte el agente
     comercial (correo de cierre / última llamada). Vence a los 3 días."""

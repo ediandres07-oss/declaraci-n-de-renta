@@ -27,7 +27,7 @@ from src import wompi as wompi_mod
 from src.asistente import asistente_activo as asistente_ia_activo
 from src.asistente import cargar_config as cargar_config_ia
 from src.asistente import responder as responder_ia
-from src.auth import (AccesoAutorizado, ArchivoExogena, LeadEspera, LeadExogena,
+from src.auth import (AccesoAutorizado, ArchivoExogena, LeadEspera, LeadExogena, VisitaWeb,
                       MuestraContador,
                       OrdenRegistro, Usuario, auth_bp, autorizado_requerido, db,
                       init_auth, login_requerido, pro_requerido, usuario_actual,
@@ -159,6 +159,32 @@ def _bucle_avisos_vencimientos():
 threading.Thread(target=_bucle_avisos_vencimientos, daemon=True).start()
 
 
+def _contar_visita():
+    """Suma la visita a la página pública actual (día + ruta + origen). Un
+    navegador cuenta como visitante nuevo la primera vez que entra cada día."""
+    ruta = request.path.rstrip("/") or "/"
+    if "." in ruta.rsplit("/", 1)[-1] or ruta.startswith(("/liquidador", "/auth", "/login", "/logout")):
+        return
+    try:
+        from datetime import date as _date
+        hoy = _date.today()
+        nuevo = session.get("vdia") != hoy.isoformat()
+        if nuevo:
+            session["vdia"] = hoy.isoformat()
+        origen = session.get("origen") or "directo"
+        fila = VisitaWeb.query.filter_by(dia=hoy, ruta=ruta[:120], origen=origen[:40]).first()
+        if not fila:
+            fila = VisitaWeb(dia=hoy, ruta=ruta[:120], origen=origen[:40], vistas=0, visitantes=0)
+            db.session.add(fila)
+        fila.vistas = (fila.vistas or 0) + 1
+        if nuevo:
+            fila.visitantes = (fila.visitantes or 0) + 1
+        db.session.commit()
+    except Exception as e:  # nunca tumbar una página pública por el contador
+        db.session.rollback()
+        app.logger.debug("contador de visitas: %s", e)
+
+
 @app.before_request
 def _capturar_origen():
     """Atribución: recuerda de dónde llegó el visitante (ads/instagram/…) en su
@@ -175,6 +201,7 @@ def _capturar_origen():
     if request.args.get("bono"):
         session["bono"] = request.args.get("bono").strip().upper()[:20]
     if session.get("origen"):
+        _contar_visita()
         return
     a = request.args
     utm = (a.get("utm_source") or "").strip().lower()
@@ -200,6 +227,7 @@ def _capturar_origen():
         org = "instagram"
     if org:
         session["origen"] = org
+    _contar_visita()
 
 
 def _origen_actual() -> str:
@@ -851,6 +879,27 @@ def admin_dashboard():
     from src import gerente as _ger
     return render_template("admin_dashboard.html", m=_ger.metricas_negocio(),
                            cont=_ger.metricas_contactos())
+
+
+@app.get("/admin/visitas")
+@autorizado_requerido
+def admin_visitas():
+    """Cuántas personas entran a tributando.co: por día, por página y por origen (últimos 30 días)."""
+    from datetime import date as _date, timedelta as _td
+    from sqlalchemy import func as _f
+    desde = _date.today() - _td(days=29)
+    q = VisitaWeb.query.filter(VisitaWeb.dia >= desde)
+    por_dia = (db.session.query(VisitaWeb.dia, _f.sum(VisitaWeb.vistas), _f.sum(VisitaWeb.visitantes))
+               .filter(VisitaWeb.dia >= desde).group_by(VisitaWeb.dia).order_by(VisitaWeb.dia.desc()).all())
+    por_ruta = (db.session.query(VisitaWeb.ruta, _f.sum(VisitaWeb.vistas), _f.sum(VisitaWeb.visitantes))
+                .filter(VisitaWeb.dia >= desde).group_by(VisitaWeb.ruta).order_by(_f.sum(VisitaWeb.vistas).desc()).limit(25).all())
+    por_origen = (db.session.query(VisitaWeb.origen, _f.sum(VisitaWeb.vistas), _f.sum(VisitaWeb.visitantes))
+                  .filter(VisitaWeb.dia >= desde).group_by(VisitaWeb.origen).order_by(_f.sum(VisitaWeb.vistas).desc()).all())
+    hoy = _date.today()
+    t_hoy = (db.session.query(_f.sum(VisitaWeb.vistas), _f.sum(VisitaWeb.visitantes)).filter(VisitaWeb.dia == hoy).first())
+    t_30 = (db.session.query(_f.sum(VisitaWeb.vistas), _f.sum(VisitaWeb.visitantes)).filter(VisitaWeb.dia >= desde).first())
+    return render_template("admin_visitas.html", por_dia=por_dia, por_ruta=por_ruta, por_origen=por_origen,
+                           hoy=(t_hoy[0] or 0, t_hoy[1] or 0), t30=(t_30[0] or 0, t_30[1] or 0), desde=desde)
 
 
 @app.get("/admin/lector")
