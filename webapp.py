@@ -774,6 +774,15 @@ def contabilidad():
                            ia_whatsapp=IA_CFG.get("negocio", {}).get("whatsapp", ""))
 
 
+@app.get("/aliados")
+def aliados():
+    """Programa de aliados: 20 %% recurrente para contadores que montan empresas."""
+    from urllib.parse import quote
+    return render_template("aliados.html",
+                           whatsapp=(IA_CFG.get("negocio", {}).get("whatsapp") or "573332470715"),
+                           wa_texto=quote("Hola, quiero ser aliado de Tributando y montar mis empresas. ¿Cómo empiezo?"))
+
+
 @app.get("/calendario-tributario-2026")
 @app.get("/calendario")
 def calendario_2026_publico():
