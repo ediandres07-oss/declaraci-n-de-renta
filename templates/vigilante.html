@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Vigilante DIAN — ¿te están reportando ingresos que no son tuyos? | Tributando.co</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Sube tu exógena de la DIAN y en segundos te decimos si algún tercero te reportó ingresos falsos, pagos duplicados o bienes que no son tuyos. Revisión gratis.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://tributando.co/vigilante">
+<meta property="og:title" content="¿Alguien te reportó ingresos falsos ante la DIAN?">
+<meta property="og:description" content="Revisa gratis tu exógena: reportes falsos, pagos duplicados y bienes que no son tuyos, antes de que la DIAN te los cobre.">
+<meta property="og:image" content="https://tributando.co/static/img/og-contadores.png">
+<style>
+  :root{--navy:#1e2432;--oro:#e6c483;--borde:rgba(230,196,131,.28);--texto:#f3f5f8;--suave:#c2c9d4;--tenue:#8b93a1;
+    --rojo:#ff6b6b;--naranja:#f0a44b;--azul:#7fb4ff;--verde:#37d38f}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;color:var(--texto);line-height:1.55;background:#0a0c13}
+  body::before{content:"";position:fixed;inset:0;z-index:-1;background:
+    radial-gradient(1000px 520px at 20% 6%,rgba(255,107,107,.08),transparent 60%),
+    radial-gradient(900px 520px at 85% 90%,rgba(230,196,131,.10),transparent 60%),linear-gradient(160deg,#0e1220,#0a0c13)}
+  a{color:inherit} b{color:#fff}
+  .c{max-width:880px;margin:0 auto;padding:0 20px}
+  .top{background:var(--navy);position:sticky;top:0;z-index:5}
+  .top .c{display:flex;justify-content:space-between;align-items:center;padding:11px 20px}
+  .marca{color:#fff;font-weight:800;text-decoration:none;display:flex;gap:9px;align-items:center}
+  .marca img{height:32px;width:32px;border-radius:50%}
+  .volver{font-size:.82rem;font-weight:700;text-decoration:none;border:1px solid var(--borde);padding:7px 14px;border-radius:20px}
+  header{text-align:center;padding:48px 0 26px}
+  .tag{display:inline-block;background:rgba(255,107,107,.14);color:#ffb3b3;font-weight:800;font-size:.74rem;letter-spacing:.1em;padding:7px 16px;border-radius:30px;text-transform:uppercase}
+  h1{font-size:clamp(1.9rem,4vw+.6rem,2.9rem);line-height:1.1;margin-top:18px;font-weight:800;letter-spacing:-.02em}
+  h1 span{color:var(--oro)}
+  .sub{max-width:640px;margin:16px auto 0;color:var(--suave);font-size:1.05rem}
+  .caso{max-width:640px;margin:22px auto 0;background:rgba(255,255,255,.04);border-left:3px solid var(--rojo);padding:14px 18px;border-radius:10px;color:var(--suave);font-size:.95rem;text-align:left}
+  .zona{margin:30px auto 0;max-width:620px;border:2px dashed var(--borde);border-radius:18px;padding:30px 20px;text-align:center;cursor:pointer;background:rgba(255,255,255,.03);transition:.2s}
+  .zona:hover,.zona.sobre{border-color:var(--oro);background:rgba(230,196,131,.06)}
+  .zona b{display:block;font-size:1.1rem;margin-bottom:6px}
+  .zona small{color:var(--tenue)}
+  .btn{display:inline-flex;align-items:center;gap:8px;background:var(--oro);color:var(--navy);font-weight:800;padding:13px 26px;border-radius:30px;text-decoration:none;border:0;cursor:pointer;font-size:1rem}
+  .btn.wa{background:#25d366;color:#0b1a12}
+  .nota{color:var(--tenue);font-size:.82rem;margin-top:10px}
+  #res{margin:30px auto 0;max-width:720px;display:none}
+  .resumen{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
+  .num{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px;text-align:center}
+  .num b{display:block;font-size:1.8rem}
+  .num.alta b{color:var(--rojo)} .num.media b{color:var(--naranja)} .num.revisar b{color:var(--azul)}
+  .num span{color:var(--suave);font-size:.85rem}
+  .al{border-radius:14px;padding:16px 18px;margin-bottom:12px;background:rgba(255,255,255,.04);border-left:4px solid var(--azul)}
+  .al.alta{border-color:var(--rojo)} .al.media{border-color:var(--naranja)}
+  .al h3{font-size:1rem;margin-bottom:6px}
+  .al p{color:var(--suave);font-size:.93rem;margin-top:6px}
+  .al .qh{color:#e9edf3}
+  .al .inf{color:var(--tenue);font-size:.8rem;margin-top:8px}
+  .ok{text-align:center;padding:22px;border-radius:14px;background:rgba(55,211,143,.08);border:1px solid rgba(55,211,143,.3);color:#bff3d9}
+  .err{color:#ffb3b3;text-align:center;margin-top:14px}
+  section{padding:40px 0}
+  .titulo{text-align:center;font-size:1.5rem;margin-bottom:8px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:22px}
+  .card{background:rgba(255,255,255,.04);border:1px solid rgba(230,196,131,.16);border-radius:16px;padding:18px}
+  .card b{display:block;margin-bottom:6px}
+  .card p{color:var(--suave);font-size:.93rem}
+  .plan{max-width:560px;margin:24px auto 0;text-align:center;background:linear-gradient(160deg,#232a3a,#161b26);border:1.5px solid var(--borde);border-radius:22px;padding:28px}
+  .precio{font-size:2.4rem;font-weight:800;color:var(--oro)}
+  .plan ul{list-style:none;margin:16px 0 22px;color:var(--suave);text-align:left;display:inline-block}
+  .plan li{margin:7px 0}
+  footer{text-align:center;color:var(--tenue);font-size:.8rem;padding:24px 0 36px}
+  @media(max-width:720px){.grid3,.resumen{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="top"><div class="c">
+  <a class="marca" href="/"><img src="/static/img/logo-tributando.png" alt="">Tributando</a>
+  <a class="volver" href="/">Inicio</a>
+</div></div>
+
+<div class="c">
+<header>
+  <span class="tag">Vigilante DIAN · revisión gratis</span>
+  <h1>¿Alguien te está reportando <span>ingresos que no son tuyos</span>?</h1>
+  <p class="sub">Sube tu exógena de la DIAN y en segundos te decimos si hay reportes falsos, pagos contados dos veces o bienes a tu nombre que debes confirmar. Antes de que la DIAN te los cobre.</p>
+  <div class="caso"><b>Caso real:</b> a un contador de Medellín un tercero le reportó $210 millones en «pagos por servicios» que nunca recibió, sin retención. La DIAN los habría tomado como ingreso: casi $50 millones de impuesto por algo que no existió.</div>
+
+  <div class="zona" id="zona">
+    <b>📄 Arrastra aquí tu exógena (Excel)</b>
+    <small>El archivo «Información reportada por terceros» que descargas en MUISCA · o haz clic para buscarlo</small>
+    <input type="file" id="archivo" accept=".xlsx,.xlsm" hidden>
+  </div>
+  <p class="nota">No guardamos tu archivo: se lee, se analiza y se borra. Revisión sin registro.</p>
+  <p class="err" id="err"></p>
+</header>
+
+<div id="res"></div>
+
+<section>
+  <h2 class="titulo">Qué revisa</h2>
+  <div class="grid3">
+    <div class="card"><b>🚨 Reportes falsos</b><p>Ingresos grandes de terceros sin retención en la fuente, la huella típica de un reporte inventado o de un error.</p></div>
+    <div class="card"><b>🔁 Pagos duplicados</b><p>El mismo pago reportado dos veces (en honorarios y en documentos soporte), que infla tu ingreso.</p></div>
+    <div class="card"><b>🏠 Bienes y consignaciones</b><p>Inmuebles y vehículos a tu nombre que debes confirmar, y consignaciones muy por encima de tus ingresos.</p></div>
+  </div>
+</section>
+
+<section>
+  <h2 class="titulo">Vigilancia mensual</h2>
+  <p class="sub" style="text-align:center">La exógena cambia cada vez que un tercero corrige o reporta. Te la revisamos cada mes y te avisamos por WhatsApp si aparece algo nuevo.</p>
+  <div class="plan">
+    <div class="precio">$9.900<small style="font-size:1rem;color:var(--suave)"> / mes</small></div>
+    <ul>
+      <li>✅ Revisión mensual de tu exógena</li>
+      <li>✅ Aviso por WhatsApp si aparece algo que no es tuyo</li>
+      <li>✅ Carta de corrección lista para enviarle al tercero</li>
+      <li>✅ Sin permanencia</li>
+    </ul><br>
+    <a class="btn wa" href="https://wa.me/{{ whatsapp }}?text={{ wa_texto }}" target="_blank" rel="noopener">💬 Activar la vigilancia</a>
+  </div>
+</section>
+</div>
+<footer>Tributando.co · Vigilante DIAN · La revisión es orientativa y no reemplaza la asesoría de un contador.</footer>
+
+<script>
+const zona=document.getElementById('zona'), inp=document.getElementById('archivo'), res=document.getElementById('res'), err=document.getElementById('err');
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+zona.onclick=()=>inp.click();
+['dragover','dragenter'].forEach(e=>zona.addEventListener(e,ev=>{ev.preventDefault();zona.classList.add('sobre')}));
+['dragleave','drop'].forEach(e=>zona.addEventListener(e,ev=>{ev.preventDefault();zona.classList.remove('sobre')}));
+zona.addEventListener('drop',ev=>{if(ev.dataTransfer.files[0])enviar(ev.dataTransfer.files[0])});
+inp.onchange=()=>{if(inp.files[0])enviar(inp.files[0])};
+async function enviar(f){
+  err.textContent='';res.style.display='block';res.innerHTML='<p style="text-align:center;color:#c2c9d4">Revisando tu exógena…</p>';
+  const fd=new FormData();fd.append('exogena',f);
+  try{
+    const r=await fetch('/api/vigilante',{method:'POST',body:fd});const d=await r.json();
+    if(!r.ok){res.style.display='none';err.textContent=d.error||'No se pudo leer el archivo.';return}
+    const c=d.cuenta;
+    let h=`<h2 class="titulo">${esc(d.nombre||'Tu exógena')} ${d.anio?'· año '+esc(d.anio):''}</h2>
+      <div class="resumen"><div class="num alta"><b>${c.alta}</b><span>alertas graves</span></div>
+      <div class="num media"><b>${c.media}</b><span>para aclarar</span></div>
+      <div class="num revisar"><b>${c.revisar}</b><span>para confirmar</span></div></div>`;
+    if(!d.alertas.length) h+='<div class="ok">✅ No encontramos nada raro en tu exógena. Vuelve a revisarla antes de declarar: los terceros corrigen hasta último momento.</div>';
+    for(const a of d.alertas){
+      h+=`<div class="al ${esc(a.nivel)}"><h3>${esc(a.titulo)}</h3><p>${esc(a.detalle)}</p><p class="qh"><b>Qué hacer:</b> ${esc(a.que_hacer)}</p><div class="inf">${esc(a.informante)}</div></div>`;
+    }
+    h+=`<p style="text-align:center;margin-top:18px"><a class="btn wa" href="https://wa.me/{{ whatsapp }}?text={{ wa_ayuda }}" target="_blank" rel="noopener">💬 Quiero ayuda con esto</a></p>`;
+    res.innerHTML=h;res.scrollIntoView({behavior:'smooth'});
+  }catch(e){res.style.display='none';err.textContent='No se pudo conectar. Intenta de nuevo.'}
+}
+</script>
+</body>
+</html>

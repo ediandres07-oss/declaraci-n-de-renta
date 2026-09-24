@@ -802,6 +802,39 @@ def contabilidad():
                            ia_whatsapp=IA_CFG.get("negocio", {}).get("whatsapp", ""))
 
 
+@app.get("/vigilante")
+def vigilante_pagina():
+    """Vigilante DIAN: revisión gratis de la exógena (reportes falsos, duplicados, bienes)."""
+    from urllib.parse import quote
+    wa = IA_CFG.get("negocio", {}).get("whatsapp") or "573332470715"
+    return render_template("vigilante.html", whatsapp=wa,
+                           wa_texto=quote("Hola, quiero activar el Vigilante DIAN de $9.900 al mes."),
+                           wa_ayuda=quote("Hola, revisé mi exógena en el Vigilante DIAN y me salieron alertas. Necesito ayuda."))
+
+
+@app.post("/api/vigilante")
+def vigilante_api():
+    """Lee la exógena, corre las reglas del vigilante y BORRA el archivo."""
+    from src.vigilante import analizar
+    archivo = request.files.get("exogena")
+    if archivo is None or archivo.filename == "":
+        return jsonify({"error": "No llegó ningún archivo."}), 400
+    if not archivo.filename.lower().endswith((".xlsx", ".xlsm")):
+        return jsonify({"error": "El archivo debe ser el Excel (.xlsx) de la exógena DIAN."}), 400
+    UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
+    ruta = UPLOADS_DIR / f"vig_{uuid.uuid4().hex}.xlsx"
+    archivo.save(ruta)
+    try:
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            exo = parsear_exogena(ruta)
+        return jsonify(analizar(exo))
+    except ExogenaError as exc:
+        return jsonify({"error": str(exc)}), 422
+    finally:
+        ruta.unlink(missing_ok=True)
+
+
 @app.get("/aliados")
 def aliados():
     """Programa de aliados: 20 %% recurrente para contadores que montan empresas."""
