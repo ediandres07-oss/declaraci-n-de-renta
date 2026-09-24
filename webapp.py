@@ -835,6 +835,46 @@ def vigilante_api():
         ruta.unlink(missing_ok=True)
 
 
+@app.get("/sas")
+def sas_pagina():
+    """Constitución de S.A.S. en línea: borrador gratis y acompañamiento de $300.000."""
+    from urllib.parse import quote
+    wa = IA_CFG.get("negocio", {}).get("whatsapp") or "573332470715"
+    return render_template("sas.html", whatsapp=wa,
+                           wa_texto=quote("Hola, quiero crear mi S.A.S. con el acompañamiento de $300.000."))
+
+
+@app.post("/api/sas/borrador")
+def sas_borrador():
+    """PDF del documento de constitución con marca de agua BORRADOR."""
+    from src.constitucion_sas import generar_pdf
+    d = request.get_json(silent=True) or {}
+    req = ("razon_social", "municipio", "departamento", "direccion", "correo", "objeto")
+    faltan = [k for k in req if not str(d.get(k) or "").strip()]
+    if faltan:
+        return jsonify({"error": "Faltan datos: " + ", ".join(faltan)}), 400
+    try:
+        capital, vn = int(float(d.get("capital") or 0)), int(float(d.get("valor_nominal") or 1000))
+    except ValueError:
+        return jsonify({"error": "Capital y valor nominal deben ser números."}), 400
+    if capital <= 0 or vn <= 0 or capital % vn:
+        return jsonify({"error": "El capital debe ser múltiplo exacto del valor nominal de la acción."}), 400
+    acc = [a for a in (d.get("accionistas") or []) if str(a.get("nombre") or "").strip()]
+    if not acc or any(not str(a.get("cedula") or "").strip() for a in acc):
+        return jsonify({"error": "Cada accionista necesita nombre y cédula."}), 400
+    if sum(int(a.get("acciones") or 0) for a in acc) != capital // vn:
+        return jsonify({"error": f"Las acciones de los accionistas deben sumar {capital // vn:,}.".replace(",", ".")}), 400
+    datos = {k: str(d.get(k) or "").strip() for k in req + ("ciiu", "telefono")}
+    datos.update(capital=capital, valor_nominal=vn, accionistas=acc,
+                 representante=int(d.get("representante") or 0),
+                 suplente=(int(d["suplente"]) if str(d.get("suplente") or "") != "" else None))
+    if datos["suplente"] == datos["representante"]:
+        datos["suplente"] = None
+    pdf = generar_pdf(datos, borrador=True)
+    return send_file(io.BytesIO(pdf), mimetype="application/pdf", as_attachment=True,
+                     download_name="Constitucion_SAS_BORRADOR.pdf")
+
+
 @app.get("/aliados")
 def aliados():
     """Programa de aliados: 20 %% recurrente para contadores que montan empresas."""
