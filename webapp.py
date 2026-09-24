@@ -802,6 +802,94 @@ def contabilidad():
                            ia_whatsapp=IA_CFG.get("negocio", {}).get("whatsapp", ""))
 
 
+def _es_contador_nuevo(email: str) -> bool:
+    """La cortesía es SOLO para contadores nuevos: el correo no puede tener ya el
+    pase (AccesoAutorizado), ni haber pedido la muestra del liquidador, ni tener
+    una orden registrada (comprada, pendiente o de cortesía)."""
+    from src.auth import MuestraContador, MuestraContadorEmail
+    email = (email or "").strip().lower()
+    if db.session.get(AccesoAutorizado, email) is not None:
+        return False
+    if db.session.get(MuestraContadorEmail, email) is not None:
+        return False
+    if MuestraContador.query.filter(db.func.lower(MuestraContador.email) == email).first():
+        return False
+    for o in _leer_ordenes().values():
+        if ((o.get("contacto") or {}).get("email", "") or "").strip().lower() == email:
+            return False
+    return True
+
+
+@app.get("/pase-gratis")
+def pase_gratis_pagina():
+    """Pase de renta de cortesía para contadores NUEVOS + acceso a la app contable."""
+    cont = _CFG_PRECIOS.get("contadores", {})
+    return render_template("pase_gratis.html", precio=cont.get("precio", 149900),
+                           temporada=cont.get("temporada", ""), app_url=CONTAB_URL)
+
+
+@app.post("/api/pase-gratis")
+def pase_gratis_api():
+    """Activa el pase de cortesía: AccesoAutorizado (liquidador) + orden en 0 para
+    el embudo + correo con los dos accesos (liquidador y app contable, que se
+    activa con código al correo y arranca su mes de prueba)."""
+    b = request.get_json(silent=True) or {}
+    if (b.get("sitio_web") or "").strip():          # bot
+        return jsonify({"ok": True})
+    nombre = str(b.get("nombre") or "").strip()[:120]
+    email = (b.get("email") or "").strip().lower()[:160]
+    telefono = re.sub(r"[^\d+ ]", "", str(b.get("telefono") or ""))[:30]
+    if len(nombre) < 2 or not _EMAIL_RE.match(email):
+        return jsonify({"ok": False, "error": "Escribe tu nombre y un correo válido."}), 400
+    if not _asesoria_permitida(_ip_cliente()):
+        return jsonify({"ok": False, "error": "Ya recibimos varias solicitudes desde aquí. "
+                                              "Espera unos minutos."}), 429
+    if not _es_contador_nuevo(email):
+        return jsonify({"ok": False, "ya_existe": True,
+                        "error": "Ese correo ya está registrado con nosotros. La cortesía es para "
+                                 "contadores nuevos; si ya tienes el pase, entra al liquidador."}), 409
+    try:
+        db.session.add(AccesoAutorizado(email=email, nombre=nombre,
+                                        nota="Pase de cortesía 2026 (contador nuevo)"))
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        return jsonify({"ok": False, "error": "No pudimos activar el pase. Intenta de nuevo."}), 500
+    ordenes = _leer_ordenes()
+    orden_id = uuid.uuid4().hex[:12]
+    ordenes[orden_id] = {"tipo": "orden", "plan": "contadores", "estado": "cortesia",
+                         "precio": 0, "origen": _origen_actual(), "fecha": str(date.today()),
+                         "contacto": {"email": email, "nombre": nombre, "telefono": telefono},
+                         "nit": "", "nombre": nombre, "nota": "Pase de cortesía (contador nuevo)"}
+    _guardar_ordenes(ordenes)
+    try:
+        from src.correo import cargar_config_email, enviar_email
+        cfg = cargar_config_email()
+        sitio = (_CONTACTO.get("sitio") or "https://tributando.co").rstrip("/")
+        from urllib.parse import quote
+        act = f"{CONTAB_URL}/activar?email={quote(email)}"
+        primer = nombre.split()[0].title() if nombre else ""
+        html = f"""<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:540px;color:#1e2b3a;line-height:1.6">
+          <h2 style="color:#1e2432">Tu pase de renta de cortesía está activo</h2>
+          <p>Hola {primer}, te damos la bienvenida a Tributando.co. Esto quedó activo con <b>{email}</b>:</p>
+          <p><b>1. Liquidador de renta (declaraciones ilimitadas hasta el cierre de la temporada)</b><br>
+          Entra a <a href="{sitio}/liquidador">{sitio.replace('https://','')}/liquidador</a>, inicia sesión con Google o
+          Microsoft usando este mismo correo, sube la exógena del cliente y descarga su Formulario 210.</p>
+          <p><b>2. Software contable (1 mes de prueba con todo)</b><br>
+          Crea tu clave aquí: <a href="{act}">activar mi cuenta</a>. Te llega un código a este correo.</p>
+          <p style="color:#5a6b7f;font-size:.9rem">¿Dudas? Responde este correo o escríbenos por WhatsApp.</p>
+          <p>— Edison Monsalve, Tributando.co</p></div>"""
+        if cfg.get("habilitado"):
+            enviar_email(email, "Tu pase de renta de cortesía — Tributando.co", html, cfg)
+        enviar_email("contacto@tributando.co", f"Pase de cortesía — {nombre}",
+                     f"<p>Nuevo pase de cortesía: <b>{nombre}</b> · {email} · WhatsApp {telefono or '—'} · "
+                     f"origen {_origen_actual() or 'directo'}.</p>", cfg)
+    except Exception as e:
+        app.logger.warning("pase-gratis: correo no enviado: %s", e)
+    return jsonify({"ok": True, "liquidador": "/liquidador",
+                    "app": f"{CONTAB_URL}/activar?email={email}"})
+
+
 @app.get("/vigilante")
 def vigilante_pagina():
     """Vigilante DIAN: revisión gratis de la exógena (reportes falsos, duplicados, bienes)."""

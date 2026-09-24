@@ -126,17 +126,6 @@ h1{font-size:clamp(2.1rem,4.6vw,3.55rem);line-height:1.07;letter-spacing:-.04em;
   background:linear-gradient(#fcd116 0 50%,#003893 50% 75%,#ce1126 75%)}
 .hecho .sep{width:4px;height:4px;border-radius:50%;background:var(--tenue)}
 .hecho small{color:var(--tenue);font-size:.88rem}
-/* Gancho gratis: Vigilante DIAN */
-.gancho{display:flex;align-items:center;gap:16px;max-width:760px;margin:6px auto 22px;padding:14px 16px 14px 18px;
-  border-radius:var(--r-sm);text-align:left;background:linear-gradient(120deg,rgba(55,211,143,.12),rgba(55,211,143,.03));
-  border:1px solid rgba(55,211,143,.35);transition:transform .2s,border-color .2s}
-.gancho:hover{transform:translateY(-2px);border-color:rgba(55,211,143,.6)}
-.gancho .tag{flex:none;font-size:.72rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#07130d;
-  background:var(--verde);padding:5px 10px;border-radius:30px}
-.gancho p{flex:1;font-size:.95rem;color:var(--suave);line-height:1.45}
-.gancho p b{color:var(--txt)}
-.gancho .ir{flex:none;display:inline-flex;align-items:center;gap:6px;font-weight:700;color:var(--verde);white-space:nowrap}
-@media(max-width:640px){.gancho{flex-direction:column;align-items:flex-start;gap:10px}}
 .iso-wrap{position:relative;margin:8px auto 0;max-width:1040px}
 .iso{width:100%;height:auto;overflow:visible}
 .iso text{font-family:var(--ff)}
@@ -528,11 +517,6 @@ footer{border-top:1px solid var(--line);margin-top:104px;padding:60px 0 34px}
       <a class="btn btn-oro" href="#asesoria">Agenda una asesoría <svg class="ic"><use href="#i-flecha"/></svg></a>
       <button class="btn btn-ghost js-wa" type="button"><svg class="wa-ic"><use href="#i-wa"/></svg> Escríbenos por WhatsApp</button>
     </div>
-    <a class="gancho" href="/vigilante">
-      <span class="tag">Gratis</span>
-      <p><b>¿Le reportaron a tu cliente ingresos que no son suyos?</b> Sube su exógena y en segundos te decimos si hay reportes falsos, pagos duplicados o bienes que debe confirmar. Sin registro.</p>
-      <span class="ir">Revisar exógena <svg class="ic"><use href="#i-flecha"/></svg></span>
-    </a>
     <div class="hecho"><span>Hecho para Colombia</span><i class="bandera" aria-hidden="true"></i><i class="sep" aria-hidden="true"></i><small>Sin compromiso · montaje y capacitación incluidos</small></div>
     <div class="iso-wrap">
       <svg class="iso" viewBox="0 84 1040 460" role="img" aria-label="Tributando en el centro: recibe lo de la DIAN y el correo, lo causa y lo lleva a Siigo, World Office, Helisa y Contai" xmlns="http://www.w3.org/2000/svg">
@@ -1111,5 +1095,6 @@ window.addEventListener("load", function(){
 });
 </script>
 {% endif %}
+{% include "_flotante_gratis.html" %}
 </body>
 </html>

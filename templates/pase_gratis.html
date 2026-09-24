@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Pase de renta gratis para contadores nuevos | Tributando.co</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Si eres contador y es tu primera vez en Tributando, te regalamos el pase de renta: declaraciones ilimitadas hasta el cierre de la temporada, y un mes del software contable.">
+<meta property="og:title" content="Pase de renta gratis para contadores nuevos">
+<meta property="og:description" content="Declaraciones de renta ilimitadas hasta el cierre de la temporada y un mes del software contable. Solo para contadores nuevos.">
+<meta property="og:image" content="https://tributando.co/static/img/og-contadores.png">
+<link rel="icon" href="/static/img/logo-tributando.png">
+<style>
+  :root{--navy:#1e2432;--oro:#e6c483;--borde:rgba(230,196,131,.28);--texto:#f3f5f8;--suave:#c2c9d4;--tenue:#8b93a1;--verde:#37d38f}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;color:var(--texto);line-height:1.55;background:#0a0c13}
+  body::before{content:"";position:fixed;inset:0;z-index:-1;background:radial-gradient(1000px 520px at 20% 6%,rgba(55,211,143,.10),transparent 60%),radial-gradient(900px 520px at 85% 90%,rgba(230,196,131,.10),transparent 60%),linear-gradient(160deg,#0e1220,#0a0c13)}
+  a{color:inherit} b{color:#fff}
+  .c{max-width:760px;margin:0 auto;padding:0 20px}
+  .top{background:var(--navy);position:sticky;top:0;z-index:5}
+  .top .c{display:flex;justify-content:space-between;align-items:center;padding:11px 20px;max-width:980px}
+  .marca{color:#fff;font-weight:800;text-decoration:none;display:flex;gap:9px;align-items:center}
+  .marca img{height:32px;width:32px;border-radius:50%}
+  .volver{font-size:.82rem;font-weight:700;text-decoration:none;border:1px solid var(--borde);padding:7px 14px;border-radius:20px}
+  header{text-align:center;padding:44px 0 18px}
+  .tag{display:inline-block;background:rgba(55,211,143,.14);color:var(--verde);font-weight:800;font-size:.74rem;letter-spacing:.1em;padding:7px 16px;border-radius:30px;text-transform:uppercase}
+  h1{font-size:clamp(1.9rem,4vw+.6rem,2.7rem);line-height:1.12;margin-top:16px;font-weight:800;letter-spacing:-.02em}
+  h1 span{color:var(--oro)}
+  .sub{max-width:600px;margin:14px auto 0;color:var(--suave);font-size:1.04rem}
+  .incluye{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:26px 0}
+  .card{background:rgba(255,255,255,.04);border:1px solid rgba(230,196,131,.16);border-radius:16px;padding:18px}
+  .card b{display:block;margin-bottom:6px;font-size:1.02rem}
+  .card p{color:var(--suave);font-size:.93rem}
+  .card .val{color:var(--tenue);font-size:.82rem;margin-top:8px}
+  form{background:rgba(255,255,255,.035);border:1px solid rgba(55,211,143,.3);border-radius:18px;padding:22px;margin-bottom:18px}
+  label{display:block;font-size:.84rem;color:var(--suave);margin:12px 0 5px}
+  input{width:100%;background:#12161f;border:1px solid rgba(255,255,255,.14);color:#fff;border-radius:10px;padding:12px 13px;font:inherit}
+  input:focus{outline:2px solid var(--verde);outline-offset:1px}
+  .hp{position:absolute;left:-9999px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:18px;background:var(--verde);color:#07130d;font-weight:800;padding:14px 22px;border-radius:30px;border:0;cursor:pointer;font-size:1.02rem;text-decoration:none}
+  .btn.sec{background:transparent;color:var(--oro);border:1px solid var(--borde)}
+  .btn[disabled]{opacity:.6;cursor:wait}
+  .err{color:#ffb3b3;margin-top:12px;font-size:.92rem}
+  .nota{color:var(--tenue);font-size:.82rem;text-align:center;margin-top:10px}
+  .ok{display:none;text-align:center;background:rgba(55,211,143,.08);border:1px solid rgba(55,211,143,.35);border-radius:18px;padding:26px 22px;margin-bottom:18px}
+  .ok h2{font-size:1.35rem;margin-bottom:8px}
+  .ok p{color:var(--suave)}
+  .ok .btns{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}
+  footer{text-align:center;color:var(--tenue);font-size:.8rem;padding:18px 0 36px}
+  @media(max-width:640px){.incluye,.ok .btns{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="top"><div class="c"><a class="marca" href="/"><img src="/static/img/logo-tributando.png" alt="">Tributando</a><a class="volver" href="/">Inicio</a></div></div>
+<div class="c">
+<header>
+  <span class="tag">Solo contadores nuevos · cortesía</span>
+  <h1>Te regalamos el <span>pase de renta</span></h1>
+  <p class="sub">Si es tu primera vez en Tributando, liquida las declaraciones de renta de tus clientes gratis hasta el cierre de la temporada{% if temporada %} ({{ temporada }}){% endif %}. Y de paso, prueba un mes el software contable.</p>
+</header>
+
+<div class="incluye">
+  <div class="card"><b>Liquidador de renta ilimitado</b><p>Subes la exógena del cliente y recibes el Formulario 210 diligenciado, con papeles de trabajo en Excel.</p><div class="val">Vale ${{ '{:,.0f}'.format(precio)|replace(',', '.') }} · para ti, $0</div></div>
+  <div class="card"><b>Software contable, 1 mes</b><p>Baja lo de la DIAN, causa solo con las cuentas de cada empresa y saca IVA, retención y exógena.</p><div class="val">Prueba completa, sin tarjeta</div></div>
+</div>
+
+<form id="f" autocomplete="on">
+  <label for="nombre">Tu nombre</label><input id="nombre" name="nombre" required autocomplete="name">
+  <label for="email">Correo (con este entras al liquidador y a la app)</label><input id="email" name="email" type="email" required autocomplete="email">
+  <label for="telefono">WhatsApp (opcional)</label><input id="telefono" name="telefono" inputmode="tel" autocomplete="tel">
+  <input class="hp" name="sitio_web" tabindex="-1" autocomplete="off" aria-hidden="true">
+  <button class="btn" type="submit" id="enviar">Activar mi pase gratis</button>
+  <p class="err" id="err" role="alert"></p>
+  <p class="nota">Uno por contador. Si ya tienes cuenta con nosotros, esta cortesía no aplica.</p>
+</form>
+
+<div class="ok" id="ok" aria-live="polite">
+  <h2>¡Listo! Tu pase quedó activo</h2>
+  <p>Te enviamos los dos accesos al correo. Entra al liquidador con Google o Microsoft usando ese mismo correo.</p>
+  <div class="btns">
+    <a class="btn" id="irLiq" href="/liquidador">Entrar al liquidador</a>
+    <a class="btn sec" id="irApp" href="{{ app_url }}/activar">Activar la app contable</a>
+  </div>
+</div>
+</div>
+<footer>Tributando.co · Cortesía válida hasta el cierre de la temporada de renta de personas naturales.</footer>
+<script>
+const f=document.getElementById('f'),err=document.getElementById('err'),btn=document.getElementById('enviar');
+f.addEventListener('submit',async e=>{
+  e.preventDefault();err.textContent='';btn.disabled=true;btn.textContent='Activando…';
+  try{
+    const r=await fetch('/api/pase-gratis',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.fromEntries(new FormData(f)))});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok||!d.ok){err.textContent=d.error||'No se pudo activar. Intenta de nuevo.';return}
+    if(d.app)document.getElementById('irApp').href=d.app;
+    f.style.display='none';document.getElementById('ok').style.display='block';
+  }catch(_){err.textContent='No se pudo conectar. Intenta de nuevo.'}
+  finally{btn.disabled=false;btn.textContent='Activar mi pase gratis'}
+});
+</script>
+</body>
+</html>

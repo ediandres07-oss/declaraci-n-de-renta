@@ -1,0 +1,46 @@
+<!-- Tarjeta flotante «Gratis» (esquina inferior izquierda; el WhatsApp va a la derecha) -->
+<style>
+  .fg{position:fixed;left:18px;bottom:18px;z-index:900;width:300px;max-width:calc(100vw - 36px);
+    font-family:-apple-system,'Segoe UI',Roboto,sans-serif;color:#eef1f6;
+    background:linear-gradient(160deg,#14271f,#0d1119 70%);border:1px solid rgba(55,211,143,.45);
+    border-radius:18px;box-shadow:0 18px 50px -12px rgba(0,0,0,.6);padding:16px 16px 12px;
+    transform:translateY(20px);opacity:0;transition:transform .35s ease,opacity .35s ease}
+  .fg.vis{transform:none;opacity:1}
+  .fg .fg-cab{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+  .fg .fg-tag{background:#37d38f;color:#07130d;font-size:.7rem;font-weight:800;letter-spacing:.08em;
+    text-transform:uppercase;padding:4px 9px;border-radius:30px}
+  .fg .fg-tit{font-weight:800;font-size:.95rem}
+  .fg .fg-x{margin-left:auto;background:none;border:0;color:#9aa3b2;font-size:1.3rem;line-height:1;cursor:pointer;padding:2px 4px}
+  .fg a.fg-it{display:block;text-decoration:none;color:inherit;padding:10px 12px;border-radius:12px;margin-bottom:8px;
+    background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);transition:border-color .2s,background .2s}
+  .fg a.fg-it:hover{border-color:rgba(55,211,143,.6);background:rgba(55,211,143,.08)}
+  .fg a.fg-it b{display:block;font-size:.9rem;color:#fff}
+  .fg a.fg-it span{display:block;font-size:.8rem;color:#b7bfcc;line-height:1.4;margin-top:2px}
+  .fg a.fg-it i{font-style:normal;color:#37d38f;font-weight:800}
+  .fg-pill{position:fixed;left:18px;bottom:18px;z-index:900;display:none;align-items:center;gap:8px;cursor:pointer;
+    font-family:-apple-system,'Segoe UI',Roboto,sans-serif;font-weight:800;font-size:.9rem;color:#07130d;
+    background:#37d38f;border:0;border-radius:30px;padding:12px 18px;box-shadow:0 12px 30px -8px rgba(55,211,143,.6)}
+  .fg-min .fg{display:none}
+  .fg-min .fg-pill{display:inline-flex}
+  @media(max-width:640px){.fg{left:12px;bottom:12px;width:auto;right:84px}.fg-pill{left:12px;bottom:12px}}
+  @media(prefers-reduced-motion:reduce){.fg{transition:none}}
+</style>
+<div id="fgWrap">
+  <aside class="fg" id="fg" aria-label="Ofertas gratis">
+    <div class="fg-cab"><span class="fg-tag">Gratis</span><span class="fg-tit">Para contadores</span>
+      <button class="fg-x" type="button" id="fgX" aria-label="Minimizar">×</button></div>
+    <a class="fg-it" href="/pase-gratis"><b>Pase de renta gratis</b><span>Declaraciones ilimitadas hasta octubre + 1 mes del software contable. Solo contadores nuevos. <i>→</i></span></a>
+    <a class="fg-it" href="/vigilante"><b>Revisa una exógena</b><span>En segundos te decimos si le reportaron al cliente ingresos que no son suyos. Sin registro. <i>→</i></span></a>
+  </aside>
+  <button class="fg-pill" type="button" id="fgPill" aria-label="Ver ofertas gratis">Gratis para contadores</button>
+</div>
+<script>
+(function(){
+  var w=document.getElementById('fgWrap'),fg=document.getElementById('fg');
+  var min=false; try{min=localStorage.getItem('fgMin')==='1'}catch(e){}
+  if(min||window.innerWidth<640){w.classList.add('fg-min')}
+  setTimeout(function(){fg.classList.add('vis')},1200);
+  document.getElementById('fgX').onclick=function(){w.classList.add('fg-min');try{localStorage.setItem('fgMin','1')}catch(e){}};
+  document.getElementById('fgPill').onclick=function(){w.classList.remove('fg-min');fg.classList.add('vis');try{localStorage.removeItem('fgMin')}catch(e){}};
+})();
+</script>
