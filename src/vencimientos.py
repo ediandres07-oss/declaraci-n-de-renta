@@ -1048,3 +1048,93 @@ def correr_avisos_diarios(hoy: Optional[date] = None) -> int:
         db.session.rollback()
         return 0
     return enviar_avisos_vencimientos(hoy)
+
+
+# ------------------------------------------- recordatorios por WhatsApp (público)
+class SuscripcionVencWA(db.Model):
+    """Persona o empresa que pidió desde el calendario público que le avisemos
+    sus vencimientos DIAN por WhatsApp (sin cuenta). El envío lo hace la app
+    contable (/api/wa/vencimiento, plantilla `vencimiento_dian`)."""
+    __tablename__ = "suscripciones_venc_wa"
+    id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(120))
+    whatsapp = db.Column(db.String(20), index=True)        # 57 + 10 dígitos
+    nit = db.Column(db.String(20))
+    tipo = db.Column(db.String(12))                         # natural | juridica | gran | rst
+    obligaciones = db.Column(db.String(300))                # csv de claves del YAML
+    origen = db.Column(db.String(40))
+    activo = db.Column(db.Boolean, default=True)
+    creado = db.Column(db.DateTime, default=datetime.utcnow)
+
+    __table_args__ = (db.UniqueConstraint("whatsapp", "nit"),)
+
+
+WA_DIAS_ANTES = (3,)
+_DIAS_ES = ("lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo")
+_MESES_ES = ("enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto",
+             "septiembre", "octubre", "noviembre", "diciembre")
+
+
+def celular_co(x) -> str:
+    """Celular colombiano en formato WhatsApp (57 + 10 dígitos). '' si no sirve."""
+    d = "".join(c for c in str(x or "") if c.isdigit())
+    if len(d) == 10 and d.startswith("3"):
+        return "57" + d
+    if len(d) == 12 and d.startswith("573"):
+        return d
+    return ""
+
+
+def fecha_larga(d: date) -> str:
+    return f"{_DIAS_ES[d.weekday()]} {d.day} de {_MESES_ES[d.month - 1]}"
+
+
+def _texto_obligacion(ev: dict) -> str:
+    nombre = ev.get("nombre", "")
+    et = ev.get("etiqueta", "")
+    return f"{nombre} ({et})" if et else nombre
+
+
+def enviar_wa_vencimiento(sus: "SuscripcionVencWA", ev: dict) -> tuple:
+    """Pide a la app contable mandar la plantilla. (ok, detalle). Nunca lanza."""
+    import os
+    import urllib.request
+    url = os.environ.get("CONTAB_URL", "https://contabilidad-tributando.onrender.com").rstrip("/")
+    secreto = os.environ.get("PASE_SECRET", "").strip()
+    if not secreto:
+        return False, "PASE_SECRET no configurado"
+    digitos = "".join(c for c in str(sus.nit or "") if c.isdigit())[-2:]
+    cuerpo = json.dumps({"telefono": sus.whatsapp, "nombre": (sus.nombre or "").split(" ")[0],
+                         "obligacion": _texto_obligacion(ev), "fecha": fecha_larga(ev["fecha"]),
+                         "digitos": digitos}).encode("utf-8")
+    req = urllib.request.Request(f"{url}/api/wa/vencimiento", data=cuerpo, method="POST",
+                                 headers={"Content-Type": "application/json",
+                                          "X-Pase-Secret": secreto})
+    try:
+        with urllib.request.urlopen(req, timeout=30) as r:
+            d = json.loads(r.read().decode("utf-8") or "{}")
+            return bool(d.get("ok")), str(d.get("dato", ""))
+    except Exception as exc:  # noqa: BLE001
+        return False, str(exc)[:300]
+
+
+def avisos_wa_diarios(hoy: Optional[date] = None) -> int:
+    """Manda por WhatsApp los vencimientos que caen en WA_DIAS_ANTES días.
+    Deduplica en vencimientos_avisos con usuario_id = -id de la suscripción."""
+    hoy = hoy or date.today()
+    enviados = 0
+    for sus in SuscripcionVencWA.query.filter_by(activo=True).all():
+        obligs = [o for o in (sus.obligaciones or "").split(",") if o]
+        for ev in vencimientos_de(sus.nit, obligs, hoy.year):
+            dias = (ev["fecha"] - hoy).days
+            if dias not in WA_DIAS_ANTES:
+                continue
+            clave = f"wa|{ev['obligacion']}|{ev['fecha'].isoformat()}|{dias}"
+            if VencimientoAviso.query.filter_by(usuario_id=-sus.id, clave=clave).first():
+                continue
+            ok, _ = enviar_wa_vencimiento(sus, ev)
+            if ok:
+                db.session.add(VencimientoAviso(usuario_id=-sus.id, clave=clave))
+                db.session.commit()
+                enviados += 1
+    return enviados

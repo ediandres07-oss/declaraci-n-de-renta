@@ -133,6 +133,12 @@ def _bucle_avisos_vencimientos():
                             n = _agente_crm_xsell_pase()
                             if n:
                                 print(f"[agente-crm] {n} cross-sell a compradores del pase")
+                        # Recordatorios de vencimientos DIAN por WhatsApp (calendario público).
+                        if _candado(f"venc-wa|{hoy}"):
+                            from src.vencimientos import avisos_wa_diarios
+                            n = avisos_wa_diarios(ahora.date())
+                            if n:
+                                print(f"[venc-wa] {n} recordatorio(s) por WhatsApp")
                         # Lunes: lote de contenido de marketing.
                         if ahora.weekday() == 0 and _candado(f"mkt|{hoy}"):
                             _ger.contenido_semanal(IA_CFG)
@@ -888,6 +894,60 @@ def pase_gratis_api():
         app.logger.warning("pase-gratis: correo no enviado: %s", e)
     return jsonify({"ok": True, "liquidador": "/liquidador",
                     "app": f"{CONTAB_URL}/activar?email={email}"})
+
+
+@app.post("/api/vencimientos-wa")
+def vencimientos_wa_api():
+    """Suscripción pública a los recordatorios DIAN por WhatsApp (desde el
+    calendario). Devuelve de una vez las próximas fechas de ese NIT y manda la
+    primera por WhatsApp como confirmación."""
+    from src.vencimientos import (SUGERENCIAS, SuscripcionVencWA, VencimientoAviso,
+                                  celular_co, enviar_wa_vencimiento, fecha_larga,
+                                  vencimientos_de)
+    b = request.get_json(silent=True) or {}
+    if (b.get("sitio_web") or "").strip():
+        return jsonify({"ok": True, "proximos": []})
+    nombre = str(b.get("nombre") or "").strip()[:120]
+    tel = celular_co(b.get("whatsapp"))
+    nit = "".join(c for c in str(b.get("nit") or "") if c.isdigit())[:15]
+    tipo = (b.get("tipo") or "natural").strip().lower()
+    if tipo not in SUGERENCIAS:
+        tipo = "natural"
+    if len(nombre) < 2 or not tel or len(nit) < 5:
+        return jsonify({"ok": False, "error": "Escribe tu nombre, un celular de 10 dígitos y tu NIT o cédula."}), 400
+    if not _asesoria_permitida(_ip_cliente()):
+        return jsonify({"ok": False, "error": "Ya recibimos varias solicitudes desde aquí. Espera unos minutos."}), 429
+    obligs = SUGERENCIAS[tipo]
+    sus = SuscripcionVencWA.query.filter_by(whatsapp=tel, nit=nit).first()
+    nuevo = sus is None
+    if nuevo:
+        sus = SuscripcionVencWA(whatsapp=tel, nit=nit)
+        db.session.add(sus)
+    sus.nombre, sus.tipo, sus.obligaciones, sus.activo = nombre, tipo, ",".join(obligs), True
+    sus.origen = _origen_actual() or "directo"
+    db.session.commit()
+    hoy = date.today()
+    prox = [e for e in vencimientos_de(nit, obligs, hoy.year) if e["fecha"] >= hoy]
+    salida = [{"obligacion": e["nombre"], "periodo": e.get("etiqueta", ""),
+               "fecha": fecha_larga(e["fecha"]), "dias": (e["fecha"] - hoy).days} for e in prox[:6]]
+    wa_ok = False
+    if prox and nuevo:
+        wa_ok, _ = enviar_wa_vencimiento(sus, prox[0])
+        if wa_ok:
+            try:
+                db.session.add(VencimientoAviso(usuario_id=-sus.id,
+                               clave=f"wa|{prox[0]['obligacion']}|{prox[0]['fecha'].isoformat()}|alta"))
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+    try:
+        from src.correo import enviar_email
+        enviar_email("contacto@tributando.co", f"Vencimientos por WhatsApp — {nombre}",
+                     f"<p>Nueva suscripción: <b>{nombre}</b> · WhatsApp {tel} · NIT {nit} · {tipo} · "
+                     f"origen {sus.origen}. Primer WhatsApp: {'enviado' if wa_ok else 'no enviado'}.</p>")
+    except Exception:
+        pass
+    return jsonify({"ok": True, "proximos": salida, "whatsapp": wa_ok})
 
 
 @app.get("/vigilante")

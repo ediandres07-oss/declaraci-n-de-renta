@@ -43,6 +43,25 @@
                 font-weight:800; text-decoration:none; padding:13px 30px; border-radius:12px; }
   .cta small{ display:block; color:#9aa2b0; margin-top:12px; }
   footer{ text-align:center; color:var(--tx2); font-size:.82rem; padding:24px 0 40px; }
+  .wa-box{ background:#fff; border:2px solid #25d366; border-radius:16px; padding:20px; margin:0 0 26px;
+            box-shadow:0 6px 22px rgba(37,211,102,.12); scroll-margin-top:20px; }
+  .wa-box h2{ font-size:1.2rem; color:var(--navy); margin-bottom:4px; }
+  .wa-box > p{ color:var(--tx2); font-size:.93rem; margin-bottom:14px; }
+  .wa-grid{ display:grid; grid-template-columns:1.2fr 1fr 1fr 1fr; gap:10px; }
+  .wa-grid label{ display:block; font-size:.78rem; color:var(--tx2); margin-bottom:3px; font-weight:600; }
+  .wa-grid input, .wa-grid select{ width:100%; padding:10px 11px; border:1px solid var(--ln); border-radius:10px;
+            font:inherit; font-size:.95rem; background:#fff; color:var(--tx); }
+  .wa-btn{ margin-top:12px; background:#25d366; color:#0b1a12; font-weight:800; border:0; border-radius:12px;
+            padding:12px 22px; font-size:1rem; cursor:pointer; }
+  .wa-btn[disabled]{ opacity:.6; cursor:wait; }
+  .wa-err{ color:#b3261e; font-size:.9rem; margin-top:8px; }
+  .wa-hp{ position:absolute; left:-9999px; }
+  .wa-res{ display:none; margin-top:14px; }
+  .wa-res h3{ font-size:1rem; color:#1e7d43; margin-bottom:8px; }
+  .wa-res li{ list-style:none; padding:8px 0; border-bottom:1px solid #f0ede5; font-size:.93rem; display:flex; justify-content:space-between; gap:10px; }
+  .wa-res li b{ color:var(--navy); white-space:nowrap; }
+  @media(max-width:700px){ .wa-grid{ grid-template-columns:1fr 1fr; } }
+  @media(max-width:440px){ .wa-grid{ grid-template-columns:1fr; } }
   footer a{ color:var(--oro); text-decoration:none; }
 </style>
 </head>
@@ -57,6 +76,31 @@
 </header>
 
 <main class="wrap">
+  <section class="wa-box" id="whatsapp">
+    <h2>Recibe tus vencimientos por WhatsApp</h2>
+    <p>Escribe tu NIT o cédula y te mostramos tus fechas exactas. Te avisamos por WhatsApp 3 días antes de cada una. Gratis.</p>
+    <form id="waForm">
+      <div class="wa-grid">
+        <div><label for="waNom">Nombre</label><input id="waNom" name="nombre" required autocomplete="name"></div>
+        <div><label for="waTel">WhatsApp</label><input id="waTel" name="whatsapp" inputmode="tel" placeholder="300 123 4567" required autocomplete="tel"></div>
+        <div><label for="waNit">NIT o cédula</label><input id="waNit" name="nit" inputmode="numeric" required></div>
+        <div><label for="waTipo">Eres</label>
+          <select id="waTipo" name="tipo">
+            <option value="natural">Persona natural</option>
+            <option value="juridica">Empresa (persona jurídica)</option>
+            <option value="gran">Gran contribuyente</option>
+            <option value="rst">Régimen simple (RST)</option>
+          </select></div>
+      </div>
+      <input class="wa-hp" name="sitio_web" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <button class="wa-btn" type="submit" id="waBtn">Quiero mis avisos por WhatsApp</button>
+      <p class="wa-err" id="waErr" role="alert"></p>
+    </form>
+    <div class="wa-res" id="waRes" aria-live="polite">
+      <h3 id="waTit">Listo. Estas son tus próximas fechas:</h3>
+      <ul id="waLista"></ul>
+    </div>
+  </section>
   <p class="intro">
     Estas son las <b>fechas de vencimiento {{ ano }}</b> de las principales obligaciones ante la
     <b>DIAN</b>: declaración de <b>renta</b>, <b>IVA</b>, <b>retención en la fuente</b>,
@@ -115,6 +159,28 @@
   <a href="/vencimientos">Gestor de vencimientos</a> · <a href="/contabilidad">Contabilidad</a>
 </footer>
 
+<script>
+(function(){
+  var f=document.getElementById('waForm'),b=document.getElementById('waBtn'),er=document.getElementById('waErr');
+  f.addEventListener('submit',async function(e){
+    e.preventDefault();er.textContent='';b.disabled=true;b.textContent='Consultando…';
+    try{
+      var r=await fetch('/api/vencimientos-wa',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.fromEntries(new FormData(f)))});
+      var d=await r.json().catch(function(){return {}});
+      if(!r.ok||!d.ok){er.textContent=d.error||'No se pudo registrar. Intenta de nuevo.';return}
+      var ul=document.getElementById('waLista');ul.innerHTML='';
+      (d.proximos||[]).forEach(function(x){var li=document.createElement('li');
+        var t=document.createElement('span');t.textContent=x.obligacion+(x.periodo?' · '+x.periodo:'');
+        var fe=document.createElement('b');fe.textContent=x.fecha+(x.dias===0?' (hoy)':' (en '+x.dias+' días)');
+        li.appendChild(t);li.appendChild(fe);ul.appendChild(li);});
+      if(!(d.proximos||[]).length){ul.innerHTML='<li>No te quedan vencimientos este año con esos datos.</li>'}
+      document.getElementById('waTit').textContent=d.whatsapp?'Listo. Te enviamos la primera fecha por WhatsApp. Estas son las próximas:':'Listo. Te avisaremos por WhatsApp 3 días antes. Estas son tus próximas fechas:';
+      f.style.display='none';document.getElementById('waRes').style.display='block';
+    }catch(_){er.textContent='No se pudo conectar. Intenta de nuevo.'}
+    finally{b.disabled=false;b.textContent='Quiero mis avisos por WhatsApp'}
+  });
+})();
+</script>
 {% include "_flotante_gratis.html" %}
 </body>
 </html>
