@@ -811,6 +811,10 @@ def uri_base_datos() -> str:
         # Render entrega 'postgres://', un esquema que SQLAlchemy 2 ya no acepta.
         if url.startswith("postgres://"):
             url = url.replace("postgres://", "postgresql://", 1)
+        # SQLAlchemy 2.1 cambió el driver por defecto de 'postgresql://' a psycopg 3,
+        # que no está instalado: se fija psycopg2 (el de requirements.txt).
+        if url.startswith("postgresql://"):
+            url = url.replace("postgresql://", "postgresql+psycopg2://", 1)
         return url
     # La carpeta sessions/ no viene en el repo (está en .gitignore); la creamos
     # al arrancar para que SQLite pueda escribir la base de datos.
