@@ -2,11 +2,11 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<title>Pase de renta gratis para contadores nuevos | Tributando.co</title>
+<title>Pase de renta gratis para contadores | Tributando.co</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Si eres contador y es tu primera vez en Tributando, te regalamos el pase de renta: declaraciones ilimitadas hasta el cierre de la temporada, y un mes del software contable.">
-<meta property="og:title" content="Pase de renta gratis para contadores nuevos">
-<meta property="og:description" content="Declaraciones de renta ilimitadas hasta el cierre de la temporada y un mes del software contable. Solo para contadores nuevos.">
+<meta name="description" content="Si eres contador, te regalamos el pase de renta: declaraciones ilimitadas hasta el cierre de la temporada, y un mes del software contable.">
+<meta property="og:title" content="Pase de renta gratis para contadores">
+<meta property="og:description" content="Declaraciones de renta ilimitadas hasta el cierre de la temporada y un mes del software contable.">
 <meta property="og:image" content="https://tributando.co/static/img/og-contadores.png">
 <link rel="icon" href="/static/img/logo-tributando.png">
 <style>
@@ -53,9 +53,9 @@
 <div class="top"><div class="c"><a class="marca" href="/"><img src="/static/img/logo-tributando.png" alt="">Tributando</a><a class="volver" href="/">Inicio</a></div></div>
 <div class="c">
 <header>
-  <span class="tag">Solo contadores nuevos · cortesía</span>
+  <span class="tag">Para contadores · cortesía</span>
   <h1>Te regalamos el <span>pase de renta</span></h1>
-  <p class="sub">Si es tu primera vez en Tributando, liquida las declaraciones de renta de tus clientes gratis hasta el cierre de la temporada{% if temporada %} ({{ temporada }}){% endif %}. Y de paso, prueba un mes el software contable.</p>
+  <p class="sub">Liquida las declaraciones de renta de tus clientes gratis hasta el cierre de la temporada{% if temporada %} ({{ temporada }}){% endif %}. Y de paso, prueba un mes el software contable.</p>
 </header>
 
 <div class="incluye">
@@ -70,7 +70,7 @@
   <input class="hp" name="sitio_web" tabindex="-1" autocomplete="off" aria-hidden="true">
   <button class="btn" type="submit" id="enviar">Activar mi pase gratis</button>
   <p class="err" id="err" role="alert"></p>
-  <p class="nota">Uno por contador. Si ya tienes cuenta con nosotros, esta cortesía no aplica.</p>
+  <p class="nota">Uno por contador. Si ya tienes el pase, te llevamos directo al liquidador.</p>
 </form>
 
 <div class="ok" id="ok" aria-live="polite">
@@ -92,6 +92,7 @@ f.addEventListener('submit',async e=>{
     const d=await r.json().catch(()=>({}));
     if(!r.ok||!d.ok){err.textContent=d.error||'No se pudo activar. Intenta de nuevo.';return}
     if(d.app)document.getElementById('irApp').href=d.app;
+    if(d.ya_tenia){document.querySelector('#ok h2').textContent='Ya tienes el pase activo';document.querySelector('#ok p').textContent='Entra al liquidador con Google o Microsoft usando ese mismo correo.'}
     f.style.display='none';document.getElementById('ok').style.display='block';
   }catch(_){err.textContent='No se pudo conectar. Intenta de nuevo.'}
   finally{btn.disabled=false;btn.textContent='Activar mi pase gratis'}

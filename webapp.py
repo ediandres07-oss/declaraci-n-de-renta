@@ -808,27 +808,9 @@ def contabilidad():
                            ia_whatsapp=IA_CFG.get("negocio", {}).get("whatsapp", ""))
 
 
-def _es_contador_nuevo(email: str) -> bool:
-    """La cortesía es SOLO para contadores nuevos: el correo no puede tener ya el
-    pase (AccesoAutorizado), ni haber pedido la muestra del liquidador, ni tener
-    una orden registrada (comprada, pendiente o de cortesía)."""
-    from src.auth import MuestraContador, MuestraContadorEmail
-    email = (email or "").strip().lower()
-    if db.session.get(AccesoAutorizado, email) is not None:
-        return False
-    if db.session.get(MuestraContadorEmail, email) is not None:
-        return False
-    if MuestraContador.query.filter(db.func.lower(MuestraContador.email) == email).first():
-        return False
-    for o in _leer_ordenes().values():
-        if ((o.get("contacto") or {}).get("email", "") or "").strip().lower() == email:
-            return False
-    return True
-
-
 @app.get("/pase-gratis")
 def pase_gratis_pagina():
-    """Pase de renta de cortesía para contadores NUEVOS + acceso a la app contable."""
+    """Pase de renta de cortesía para cualquier contador + acceso a la app contable."""
     cont = _CFG_PRECIOS.get("contadores", {})
     return render_template("pase_gratis.html", precio=cont.get("precio", 149900),
                            temporada=cont.get("temporada", ""), app_url=CONTAB_URL)
@@ -850,13 +832,13 @@ def pase_gratis_api():
     if not _asesoria_permitida(_ip_cliente()):
         return jsonify({"ok": False, "error": "Ya recibimos varias solicitudes desde aquí. "
                                               "Espera unos minutos."}), 429
-    if not _es_contador_nuevo(email):
-        return jsonify({"ok": False, "ya_existe": True,
-                        "error": "Ese correo ya está registrado con nosotros. La cortesía es para "
-                                 "contadores nuevos; si ya tienes el pase, entra al liquidador."}), 409
+    if db.session.get(AccesoAutorizado, email) is not None:
+        # Ya tiene el pase (pagado o de cortesía): no se duplica, solo se le indica entrar.
+        return jsonify({"ok": True, "ya_tenia": True, "liquidador": "/liquidador",
+                        "app": f"{CONTAB_URL}/activar?email={email}"})
     try:
         db.session.add(AccesoAutorizado(email=email, nombre=nombre,
-                                        nota="Pase de cortesía 2026 (contador nuevo)"))
+                                        nota="Pase de cortesía 2026"))
         db.session.commit()
     except Exception:
         db.session.rollback()
@@ -866,7 +848,7 @@ def pase_gratis_api():
     ordenes[orden_id] = {"tipo": "orden", "plan": "contadores", "estado": "cortesia",
                          "precio": 0, "origen": _origen_actual(), "fecha": str(date.today()),
                          "contacto": {"email": email, "nombre": nombre, "telefono": telefono},
-                         "nit": "", "nombre": nombre, "nota": "Pase de cortesía (contador nuevo)"}
+                         "nit": "", "nombre": nombre, "nota": "Pase de cortesía"}
     _guardar_ordenes(ordenes)
     try:
         from src.correo import cargar_config_email, enviar_email
