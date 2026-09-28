@@ -140,7 +140,7 @@ def _envolver(cuerpo: str, email: str, cta_txt: str, cta_url: str) -> str:
 <div style="background:{navy};color:#fff;padding:18px 24px;font-weight:800">Tributando<span style="color:{dorado}">.co</span></div>
 <div style="padding:22px 24px;font-size:15px;line-height:1.6">{cuerpo}
 <p style="margin:22px 0"><a href="{cta_url}" style="background:{dorado};color:#fff;text-decoration:none;padding:11px 18px;border-radius:8px;font-weight:700">{cta_txt}</a></p>
-<p>Un saludo,<br><b>Edison Monsalve</b><br>Contador público · Tributando.co</p></div></div>
+<p>Un saludo,<br><b>Edison Monsalve</b><br>Contador público · Tributando.co<br>WhatsApp: <a href="https://wa.me/573332470715" style="color:{dorado};font-weight:700">333 247 0715</a></p></div></div>
 <p style="font-size:11px;color:#8a94a6;line-height:1.5;padding:12px 8px">Te escribimos porque el correo de tu empresa figura en el Registro Mercantil (RUES), que es público.
 Si no quieres recibir más mensajes, <a href="{url_baja(email)}" style="color:#8a94a6">haz clic aquí para darte de baja</a> y no te volveremos a escribir.</p>
 </div></body></html>"""
