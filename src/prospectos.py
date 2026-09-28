@@ -157,7 +157,8 @@ def plantilla(p: Prospecto) -> tuple[str, str]:
 <li>Aprende las cuentas de cada cliente y arma el <b>plano listo</b> para Siigo, World Office, Helisa o Contai en un clic.</li>
 <li>Multi-cliente: cada empresa con su historial.</li>
 </ul>
-<p><b>1 mes gratis con 1 cliente, sin tarjeta.</b> Pones tu correo, te llega un código y entras.</p>"""
+<p><b>1 mes gratis con 1 cliente, sin tarjeta.</b> Pones tu correo, te llega un código y entras.</p>
+<p>Y si quieres llevar la <b>contabilidad completa en la nube</b>: la <b>app de Tributando</b> causa sola esas facturas, concilia bancos, saca el IVA, la retención y la exógena, y liquida la <b>nómina electrónica</b>. También con un mes de prueba: <a href="{URL}/contadores/contabilidad" style="color:#b8955f;font-weight:700">ver la app para contadores</a>.</p>"""
         return asunto, _envolver(cuerpo, p.email, "Activar mi prueba del Lector", f"{URL}/contadores/lector")
     nombre = (p.razon_social or "tu empresa").strip()
     asunto = f"{nombre}: lo que la DIAN le pide a una empresa nueva"
