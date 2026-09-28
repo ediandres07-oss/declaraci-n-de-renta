@@ -38,6 +38,7 @@ from src.auth import (AccesoAutorizado, ArchivoExogena, LeadEspera, LeadExogena,
                       agente_consumir, agente_set)
 from src.calendario import fecha_limite
 from src.vencimientos import venc_bp, calendario_publico
+from src import prospectos as prosp_mod   # noqa: E402 — registra las tablas antes de init_auth
 from src.documentos import generar_checklist_pdf
 from src.guia_dian import generar_guia_dian_pdf
 
@@ -139,6 +140,12 @@ def _bucle_avisos_vencimientos():
                             n = avisos_wa_diarios(ahora.date())
                             if n:
                                 print(f"[venc-wa] {n} recordatorio(s) por WhatsApp")
+                        # Prospección de empresas nuevas (RUES): tope diario, apagado
+                        # salvo PROSPECTOS_ON=1, desde contacto@ (PROSP_SMTP_*).
+                        if _candado(f"prospectos|{hoy}"):
+                            n = prosp_mod.enviar_lote()
+                            if n:
+                                print(f"[prospectos] {n} correo(s) a empresas nuevas")
                         # Lunes: lote de contenido de marketing.
                         if ahora.weekday() == 0 and _candado(f"mkt|{hoy}"):
                             _ger.contenido_semanal(IA_CFG)
@@ -930,6 +937,44 @@ def vencimientos_wa_api():
     except Exception:
         pass
     return jsonify({"ok": True, "proximos": salida, "whatsapp": wa_ok})
+
+
+@app.get("/baja")
+def baja_correo():
+    """Enlace de «darse de baja» de los correos comerciales (prospección y campañas)."""
+    ok = prosp_mod.dar_de_baja(request.args.get("e", ""), request.args.get("t", ""))
+    msg = ("Listo. No te volveremos a escribir a este correo." if ok
+           else "El enlace no es válido. Escríbenos a contacto@tributando.co y te retiramos a mano.")
+    return (f"<!doctype html><meta name=viewport content='width=device-width,initial-scale=1'>"
+            f"<title>Tributando</title><div style='font-family:sans-serif;max-width:480px;margin:60px auto;"
+            f"padding:0 16px;color:#1e2432'><h2>Tributando.co</h2><p>{msg}</p></div>")
+
+
+@app.get("/admin/prospectos")
+@autorizado_requerido
+def admin_prospectos():
+    """Estado de la prospección y vista previa de los dos correos."""
+    r = prosp_mod.resumen()
+    muestra_e = prosp_mod.Prospecto(email="ejemplo@empresa.co", segmento="empresa",
+                                    razon_social="DISTRIBUIDORA EJEMPLO SAS", fecha_matricula="2026-09-26")
+    muestra_c = prosp_mod.Prospecto(email="contador@ejemplo.co", segmento="contador", n_empresas=3)
+    (ae, he), (ac, hc) = prosp_mod.plantilla(muestra_e), prosp_mod.plantilla(muestra_c)
+    import html as _h
+    return (f"<!doctype html><title>Prospectos</title><div style='font-family:sans-serif;max-width:760px;margin:24px auto;padding:0 16px'>"
+            f"<h2>Prospección de empresas nuevas</h2><pre>{_h.escape(json.dumps(r, ensure_ascii=False, indent=1))}</pre>"
+            f"<form method=post action='/admin/prospectos/cargar' enctype='multipart/form-data'>"
+            f"<input type=file name=archivo accept='.csv,.CSV'> <button>Cargar CSV del RUES</button></form>"
+            f"<h3>Empresa · {_h.escape(ae)}</h3><iframe style='width:100%;height:640px;border:1px solid #ddd' srcdoc='{_h.escape(he)}'></iframe>"
+            f"<h3>Contador · {_h.escape(ac)}</h3><iframe style='width:100%;height:600px;border:1px solid #ddd' srcdoc='{_h.escape(hc)}'></iframe></div>")
+
+
+@app.post("/admin/prospectos/cargar")
+@autorizado_requerido
+def admin_prospectos_cargar():
+    f = request.files.get("archivo")
+    if not f:
+        return jsonify({"ok": False, "error": "Falta el archivo"}), 400
+    return jsonify({"ok": True, **prosp_mod.cargar_csv(f.read())})
 
 
 @app.get("/vigilante")

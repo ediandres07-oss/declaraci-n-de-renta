@@ -225,8 +225,11 @@ def enviar_campana(asunto: str, html: str, destinatarios: list[str]) -> dict:
     {enviados, fallidos}."""
     from src.correo import enviar_email
 
+    from src.prospectos import esta_de_baja
     enviados, fallidos = 0, []
     for correo in destinatarios:
+        if esta_de_baja(correo):
+            continue                      # pidió no recibir más correos comerciales
         try:
             enviar_email(correo, asunto, html)
             enviados += 1
