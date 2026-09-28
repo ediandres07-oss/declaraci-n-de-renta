@@ -149,17 +149,16 @@ Si no quieres recibir más mensajes, <a href="{url_baja(email)}" style="color:#8
 def plantilla(p: Prospecto) -> tuple[str, str]:
     if p.segmento == "contador":
         n = p.n_empresas or 1
-        asunto = "Automatiza la contabilidad de tus clientes: de la DIAN a los libros sin digitar"
+        asunto = "Lector XML DIAN: de la DIAN a tu programa contable, sin digitar facturas"
         cuerpo = f"""<p>Hola,</p>
-<p>Vi que {'registraste ' + str(n) + ' empresas nuevas' if n > 1 else 'acompañaste el registro de una empresa nueva'} en la Cámara de Comercio estas semanas. Soy contador y armé <b>Tributando</b> para dejar de digitar facturas:</p>
+<p>Vi que {'registraste ' + str(n) + ' empresas nuevas' if n > 1 else 'acompañaste el registro de una empresa nueva'} en la Cámara de Comercio estas semanas. Soy contador y armé el <b>Lector XML DIAN</b> para dejar de digitar facturas:</p>
 <ul style="padding-left:18px">
-<li><b>Las facturas electrónicas llegan solas</b> desde la DIAN y el correo del cliente, y se <b>causan automáticamente</b> con su IVA y su retención.</li>
-<li><b>Bancos, IVA, retención y exógena</b> salen de lo que ya está causado.</li>
-<li><b>Nómina electrónica</b> con seguridad social y prestaciones, enviada a la DIAN.</li>
-<li>Si trabajas con Siigo, World Office o Helisa, te arma el <b>plano listo para importar</b>.</li>
+<li><b>Descarga las facturas electrónicas</b> de tus clientes desde la DIAN por rango de fechas, con el <b>IVA discriminado</b>.</li>
+<li>Aprende las cuentas de cada cliente y arma el <b>plano listo</b> para Siigo, World Office, Helisa o Contai en un clic.</li>
+<li>Multi-cliente: cada empresa con su historial.</li>
 </ul>
-<p>Pruébalo <b>un mes gratis</b> con uno de esos clientes nuevos.</p>"""
-        return asunto, _envolver(cuerpo, p.email, "Probar la automatización un mes gratis", f"{URL}/contadores/contabilidad")
+<p><b>1 mes gratis con 1 cliente, sin tarjeta.</b> Pones tu correo, te llega un código y entras.</p>"""
+        return asunto, _envolver(cuerpo, p.email, "Activar mi prueba del Lector", f"{URL}/contadores/lector")
     nombre = (p.razon_social or "tu empresa").strip()
     asunto = f"{nombre}: lo que la DIAN le pide a una empresa nueva"
     cuerpo = f"""<p>Hola,</p>
