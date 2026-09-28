@@ -149,16 +149,17 @@ Si no quieres recibir más mensajes, <a href="{url_baja(email)}" style="color:#8
 def plantilla(p: Prospecto) -> tuple[str, str]:
     if p.segmento == "contador":
         n = p.n_empresas or 1
-        asunto = "Para tus clientes nuevos: contabilidad, facturas DIAN y nómina en una sola app"
+        asunto = "Automatiza la contabilidad de tus clientes: de la DIAN a los libros sin digitar"
         cuerpo = f"""<p>Hola,</p>
-<p>Vi que {'registraste ' + str(n) + ' empresas nuevas' if n > 1 else 'acompañaste el registro de una empresa nueva'} en la Cámara de Comercio estas semanas. Soy contador y armé <b>Tributando</b>, la herramienta con la que llevo mis propios clientes:</p>
+<p>Vi que {'registraste ' + str(n) + ' empresas nuevas' if n > 1 else 'acompañaste el registro de una empresa nueva'} en la Cámara de Comercio estas semanas. Soy contador y armé <b>Tributando</b> para dejar de digitar facturas:</p>
 <ul style="padding-left:18px">
-<li><b>Contabilidad en la nube multiempresa</b>, alimentada sola con las facturas electrónicas de la DIAN.</li>
-<li><b>Nómina electrónica</b> con seguridad social, prestaciones y envío a la DIAN.</li>
-<li><b>IVA, retención y exógena</b> salen de lo causado.</li>
+<li><b>Las facturas electrónicas llegan solas</b> desde la DIAN y el correo del cliente, y se <b>causan automáticamente</b> con su IVA y su retención.</li>
+<li><b>Bancos, IVA, retención y exógena</b> salen de lo que ya está causado.</li>
+<li><b>Nómina electrónica</b> con seguridad social y prestaciones, enviada a la DIAN.</li>
+<li>Si trabajas con Siigo, World Office o Helisa, te arma el <b>plano listo para importar</b>.</li>
 </ul>
-<p>Pruébala <b>un mes gratis</b> con uno de esos clientes nuevos.</p>"""
-        return asunto, _envolver(cuerpo, p.email, "Probar un mes gratis", f"{URL}/contadores/contabilidad")
+<p>Pruébalo <b>un mes gratis</b> con uno de esos clientes nuevos.</p>"""
+        return asunto, _envolver(cuerpo, p.email, "Probar la automatización un mes gratis", f"{URL}/contadores/contabilidad")
     nombre = (p.razon_social or "tu empresa").strip()
     asunto = f"{nombre}: lo que la DIAN le pide a una empresa nueva"
     cuerpo = f"""<p>Hola,</p>
