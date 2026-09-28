@@ -443,13 +443,28 @@ def _wrap_correo(pill: str, cuerpo: str, cta_txt: str, cta_url: str) -> str:
 
 def _correo_onboarding(paso: int, s) -> tuple[str, str]:
     """(asunto, html) del correo del día `paso` para la suscripción de prueba `s`."""
+    sin_activar = not getattr(s, "equipo", None)     # pidió la prueba pero nunca entró al Lector
+    if paso == 7 and sin_activar:
+        rest = (s.vence - date.today()).days if s.vence else 23
+        cuerpo = f"""
+          <h1 style="font-size:20px;margin:14px 0 8px;color:#1e2432">Tu prueba sigue sin activar</h1>
+          <p style="font-size:15px;line-height:1.55">Pediste la prueba gratis del Lector hace una semana, pero todavía no has entrado. Te quedan <b>{rest} días</b>.</p>
+          <ol style="font-size:15px;line-height:1.75;padding-left:18px">
+            <li><b>Descarga</b> el Lector para Windows.</li>
+            <li>Escribe tu correo (<b>{s.email}</b>): te llega un <b>código nuevo</b> de 6 dígitos (cada código dura 15 minutos).</li>
+            <li>Crea tu empresa y carga los XML o el ZIP de la DIAN.</li>
+          </ol>
+          <p style="font-size:15px">¿Algo no te funcionó? Responde este correo y lo revisamos contigo.</p>"""
+        return "🔑 Tu prueba del Lector sigue sin activar", _wrap_correo(
+            "DÍA 7 · ACTIVA TU PRUEBA", cuerpo, "⬇ Descargar el Lector", _DESCARGA_LECTOR)
+
     if paso == 1:
         cuerpo = f"""
-          <h1 style="font-size:20px;margin:14px 0 8px;color:#1e2432">Tu prueba gratis ya está activa 🎉</h1>
+          <h1 style="font-size:20px;margin:14px 0 8px;color:#1e2432">{"Tu prueba gratis te está esperando" if sin_activar else "Tu prueba gratis ya está activa 🎉"}</h1>
           <p style="font-size:15px;line-height:1.55">Deja de digitar las facturas a mano. Así arrancas en 5 minutos:</p>
           <ol style="font-size:15px;line-height:1.75;padding-left:18px">
             <li><b>Descarga</b> el Lector para Windows.</li>
-            <li><b>Entra con tu correo</b> (<b>{s.email}</b>) y el código de 6 dígitos que te llega.</li>
+            <li><b>Entra con tu correo</b> (<b>{s.email}</b>) y el código de 6 dígitos que te llega{" — pide uno nuevo, cada código dura 15 minutos" if sin_activar else ""}.</li>
             <li><b>Activa el token de la DIAN</b>, baja las facturas de un cliente y exporta el <b>plano listo</b> para Siigo, World Office o Helisa.</li>
           </ol>
           <p style="font-size:15px">Tienes <b>30 días</b> para probarlo con un cliente real.</p>"""

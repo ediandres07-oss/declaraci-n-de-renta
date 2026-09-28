@@ -4506,7 +4506,7 @@ def _agente_crm_asesor(limite=None) -> int:
     return enviados
 
 
-def _contador_emails() -> dict:
+def _contador_emails(incluir_lector: bool = True) -> dict:
     """Todos los correos IDENTIFICADOS como contadores, con su nombre. Señales:
     compraron el pase (orden plan 'contadores'), pidieron la muestra de contadores
     (con o sin registro), están habilitados al pase (AccesoAutorizado), o tienen
@@ -4533,8 +4533,9 @@ def _contador_emails() -> dict:
         _add(m.email, "")
     for a in AccesoAutorizado.query.all():
         _add(a.email, a.nombre or "")
-    for s in SuscripcionLector.query.all():
-        _add(s.email, "")
+    if incluir_lector:
+        for s in SuscripcionLector.query.all():
+            _add(s.email, "")
     return contadores
 
 
@@ -4557,33 +4558,63 @@ def _agente_crm_xsell_pase(limite=None) -> int:
     url_conta = f"{sitio}/contadores/contabilidad"
     enviados = 0
     navy, dorado = "#1e2432", "#b8955f"
+    from src.auth import SuscripcionLector
+    # Segmentos: quien usó la RENTA (pase, muestra, habilitados) y quien tiene el
+    # LECTOR. Al que solo tiene el Lector no se le dice «ya declaras» (nunca usó
+    # la renta) ni se le ofrece el Contabilizador (es el Lector que ya tiene), y
+    # se le deja respirar 7 días después de pedir la prueba antes de venderle más.
+    lector = {}
+    for s in SuscripcionLector.query.all():
+        e = (s.email or "").lower().strip()
+        if e and (e not in lector or (s.creado and lector[e].creado and s.creado < lector[e].creado)):
+            lector[e] = s
+    renta = set(_contador_emails(incluir_lector=False))
+    ahora = datetime.utcnow()
     for email, nombre in _contador_emails().items():
         if not email or "@" not in email or _es_propio(email):
             continue
         cl = db.session.get(CrmLead, email)
         if cl and cl.xsell_conta:
             continue
+        sub = lector.get(email)
+        usa_renta = email in renta
+        if sub and not usa_renta and sub.creado and (ahora - sub.creado).days < 7:
+            continue                     # recién pidió el Lector: todavía no
         primer = (nombre or "").split()[0].title() if nombre else ""
         saludo = f"Hola {primer}," if primer else "Hola,"
         wa_snip = (f' o escríbeme por <a href="https://wa.me/{wa}">WhatsApp</a>') if wa else ''
+        if usa_renta:
+            titulo = f'Ya declaras rápido… ahora <span style="color:{dorado}">contabiliza solo</span>'
+            asunto = ("Ya declaras rápido — ahora contabiliza solo (Contabilizador DIAN)" if not sub
+                      else "Ya declaras rápido — ahora lleva la contabilidad en la nube")
+            intro = ("Sé que llevas la renta de varios clientes con Tributando. Quería contarte "
+                     "que también te <b>automatizamos la contabilidad</b> de tu cartera."
+                     + (" Dos opciones:" if not sub else ""))
+        else:
+            titulo = f'Ya lees tus facturas… ahora <span style="color:{dorado}">lleva la contabilidad</span>'
+            asunto = "Del Lector a la contabilidad completa en la nube"
+            intro = ("Ya tienes el <b>Lector</b> de Tributando para tus facturas electrónicas. "
+                     "El siguiente paso es llevar la <b>contabilidad completa</b> de tus clientes "
+                     "en la nube, alimentada con esas mismas facturas.")
+        bloque_plano = ("" if sub else f"""
+                <div style="background:#f5f7fa;border-radius:12px;padding:16px 18px;margin:14px 0">
+                  <b>1. Contabilizador DIAN → tu plano</b><br>
+                  <span style="font-size:.9rem;color:#5a6b7f">Baja las facturas de la DIAN y arma el <b>plano</b> para Siigo, Contai, Helisa y World Office (IVA y retención discriminados), sin digitar.</span><br>
+                  <a href="{url_plano}" style="display:inline-block;margin-top:8px;background:{dorado};color:#fff;text-decoration:none;padding:9px 16px;border-radius:8px;font-weight:700">Ver el Contabilizador →</a>
+                </div>""")
+        n_conta = "" if sub else "2. "
         html = f"""<!DOCTYPE html><html><body style="margin:0;background:#f5f7fa;
           font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:#1e2b3a">
           <div style="max-width:560px;margin:0 auto;padding:24px">
             <div style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 6px 20px rgba(18,63,107,.08)">
               <div style="background:{navy};color:#fff;padding:22px 26px">
-                <div style="font-size:1.2rem;font-weight:800">Ya declaras rápido… ahora <span style="color:{dorado}">contabiliza solo</span></div>
+                <div style="font-size:1.2rem;font-weight:800">{titulo}</div>
               </div>
               <div style="padding:22px 26px;font-size:.95rem;line-height:1.65">
                 <p>{saludo}</p>
-                <p>Sé que llevas la renta de varios clientes con Tributando. Quería contarte
-                   que también te <b>automatizamos la contabilidad</b> de tu cartera. Dos opciones:</p>
+                <p>{intro}</p>{bloque_plano}
                 <div style="background:#f5f7fa;border-radius:12px;padding:16px 18px;margin:14px 0">
-                  <b>1. Contabilizador DIAN → tu plano</b><br>
-                  <span style="font-size:.9rem;color:#5a6b7f">Baja las facturas de la DIAN y arma el <b>plano</b> para Siigo, Contai, Helisa y World Office (IVA y retención discriminados), sin digitar.</span><br>
-                  <a href="{url_plano}" style="display:inline-block;margin-top:8px;background:{dorado};color:#fff;text-decoration:none;padding:9px 16px;border-radius:8px;font-weight:700">Ver el Contabilizador →</a>
-                </div>
-                <div style="background:#f5f7fa;border-radius:12px;padding:16px 18px;margin:14px 0">
-                  <b>2. Contabilidad completa en la nube</b><br>
+                  <b>{n_conta}Contabilidad completa en la nube</b><br>
                   <span style="font-size:.9rem;color:#5a6b7f">Causa en partida doble, informes, impuestos y el Contador IA — todo en un plan, para toda tu cartera.</span><br>
                   <a href="{url_conta}" style="display:inline-block;margin-top:8px;background:{navy};color:#fff;text-decoration:none;padding:9px 16px;border-radius:8px;font-weight:700">Ver Contabilidad →</a>
                 </div>
@@ -4593,7 +4624,7 @@ def _agente_crm_xsell_pase(limite=None) -> int:
             </div>
           </div></body></html>"""
         try:
-            enviar_email(email, "Ya declaras rápido — ahora contabiliza solo (Contabilizador DIAN)", html, cfg)
+            enviar_email(email, asunto, html, cfg)
             cl = cl or CrmLead(email=email)
             cl.xsell_conta = datetime.utcnow()
             db.session.add(cl)
