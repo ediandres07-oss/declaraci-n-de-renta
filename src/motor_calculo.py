@@ -231,10 +231,18 @@ def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
     # (llega a la casilla de "otras deducciones" de esa cédula).
     if d.gmf_pagado > 0:
         ded_gmf = round(d.gmf_pagado * 0.5)
-        d.trabajo.otras_deducciones += ded_gmf
+        # Va a la subcédula con MAYORES ingresos brutos (si no hay trabajo, no puede
+        # aparecer una deducción en una cédula vacía: un rentista de capital la lleva
+        # en capital). Empate o todo en cero → trabajo, como la Ayuda Renta.
+        _cands = [("trabajo", d.trabajo), ("honorarios", d.honorarios),
+                  ("capital", d.capital), ("no laborales", d.no_laboral)]
+        _nom, _sc = max(_cands, key=lambda x: x[1].ingresos_brutos)
+        if _sc.ingresos_brutos <= 0:
+            _nom, _sc = "trabajo", d.trabajo
+        _sc.otras_deducciones += ded_gmf
         liq.detalle.append(
             f"4×1000: GMF certificado {d.gmf_pagado:,.0f} → deducible el 50% "
-            f"(Art. 115) = {ded_gmf:,.0f}, imputado a la cédula de rentas de trabajo. "
+            f"(Art. 115) = {ded_gmf:,.0f}, imputado a la cédula de rentas de {_nom}. "
             "Conserve el certificado tributario del banco: es requisito expreso del Art. 115.")
 
     tope_viv = p.a_pesos(VIVIENDA_119_TOPE_UVT)
