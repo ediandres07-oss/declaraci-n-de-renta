@@ -1990,11 +1990,10 @@ LECTOR_VERSION_LATEST = os.environ.get("LECTOR_VERSION", "1.2.3")
 # dentro del Lector). Se puede sobrescribir con la variable de entorno del mismo
 # nombre sin recompilar el servidor. Usa saltos de línea para viñetas.
 LECTOR_NOVEDADES = os.environ.get("LECTOR_NOVEDADES",
-    "• IVA sobre AIU (vigilancia, aseo y temporales): la base gravada ahora sale del XML y no del valor de la línea. Antes una factura de $98.051 con IVA de $1.863 mostraba los $98.051 como base al 19%.\n"
-    "• «Base IVA 19%» y «Base IVA 5%» quedan con la base real y el resto pasa a «Base IVA 0/excl.», así base × tarifa siempre da el IVA.\n"
-    "• El borrador del 300 toma esa misma base: ya no infla la base gravada de compras ni deja el no gravado en cero.\n"
-    "• La hoja «Detalle» del Excel trae la columna nueva «Base gravada IVA», al lado de «Base línea».\n"
-    "• Los planos (Contai, Syscafé y los demás) no cambian: siempre tomaron la base gravada exacta del XML.")
+    "• «Buscar documentos» en la DIAN vuelve a traer las compras y ventas: el portal cambió y empezó a responder 0 si no se le da «Buscar» en su página. El Lector ahora pone las fechas y le da «Buscar» solo.\n"
+    "• Al entrar con el enlace del correo espera hasta 20 segundos a que la DIAN abra la sesión y, si no arranca, lo intenta otra vez con el mismo enlace (no se gasta).\n"
+    "• El impuesto al consumo de las compras sale en su propia cuenta del plano.\n"
+    "• Botón «Llevar a mi contabilidad»: pasa lo leído a Tributando en la nube.")
 
 
 @app.post("/api/lector-suscripcion/crear")
