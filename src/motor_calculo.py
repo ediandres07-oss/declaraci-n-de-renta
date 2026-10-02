@@ -740,7 +740,9 @@ def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
     # asumirlo en 0 lo bajaría a la mitad de forma indebida. Sin ese dato → método
     # simple. Con el dato → el contribuyente toma el menor de los dos.
     pct = p.anticipo_porcentajes[min(max(d.numero_anio_declaracion, 1), 3)]
-    if d.numero_anio_declaracion <= 1 or d.impuesto_neto_anio_anterior <= 0:
+    _conocido = (d.impuesto_neto_anio_anterior > 0
+                 or getattr(d, "impuesto_anterior_conocido", False))
+    if d.numero_anio_declaracion <= 1 or not _conocido:
         base_anticipo = r126 * pct
         metodo = "simple"
     else:
@@ -749,7 +751,7 @@ def calcular(datos: DatosDeclaracion, p: Parametros) -> Liquidacion:
         metodo = "promedio" if promedio < r126 else "simple"
     r133 = max(0.0, _round_mil(base_anticipo) - _round_mil(d.retenciones))
     liq.set(133, r133, f"anticipo año siguiente ({pct:.0%}, método {metodo})")
-    if d.numero_anio_declaracion >= 2 and d.impuesto_neto_anio_anterior <= 0 and r133 > 0:
+    if d.numero_anio_declaracion >= 2 and not _conocido and r133 > 0:
         liq.advertencias.append(
             f"Anticipo de renta {r133:,.0f} calculado por el método simple "
             f"({pct:.0%} del impuesto del año). Si conoce el impuesto NETO de renta del "

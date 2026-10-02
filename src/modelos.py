@@ -259,6 +259,9 @@ class DatosDeclaracion:
     saldo_favor_anterior: float = 0.0        # R131
     sanciones: float = 0.0                   # R135
     impuesto_neto_anio_anterior: float = 0.0  # para el cálculo del anticipo
+    # True cuando el impuesto NETO del año anterior se CONOCE aunque sea 0 (declaró
+    # y no le dio impuesto): así el promedio del Art. 807 se aplica con ese 0.
+    impuesto_anterior_conocido: bool = False
     numero_anio_declaracion: int = 3         # 1=primera vez, 2=segundo año, 3=tercero+
     descuento_impuestos_exterior: float = 0.0   # R122
     descuento_donaciones: float = 0.0           # R123
