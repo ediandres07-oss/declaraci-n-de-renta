@@ -27,7 +27,7 @@ from src import wompi as wompi_mod
 from src.asistente import asistente_activo as asistente_ia_activo
 from src.asistente import cargar_config as cargar_config_ia
 from src.asistente import responder as responder_ia
-from src.auth import (AccesoAutorizado, ArchivoExogena, LeadEspera, LeadExogena, VisitaWeb,
+from src.auth import (AccesoAutorizado, ArchivoExogena, LeadEspera, LeadExogena, VisitaWeb, ClicWeb,
                       MuestraContador,
                       OrdenRegistro, Usuario, auth_bp, autorizado_requerido, db,
                       init_auth, login_requerido, pro_requerido, usuario_actual,
@@ -1129,6 +1129,39 @@ def admin_dashboard():
                            cont=_ger.metricas_contactos())
 
 
+_BOTONES_CLIC = {"prueba_app", "asesoria", "asesoria_enviada", "whatsapp", "pase_gratis",
+                 "lector", "descargador", "contadores", "contabilidad", "entrar", "calendario",
+                 "vencimientos_wa", "vigilante", "otro"}
+
+
+@app.post("/api/clic")
+def api_clic():
+    """Cuenta un clic en un botón de una página pública (lo manda el navegador con
+    sendBeacon). Nunca falla hacia el visitante."""
+    try:
+        d = request.get_json(silent=True, force=True) or {}
+        boton = str(d.get("b") or "").strip().lower()[:40]
+        if boton not in _BOTONES_CLIC:
+            boton = "otro"
+        ruta = (str(d.get("r") or "/").split("?")[0].split("#")[0].rstrip("/") or "/")[:120]
+        ua = (request.headers.get("User-Agent") or "").lower()
+        if any(x in ua for x in ("bot", "crawler", "spider", "preview")):
+            return ("", 204)
+        from datetime import date as _date
+        hoy = _date.today()
+        origen = (session.get("origen") or "directo")[:40]
+        fila = ClicWeb.query.filter_by(dia=hoy, boton=boton, ruta=ruta, origen=origen).first()
+        if not fila:
+            fila = ClicWeb(dia=hoy, boton=boton, ruta=ruta, origen=origen, clics=0)
+            db.session.add(fila)
+        fila.clics = (fila.clics or 0) + 1
+        db.session.commit()
+    except Exception as e:  # noqa: BLE001
+        db.session.rollback()
+        app.logger.debug("contador de clics: %s", e)
+    return ("", 204)
+
+
 @app.get("/admin/visitas")
 @autorizado_requerido
 def admin_visitas():
@@ -1146,7 +1179,15 @@ def admin_visitas():
     hoy = _date.today()
     t_hoy = (db.session.query(_f.sum(VisitaWeb.vistas), _f.sum(VisitaWeb.visitantes)).filter(VisitaWeb.dia == hoy).first())
     t_30 = (db.session.query(_f.sum(VisitaWeb.vistas), _f.sum(VisitaWeb.visitantes)).filter(VisitaWeb.dia >= desde).first())
+    clics = (db.session.query(ClicWeb.boton, _f.sum(ClicWeb.clics))
+             .filter(ClicWeb.dia >= desde).group_by(ClicWeb.boton).order_by(_f.sum(ClicWeb.clics).desc()).all())
+    clics_hoy = dict(db.session.query(ClicWeb.boton, _f.sum(ClicWeb.clics))
+                     .filter(ClicWeb.dia == hoy).group_by(ClicWeb.boton).all())
+    clics_ruta = (db.session.query(ClicWeb.boton, ClicWeb.ruta, _f.sum(ClicWeb.clics))
+                  .filter(ClicWeb.dia >= desde).group_by(ClicWeb.boton, ClicWeb.ruta)
+                  .order_by(_f.sum(ClicWeb.clics).desc()).limit(30).all())
     return render_template("admin_visitas.html", por_dia=por_dia, por_ruta=por_ruta, por_origen=por_origen,
+                           clics=clics, clics_hoy=clics_hoy, clics_ruta=clics_ruta,
                            hoy=(t_hoy[0] or 0, t_hoy[1] or 0), t30=(t_30[0] or 0, t_30[1] or 0), desde=desde)
 
 

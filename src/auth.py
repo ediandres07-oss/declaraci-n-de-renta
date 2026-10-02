@@ -248,6 +248,20 @@ class VisitaWeb(db.Model):
     __table_args__ = (db.UniqueConstraint("dia", "ruta", "origen", name="uq_visita_dia_ruta_origen"),)
 
 
+class ClicWeb(db.Model):
+    """Clics en los botones de las páginas públicas (WhatsApp, asesoría, prueba
+    gratis, Lector, Descargador…): una fila por día + botón + página + origen.
+    Sirve para saber dónde se cae el visitante, no solo qué página abrió."""
+    __tablename__ = "clics_web"
+    id = db.Column(db.Integer, primary_key=True)
+    dia = db.Column(db.Date, index=True)
+    boton = db.Column(db.String(40))
+    ruta = db.Column(db.String(120))
+    origen = db.Column(db.String(40))
+    clics = db.Column(db.Integer, default=0)
+    __table_args__ = (db.UniqueConstraint("dia", "boton", "ruta", "origen", name="uq_clic_dia_boton_ruta_origen"),)
+
+
 class Bono(db.Model):
     """Bono de descuento personal, de un solo uso, que reparte el agente
     comercial (correo de cierre / última llamada). Vence a los 3 días."""

@@ -43,6 +43,17 @@
   <div class="card"><div class="n">{{ t30[0] }}</div><div class="l">vistas en 30 días</div></div>
 </div>
 
+<h2>Clics en los botones (30 días)</h2>
+{% if clics %}
+<table><tr><th>Botón</th><th class="r">Hoy</th><th class="r">30 días</th></tr>
+{% for b,c in clics %}<tr><td>{{ b }}</td><td class="r">{{ clics_hoy.get(b, 0) }}</td><td class="r">{{ c }}</td></tr>{% endfor %}
+</table>
+<h2>Clics por página (30 días)</h2>
+<table><tr><th>Botón</th><th>Página</th><th class="r">Clics</th></tr>
+{% for b,r,c in clics_ruta %}<tr><td>{{ b }}</td><td>{{ r }}</td><td class="r">{{ c }}</td></tr>{% endfor %}
+</table>
+{% else %}<div class="vacio">Todavía no hay clics: el conteo de botones empezó con este despliegue.</div>{% endif %}
+
 {% set maxo = (por_origen|map(attribute=1)|max) if por_origen else 1 %}
 <h2>De dónde llegan (30 días)</h2>
 {% if por_origen %}

@@ -1,0 +1,37 @@
+<script>
+/* Conteo de clics en los botones (panel /admin/visitas). Un botón se identifica
+   por data-clic="..." o, si no lo tiene, por a dónde lleva. Nunca bloquea el clic. */
+(function(){
+  function tipo(el){
+    var d = el.getAttribute('data-clic'); if (d) return d;
+    var h = (el.getAttribute('href') || '').toLowerCase(), c = (el.className || '') + '';
+    if (c.indexOf('js-wa') >= 0 || h.indexOf('wa.me') >= 0 || h.indexOf('whatsapp') >= 0) return 'whatsapp';
+    if (h.indexOf('#asesoria') >= 0) return 'asesoria';
+    if (h.indexOf('/activar') >= 0) return 'prueba_app';
+    if (h.indexOf('pase-gratis') >= 0) return 'pase_gratis';
+    if (h.indexOf('descargador') >= 0) return 'descargador';
+    if (h.indexOf('lector') >= 0 || h.indexOf('/descargar') >= 0) return 'lector';
+    if (h.indexOf('/login') >= 0) return 'entrar';
+    if (h.indexOf('contabilidad') >= 0) return 'contabilidad';
+    if (h.indexOf('/contadores') >= 0) return 'contadores';
+    if (h.indexOf('calendario') >= 0) return 'calendario';
+    if (h.indexOf('vigilante') >= 0) return 'vigilante';
+    return null;
+  }
+  function enviar(b){
+    try{
+      var cuerpo = JSON.stringify({b: b, r: location.pathname});
+      if (navigator.sendBeacon) navigator.sendBeacon('/api/clic', new Blob([cuerpo], {type:'application/json'}));
+      else fetch('/api/clic', {method:'POST', headers:{'Content-Type':'application/json'}, body: cuerpo, keepalive:true});
+    }catch(e){}
+  }
+  document.addEventListener('click', function(ev){
+    var el = ev.target.closest ? ev.target.closest('a,button') : null;
+    if (!el) return;
+    var b = tipo(el); if (b) enviar(b);
+  }, true);
+  document.addEventListener('submit', function(ev){
+    var f = ev.target; if (f && f.closest && f.closest('#asesoria')) enviar('asesoria_enviada');
+  }, true);
+})();
+</script>

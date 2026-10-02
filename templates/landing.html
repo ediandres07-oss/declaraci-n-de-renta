@@ -88,6 +88,12 @@ button,input,select,textarea{font:inherit;color:inherit}
 .marca span{color:var(--oro)}
 .nav-links{display:flex;align-items:center;gap:24px;font-size:.9rem;color:var(--suave);font-weight:500;white-space:nowrap}
 .nav-links a:hover{color:#fff}
+.prod-vista{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin:22px auto 6px;max-width:860px}
+.prod-vista .prod{flex:1 1 320px;max-width:420px;text-align:left;padding:14px 18px;border:1px solid rgba(230,196,131,.35);border-radius:14px;background:rgba(255,255,255,.03);color:inherit;text-decoration:none;transition:border-color .2s,background .2s}
+.prod-vista .prod:hover{border-color:#e6c483;background:rgba(230,196,131,.07)}
+.prod-vista .prod b{display:block;color:#e6c483;font-size:1rem;margin-bottom:4px}
+.prod-vista .prod span{display:block;font-size:.86rem;line-height:1.45;color:var(--suave)}
+.prod-vista .prod em{display:block;font-style:normal;font-size:.84rem;margin-top:8px;color:#fff;font-weight:600}
 .nav-acc{display:flex;align-items:center;gap:10px}
 .nav-entrar{color:#0e1b14;background:var(--verde);font-weight:700;font-size:.92rem;padding:9px 20px;border-radius:10px;box-shadow:0 8px 22px -10px rgba(55,211,143,.7);transition:background .2s,transform .2s,box-shadow .2s}
 .nav-entrar:hover{background:#4be29d;transform:translateY(-1px);box-shadow:0 12px 28px -10px rgba(55,211,143,.85)}
@@ -480,6 +486,8 @@ footer{border-top:1px solid var(--line);margin-top:104px;padding:60px 0 34px}
       <a href="#plataforma">Software contable, POS y nómina</a>
       <a href="#ia">Contador Auxiliar IA</a>
       <a href="#otros">Automatizar otros programas contables</a>
+      <a href="/contadores/lector" data-clic="lector">Lector XML</a>
+      <a href="{{ app_url }}/descargador.zip" data-clic="descargador">Descargador</a>
       <a class="nav-serv" href="#servicio">Servicio</a>
     </div>
     <div class="nav-acc">
@@ -488,6 +496,9 @@ footer{border-top:1px solid var(--line);margin-top:104px;padding:60px 0 34px}
     </div>
   </div>
   <div class="menu-mov" id="menuMov">
+    <a href="{{ app_url }}/activar" data-clic="prueba_app">Pruébalo gratis 1 mes</a>
+    <a href="/contadores/lector" data-clic="lector">Lector XML DIAN</a>
+    <a href="{{ app_url }}/descargador.zip" data-clic="descargador">Descargador Tributando</a>
     <a href="#plataforma">Software contable, POS y nómina</a>
     <a href="#ia">Contador Auxiliar IA</a>
     <a href="#otros">Automatizar otros programas contables</a>
@@ -514,10 +525,23 @@ footer{border-top:1px solid var(--line);margin-top:104px;padding:60px 0 34px}
     <h1>El software contable que causa solo<br><span class="grad">como tener un contador auxiliar</span></h1>
     <p class="lead">Baja lo de la <b>DIAN</b> y el <b>correo</b>, <b>causa</b> cada documento con las cuentas de cada empresa y lo lleva <b>a tu programa contable</b>.</p>
     <div class="hero-cta">
-      <a class="btn btn-oro" href="#asesoria">Agenda una asesoría <svg class="ic"><use href="#i-flecha"/></svg></a>
-      <button class="btn btn-ghost js-wa" type="button"><svg class="wa-ic"><use href="#i-wa"/></svg> Escríbenos por WhatsApp</button>
+      <a class="btn btn-oro" href="{{ app_url }}/activar" data-clic="prueba_app">Pruébalo gratis 1 mes <svg class="ic"><use href="#i-flecha"/></svg></a>
+      <a class="btn btn-ghost" href="#asesoria" data-clic="asesoria">Agenda una asesoría</a>
+      <button class="btn btn-ghost js-wa" type="button" data-clic="whatsapp"><svg class="wa-ic"><use href="#i-wa"/></svg> WhatsApp</button>
     </div>
-    <div class="hecho"><span>Hecho para Colombia</span><i class="bandera" aria-hidden="true"></i><i class="sep" aria-hidden="true"></i><small>Sin compromiso · montaje y capacitación incluidos</small></div>
+    <div class="prod-vista">
+      <a class="prod" href="/contadores/lector" data-clic="lector">
+        <b>Lector XML DIAN</b>
+        <span>Para contadores: de la DIAN a Siigo, World Office, Helisa o tu programa, sin digitar facturas.</span>
+        <em>Ver el Lector →</em>
+      </a>
+      <a class="prod" href="{{ app_url }}/descargador.zip" data-clic="descargador">
+        <b>Descargador Tributando</b>
+        <span>Baja compras, ventas, nómina, documento soporte y POS de la DIAN directo a tu contabilidad en la nube.</span>
+        <em>Descargar para Windows →</em>
+      </a>
+    </div>
+    <div class="hecho"><span>Hecho para Colombia</span><i class="bandera" aria-hidden="true"></i><i class="sep" aria-hidden="true"></i><small>1 mes gratis sin tarjeta · montaje y capacitación incluidos</small></div>
     <div class="iso-wrap">
       <svg class="iso" viewBox="0 84 1040 460" role="img" aria-label="Tributando en el centro: recibe lo de la DIAN y el correo, lo causa y lo lleva a Siigo, World Office, Helisa y Contai" xmlns="http://www.w3.org/2000/svg">
 <defs>
@@ -1096,5 +1120,6 @@ window.addEventListener("load", function(){
 </script>
 {% endif %}
 {% include "_flotante_gratis.html" %}
+{% include "_clics.html" %}
 </body>
 </html>
