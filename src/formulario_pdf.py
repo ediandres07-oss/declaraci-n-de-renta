@@ -246,6 +246,11 @@ def _generar_oficial_pdf(
     _txt(305, 181, con.segundo_apellido)
     _txt(388, 181, con.primer_nombre)
     _txt(472, 181, con.otros_nombres)
+    _txt(545, 181, getattr(con, "seccional", ""), 8)            # 12. Cód. dirección seccional
+    _txt(70, 191, con.actividad_economica, 7.5)                # 24. Actividad económica
+    if R(28):                                                  # 28. 1% compras con FE
+        c.setFont("Helvetica", 7.5)
+        c.drawRightString(588, H - 191, _mil(R(28)))
     pago = R(136)                                          # 980. Pago total
     if pago > 0:
         c.setFont("Helvetica", 8)
@@ -254,7 +259,8 @@ def _generar_oficial_pdf(
     # ---- valores por renglón ----
     mapa = _mapa_oficial()
     for num, (x, y, w, h) in sorted(mapa.items()):
-        valor = _mil(R(num))
+        # 138 es un CONTEO (número de dependientes), no pesos: _mil lo dejaba en 0.
+        valor = str(int(R(num))) if num == 138 else _mil(R(num))
         if rellenable:
             c.acroForm.textfield(
                 name=f"R{num}", value=valor, tooltip=f"Renglón {num}",
