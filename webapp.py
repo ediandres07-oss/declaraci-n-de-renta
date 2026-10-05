@@ -1285,16 +1285,19 @@ def admin_lector():
         <div><label style="font-size:.75rem;display:block;color:#5b6472">Correo del contador</label><input id="czEmail" type="email" placeholder="correo@ejemplo.com" style="padding:8px;border:1px solid #d7dbe2;border-radius:8px;min-width:220px"></div>
         <div><label style="font-size:.75rem;display:block;color:#5b6472">Plan</label>
           <select id="czPlan" style="padding:8px;border:1px solid #d7dbe2;border-radius:8px">
+            <option value="empresa_mensual" selected>Por empresa · mensual</option>
+            <option value="empresa_anual">Por empresa · anual</option>
             <option value="basico_mensual">Básico mensual (3 empresas)</option>
             <option value="independiente_mensual">Independiente mensual (10 empresas)</option>
             <option value="pro_mensual">Pro mensual (25 empresas)</option>
             <option value="max_mensual">Max mensual (ilimitado)</option>
             <option value="basico_anual">Básico anual (3 empresas)</option>
-            <option value="independiente_anual" selected>Independiente anual (10 empresas)</option>
+            <option value="independiente_anual">Independiente anual (10 empresas)</option>
             <option value="pro_anual">Pro anual (25 empresas)</option>
             <option value="max_anual">Max anual (ilimitado)</option>
           </select></div>
-        <div><label style="font-size:.75rem;display:block;color:#5b6472">Días</label><input id="czDias" type="number" value="365" title="Se ajusta solo al cambiar el plan: mensual 30, anual 365" style="padding:8px;border:1px solid #d7dbe2;border-radius:8px;width:90px"></div>
+        <div><label style="font-size:.75rem;display:block;color:#5b6472">Empresas</label><input id="czEmpresas" type="number" min="1" value="1" title="Solo para los planes por empresa" style="padding:8px;border:1px solid #d7dbe2;border-radius:8px;width:80px"></div>
+        <div><label style="font-size:.75rem;display:block;color:#5b6472">Días</label><input id="czDias" type="number" value="30" title="Se ajusta solo al cambiar el plan: mensual 30, anual 365" style="padding:8px;border:1px solid #d7dbe2;border-radius:8px;width:90px"></div>
         <label style="font-size:.82rem;display:flex;align-items:center;gap:5px;color:#1e2432"><input id="czAgente" type="checkbox"> con Agente</label>
         <button onclick="cortesia()" style="background:#1f8a5f;color:#fff;border:0;padding:9px 16px;border-radius:8px;font-weight:600;cursor:pointer">Crear/activar gratis</button>
       </div>
@@ -1330,9 +1333,10 @@ def admin_lector():
       const plan=document.getElementById('czPlan').value;
       const dias=document.getElementById('czDias').value||(plan.endsWith('_mensual')?30:365);
       const agente=document.getElementById('czAgente').checked;
+      const empresas=document.getElementById('czEmpresas').value||1;
       const msg=document.getElementById('czMsg');
       if(!email||!email.includes('@')){ msg.style.color='#b91c1c'; msg.textContent='Escribe un correo válido.'; return; }
-      const r=await fetch('/admin/lector/cortesia',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,plan,dias,agente})});
+      const r=await fetch('/admin/lector/cortesia',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,plan,dias,agente,empresas})});
       const d=await r.json();
       if(!d.ok){ msg.style.color='#b91c1c'; msg.textContent=d.error||'No se pudo.'; return; }
       msg.style.color='#1f8a5f'; msg.textContent='Licencia activa para '+d.email+' (vence '+d.vence+'). Que entre al Lector con su correo + código.';
@@ -1489,7 +1493,12 @@ def admin_lector_cortesia():
         dias = int(b.get("dias") or 365)
     except (TypeError, ValueError):
         dias = 365
-    sus = crear_suscripcion(email, plan, dias)
+    # Por empresa (precio vigente desde el 14-sep): el cupo es el número de
+    # empresas que se escribe; los planes viejos traen su cupo fijo.
+    empresas = _empresas_validas(b.get("empresas")) if plan.startswith("empresa_") else None
+    if plan.startswith("empresa_") and not empresas:
+        return jsonify({"ok": False, "error": f"Escribe cuántas empresas (1 a {EMPRESAS_MAX})."})
+    sus = crear_suscripcion(email, plan, dias, empresas_max=empresas)
     if b.get("agente"):
         agente_set(sus.licencia, True)
     return jsonify({"ok": True, "email": email, "licencia": sus.licencia,
