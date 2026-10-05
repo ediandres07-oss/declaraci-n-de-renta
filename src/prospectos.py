@@ -396,13 +396,29 @@ def revisar_buzon(cfg: dict | None = None) -> dict:
     cfg = cfg or _config_smtp()
     if not cfg:
         return {"error": "sin credenciales"}
+    # Los que una revisión anterior pasó a pendiente sin haber podido leer
+    # Enviados (conservan el mensaje del corte viejo): vuelven a «error» y se
+    # concilian de nuevo abajo. Así nunca se le escribe dos veces a nadie.
+    for p in Prospecto.query.filter(Prospecto.estado == "pendiente",
+                                    Prospecto.error.like("Connection unexpectedly closed%")).all():
+        p.estado = "error"
+    db.session.commit()
     m = _imap(cfg)
+    diag = {}
     try:
         enviados = set()
         sent = _carpeta(m, "\\Sent")
-        if sent:
-            for h in _cabeceras(m, sent, "TO"):
-                enviados.update(_norm(a) for _n, a in getaddresses(h.get_all("To", [])))
+        candidatas = [c for c in (sent, '"[Gmail]/Enviados"', '"[Gmail]/Sent Mail"') if c]
+        for c in candidatas:
+            try:
+                for h in _cabeceras(m, c, "TO"):
+                    enviados.update(_norm(a) for _n, a in getaddresses(h.get_all("To", [])))
+            except Exception as exc:  # noqa: BLE001
+                diag.setdefault("fallos", []).append(f"{c}: {str(exc)[:80]}")
+            if enviados:
+                diag["carpeta"] = c
+                break
+        diag["direcciones_en_enviados"] = len(enviados)
         remitentes, fallidos = {}, set()
         for h in _cabeceras(m, "INBOX", "FROM DATE X-FAILED-RECIPIENTS"):
             for a in (h.get("X-Failed-Recipients") or "").split(","):
@@ -415,15 +431,20 @@ def revisar_buzon(cfg: dict | None = None) -> dict:
             m.logout()
         except Exception:  # noqa: BLE001
             pass
-    r = {"conciliados": 0, "a_pendiente": 0, "respondieron": 0, "rebotes": 0}
+    r = {"conciliados": 0, "a_pendiente": 0, "respondieron": 0, "rebotes": 0, **diag}
+    # Sin una lectura creíble de Enviados NO se toca ningún «error»: pasarlos
+    # a pendiente sería volver a escribirles a cientos que ya recibieron el correo.
+    leer_ok = len(enviados) >= 20
+    r["enviados_leidos"] = leer_ok
     for p in Prospecto.query.filter(Prospecto.estado.in_(("error", "enviado"))).all():
         n = _norm(p.email)
-        if p.estado == "error":
+        if p.estado == "error" and leer_ok:
             if n in enviados:
                 p.estado, p.error = "enviado", ""
                 r["conciliados"] += 1
             elif "rechazado" not in (p.error or ""):
                 p.estado = "pendiente"
+                p.error = "no estaba en Enviados: " + (p.error or "")[:200]
                 r["a_pendiente"] += 1
         if n in fallidos and p.etapa in ("", None):
             p.etapa = "rebotado"
