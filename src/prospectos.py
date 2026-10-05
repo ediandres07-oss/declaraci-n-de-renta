@@ -222,7 +222,14 @@ def resumen() -> dict:
     out = defaultdict(dict)
     for seg, est, n in q:
         out[seg][est] = n
+    # Los errores agrupados por su mensaje (primeros 90 caracteres): sin esto
+    # el panel solo decía «error: 1.372» y no había cómo saber si era el cupo
+    # diario de Gmail, un correo inválido o una falla de conexión.
+    errores = Counter()
+    for (e,) in db.session.query(Prospecto.error).filter(Prospecto.estado == "error").all():
+        errores[(e or "sin mensaje")[:90]] += 1
     return {"por_segmento": dict(out), "bajas": BajaCorreo.query.count(),
+            "errores_top": errores.most_common(8),
             "encendido": os.environ.get("PROSPECTOS_ON", "") == "1",
             "smtp": bool(_config_smtp()),
             "por_dia": int(os.environ.get("PROSPECTOS_POR_DIA", "150") or 150)}
