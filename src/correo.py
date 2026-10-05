@@ -66,6 +66,23 @@ def enviar_email(destino: str, asunto: str, html: str,
     divide en tipo/subtipo para adjuntarlo.
     """
     cfg = cfg or cargar_config_email()
+    msg = armar_mensaje(destino, asunto, html, cfg, adjuntos)
+    host, port = cfg.get("host", "smtp.gmail.com"), int(cfg.get("port", 465))
+    if cfg.get("ssl", True):
+        with smtplib.SMTP_SSL(host, port) as s:
+            s.login(cfg["user"], cfg["password"])
+            s.send_message(msg)
+    else:
+        with smtplib.SMTP(host, port) as s:
+            s.starttls()
+            s.login(cfg["user"], cfg["password"])
+            s.send_message(msg)
+
+
+def armar_mensaje(destino: str, asunto: str, html: str, cfg: dict,
+                  adjuntos: Optional[list] = None) -> EmailMessage:
+    """El mensaje listo para enviar, sin abrir conexión: así un lote puede
+    mandar muchos por UNA sola sesión SMTP."""
     msg = EmailMessage()
     msg["Subject"] = asunto
     msg["From"] = formataddr((cfg.get("remitente_nombre", "Recordatorios"),
@@ -80,17 +97,7 @@ def enviar_email(destino: str, asunto: str, html: str,
         maintype, _, subtype = (mimetype or "application/octet-stream").partition("/")
         msg.add_attachment(datos, maintype=maintype,
                            subtype=subtype or "octet-stream", filename=nombre)
-
-    host, port = cfg.get("host", "smtp.gmail.com"), int(cfg.get("port", 465))
-    if cfg.get("ssl", True):
-        with smtplib.SMTP_SSL(host, port) as s:
-            s.login(cfg["user"], cfg["password"])
-            s.send_message(msg)
-    else:
-        with smtplib.SMTP(host, port) as s:
-            s.starttls()
-            s.login(cfg["user"], cfg["password"])
-            s.send_message(msg)
+    return msg
 
 
 def plantilla_recordatorio(nombre: str, limite: date, dias: int,

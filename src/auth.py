@@ -957,6 +957,19 @@ def _migrar_columnas_faltantes():
                     pass
 
 
+    # Columnas del CRM de la prospección (etapa, nota, cuándo respondió).
+    if "prospectos" in insp.get_table_names():
+        cols_p = {c["name"] for c in insp.get_columns("prospectos")}
+        for nombre, tipo in {"etapa": "VARCHAR(20) DEFAULT ''", "nota": "VARCHAR(500) DEFAULT ''",
+                             "respondio_en": marca_tiempo, "visto_en": marca_tiempo,
+                             "visitas": "INTEGER DEFAULT 0", "bienvenida_en": marca_tiempo}.items():
+            if nombre not in cols_p:
+                try:
+                    with db.engine.begin() as con:
+                        con.execute(text(f"ALTER TABLE prospectos ADD COLUMN {nombre} {tipo}"))
+                except Exception:
+                    pass
+
     # Columna 'origen' (atribución ads/instagram/…) en las tablas del embudo.
     for tabla in ("leads_exogena", "muestras_contador_email", "codigos_muestra"):
         if tabla in insp.get_table_names():

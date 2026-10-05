@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portafolio de servicios contables · Tributando</title>
+<meta name="description" content="Contabilidad, impuestos, nómina y cumplimiento ante la DIAN para empresas que empiezan, con un contador de verdad y un software que causa solo.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--osc:#0F2A22;--osc2:#163A30;--claro:#F6F7F2;--blanco:#FFFFFF;--tinta:#14231D;--suave:#4A5A52;--verde:#37D38F;--verde-t:#1C7A50;--borde:#DDE3DA;--claro-t:#BFD8CC}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Plus Jakarta Sans',Arial,sans-serif;color:var(--tinta);background:var(--claro);line-height:1.55}
+  a{color:inherit}
+  .env{max-width:1080px;margin:0 auto;padding:0 20px}
+  header{background:var(--osc);color:#F4F6F1;padding:56px 0 64px;border-left:10px solid var(--verde)}
+  .marca{font-weight:800;font-size:20px}.marca span{color:var(--verde)}
+  .ceja{color:var(--verde);font-weight:700;letter-spacing:3px;text-transform:uppercase;font-size:13px;margin:40px 0 12px}
+  h1{font-size:clamp(32px,5vw,54px);line-height:1.08;margin:0 0 18px;font-weight:800}
+  header p{color:var(--claro-t);font-size:18px;max-width:640px;margin:0 0 28px}
+  .btn{display:inline-block;background:var(--verde);color:var(--osc);font-weight:800;text-decoration:none;padding:14px 22px;border-radius:10px}
+  .btn.sec{background:transparent;color:#F4F6F1;border:1.5px solid var(--claro-t);margin-left:8px}
+  section{padding:56px 0}
+  h2{font-size:clamp(26px,3.4vw,38px);line-height:1.15;margin:0 0 28px;font-weight:800}
+  .rejilla{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px}
+  .tarjeta{background:var(--blanco);border:1px solid var(--borde);border-radius:16px;padding:24px}
+  .tarjeta h3{margin:0 0 8px;font-size:19px}
+  .tarjeta p{margin:0;color:var(--suave);font-size:15.5px}
+  .oscuro{background:var(--osc);color:#F4F6F1}
+  .oscuro .tarjeta{background:var(--osc2);border-color:var(--osc2)}
+  .oscuro .tarjeta p{color:var(--claro-t)}
+  .oscuro .ceja2{color:var(--verde)}
+  .ceja2{color:var(--verde-t);font-weight:700;letter-spacing:3px;text-transform:uppercase;font-size:13px;margin:0 0 10px}
+  .pasos{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:22px}
+  .num{font-size:44px;font-weight:800;color:var(--verde);line-height:1}
+  .pasos h3{margin:8px 0 4px;font-size:18px}.pasos p{margin:0;color:var(--suave);font-size:15px}
+  .cierre{background:var(--osc);color:#F4F6F1;text-align:center;padding:64px 0}
+  .cierre p{color:var(--claro-t)}
+  footer{font-size:13px;color:var(--suave);padding:24px 0;text-align:center}
+</style>
+</head>
+<body>
+<header>
+  <div class="env">
+    <div class="marca">Tributando<span>.co</span></div>
+    <p class="ceja">Portafolio de servicios contables</p>
+    <h1>Su empresa al día con la DIAN<br>desde el primer mes</h1>
+    <p>Contabilidad, impuestos, nómina y cumplimiento para empresas que empiezan, con un contador de verdad y un software que causa sus facturas solo.</p>
+    <a class="btn" href="https://wa.me/{{ whatsapp }}?text={{ wa_texto }}" data-clic="whatsapp">Pedir mi propuesta por WhatsApp</a>
+    <a class="btn sec" href="#servicios">Ver servicios</a>
+  </div>
+</header>
+
+<section id="servicios">
+  <div class="env">
+    <p class="ceja2">Qué hacemos cada mes</p>
+    <h2>Toda la contabilidad y los impuestos en un solo equipo</h2>
+    <div class="rejilla">
+      <div class="tarjeta"><h3>Contabilidad</h3><p>Causación de compras y ventas, conciliación bancaria, cierre mensual y estados financieros.</p></div>
+      <div class="tarjeta"><h3>Impuestos</h3><p>IVA, retención en la fuente, autorretención e industria y comercio, presentados a tiempo.</p></div>
+      <div class="tarjeta"><h3>Nómina</h3><p>Liquidación mensual, nómina electrónica, planilla PILA, prestaciones y liquidaciones.</p></div>
+      <div class="tarjeta"><h3>Cumplimiento anual</h3><p>Declaración de renta, información exógena y certificados de ingresos y retenciones.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="oscuro">
+  <div class="env">
+    <p class="ceja2">Cómo trabajamos</p>
+    <h2>Un contador de verdad, no solo un programa</h2>
+    <div class="rejilla">
+      <div class="tarjeta"><h3>Montaje incluido</h3><p>Dejamos listos el plan de cuentas, los terceros y la facturación electrónica.</p></div>
+      <div class="tarjeta"><h3>Respuesta el mismo día</h3><p>Soporte con el contador el mismo día hábil, por WhatsApp o llamada.</p></div>
+      <div class="tarjeta"><h3>Revisión mensual</h3><p>Cruzamos lo que reporta la DIAN contra los libros y le avisamos de cualquier diferencia.</p></div>
+      <div class="tarjeta"><h3>Capacitación</h3><p>Le enseñamos a su equipo a facturar y a consultar sus cifras.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="env">
+    <p class="ceja2">Tecnología incluida</p>
+    <h2>Su contabilidad en línea, causada de forma automática</h2>
+    <div class="rejilla">
+      <div class="tarjeta"><h3>Facturas DIAN leídas solas</h3><p>Las facturas electrónicas de compra y venta se descargan y se causan sin digitarlas.</p></div>
+      <div class="tarjeta"><h3>Todo en los mismos libros</h3><p>Contabilidad, nómina y punto de venta en una sola plataforma.</p></div>
+      <div class="tarjeta"><h3>Sus cifras cuando las necesite</h3><p>Acceso a balances, cartera y reportes desde el celular o el computador.</p></div>
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:0">
+  <div class="env">
+    <p class="ceja2">Cómo empezamos</p>
+    <h2>En cuatro pasos queda al día</h2>
+    <div class="pasos">
+      <div><div class="num">01</div><h3>Reunión</h3><p>Revisamos RUT, cámara de comercio y accesos a la DIAN.</p></div>
+      <div><div class="num">02</div><h3>Montaje</h3><p>Plan de cuentas, terceros, nómina y factura electrónica.</p></div>
+      <div><div class="num">03</div><h3>Primer cierre</h3><p>Causamos el mes y presentamos las declaraciones.</p></div>
+      <div><div class="num">04</div><h3>Informe mensual</h3><p>Estados financieros y alertas de cada mes.</p></div>
+    </div>
+  </div>
+</section>
+
+<div class="cierre">
+  <div class="env">
+    <h2>Tarifa de arranque, a la medida de su empresa</h2>
+    <p>Le enviamos una propuesta según su actividad, sus documentos y sus empleados.</p>
+    <a class="btn" href="https://wa.me/{{ whatsapp }}?text={{ wa_texto }}" data-clic="whatsapp">Pedir mi propuesta por WhatsApp</a>
+    <p style="margin-top:22px">Edison Monsalve, Contador Público · <a href="https://tributando.co" style="color:#F4F6F1">tributando.co</a></p>
+  </div>
+</div>
+<footer>Tributando.co · Contabilidad e impuestos para empresas en Colombia</footer>
+{% include "_clics.html" %}
+</body>
+</html>

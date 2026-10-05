@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CRM de prospectos · Tributando</title>
+<style>
+  body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;margin:0;background:#f5f7fa;color:#1e2b3a}
+  .env{max-width:1200px;margin:0 auto;padding:20px}
+  h1{font-size:22px;margin:0 0 6px}
+  .kpis{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}
+  .kpi{background:#fff;border:1px solid #e3e7ee;border-radius:10px;padding:10px 14px;min-width:120px}
+  .kpi b{display:block;font-size:20px}
+  .kpi span{font-size:12px;color:#6b7686}
+  form.filtros{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0}
+  input,select,button{font:inherit;padding:7px 9px;border:1px solid #cfd6e0;border-radius:8px;background:#fff}
+  button{background:#1e2432;color:#fff;border-color:#1e2432;cursor:pointer}
+  table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #e3e7ee;border-radius:10px;overflow:hidden;font-size:13.5px}
+  th,td{padding:8px 10px;border-bottom:1px solid #eef1f5;text-align:left;vertical-align:top}
+  th{background:#1e2432;color:#fff;font-weight:600}
+  .sub{color:#6b7686;font-size:12px}
+  .et{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:600;background:#eef1f5}
+  .et.respondio{background:#e3f6ec;color:#1c7a50}.et.propuesta{background:#fff4dc;color:#8a5a00}
+  .et.cliente{background:#d9f2ff;color:#0b5a8a}.et.descartado,.et.rebotado{background:#fde8e8;color:#9b2c2c}
+  td form{display:flex;gap:6px;flex-wrap:wrap}
+  td form input[name=nota]{min-width:180px;flex:1}
+</style></head>
+<body><div class="env">
+  <h1>CRM de prospectos</h1>
+  <div class="sub"><a href="/admin/prospectos">← Prospección</a> · <a href="/portafolio" target="_blank">Portafolio</a> ·
+    «Respondió» y «Rebotó» los marca solo la revisión del buzón de contacto@ (cada día, o con el botón en Prospección).</div>
+
+  <div class="kpis">
+    {% set pe = r.por_segmento.get('empresa', {}) %}{% set pc = r.por_segmento.get('contador', {}) %}
+    <div class="kpi"><b>{{ (pe.get('enviado',0) + pc.get('enviado',0)) }}</b><span>Enviados</span></div>
+    <div class="kpi"><b>{{ (pe.get('pendiente',0) + pc.get('pendiente',0)) }}</b><span>Pendientes</span></div>
+    <div class="kpi"><b>{{ (pe.get('error',0) + pc.get('error',0)) }}</b><span>Con error</span></div>
+    <div class="kpi"><b>{{ r.bajas }}</b><span>Se dieron de baja</span></div>
+    <div class="kpi"><b>{{ r.vieron_portafolio }}</b><span>Vieron el portafolio</span></div>
+    {% for k, rot in etapas %}{% if k %}<div class="kpi"><b>{{ r.por_etapa.get(k, 0) }}</b><span>{{ rot }}</span></div>{% endif %}{% endfor %}
+  </div>
+
+  <form class="filtros" method="get">
+    <select name="etapa">
+      <option value="todas" {{ 'selected' if etapa=='todas' }}>Todas las etapas</option>
+      <option value="vio" {{ 'selected' if etapa=='vio' }}>Vieron el portafolio</option>
+      {% for k, rot in etapas %}<option value="{{ k }}" {{ 'selected' if etapa==k }}>{{ rot }}</option>{% endfor %}
+    </select>
+    <select name="estado">
+      <option value="">Todo envío</option>
+      {% for e in ('enviado','pendiente','error','baja') %}<option value="{{ e }}" {{ 'selected' if estado==e }}>{{ e }}</option>{% endfor %}
+    </select>
+    <input name="q" value="{{ q }}" placeholder="Empresa, correo, NIT o municipio">
+    <button>Filtrar</button>
+    <span class="sub">{{ filas|length }} resultado(s){% if filas|length >= 300 %} (máximo 300; afina el filtro){% endif %}</span>
+  </form>
+
+  <table>
+    <tr><th>Empresa</th><th>Contacto</th><th>Envío</th><th>Etapa y nota</th></tr>
+    {% for p in filas %}
+    <tr>
+      <td><b>{{ p.razon_social[:90] }}</b><div class="sub">{{ 'Contador · ' ~ p.n_empresas ~ ' empresa(s)' if p.segmento=='contador' else (p.actividad[:70] if p.actividad else '') }}</div>
+        <div class="sub">{{ p.municipio }}{% if p.nit %} · NIT {{ p.nit }}{% endif %}{% if p.fecha_matricula %} · matrícula {{ p.fecha_matricula }}{% endif %}</div></td>
+      <td><a href="mailto:{{ p.email }}">{{ p.email }}</a>{% if p.respondio_en %}<div class="sub">respondió {{ p.respondio_en.strftime('%d/%m %H:%M') }}</div>{% endif %}
+        {% if p.visto_en %}<div class="sub" style="color:#1c7a50;font-weight:600">vio el portafolio {{ p.visitas or 1 }} vez/veces · {{ p.visto_en.strftime('%d/%m %H:%M') }}</div>{% endif %}
+        {% if p.bienvenida_en %}<div class="sub">saludo enviado {{ p.bienvenida_en.strftime('%d/%m %H:%M') }}</div>{% endif %}</td>
+      <td>{{ p.estado }}{% if p.enviado_en %}<div class="sub">{{ p.enviado_en.strftime('%d/%m/%Y') }}</div>{% endif %}
+        {% if p.error %}<div class="sub" title="{{ p.error }}">{{ p.error[:40] }}…</div>{% endif %}</td>
+      <td>
+        {% if p.etapa %}<span class="et {{ p.etapa }}">{{ dict(etapas).get(p.etapa, p.etapa) }}</span>{% endif %}
+        <form method="post" action="/admin/prospectos/etapa">
+          <input type="hidden" name="email" value="{{ p.email }}">
+          <input type="hidden" name="volver" value="{{ request.full_path }}">
+          <select name="etapa">{% for k, rot in etapas %}<option value="{{ k }}" {{ 'selected' if (p.etapa or '')==k }}>{{ rot }}</option>{% endfor %}</select>
+          <input name="nota" value="{{ p.nota or '' }}" placeholder="Nota (p. ej. propuesta $1,2 M enviada 5-oct)">
+          <button>Guardar</button>
+        </form>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="4" class="sub">Nada con ese filtro.</td></tr>
+    {% endfor %}
+  </table>
+</div></body></html>

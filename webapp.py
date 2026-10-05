@@ -959,13 +959,73 @@ def admin_prospectos():
                                     razon_social="DISTRIBUIDORA EJEMPLO SAS", fecha_matricula="2026-09-26")
     muestra_c = prosp_mod.Prospecto(email="contador@ejemplo.co", segmento="contador", n_empresas=3)
     (ae, he), (ac, hc) = prosp_mod.plantilla(muestra_e), prosp_mod.plantilla(muestra_c)
+    ab, hb = prosp_mod.plantilla_bienvenida(muestra_e)
     import html as _h
     return (f"<!doctype html><title>Prospectos</title><div style='font-family:sans-serif;max-width:760px;margin:24px auto;padding:0 16px'>"
-            f"<h2>Prospección de empresas nuevas</h2><pre>{_h.escape(json.dumps(r, ensure_ascii=False, indent=1))}</pre>"
+            f"<h2>Prospección de empresas nuevas</h2>"
+            f"<p><a href='/admin/prospectos/crm' style='font-weight:700'>Abrir el CRM de prospectos →</a> · "
+            f"<a href='/portafolio' target=_blank>Ver el portafolio</a></p>"
+            f"<form method=post action='/admin/prospectos/revisar'><button>Revisar el buzón de contacto@ ahora</button> "
+            f"<small>(enviados reales, respuestas y rebotes)</small></form>"
+            f"<pre>{_h.escape(json.dumps(r, ensure_ascii=False, indent=1))}</pre>"
             f"<form method=post action='/admin/prospectos/cargar' enctype='multipart/form-data'>"
             f"<input type=file name=archivo accept='.csv,.CSV'> <button>Cargar CSV del RUES</button></form>"
             f"<h3>Empresa · {_h.escape(ae)}</h3><iframe style='width:100%;height:640px;border:1px solid #ddd' srcdoc='{_h.escape(he)}'></iframe>"
-            f"<h3>Contador · {_h.escape(ac)}</h3><iframe style='width:100%;height:600px;border:1px solid #ddd' srcdoc='{_h.escape(hc)}'></iframe></div>")
+            f"<h3>Contador · {_h.escape(ac)}</h3><iframe style='width:100%;height:600px;border:1px solid #ddd' srcdoc='{_h.escape(hc)}'></iframe>"
+            f"<h3>Bienvenida al abrir el portafolio · {_h.escape(ab)} "
+            f"<small>({'ENCENDIDA' if r.get('bienvenida_encendida') else 'apagada: PROSP_BIENVENIDA_ON=1 en Render para activarla'})</small></h3>"
+            f"<iframe style='width:100%;height:560px;border:1px solid #ddd' srcdoc='{_h.escape(hb)}'></iframe></div>")
+
+
+@app.post("/admin/prospectos/revisar")
+@autorizado_requerido
+def admin_prospectos_revisar():
+    """Lee contacto@ por IMAP: concilia los «error» con Enviados y marca
+    respuestas y rebotes. Lo mismo corre solo cada día antes del lote."""
+    try:
+        r = prosp_mod.revisar_buzon()
+    except Exception as exc:  # noqa: BLE001
+        prosp_mod.db.session.rollback()
+        r = {"error": str(exc)[:300]}
+    import html as _h
+    return (f"<!doctype html><div style='font-family:sans-serif;max-width:760px;margin:24px auto'>"
+            f"<h3>Buzón revisado</h3><pre>{_h.escape(json.dumps(r, ensure_ascii=False, indent=1))}</pre>"
+            f"<p><a href='/admin/prospectos/crm'>Ir al CRM</a> · <a href='/admin/prospectos'>Volver</a></p></div>")
+
+
+@app.get("/admin/prospectos/crm")
+@autorizado_requerido
+def admin_prospectos_crm():
+    """CRM de la prospección: en qué va cada empresa contactada."""
+    etapa = request.args.get("etapa", "todas")
+    estado = request.args.get("estado", "") or None
+    q = request.args.get("q", "")
+    filas = prosp_mod.lista_crm(etapa, estado, q)
+    r = prosp_mod.resumen()
+    return render_template("prospectos_crm.html", filas=filas, etapas=prosp_mod.ETAPAS,
+                           etapa=etapa, estado=estado or "", q=q, r=r)
+
+
+@app.post("/admin/prospectos/etapa")
+@autorizado_requerido
+def admin_prospectos_etapa():
+    ok = prosp_mod.poner_etapa(request.form.get("email", ""), request.form.get("etapa", ""),
+                               request.form.get("nota"))
+    return redirect(request.form.get("volver") or "/admin/prospectos/crm") if ok else ("Etapa inválida", 400)
+
+
+@app.get("/portafolio")
+def portafolio():
+    """Portafolio de servicios contables para empresas (enlace de la prospección)."""
+    wa = IA_CFG.get("negocio", {}).get("whatsapp") or "573332470715"
+    from urllib.parse import quote
+    if request.args.get("e"):
+        try:
+            prosp_mod.registrar_visita(request.args.get("e", ""), request.args.get("t", ""))
+        except Exception:  # noqa: BLE001 — una visita nunca tumba la página
+            prosp_mod.db.session.rollback()
+    return render_template("portafolio.html", whatsapp=wa,
+                           wa_texto=quote("Hola Edison, vi el portafolio de Tributando y quiero una propuesta para mi empresa."))
 
 
 @app.post("/admin/prospectos/cargar")

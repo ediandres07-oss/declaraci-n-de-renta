@@ -44,6 +44,15 @@ class Prospecto(db.Model):
     enviado_en = db.Column(db.DateTime)
     error = db.Column(db.String(300), default="")
     creado = db.Column(db.DateTime, default=datetime.utcnow)
+    # CRM: en qué va la conversación comercial. «respondio» y «rebotado» los
+    # marca solo la lectura del buzón; lo demás lo pone Edison.
+    etapa = db.Column(db.String(20), default="")       # '' | respondio | propuesta | cliente | descartado | rebotado
+    nota = db.Column(db.String(500), default="")
+    respondio_en = db.Column(db.DateTime)
+    # Quién abrió el portafolio: cada correo lleva SU enlace firmado.
+    visto_en = db.Column(db.DateTime)
+    visitas = db.Column(db.Integer, default=0)
+    bienvenida_en = db.Column(db.DateTime)      # saludo al abrir el portafolio (una sola vez)
 
 
 class BajaCorreo(db.Model):
@@ -69,6 +78,72 @@ def token_baja(email: str) -> str:
 def url_baja(email: str) -> str:
     from urllib.parse import quote
     return f"{URL}/baja?e={quote(email)}&t={token_baja(email)}"
+
+
+def token_portafolio(email: str) -> str:
+    return hmac.new(_secreto(), ("portafolio|" + email.lower().strip()).encode(),
+                    hashlib.sha256).hexdigest()[:20]
+
+
+def url_portafolio(email: str) -> str:
+    from urllib.parse import quote
+    return f"{URL}/portafolio?e={quote(email)}&t={token_portafolio(email)}"
+
+
+def registrar_visita(email: str, token: str) -> bool:
+    """Anota que ese prospecto abrió el portafolio (enlace firmado; sin firma
+    válida no se anota nada: la visita cuenta igual en /admin/visitas)."""
+    email = (email or "").lower().strip()
+    if not email or not hmac.compare_digest(token or "", token_portafolio(email)):
+        return False
+    p = db.session.get(Prospecto, email)
+    if not p:
+        return False
+    p.visto_en = datetime.utcnow()
+    p.visitas = (p.visitas or 0) + 1
+    db.session.commit()
+    if not p.bienvenida_en and os.environ.get("PROSP_BIENVENIDA_ON", "").strip() == "1":
+        _bienvenida_en_hilo(p.email)
+    return True
+
+
+def plantilla_bienvenida(p: "Prospecto") -> tuple[str, str]:
+    """Saludo a quien abre el portafolio: pide los 3 datos para cotizar."""
+    nombre = (p.razon_social or "su empresa").strip()
+    asunto = f"Gracias por su interés, {nombre}"
+    cuerpo = f"""<p>Hola,</p>
+<p>Gracias por revisar el portafolio de <b>Tributando</b>. Con gusto le preparamos una propuesta a la medida de <b>{nombre}</b>.</p>
+<p>Para cotizarle bien, responda este correo con tres datos:</p>
+<ol style="padding-left:18px">
+<li>A qué se dedica la empresa.</li>
+<li>Cuántas facturas emite y recibe al mes, más o menos.</li>
+<li>Cuántos empleados tiene o va a contratar.</li>
+</ol>
+<p>Si prefiere, escríbame por WhatsApp y lo hablamos.</p>"""
+    return asunto, _envolver(cuerpo, p.email, "Escribir por WhatsApp", "https://wa.me/573332470715")
+
+
+def _bienvenida_en_hilo(email: str) -> None:
+    """Manda el saludo sin hacer esperar la página (hilo aparte, una sola vez)."""
+    import threading
+    from flask import current_app
+    app = current_app._get_current_object()
+
+    def _tarea():
+        with app.app_context():
+            p = db.session.get(Prospecto, email)
+            cfg = _config_smtp()
+            if not p or p.bienvenida_en or not cfg or esta_de_baja(email):
+                return
+            from src.correo import enviar_email
+            try:
+                asunto, html = plantilla_bienvenida(p)
+                enviar_email(p.email, asunto, html, cfg)
+                p.bienvenida_en = datetime.utcnow()
+                db.session.commit()
+            except Exception:  # noqa: BLE001
+                db.session.rollback()
+    threading.Thread(target=_tarea, daemon=True).start()
 
 
 def dar_de_baja(email: str, token: str) -> bool:
@@ -171,7 +246,7 @@ def plantilla(p: Prospecto) -> tuple[str, str]:
 <li><b>Renovar la matrícula</b> antes del 31 de marzo.</li>
 </ul>
 <p>En <b>Tributando</b> te llevamos la <b>contabilidad en la nube</b>, alimentada sola con tus facturas de la DIAN, la <b>nómina electrónica</b> y los impuestos, con un contador que lo revisa. Responde este correo y te cuento cuánto cuesta para {nombre}.</p>"""
-    return asunto, _envolver(cuerpo, p.email, "Ver cómo funciona", f"{URL}/contabilidad")
+    return asunto, _envolver(cuerpo, p.email, "Ver nuestro portafolio", url_portafolio(p.email))
 
 
 # ---------------------------------------------------------------- envío
@@ -187,33 +262,206 @@ def _config_smtp() -> dict | None:
     return cfg
 
 
+ETAPAS = (("", "Sin respuesta"), ("respondio", "Respondió"), ("propuesta", "Propuesta enviada"),
+          ("cliente", "Cliente"), ("descartado", "Descartado"), ("rebotado", "Rebotó"))
+DESDE_IMAP = "28-Sep-2026"          # inicio de la prospección
+
+
+def _norm(email: str) -> str:
+    """Gmail ignora los puntos del usuario: carnicosdelnorte.ge@ = carnicosdelnortege@."""
+    email = (email or "").strip().lower()
+    u, _, d = email.partition("@")
+    if d in ("gmail.com", "googlemail.com"):
+        u = u.split("+")[0].replace(".", "")
+    return f"{u}@{d}"
+
+
+def _abrir_smtp(cfg):
+    import smtplib
+    s = smtplib.SMTP_SSL(cfg.get("host", "smtp.gmail.com"), int(cfg.get("port", 465)), timeout=40)
+    s.login(cfg["user"], cfg["password"])
+    return s
+
+
 def enviar_lote(limite: int | None = None) -> int:
     """Manda hasta `limite` correos a prospectos pendientes (los más recientes
-    primero). Apagado salvo PROSPECTOS_ON=1. Devuelve cuántos envió."""
+    primero) por UNA sola conexión SMTP y con pausa entre correos.
+
+    Antes se abría una conexión e inicio de sesión por correo y Gmail cortaba
+    («Connection unexpectedly closed»): 1.438 quedaron como «error» aunque
+    cientos sí habían salido. Ahora, si Gmail corta, se reintenta una vez con
+    conexión nueva y, si vuelve a cortar, se PARA el lote y el resto queda
+    pendiente para mañana; solo un destinatario rechazado queda en error.
+    Apagado salvo PROSPECTOS_ON=1. Devuelve cuántos envió."""
+    import smtplib
+    import time
     if os.environ.get("PROSPECTOS_ON", "").strip() != "1":
         return 0
     cfg = _config_smtp()
     if not cfg:
         return 0
-    from src.correo import enviar_email
+    from src.correo import armar_mensaje
+    try:
+        revisar_buzon(cfg)          # primero: errores viejos que sí salieron, respuestas y rebotes
+    except Exception:  # noqa: BLE001
+        db.session.rollback()
     limite = limite or int(os.environ.get("PROSPECTOS_POR_DIA", "150") or 150)
-    enviados = 0
-    for p in (Prospecto.query.filter_by(estado="pendiente")
-              .order_by(Prospecto.fecha_matricula.desc()).limit(limite * 2).all()):
-        if enviados >= limite:
-            break
-        if esta_de_baja(p.email):
-            p.estado = "baja"
-            continue
-        asunto, html = plantilla(p)
+    pausa = float(os.environ.get("PROSPECTOS_PAUSA", "4") or 4)
+    enviados, smtp = 0, None
+    try:
+        for p in (Prospecto.query.filter_by(estado="pendiente")
+                  .order_by(Prospecto.fecha_matricula.desc()).limit(limite * 2).all()):
+            if enviados >= limite:
+                break
+            if esta_de_baja(p.email):
+                p.estado = "baja"
+                db.session.commit()
+                continue
+            asunto, html = plantilla(p)
+            msg = armar_mensaje(p.email, asunto, html, cfg)
+            cortar = False
+            for intento in (1, 2):
+                try:
+                    if smtp is None:
+                        smtp = _abrir_smtp(cfg)
+                    smtp.send_message(msg)
+                    p.estado, p.enviado_en, p.error = "enviado", datetime.utcnow(), ""
+                    enviados += 1
+                    break
+                except smtplib.SMTPRecipientsRefused as exc:
+                    p.estado, p.error = "error", ("rechazado: " + str(exc))[:300]
+                    break
+                except (smtplib.SMTPException, OSError) as exc:
+                    try:
+                        smtp and smtp.close()
+                    except Exception:  # noqa: BLE001
+                        pass
+                    smtp = None
+                    if intento == 2:
+                        cortar = True
+                        p.error = ("corte (queda pendiente): " + str(exc))[:300]
+            db.session.commit()
+            if cortar:
+                break
+            time.sleep(pausa)
+    finally:
         try:
-            enviar_email(p.email, asunto, html, cfg)
-            p.estado, p.enviado_en, p.error = "enviado", datetime.utcnow(), ""
-            enviados += 1
-        except Exception as exc:  # noqa: BLE001
-            p.estado, p.error = "error", str(exc)[:300]
-        db.session.commit()
+            smtp and smtp.quit()
+        except Exception:  # noqa: BLE001
+            pass
     return enviados
+
+
+# ---------------------------------------------------------------- buzón
+def _imap(cfg):
+    import imaplib
+    m = imaplib.IMAP4_SSL("imap.gmail.com")
+    m.login(cfg["user"], cfg["password"])
+    return m
+
+
+def _carpeta(m, atributo: str) -> str | None:
+    """Nombre de la carpeta con ese atributo (\\Sent): en Gmail en español es
+    «[Gmail]/Enviados»; se busca por el atributo para no depender del idioma."""
+    _t, lineas = m.list()
+    for ln in lineas or []:
+        txt = ln.decode("utf-8", "ignore") if isinstance(ln, bytes) else str(ln)
+        if atributo in txt:
+            return txt.rsplit(' "/" ', 1)[-1].strip()
+    return None
+
+
+def _cabeceras(m, carpeta: str, campos: str) -> list:
+    """Cabeceras pedidas de los mensajes de la carpeta desde DESDE_IMAP."""
+    from email.parser import HeaderParser
+    m.select(carpeta, readonly=True)
+    _t, datos = m.search(None, f"SINCE {DESDE_IMAP}")
+    ids = (datos[0] or b"").split()
+    out = []
+    for k in range(0, len(ids), 400):
+        _t, resp = m.fetch(b",".join(ids[k:k + 400]), f"(BODY.PEEK[HEADER.FIELDS ({campos})])")
+        for parte in resp or []:
+            if isinstance(parte, tuple) and parte[1]:
+                out.append(HeaderParser().parsestr(parte[1].decode("utf-8", "ignore")))
+    return out
+
+
+def revisar_buzon(cfg: dict | None = None) -> dict:
+    """Lee contacto@ por IMAP y pone al día la prospección:
+    - «error» que SÍ aparece en Enviados → enviado (no se le vuelve a escribir);
+      el resto de «error» por corte de conexión → pendiente (se reintenta).
+    - Respuestas en la bandeja de entrada de un prospecto → etapa «respondio».
+    - Rebotes (X-Failed-Recipients) → etapa «rebotado»."""
+    from email.utils import getaddresses
+    cfg = cfg or _config_smtp()
+    if not cfg:
+        return {"error": "sin credenciales"}
+    m = _imap(cfg)
+    try:
+        enviados = set()
+        sent = _carpeta(m, "\\Sent")
+        if sent:
+            for h in _cabeceras(m, sent, "TO"):
+                enviados.update(_norm(a) for _n, a in getaddresses(h.get_all("To", [])))
+        remitentes, fallidos = {}, set()
+        for h in _cabeceras(m, "INBOX", "FROM DATE X-FAILED-RECIPIENTS"):
+            for a in (h.get("X-Failed-Recipients") or "").split(","):
+                if "@" in a:
+                    fallidos.add(_norm(a))
+            for _n, a in getaddresses(h.get_all("From", [])):
+                remitentes.setdefault(_norm(a), h.get("Date", ""))
+    finally:
+        try:
+            m.logout()
+        except Exception:  # noqa: BLE001
+            pass
+    r = {"conciliados": 0, "a_pendiente": 0, "respondieron": 0, "rebotes": 0}
+    for p in Prospecto.query.filter(Prospecto.estado.in_(("error", "enviado"))).all():
+        n = _norm(p.email)
+        if p.estado == "error":
+            if n in enviados:
+                p.estado, p.error = "enviado", ""
+                r["conciliados"] += 1
+            elif "rechazado" not in (p.error or ""):
+                p.estado = "pendiente"
+                r["a_pendiente"] += 1
+        if n in fallidos and p.etapa in ("", None):
+            p.etapa = "rebotado"
+            r["rebotes"] += 1
+        elif n in remitentes and p.etapa in ("", None, "rebotado") and n not in fallidos:
+            p.etapa, p.respondio_en = "respondio", datetime.utcnow()
+            r["respondieron"] += 1
+    db.session.commit()
+    return r
+
+
+def lista_crm(etapa: str | None = None, estado: str | None = None, q: str = "",
+              limite: int = 300) -> list:
+    qry = Prospecto.query
+    if etapa == "vio":
+        qry = qry.filter(Prospecto.visto_en.isnot(None))
+    elif etapa is not None and etapa != "todas":
+        qry = qry.filter(Prospecto.etapa == etapa)
+    if estado:
+        qry = qry.filter(Prospecto.estado == estado)
+    if q:
+        like = f"%{q.strip()}%"
+        qry = qry.filter(db.or_(Prospecto.razon_social.ilike(like), Prospecto.email.ilike(like),
+                                Prospecto.municipio.ilike(like), Prospecto.nit.ilike(like)))
+    return qry.order_by(Prospecto.respondio_en.desc().nullslast(),
+                        Prospecto.visto_en.desc().nullslast(),
+                        Prospecto.fecha_matricula.desc()).limit(limite).all()
+
+
+def poner_etapa(email: str, etapa: str, nota: str | None = None) -> bool:
+    p = db.session.get(Prospecto, (email or "").strip().lower())
+    if not p or etapa not in dict(ETAPAS):
+        return False
+    p.etapa = etapa
+    if nota is not None:
+        p.nota = nota.strip()[:500]
+    db.session.commit()
+    return True
 
 
 def resumen() -> dict:
@@ -230,6 +478,11 @@ def resumen() -> dict:
         errores[(e or "sin mensaje")[:90]] += 1
     return {"por_segmento": dict(out), "bajas": BajaCorreo.query.count(),
             "errores_top": errores.most_common(8),
+            "por_etapa": dict(db.session.query(Prospecto.etapa, db.func.count())
+                              .group_by(Prospecto.etapa).all()),
+            "vieron_portafolio": Prospecto.query.filter(Prospecto.visto_en.isnot(None)).count(),
+            "bienvenidas": Prospecto.query.filter(Prospecto.bienvenida_en.isnot(None)).count(),
+            "bienvenida_encendida": os.environ.get("PROSP_BIENVENIDA_ON", "") == "1",
             "encendido": os.environ.get("PROSPECTOS_ON", "") == "1",
             "smtp": bool(_config_smtp()),
             "por_dia": int(os.environ.get("PROSPECTOS_POR_DIA", "150") or 150)}
