@@ -2100,10 +2100,9 @@ LECTOR_VERSION_LATEST = os.environ.get("LECTOR_VERSION", "1.2.3")
 # dentro del Lector). Se puede sobrescribir con la variable de entorno del mismo
 # nombre sin recompilar el servidor. Usa saltos de línea para viñetas.
 LECTOR_NOVEDADES = os.environ.get("LECTOR_NOVEDADES",
-    "• «Buscar documentos» en la DIAN vuelve a traer las compras y ventas: el portal cambió y empezó a responder 0 si no se le da «Buscar» en su página. El Lector ahora pone las fechas y le da «Buscar» solo.\n"
-    "• Al entrar con el enlace del correo espera hasta 20 segundos a que la DIAN abra la sesión y, si no arranca, lo intenta otra vez con el mismo enlace (no se gasta).\n"
-    "• El impuesto al consumo de las compras sale en su propia cuenta del plano.\n"
-    "• Botón «Llevar a mi contabilidad»: pasa lo leído a Tributando en la nube.")
+    "• Nuevo menú «Conectar con Claude»: conecta el Lector con Claude para escritorio y pregúntale por tus clientes en tus palabras: «lista las compras de septiembre de este cliente», «¿cuánto IVA descontable tiene en el bimestre?», «arma el plano para Siigo». Si Claude está abierto, el Lector lo cierra un momento, guarda la conexión y lo vuelve a abrir.\n"
+    "• Claude puede ver tus clientes y su ficha, listar facturas de compra y venta por fechas, armar el borrador del 300 y del 350 y generar el plano para Siigo, World Office, Helisa, Alegra, Loggro o Contai. Lee los datos de tu computador; no presenta nada ante la DIAN ni borra información.\n"
+    "• Documento soporte (a no obligados a facturar): ahora va a COMPRAS en el 300, el 350 y la renta del comerciante; antes inflaba las ventas.")
 
 
 @app.post("/api/lector-suscripcion/crear")
