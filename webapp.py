@@ -968,6 +968,9 @@ def admin_prospectos():
             f"<form method=post action='/admin/prospectos/revisar'><button>Revisar el buzón de contacto@ ahora</button> "
             f"<small>(enviados reales, respuestas y rebotes)</small></form>"
             f"<pre>{_h.escape(json.dumps(r, ensure_ascii=False, indent=1))}</pre>"
+            f"<form method=post action='/admin/prospectos/enviar-ahora' onsubmit=\"return confirm('¿Enviar ya a los pendientes más nuevos?')\">"
+            f"<button>Enviar ahora a los pendientes más nuevos</button> hasta <input name=n value=150 size=4> "
+            f"<small>(además del lote diario; va en segundo plano, ~4 s por correo)</small></form>"
             f"<form method=post action='/admin/prospectos/cargar' enctype='multipart/form-data'>"
             f"<input type=file name=archivo accept='.csv,.CSV'> <button>Cargar CSV del RUES</button></form>"
             f"<h3>Empresa · {_h.escape(ae)}</h3><iframe style='width:100%;height:640px;border:1px solid #ddd' srcdoc='{_h.escape(he)}'></iframe>"
@@ -975,6 +978,34 @@ def admin_prospectos():
             f"<h3>Bienvenida al abrir el portafolio · {_h.escape(ab)} "
             f"<small>({'ENCENDIDA' if r.get('bienvenida_encendida') else 'apagada: PROSP_BIENVENIDA_ON=1 en Render para activarla'})</small></h3>"
             f"<iframe style='width:100%;height:560px;border:1px solid #ddd' srcdoc='{_h.escape(hb)}'></iframe></div>")
+
+
+_ENVIO_AHORA = {"corriendo": False}
+
+
+@app.post("/admin/prospectos/enviar-ahora")
+@autorizado_requerido
+def admin_prospectos_enviar_ahora():
+    """Manda YA (en un hilo) hasta n correos a los pendientes más nuevos, sin esperar
+    el lote de la mañana. Uno a la vez; tope de 300 por clic para cuidar el límite de Gmail."""
+    import threading
+    n = max(1, min(int(request.form.get("n") or 150), 300))
+    if _ENVIO_AHORA["corriendo"]:
+        msg = "Ya hay un envío corriendo; espera a que termine."
+    else:
+        def _correr():
+            _ENVIO_AHORA["corriendo"] = True
+            try:
+                with app.app_context():
+                    prosp_mod.enviar_lote(n)
+            except Exception:  # noqa: BLE001
+                app.logger.exception("envío de prospectos ahora")
+            finally:
+                _ENVIO_AHORA["corriendo"] = False
+        threading.Thread(target=_correr, daemon=True).start()
+        msg = f"Enviando hasta {n} correos en segundo plano. Revisa el avance en unos minutos."
+    return (f"<!doctype html><div style='font-family:sans-serif;max-width:760px;margin:24px auto'>"
+            f"<h3>{msg}</h3><p><a href='/admin/prospectos'>Volver</a> · <a href='/admin/prospectos/crm'>CRM</a></p></div>")
 
 
 @app.post("/admin/prospectos/revisar")
