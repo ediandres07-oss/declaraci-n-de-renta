@@ -159,6 +159,10 @@ def _avisar(texto: str) -> None:
         pass
 
 
+def _quien_wa(remitente: str) -> str:
+    return f"+{remitente}" if remitente.isdigit() else f"usuario {remitente}"
+
+
 def generar(historial: list, remitente: str, cfg: dict) -> str:
     """Respuesta del asesor para este chat (y las acciones que pida)."""
     Prospecto, WaProspecto, db = _modelos()
@@ -169,22 +173,23 @@ def generar(historial: list, remitente: str, cfg: dict) -> str:
     respuesta = re.sub(r"\s*\[\[(PROPUESTA|LLAMADA|EDISON)\]\]\s*", " ", respuesta).strip()
     quien = f"{p.razon_social} (NIT {p.nit}, {p.email})" if p else "empresa sin identificar"
     if primero:
-        _avisar(f"Nueva empresa por WhatsApp: +{remitente}\n{quien}\nDijo: {historial[-1]['texto'][:300]}")
+        _avisar(f"Nueva empresa por WhatsApp: {_quien_wa(remitente)}\n{quien}\nDijo: {historial[-1]['texto'][:300]}")
     if "PROPUESTA" in marcas and p:
         from src.prospectos import url_propuesta, enviar_propuesta_correo
         _asociar(remitente, p.email)
         respuesta += f"\n\nAquí está tu propuesta: {url_propuesta(p.email)}\nTambién te la mandé a {p.email}."
         enviado = enviar_propuesta_correo(p)
         p.etapa = "propuesta"
-        p.nota = ((p.nota or "") + f" · Propuesta por WhatsApp +{remitente} {datetime.utcnow():%d/%m}")[:500]
+        p.nota = ((p.nota or "") + f" · Propuesta por WhatsApp {_quien_wa(remitente)} {datetime.utcnow():%d/%m}")[:500]
         wa = db.session.get(WaProspecto, remitente)
         if wa:
             wa.propuesta_en = datetime.utcnow()
         db.session.commit()
-        _avisar(f"✅ Propuesta enviada a {quien} por WhatsApp (+{remitente})" + ("" if enviado else " · el correo NO salió"))
+        _avisar(f"✅ Propuesta enviada a {quien} por WhatsApp ({_quien_wa(remitente)})" + ("" if enviado else " · el correo NO salió"))
     elif "PROPUESTA" in marcas:
         respuesta += "\n\nPara enviártela necesito el NIT o el nombre exacto de la empresa 🙏"
     if marcas & {"LLAMADA", "EDISON"}:
-        _avisar(f"📞 {'Pide llamada' if 'LLAMADA' in marcas else 'Tema para ti'}: +{remitente} · {quien}\n"
-                f"Último mensaje: {historial[-1]['texto'][:300]}\nChat: https://wa.me/{remitente}")
+        _avisar(f"📞 {'Pide llamada' if 'LLAMADA' in marcas else 'Tema para ti'}: {_quien_wa(remitente)} · {quien}\n"
+                f"Último mensaje: {historial[-1]['texto'][:300]}"
+                + (f"\nChat: https://wa.me/{remitente}" if remitente.isdigit() else "\n(Tiene nombre de usuario: búscalo en el WhatsApp del 333)"))
     return respuesta

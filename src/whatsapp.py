@@ -68,7 +68,8 @@ def extraer_mensajes(payload: dict | None) -> list:
             for m in valor.get("messages", []) or []:
                 if m.get("type") != "text":
                     continue
-                remitente = m.get("from", "")
+                # con nombre de usuario Meta no manda el teléfono: llega el BSUID (from_user_id)
+                remitente = m.get("from", "") or m.get("from_user_id", "")
                 texto = ((m.get("text") or {}).get("body") or "").strip()
                 if remitente and texto:
                     _numero_de[remitente] = (valor.get("metadata") or {}).get("phone_number_id", "")
@@ -109,16 +110,22 @@ def _agregar_turno(remitente: str, rol: str, texto: str) -> list:
         return list(turnos)
 
 
+def es_telefono(remitente: str) -> bool:
+    """Teléfono en dígitos; si no, es un BSUID (p. ej. «CO.2353214828829329») de quien tiene usuario."""
+    return (remitente or "").isdigit()
+
+
 def enviar(cfg: dict | None, destino: str, texto: str) -> bool:
     """Envía un mensaje de texto por WhatsApp Cloud API. True si Meta lo aceptó."""
     wc = config(cfg)
-    version = wc.get("api_version", "v21.0")
+    version = wc.get("api_version", "v26.0")   # v26: responde a BSUID con «recipient»
     pnid = _numero_de.get(destino) or wc["phone_number_id"]   # responde por el número al que escribieron
     url = f"https://graph.facebook.com/{version}/{pnid}/messages"
     try:
         r = requests.post(
             url,
-            json={"messaging_product": "whatsapp", "to": destino,
+            json={"messaging_product": "whatsapp", "recipient_type": "individual",
+                  **({"to": destino} if es_telefono(destino) else {"recipient": destino}),
                   "type": "text", "text": {"body": texto[:4000]}},
             headers={"Authorization": f"Bearer {wc['access_token']}"},
             timeout=_TIMEOUT,
