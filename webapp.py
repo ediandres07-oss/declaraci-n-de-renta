@@ -774,9 +774,15 @@ def whatsapp_webhook():
         # Los contadores llegan por WhatsApp (campañas + /contadores): el asistente
         # los atiende con el contexto de contador (pase de temporada / Lector XML).
         # Si piden hablar con una persona, el bot avisa al dueño y se calla en ese chat.
-        wa_mod.atender(IA_CFG, payload,
-                       lambda hist: responder_ia(hist, IA_CFG, contexto="contador"),
-                       on_handoff=_wa_avisar_traspaso)
+        # Las EMPRESAS de la prospección (escriben desde el portafolio) las atiende el
+        # asesor comercial (src/asesor_empresas.py); lo demás, el bot de contadores.
+        from src import asesor_empresas as _ases
+
+        def _generar(hist, remitente=""):
+            if _ases.es_empresa(remitente, hist[-1]["texto"] if hist else ""):
+                return _ases.generar(hist, remitente, IA_CFG)
+            return responder_ia(hist, IA_CFG, contexto="contador")
+        wa_mod.atender(IA_CFG, payload, _generar, on_handoff=_wa_avisar_traspaso)
     return "ok", 200
 
 
@@ -1043,6 +1049,44 @@ def admin_prospectos_etapa():
     ok = prosp_mod.poner_etapa(request.form.get("email", ""), request.form.get("etapa", ""),
                                request.form.get("nota"))
     return redirect(request.form.get("volver") or "/admin/prospectos/crm") if ok else ("Etapa inválida", 400)
+
+
+_FOCOS = (
+    (("fabricaci", "elaboraci", "confecci", "producci"), "Su fábrica al día con la DIAN desde el primer mes",
+     "Inventario y costos de producción", "materia prima, producto en proceso y producto terminado: cuánto le cuesta cada producto y cuánto gana", "inventario y costo de producción"),
+    (("construcci", "obras", "terminaci", "arquitect", "ingenier"), "Su constructora al día con la DIAN desde el primer mes",
+     "Costos por obra", "materiales, mano de obra y contratistas por proyecto, para saber cuánto deja cada obra", "costos por obra"),
+    (("comercio", "venta"), "Su comercio al día con la DIAN desde el primer mes",
+     "Inventario y márgenes", "mercancía con su costo promedio y el margen de cada producto, para comprar mejor", "inventario y márgenes"),
+    (("veterin", "médic", "medic", "odontol", "salud", "terap"), "Su consultorio al día con la DIAN desde el primer mes",
+     "Facturación e insumos", "facturación electrónica de consultas y procedimientos, e inventario de medicamentos e insumos", "facturación e insumos"),
+    (("inmobiliar", "arrend", "alquiler"), "Su inmobiliaria al día con la DIAN desde el primer mes",
+     "Arriendos y cartera", "cánones, depósitos, retenciones y la cartera de cada inquilino", "arriendos y cartera"),
+)
+
+
+def _foco_propuesta(actividad: str) -> dict:
+    a = (actividad or "").lower()
+    for claves, titulo, tarjeta, texto, corto in _FOCOS:
+        if any(k in a for k in claves):
+            return {"titulo": titulo, "tarjeta": tarjeta, "texto": texto[0].upper() + texto[1:] + ".", "corto": corto}
+    return {"titulo": "Su empresa al día con la DIAN desde el primer mes", "tarjeta": "Facturación y cartera",
+            "texto": "Facturación electrónica de sus servicios y la cartera de cada cliente al día.", "corto": "facturación y cartera"}
+
+
+@app.get("/propuesta")
+def propuesta_empresa():
+    """Propuesta personalizada (enlace firmado) que el asesor de WhatsApp manda a cada empresa."""
+    import hmac as _hmac
+    from urllib.parse import quote
+    email = (request.args.get("e") or "").lower().strip()
+    if not email or not _hmac.compare_digest(request.args.get("t") or "", prosp_mod.token_portafolio(email)):
+        return redirect("/portafolio")
+    p = prosp_mod.db.session.get(prosp_mod.Prospecto, email)
+    if not p:
+        return redirect("/portafolio")
+    wa = quote(f"Hola Edison, quiero arrancar con {p.razon_social}")
+    return render_template("propuesta.html", p=p, foco=_foco_propuesta(p.actividad), wa=wa)
 
 
 @app.get("/portafolio")

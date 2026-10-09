@@ -1,0 +1,93 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Propuesta {{ p.razon_social }} · Tributando</title><meta name="robots" content="noindex">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet"><style>
+  :root{--osc:#0F2A22;--osc2:#163A30;--claro:#F6F7F2;--blanco:#FFFFFF;--tinta:#14231D;--suave:#4A5A52;--verde:#37D38F;--verde-t:#1C7A50;--borde:#DDE3DA;--claro-t:#BFD8CC}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Plus Jakarta Sans',Arial,sans-serif;color:var(--tinta);background:var(--claro);line-height:1.55}
+  a{color:inherit}
+  .env{max-width:1080px;margin:0 auto;padding:0 20px}
+  header{background:var(--osc);color:#F4F6F1;padding:56px 0 64px;border-left:10px solid var(--verde)}
+  .marca{font-weight:800;font-size:20px}.marca span{color:var(--verde)}
+  .ceja{color:var(--verde);font-weight:700;letter-spacing:3px;text-transform:uppercase;font-size:13px;margin:40px 0 12px}
+  h1{font-size:clamp(32px,5vw,54px);line-height:1.08;margin:0 0 18px;font-weight:800}
+  header p{color:var(--claro-t);font-size:18px;max-width:640px;margin:0 0 28px}
+  .btn{display:inline-block;background:var(--verde);color:var(--osc);font-weight:800;text-decoration:none;padding:14px 22px;border-radius:10px}
+  .btn.sec{background:transparent;color:#F4F6F1;border:1.5px solid var(--claro-t);margin-left:8px}
+  section{padding:56px 0}
+  h2{font-size:clamp(26px,3.4vw,38px);line-height:1.15;margin:0 0 28px;font-weight:800}
+  .rejilla{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px}
+  .tarjeta{background:var(--blanco);border:1px solid var(--borde);border-radius:16px;padding:24px}
+  .tarjeta h3{margin:0 0 8px;font-size:19px}
+  .tarjeta p{margin:0;color:var(--suave);font-size:15.5px}
+  .oscuro{background:var(--osc);color:#F4F6F1}
+  .oscuro .tarjeta{background:var(--osc2);border-color:var(--osc2)}
+  .oscuro .tarjeta p{color:var(--claro-t)}
+  .oscuro .ceja2{color:var(--verde)}
+  .ceja2{color:var(--verde-t);font-weight:700;letter-spacing:3px;text-transform:uppercase;font-size:13px;margin:0 0 10px}
+  .pasos{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:22px}
+  .num{font-size:44px;font-weight:800;color:var(--verde);line-height:1}
+  .pasos h3{margin:8px 0 4px;font-size:18px}.pasos p{margin:0;color:var(--suave);font-size:15px}
+  .cierre{background:var(--osc);color:#F4F6F1;text-align:center;padding:64px 0}
+  .cierre p{color:var(--claro-t)}
+  footer{font-size:13px;color:var(--suave);padding:24px 0;text-align:center}
+  .precio{display:grid;grid-template-columns:1.3fr 1fr;gap:18px}
+  .plan{background:var(--blanco);border:2px solid var(--verde);border-radius:18px;padding:28px}
+  .plan .cifra{font-size:46px;font-weight:800;color:var(--osc);line-height:1}.plan .cifra small{font-size:16px;color:var(--suave);font-weight:600}
+  .plan ul{margin:16px 0 0;padding-left:20px;color:var(--suave)}.plan li{margin:6px 0}
+  .extra{background:var(--osc);color:#F4F6F1;border-radius:18px;padding:24px}.extra p{color:var(--claro-t);margin:6px 0 0}.extra b{color:var(--verde)}
+  .nota{font-size:13px;color:var(--suave);margin-top:14px}
+  .rejilla{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))!important}
+  section{padding:34px 0}header{padding:40px 0 44px}h2{margin-bottom:18px}.tarjeta{padding:18px}
+  .salto{break-before:page;page-break-before:always}
+</style>
+<style>@media (max-width:640px){.precio{grid-template-columns:1fr}}</style></head><body>
+<header><div class="env"><div class="marca">Tributando<span>.co</span></div>
+ <p class="ceja">Propuesta para {{ p.razon_social }}{% if p.nit %} · NIT {{ p.nit }}{% endif %}</p>
+ <h1>{{ foco.titulo }}</h1>
+ <p>Esta es la propuesta para {{ p.razon_social }}: contabilidad, impuestos, {{ foco.corto }} y nómina, con un contador de verdad y un software que causa sus facturas solo.</p>
+ <a class="btn" href="https://wa.me/573332470715?text={{ wa }}">Arrancar por WhatsApp</a></div></header>
+<section><div class="env"><p class="ceja2">Qué hacemos cada mes</p><h2>Toda la contabilidad y los impuestos en un solo equipo</h2>
+ <div class="rejilla">
+  <div class="tarjeta"><h3>Contabilidad</h3><p>Causación de compras y ventas, conciliación bancaria, cierre mensual y estados financieros.</p></div>
+  <div class="tarjeta"><h3>{{ foco.tarjeta }}</h3><p>{{ foco.texto }}</p></div>
+  <div class="tarjeta"><h3>Impuestos</h3><p>IVA, retención en la fuente, autorretención e industria y comercio, presentados a tiempo.</p></div>
+  <div class="tarjeta"><h3>Cumplimiento anual</h3><p>Declaración de renta, información exógena y certificados de ingresos y retenciones.</p></div>
+ </div></div></section>
+<section class="oscuro"><div class="env"><p class="ceja2">Cómo trabajamos</p><h2>Un contador de verdad, no solo un programa</h2>
+ <div class="rejilla">
+  <div class="tarjeta"><h3>Montaje incluido</h3><p>Revisamos el RUT y las responsabilidades, y dejamos listos el plan de cuentas, los terceros y la facturación electrónica.</p></div>
+  <div class="tarjeta"><h3>Respuesta el mismo día</h3><p>Soporte con el contador el mismo día hábil, por WhatsApp o llamada.</p></div>
+  <div class="tarjeta"><h3>Revisión mensual</h3><p>Cruzamos lo que reporta la DIAN contra los libros y le avisamos de cualquier diferencia.</p></div>
+  <div class="tarjeta"><h3>Sus cifras en línea</h3><p>Facturas DIAN leídas solas y balances, cartera y reportes desde el celular.</p></div>
+ </div></div></section>
+<section><div class="env"><p class="ceja2">Crecemos con ustedes</p><h2>A medida que su empresa crece, nosotros crecemos con ella</h2>
+ <div class="rejilla">
+  <div class="tarjeta"><h3>Hoy: lo justo para arrancar</h3><p>Un plan de empresa nueva, con lo que exige la DIAN desde el primer mes y sin pagar por lo que todavía no usa.</p></div>
+  <div class="tarjeta"><h3>Mañana: lo que vaya necesitando</h3><p>Cuando lleguen más clientes, empleados o sedes, sumamos nómina, punto de venta, costos y reportes para la gerencia, en la misma plataforma.</p></div>
+  <div class="tarjeta"><h3>Sin cambiar de contador ni de programa</h3><p>Su historia contable queda en un solo lugar: no hay migraciones ni empezar de cero cada vez que la empresa da un paso.</p></div>
+  <div class="tarjeta"><h3>Acompañamiento en cada etapa</h3><p>Le avisamos cuándo cambia de régimen, cuándo debe declarar más impuestos y cómo planear el crecimiento.</p></div>
+ </div></div></section>
+<section><div class="env"><p class="ceja2">Su inversión</p><h2>Plan Empresa Nueva para {{ p.razon_social }}</h2>
+ <div class="precio">
+  <div class="plan"><div class="cifra">$875.000 <small>al mes · medio salario mínimo</small></div><ul>
+   <li>Contabilidad completa del mes con {{ foco.corto }}.</li>
+   <li>Declaraciones de IVA, retención en la fuente e ICA.</li>
+   <li>Conciliación bancaria y estados financieros.</li>
+   <li><b>Renta y exógena del año</b> por el valor de una mensualidad.</li>
+   <li><b>Montaje inicial incluido</b>: RUT, responsabilidades y facturación electrónica.</li></ul></div>
+  <div class="extra"><h3 style="margin:0">Nómina electrónica</h3><p><b>$25.000</b> por empleado al mes (mínimo $150.000).</p>
+   <p>Liquidación de la nómina, envío electrónico a la DIAN y planilla de seguridad social.</p><p style="margin-top:14px">Solo si tienen o van a tener empleados.</p></div>
+ </div><p class="nota">Valores mensuales, válidos para el primer año.</p></div></section>
+<section style="padding-top:0"><div class="env"><p class="ceja2">Cómo empezamos</p><h2>En cuatro pasos queda al día</h2>
+ <div class="pasos">
+  <div><div class="num">01</div><h3>Reunión</h3><p>Revisamos RUT, cámara de comercio y accesos a la DIAN.</p></div>
+  <div><div class="num">02</div><h3>Montaje</h3><p>Plan de cuentas, terceros, nómina y factura electrónica.</p></div>
+  <div><div class="num">03</div><h3>Primer cierre</h3><p>Causamos el mes y presentamos las declaraciones.</p></div>
+  <div><div class="num">04</div><h3>Informe mensual</h3><p>Estados financieros y alertas de cada mes.</p></div>
+ </div></div></section>
+<div class="cierre"><div class="env"><h2>¿Arrancamos?</h2><p>Escríbanos y en una llamada de 10 minutos dejamos todo listo.</p>
+ <a class="btn" href="https://wa.me/573332470715?text={{ wa }}">WhatsApp 333 247 0715</a>
+ <p style="margin-top:22px">Edison Monsalve, Contador Público · <a href="https://tributando.co" style="color:#F4F6F1">tributando.co</a></p></div></div>
+<footer>Tributando.co · Contabilidad e impuestos para empresas en Colombia</footer>
+{% include "_clics.html" %}
+</body></html>

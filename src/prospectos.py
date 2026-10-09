@@ -507,3 +507,48 @@ def resumen() -> dict:
             "encendido": os.environ.get("PROSPECTOS_ON", "") == "1",
             "smtp": bool(_config_smtp()),
             "por_dia": int(os.environ.get("PROSPECTOS_POR_DIA", "150") or 150)}
+
+
+# ---------------------------------------------------------------- WhatsApp: asesor de empresas
+class WaProspecto(db.Model):
+    """Qué número de WhatsApp corresponde a qué prospecto (lo identifica el asesor)."""
+    __tablename__ = "wa_prospectos"
+    remitente = db.Column(db.String(40), primary_key=True)
+    email = db.Column(db.String(200), default="")
+    nombre = db.Column(db.String(120), default="")
+    creado = db.Column(db.DateTime, default=datetime.utcnow)
+    propuesta_en = db.Column(db.DateTime)
+
+
+def url_propuesta(email: str) -> str:
+    from urllib.parse import quote
+    base = os.environ.get("BASE_URL", "https://tributando.co").rstrip("/")
+    return f"{base}/propuesta?e={quote(email)}&t={token_portafolio(email)}"
+
+
+def enviar_propuesta_correo(p: Prospecto) -> bool:
+    """Manda por correo (desde contacto@) el enlace a la propuesta personalizada."""
+    cfg = _config_smtp()
+    if not cfg or not p or not p.email:
+        return False
+    from src.correo import armar_mensaje
+    nombre = (p.razon_social or "su empresa").strip()
+    asunto = f"Propuesta de contabilidad para {nombre}"
+    url = url_propuesta(p.email)
+    cuerpo = f"""<p>Hola,</p>
+<p>Gracias por escribirnos por WhatsApp. Aquí está la propuesta para <b>{nombre}</b>:</p>
+<p><a href="{url}" style="display:inline-block;background:#37D38F;color:#0F2A22;font-weight:800;text-decoration:none;padding:12px 20px;border-radius:10px">Ver la propuesta</a></p>
+<p>En resumen: <b>Plan Empresa Nueva por $875.000 al mes</b> (medio salario mínimo), con la renta y la exógena del año por una mensualidad, el montaje incluido y nómina electrónica a $25.000 por empleado si la necesitan. Y a medida que su empresa crece, nosotros crecemos con ella.</p>
+<p>Edison Monsalve<br>Contador Público · Tributando.co · WhatsApp 333 247 0715</p>"""
+    s = None
+    try:
+        s = _abrir_smtp(cfg)
+        s.send_message(armar_mensaje(p.email, asunto, cuerpo, cfg))
+        return True
+    except Exception:  # noqa: BLE001
+        return False
+    finally:
+        try:
+            s and s.quit()
+        except Exception:  # noqa: BLE001
+            pass

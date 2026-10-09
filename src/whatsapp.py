@@ -71,11 +71,13 @@ def extraer_mensajes(payload: dict | None) -> list:
                 remitente = m.get("from", "")
                 texto = ((m.get("text") or {}).get("body") or "").strip()
                 if remitente and texto:
+                    _numero_de[remitente] = (valor.get("metadata") or {}).get("phone_number_id", "")
                     fuera.append((remitente, texto, m.get("id", "")))
     return fuera
 
 
 # --- memoria de conversación y anti-duplicado (en proceso) ------------------
+_numero_de: dict = {}      # remitente -> phone_number_id por el que escribió (se responde por el mismo)
 _hist: dict = {}
 _ids_vistos: dict = {}     # id_mensaje -> timestamp
 _lock = threading.Lock()
@@ -111,7 +113,8 @@ def enviar(cfg: dict | None, destino: str, texto: str) -> bool:
     """Envía un mensaje de texto por WhatsApp Cloud API. True si Meta lo aceptó."""
     wc = config(cfg)
     version = wc.get("api_version", "v21.0")
-    url = f"https://graph.facebook.com/{version}/{wc['phone_number_id']}/messages"
+    pnid = _numero_de.get(destino) or wc["phone_number_id"]   # responde por el número al que escribieron
+    url = f"https://graph.facebook.com/{version}/{pnid}/messages"
     try:
         r = requests.post(
             url,
@@ -222,7 +225,10 @@ def atender(cfg: dict | None, payload: dict | None, generar_respuesta,
                 atendidos += 1
                 continue
             historial = _agregar_turno(remitente, "user", texto)
-            respuesta = (generar_respuesta(historial) or "").strip()
+            try:
+                respuesta = (generar_respuesta(historial, remitente) or "").strip()
+            except TypeError:
+                respuesta = (generar_respuesta(historial) or "").strip()
             if respuesta:
                 _agregar_turno(remitente, "assistant", respuesta)
                 enviar(cfg, remitente, respuesta)
