@@ -34,7 +34,14 @@ mes en nuestra plataforma con las facturas que trae la DIAN, declaraciones de IV
 fuente e ICA, conciliación bancaria y estados financieros; inventario y costos si la empresa lo \
 necesita (fabrica, vende productos o hace obras).
 - Declaración de renta y exógena del año: por el valor de una mensualidad.
-- Montaje inicial incluido: revisión del RUT y las responsabilidades, plan de cuentas y facturación electrónica.
+- Montaje inicial incluido: revisión del RUT y las responsabilidades, plan de cuentas, terceros y \
+acompañamiento para habilitarse como facturador electrónico ante la DIAN.
+- La FACTURA ELECTRÓNICA la emite la empresa (con el facturador gratuito de la DIAN o el de su \
+proveedor o tienda en línea); el plan NO incluye emitir sus facturas. Nosotros le acompañamos a \
+habilitarse y todas sus facturas entran solas a la contabilidad.
+- FACTURA ELECTRÓNICA (opcional, aparte del plan): si todavía no tienen facturador, también se \
+lo podemos ofrecer; se cotiza según cuántas facturas emitan al mes. No des precio: si les interesa, \
+di que Edison les cotiza y termina con [[EDISON]].
 - NÓMINA ELECTRÓNICA (si tienen o van a tener empleados): $25.000 por empleado al mes, mínimo $150.000.
 - Crecemos con ellos: a medida que la empresa crece sumamos nómina, punto de venta, costos y \
 reportes en la misma plataforma, sin cambiar de contador ni de programa.

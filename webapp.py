@@ -1059,7 +1059,7 @@ _FOCOS = (
     (("comercio", "venta"), "Su comercio al día con la DIAN desde el primer mes",
      "Inventario y márgenes", "mercancía con su costo promedio y el margen de cada producto, para comprar mejor", "inventario y márgenes"),
     (("veterin", "médic", "medic", "odontol", "salud", "terap"), "Su consultorio al día con la DIAN desde el primer mes",
-     "Facturación e insumos", "facturación electrónica de consultas y procedimientos, e inventario de medicamentos e insumos", "facturación e insumos"),
+     "Ingresos e insumos", "ingresos de consultas y procedimientos con sus facturas leídas solas, e inventario de medicamentos e insumos", "ingresos e insumos"),
     (("inmobiliar", "arrend", "alquiler"), "Su inmobiliaria al día con la DIAN desde el primer mes",
      "Arriendos y cartera", "cánones, depósitos, retenciones y la cartera de cada inquilino", "arriendos y cartera"),
 )
@@ -1070,8 +1070,8 @@ def _foco_propuesta(actividad: str) -> dict:
     for claves, titulo, tarjeta, texto, corto in _FOCOS:
         if any(k in a for k in claves):
             return {"titulo": titulo, "tarjeta": tarjeta, "texto": texto[0].upper() + texto[1:] + ".", "corto": corto}
-    return {"titulo": "Su empresa al día con la DIAN desde el primer mes", "tarjeta": "Facturación y cartera",
-            "texto": "Facturación electrónica de sus servicios y la cartera de cada cliente al día.", "corto": "facturación y cartera"}
+    return {"titulo": "Su empresa al día con la DIAN desde el primer mes", "tarjeta": "Ventas y cartera",
+            "texto": "Sus facturas de venta leídas solas desde la DIAN y la cartera de cada cliente al día.", "corto": "ventas y cartera"}
 
 
 @app.get("/propuesta")
