@@ -9,9 +9,14 @@ La configuración vive en ia.yaml, en un bloque `whatsapp_cloud`:
       access_token: "<token permanente de la app de Meta>"
       phone_number_id: "<ID del número en WhatsApp Cloud API>"
       api_version: "v21.0"     # opcional
+      app_secret: "<App Secret de la app de Meta>"   # firma X-Hub-Signature-256
 
 Falla de forma segura: si falta config, `activo()` devuelve False y el webhook
 responde 200 sin intentar usar la API (Meta no reintenta).
+
+Firma: con `app_secret` configurado, el POST solo se procesa si la cabecera
+X-Hub-Signature-256 coincide con el HMAC-SHA256 del cuerpo crudo; si no, 403.
+Sin `app_secret` se acepta todo y se registra un warning (transición).
 
 Flujo:
   - GET  /api/whatsapp  → handshake de verificación (`verificar_webhook`).
@@ -24,6 +29,8 @@ su propia memoria, lo que solo afecta el contexto de conversaciones largas).
 """
 from __future__ import annotations
 
+import hashlib
+import hmac
 import logging
 import threading
 import time
@@ -46,6 +53,24 @@ def activo(cfg: dict | None) -> bool:
     wc = config(cfg)
     return bool(wc.get("habilitado") and wc.get("access_token")
                 and wc.get("phone_number_id"))
+
+
+def firma_valida(cfg: dict | None, cuerpo: bytes, cabecera: str | None) -> bool:
+    """Valida X-Hub-Signature-256 (`sha256=<hex>`) contra el HMAC del cuerpo crudo.
+
+    Sin `app_secret` configurado devuelve True con un warning, para no cortar
+    producción mientras se pone el secreto en el ia.yaml de Render.
+    """
+    secreto = str(config(cfg).get("app_secret") or "").strip()
+    if not secreto:
+        _log.warning("WhatsApp: sin app_secret en ia.yaml; el webhook acepta "
+                     "POST sin verificar la firma de Meta")
+        return True
+    cabecera = (cabecera or "").strip()
+    if not cabecera.startswith("sha256="):
+        return False
+    esperado = hmac.new(secreto.encode(), cuerpo or b"", hashlib.sha256).hexdigest()
+    return hmac.compare_digest(esperado, cabecera[len("sha256="):].lower())
 
 
 def verificar_webhook(cfg: dict | None, mode: str, token: str, challenge: str):

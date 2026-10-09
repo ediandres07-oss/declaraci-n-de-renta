@@ -769,6 +769,11 @@ def whatsapp_verificar():
 
 @app.post("/api/whatsapp")
 def whatsapp_webhook():
+    # La firma se calcula sobre el cuerpo CRUDO: leerlo antes de get_json.
+    cuerpo = request.get_data(cache=True)
+    if not wa_mod.firma_valida(IA_CFG, cuerpo, request.headers.get("X-Hub-Signature-256")):
+        app.logger.warning("WhatsApp: POST con firma inválida desde %s", _ip_cliente())
+        return "forbidden", 403
     payload = request.get_json(silent=True) or {}
     if wa_mod.activo(IA_CFG) and asistente_ia_activo(IA_CFG):
         # Los contadores llegan por WhatsApp (campañas + /contadores): el asistente

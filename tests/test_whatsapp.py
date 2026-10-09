@@ -1,4 +1,8 @@
 """Integración con WhatsApp Cloud API: parseo, handshake, envío y webhook."""
+import hashlib
+import hmac
+import json
+
 import pytest
 
 import src.whatsapp as wa
@@ -129,3 +133,51 @@ def test_post_siempre_responde_200(cliente, monkeypatch):
     monkeypatch.setattr(webapp, "IA_CFG", {"whatsapp_cloud": {"habilitado": False}})
     r = cliente.post("/api/whatsapp", json=_webhook_texto())
     assert r.status_code == 200
+
+
+# --- firma X-Hub-Signature-256 ----------------------------------------------
+def _firmar(cuerpo: bytes, secreto="appsecret") -> str:
+    return "sha256=" + hmac.new(secreto.encode(), cuerpo, hashlib.sha256).hexdigest()
+
+
+CFG_FIRMA = {"whatsapp_cloud": {**CFG_OK["whatsapp_cloud"], "app_secret": "appsecret"}}
+
+
+def test_firma_valida():
+    cuerpo = b'{"entry": []}'
+    assert wa.firma_valida(CFG_FIRMA, cuerpo, _firmar(cuerpo)) is True
+    assert wa.firma_valida(CFG_FIRMA, cuerpo, _firmar(cuerpo, "otro")) is False
+    assert wa.firma_valida(CFG_FIRMA, cuerpo + b" ", _firmar(cuerpo)) is False
+    assert wa.firma_valida(CFG_FIRMA, cuerpo, None) is False
+    assert wa.firma_valida(CFG_FIRMA, cuerpo, "sha1=abc") is False
+
+
+def test_sin_app_secret_acepta_con_warning(caplog):
+    with caplog.at_level("WARNING"):
+        assert wa.firma_valida(CFG_OK, b"{}", None) is True
+    assert "app_secret" in caplog.text
+
+
+def test_post_firma_mala_responde_403_sin_procesar(cliente, monkeypatch):
+    monkeypatch.setattr(webapp, "IA_CFG", CFG_FIRMA)
+    llamado = []
+    monkeypatch.setattr(wa, "atender", lambda *a, **k: llamado.append(1))
+    cuerpo = json.dumps(_webhook_texto()).encode()
+    r = cliente.post("/api/whatsapp", data=cuerpo, content_type="application/json",
+                     headers={"X-Hub-Signature-256": _firmar(cuerpo, "falso")})
+    assert r.status_code == 403
+    r = cliente.post("/api/whatsapp", data=cuerpo, content_type="application/json")
+    assert r.status_code == 403
+    assert llamado == []
+
+
+def test_post_firma_correcta_procesa(cliente, monkeypatch):
+    monkeypatch.setattr(webapp, "IA_CFG", CFG_FIRMA)
+    monkeypatch.setattr(webapp, "asistente_ia_activo", lambda cfg: True)
+    recibido = []
+    monkeypatch.setattr(wa, "atender", lambda cfg, payload, *a, **k: recibido.append(payload))
+    cuerpo = json.dumps(_webhook_texto()).encode()
+    r = cliente.post("/api/whatsapp", data=cuerpo, content_type="application/json",
+                     headers={"X-Hub-Signature-256": _firmar(cuerpo)})
+    assert r.status_code == 200
+    assert recibido == [_webhook_texto()]
