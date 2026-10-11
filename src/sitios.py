@@ -32,7 +32,13 @@ _SUFIJOS = r"\b(S\.?\s?A\.?\s?S\.?|SAS|S\.?\s?A\.?|LTDA\.?|E\.?\s?U\.?|BIC|ZOMAC
 
 def marca(razon_social: str) -> str:
     """«BIOTECH PET S.A.S» → «BIOTECH PET» (sin la forma societaria)."""
-    m = re.sub(_SUFIJOS, "", razon_social or "", flags=re.I)
+    # Solo al FINAL del nombre: «EU CONTAINER S.A.S» no pierde el «EU».
+    m = (razon_social or "").strip()
+    while True:
+        n = re.sub(r"[\s.,-]*" + _SUFIJOS + r"[\s.,-]*$", "", m, flags=re.I)
+        if n == m:
+            break
+        m = n
     return re.sub(r"\s{2,}", " ", m).strip(" .,-") or (razon_social or "Su empresa")
 
 
