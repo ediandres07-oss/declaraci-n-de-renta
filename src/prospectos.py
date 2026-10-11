@@ -208,13 +208,16 @@ def _fecha_larga(iso: str) -> str:
         return "estas semanas"
 
 
-def _envolver(cuerpo: str, email: str, cta_txt: str, cta_url: str) -> str:
+def _envolver(cuerpo: str, email: str, cta_txt: str, cta_url: str,
+              cta2_txt: str = "", cta2_url: str = "") -> str:
     navy, dorado = "#1e2432", "#b8955f"
+    cta2 = (f' <a href="{cta2_url}" style="display:inline-block;margin:6px 0;background:{navy};color:#fff;text-decoration:none;'
+            f'padding:11px 18px;border-radius:8px;font-weight:700">{cta2_txt}</a>') if cta2_url else ""
     return f"""<!DOCTYPE html><html><body style="margin:0;background:#f5f7fa;font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:#1e2b3a">
 <div style="max-width:560px;margin:0 auto;padding:24px"><div style="background:#fff;border-radius:14px;overflow:hidden">
 <div style="background:{navy};color:#fff;padding:18px 24px;font-weight:800">Tributando<span style="color:{dorado}">.co</span></div>
 <div style="padding:22px 24px;font-size:15px;line-height:1.6">{cuerpo}
-<p style="margin:22px 0"><a href="{cta_url}" style="background:{dorado};color:#fff;text-decoration:none;padding:11px 18px;border-radius:8px;font-weight:700">{cta_txt}</a></p>
+<p style="margin:22px 0"><a href="{cta_url}" style="display:inline-block;margin:6px 0;background:{dorado};color:#fff;text-decoration:none;padding:11px 18px;border-radius:8px;font-weight:700">{cta_txt}</a>{cta2}</p>
 <p>Un saludo,<br><b>Edison Monsalve</b><br>Contador público · Tributando.co<br>WhatsApp: <a href="https://wa.me/573332470715" style="color:{dorado};font-weight:700">333 247 0715</a></p></div></div>
 <p style="font-size:11px;color:#8a94a6;line-height:1.5;padding:12px 8px">Te escribimos porque el correo de tu empresa figura en el Registro Mercantil (RUES), que es público.
 Si no quieres recibir más mensajes, <a href="{url_baja(email)}" style="color:#8a94a6">haz clic aquí para darte de baja</a> y no te volveremos a escribir.</p>
@@ -250,9 +253,10 @@ def plantilla(p: Prospecto) -> tuple[str, str]:
 <li>Presentar las declaraciones que salen en su RUT (IVA, retención en la fuente).</li>
 <li><b>Renovar la matrícula</b> antes del 31 de marzo.</li>
 </ul>
-<p>En <b>Tributando</b> te llevamos la <b>contabilidad en la nube</b>, alimentada sola con tus facturas de la DIAN, la <b>nómina electrónica</b> y los impuestos, con un contador que lo revisa. Responde este correo y te cuento cuánto cuesta para {nombre}.</p>
-<p>🎁 <b>Además te armamos un borrador de la página web de {nombre}</b>: <a href="{_url_sitio(p.email)}" style="color:#b8955f;font-weight:700">mírala aquí</a>.</p>"""
-    return asunto, _envolver(cuerpo, p.email, "Ver nuestro portafolio", url_portafolio(p.email))
+<p>En <b>Tributando</b> te llevamos la <b>contabilidad en la nube</b>, alimentada sola con tus facturas de la DIAN, la <b>nómina electrónica</b> y los impuestos, con un contador que lo revisa. Responde este correo y te cuento cuánto cuesta para {nombre.rstrip(".")}.</p>
+<p>🎁 <b>Además te armamos un borrador de la página web de {nombre.rstrip(".")}</b>. Mírala con el botón de abajo.</p>"""
+    return asunto, _envolver(cuerpo, p.email, "Ver nuestro portafolio", url_portafolio(p.email),
+                             "Ver mi página web", _url_sitio(p.email))
 
 
 # ---------------------------------------------------------------- envío
