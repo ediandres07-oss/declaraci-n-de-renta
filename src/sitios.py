@@ -95,7 +95,7 @@ _PERFILES = [
         nos="Una inmobiliaria de {ciudad} de confianza",
         f_banda="photo-1665249934445-1de680641f50", banda="¿Tiene un inmueble para arrendar o vender?",
         banda_txt="Lo visitamos, le damos un valor de referencia y nos encargamos del resto.", banda_btn="Hablar con un asesor")),
-    (("software", "sistemas inform", "datos", "telecomunic", "programaci", "hosting", "tecnolog", "digital", "internet", "informátic", "portales web"), dict(
+    (("software", "sistemas inform", "datos", "telecomunic", "programaci", "hosting", "tecnolog", "digital", "internet", "informátic", "portales web", "desarrollo experimental"), dict(
         color="#6D28D9", tipo="servicios", ceja="Tecnología",
         hero="Tecnología que hace crecer su negocio",
         sub="Soluciones digitales a la medida, con soporte cercano desde {ciudad}.",
@@ -143,7 +143,7 @@ _PERFILES = [
         nos="Una empresa de {ciudad} con sabor propio",
         f_banda="photo-1636057915164-0cc9d6a54975", banda="¿Tiene una tienda, restaurante o minimercado?",
         banda_txt="Le ofrecemos precios por volumen y entregas programadas.", banda_btn="Quiero comprar al por mayor")),
-    (("fabricaci", "elaboraci", "confecci", "producci", "manufact"), dict(
+    (("fabricaci", "elaboraci", "confecci", "producci", "manufact", "textil"), dict(
         color="#1D4ED8", tipo="productos", ceja="Fabricación",
         hero="Fabricamos en {ciudad} con calidad que se nota",
         sub="Producción propia, materiales seleccionados y entregas cumplidas para hogares y empresas.",
@@ -155,7 +155,7 @@ _PERFILES = [
         nos="Una fábrica de {ciudad} que cumple",
         f_banda="photo-1644079446600-219068676743", banda="¿Compra para su empresa o para distribuir?",
         banda_txt="Manejamos volúmenes, precios por cantidad y entregas programadas.", banda_btn="Pedir cotización")),
-    (("construcci", "obra", "instalac", "terminaci", "arquitect", "remodel", "edific"), dict(
+    (("construcci", "obra", "instalac", "terminaci", "arquitect", "remodel", "edific", "demolici"), dict(
         color="#A14A07", tipo="servicios", ceja="Construcción",
         hero="Construimos y remodelamos en {ciudad}",
         sub="Obras bien hechas, a tiempo y con presupuesto claro desde el primer día.",
@@ -191,7 +191,7 @@ _PERFILES = [
         nos="Una empresa del campo antioqueño",
         f_banda="photo-1623136299195-570a06bdae6b", banda="¿Compra para su negocio?",
         banda_txt="Programamos entregas por volumen y temporada.", banda_btn="Pedir cotización")),
-    (("médic", "medic", "odontol", "salud", "terap", "farmac", "estétic", "estetic"), dict(
+    (("médic", "medic", "odontol", "salud", "terap", "farmac", "estétic", "estetic", "diagnóstic"), dict(
         color="#0E7490", tipo="servicios", ceja="Salud",
         hero="Cuidamos su salud en {ciudad}",
         sub="Atención profesional, cercana y con todos los protocolos.",
@@ -248,7 +248,7 @@ _AGRO_TIENDA = dict(
 
 # Deportes y recreación (escuelas deportivas, gimnasios, clubes). Va antes del
 # perfil general, que es el último de la lista.
-_PERFILES.insert(len(_PERFILES) - 1, (("deport", "recreativ", "gimnas", "fitness", "acondicionamiento físico"), dict(
+_PERFILES.insert(len(_PERFILES) - 1, (("deport", "recreativ", "gimnas", "fitness", "acondicionamiento físico", "atracciones", "esparcimiento"), dict(
     color="#B45309", tipo="servicios", ceja="Deporte y recreación",
     hero="Deporte y diversión para toda la familia en {ciudad}",
     sub="Clases, entrenamiento y actividades recreativas para niños, jóvenes y adultos.",
@@ -277,6 +277,176 @@ _ECUESTRE = dict(
     banda_txt="Agende una clase de prueba y conozca nuestras instalaciones.", banda_btn="Agendar clase")
 
 
+def _perf(color, tipo, ceja, hero, sub, fotos, sec, servicios, nos, banda, banda_txt, banda_btn):
+    """Arma un perfil con las 6 fotos en orden: portada, nosotros, 3 servicios y banda."""
+    fh, fn, s1, s2, s3, fb = ("photo-" + f for f in fotos)
+    return dict(color=color, tipo=tipo, ceja=ceja, hero=hero, sub=sub, f_hero=fh, f_nos=fn, sec=sec,
+                servicios=[(s1,) + servicios[0], (s2,) + servicios[1], (s3,) + servicios[2]],
+                nos=nos, f_banda=fb, banda=banda, banda_txt=banda_txt, banda_btn=banda_btn)
+
+
+# Sectores que caían en el perfil general o en uno equivocado (revisión del
+# 11-oct sobre todo el RUES de la prospección). Se buscan en la ACTIVIDAD antes
+# que los demás perfiles, porque sus claves son más específicas: «producción de
+# películas» no es fábrica, «colocación de empleo» no es turismo.
+_ESPECIALES = [
+    (("vehícul", "vehicul", "motocic", "autopart", "automotor"), _perf(
+        "#B91C1C", "servicios", "Automotriz", "Su vehículo en buenas manos en {ciudad}",
+        "Repuestos, mantenimiento y asesoría para carros y motos.",
+        ("1771340012319-0b4fca008b54", "1676018366904-c083ed678e60", "1487754180451-c456f719a1fc",
+         "1527383418406-f85a3b146499", "1585390062628-be8608aa7d83", "1621808752171-531c30903889"),
+        "Todo para su vehículo",
+        [("Taller y mantenimiento", "Revisión, cambio de aceite y reparaciones con garantía."),
+         ("Repuestos y accesorios", "Partes originales y homologadas para su marca."),
+         ("Asesoría en compra", "Le ayudamos a escoger el vehículo o la pieza correcta.")],
+        "Gente de {ciudad} que sabe de vehículos", "¿Necesita un repuesto o una revisión?",
+        "Escríbanos la marca y el modelo y le damos precio y disponibilidad.", "Pedir cotización")),
+    (("películ", "cinematogr", "televisi", "grabaci", "fotograf", "publicidad", "audiovis"), _perf(
+        "#9D174D", "servicios", "Publicidad y audiovisual", "Contenido que hace que su marca se vea",
+        "Video, fotografía y publicidad para empresas que quieren crecer.",
+        ("1497015289639-54688650d173", "1603201667230-bd139210db18", "1459184070881-58235578f004",
+         "1647427854253-b92bb40c9330", "1572021335469-31706a17aaef", "1471341971476-ae15ff5dd4ea"),
+        "Lo que hacemos por su marca",
+        [("Producción de video", "Comerciales, videos corporativos y contenido para redes."),
+         ("Fotografía", "Producto, eventos y retratos con estudio propio."),
+         ("Publicidad y estrategia", "Campañas pensadas para vender, no solo para verse bien.")],
+        "Un equipo creativo en {ciudad}", "¿Tiene un proyecto en mente?",
+        "Cuéntenos la idea y le enviamos propuesta y presupuesto.", "Contar mi proyecto")),
+    (("jurídic", "juridic", "abogad", "notari"), _perf(
+        "#1E3A5F", "servicios", "Abogados", "Asesoría legal clara y oportuna en {ciudad}",
+        "Acompañamos a personas y empresas en cada decisión jurídica.",
+        ("1505664194779-8beaceb93744", "1758518731462-d091b0b4ed0d", "1774898988393-5c752e4d55e9",
+         "1450101499163-c8848c66ca85", "1603796846097-bee99e4a601f", "1479142506502-19b3a3b7ff33"),
+        "Áreas de práctica",
+        [("Asesoría empresarial", "Sociedades, contratos y cumplimiento para su empresa."),
+         ("Contratos", "Redacción y revisión para que firme con tranquilidad."),
+         ("Litigios y trámites", "Le representamos y hacemos seguimiento a cada proceso.")],
+        "Abogados en {ciudad} de su lado", "¿Tiene una consulta legal?",
+        "Agende una primera conversación y le decimos cómo podemos ayudarle.", "Agendar consulta")),
+    (("contabilidad", "teneduría", "tenedur", "asesoría tributaria", "revisoría"), _perf(
+        "#065F46", "servicios", "Contabilidad y finanzas", "Sus números claros y al día",
+        "Contabilidad, impuestos y asesoría financiera para empresas en {ciudad}.",
+        ("1648201637025-1c77b9be3013", "1526948531399-320e7e40f0ca", "1711097383282-28097ae16b1d",
+         "1626266061368-46a8f578ddd6", "1714974528737-3e6c7e4d11af", "1618044733300-9472054094ee"),
+        "Cómo le ayudamos",
+        [("Contabilidad", "Registros, estados financieros e informes cada mes."),
+         ("Impuestos", "Declaraciones a tiempo y planeación tributaria."),
+         ("Asesoría financiera", "Números que sirven para decidir.")],
+        "Un equipo contable en {ciudad}", "¿Quiere tener su contabilidad al día?",
+        "Escríbanos y le contamos cómo trabajamos.", "Hablar con un asesor")),
+    (("actividades de ingenier", "consultoría técnica", "consultoria tecnica"), _perf(
+        "#1D4ED8", "servicios", "Ingeniería", "Ingeniería que convierte ideas en proyectos",
+        "Diseño, consultoría técnica e interventoría en {ciudad}.",
+        ("1581094488379-6a10d04c0f04", "1694521787193-9293daeddbaa", "1542621334-a254cf47733d",
+         "1694521787162-5373b598945c", "1621905252507-b35492cc74b4", "1503387762-592deb58ef4e"),
+        "Nuestros servicios",
+        [("Diseño y planos", "Diseños técnicos y memorias de cálculo."),
+         ("Interventoría y obra", "Seguimiento en campo para que se cumpla lo diseñado."),
+         ("Consultoría técnica", "Estudios y conceptos para tomar buenas decisiones.")],
+        "Ingenieros de {ciudad} comprometidos con cada proyecto", "¿Tiene un proyecto por diseñar?",
+        "Cuéntenos el alcance y le enviamos la propuesta técnica.", "Pedir propuesta")),
+    (("extracci", "minería", "mineria", "minero"), _perf(
+        "#92400E", "servicios", "Minería", "Minería responsable en Antioquia",
+        "Exploración, extracción y operación minera con seguridad y respeto por el entorno.",
+        ("1587919968590-fbc98cea6c9a", "1691068343106-159ec5b344e9", "1719411321415-acfbe793c0aa",
+         "1610375461246-83df859d849d", "1586161148512-64a1b3dac527", "1571223641822-b82408a0e705"),
+        "Lo que hacemos",
+        [("Extracción", "Operación con maquinaria y personal capacitado."),
+         ("Metales preciosos", "Beneficio y comercialización con trazabilidad."),
+         ("Seguridad minera", "Protocolos para cuidar a nuestra gente.")],
+        "Una empresa minera de {ciudad}", "¿Busca un aliado minero?",
+        "Escríbanos y conversemos sobre su proyecto.", "Contactar")),
+    (("call center", "centros de llamadas", "contact center"), _perf(
+        "#0F766E", "servicios", "Contact center", "Atención a sus clientes, bien hecha",
+        "Servicio al cliente, ventas y soporte por teléfono, chat y correo.",
+        ("1560264280-88b68371db39", "1766066014237-00645c74e9c6", "1603714228681-b399854b8f80",
+         "1553775282-20af80779df7", "1580795479225-c50ab8c3348d", "1580795478966-561ba4f1ce68"),
+        "Servicios para su empresa",
+        [("Servicio al cliente", "Agentes entrenados que hablan como su marca."),
+         ("Ventas y cobranza", "Campañas de salida con metas claras."),
+         ("Soporte y chat", "Atención por todos los canales con reportes diarios.")],
+        "Un equipo de atención en {ciudad}", "¿Quiere atender mejor a sus clientes?",
+        "Le armamos una propuesta según su volumen de llamadas.", "Pedir propuesta")),
+    (("talento humano", "empleo", "temporal", "selección de personal"), _perf(
+        "#7C3AED", "servicios", "Talento humano", "El personal correcto para su empresa",
+        "Selección, contratación y suministro de personal en {ciudad}.",
+        ("1698047682091-782b1e5c6536", "1576267423429-569309b31e84", "1573497620053-ea5300f94f21",
+         "1548838670-cb67b43a6adb", "1758518731468-98e90ffd7430", "1521791136064-7986c2920216"),
+        "Cómo le ayudamos",
+        [("Selección", "Encontramos y evaluamos a los candidatos por usted."),
+         ("Personal operativo", "Equipos para obra, planta y logística."),
+         ("Personal administrativo", "Perfiles de oficina listos para empezar.")],
+        "Un equipo de {ciudad} que conecta empresas y personas", "¿Necesita personal?",
+        "Cuéntenos el cargo y le enviamos candidatos.", "Solicitar personal")),
+    (("alquiler", "arrendamiento de"), _perf(
+        "#CA8A04", "servicios", "Alquiler de equipos", "Maquinaria y equipos cuando los necesita",
+        "Alquiler de maquinaria y equipos para obra e industria en {ciudad}.",
+        ("1652303713917-2666b8bee507", "1575281923032-f40d94ef6160", "1580901369227-308f6f40bdeb",
+         "1591486085897-f433f05e7aed", "1685708716815-94c588417c27", "1495036019936-220b29b930ea"),
+        "Equipos disponibles",
+        [("Maquinaria amarilla", "Excavadoras, retroexcavadoras y más, con o sin operador."),
+         ("Compactación", "Equipos para vías, patios y obras."),
+         ("Transporte de equipos", "Llevamos la máquina hasta su obra.")],
+        "Una empresa de {ciudad} que mueve sus proyectos", "¿Qué equipo necesita?",
+        "Díganos la obra y las fechas y le damos el valor por día o por mes.", "Cotizar alquiler")),
+    (("peluquer", "belleza", "barber", "servicios personales", "manicur"), _perf(
+        "#BE185D", "servicios", "Belleza y cuidado personal", "Su mejor versión en {ciudad}",
+        "Corte, color, barbería y tratamientos con profesionales.",
+        ("1633681926022-84c23e8cb2d6", "1580618672591-eb180b1a973f", "1634449571010-02389ed0f9b0",
+         "1585747860715-2ba37e788b70", "1621605815971-fbc98d665033", "1600948836101-f9ffda59d250"),
+        "Nuestros servicios",
+        [("Peluquería", "Corte, color y peinados para cada ocasión."),
+         ("Barbería", "Corte y arreglo de barba con estilo."),
+         ("Tratamientos", "Cuidado del cabello y de la piel.")],
+        "Un espacio en {ciudad} para consentirse", "¿Agendamos su cita?",
+        "Escríbanos y le asignamos el horario que mejor le quede.", "Agendar cita")),
+    (("mantenimiento y reparaci",), _perf(
+        "#0369A1", "servicios", "Mantenimiento y reparación", "Equipos funcionando, operación sin pausas",
+        "Mantenimiento preventivo y correctivo de maquinaria y equipos en {ciudad}.",
+        ("1595831708961-1b13c0dd2422", "1610259998914-d1b9afe0dc55", "1563456021008-5cd6ac7c005d",
+         "1660330589827-da8ab7dd3c02", "1563770660941-20978e870e26", "1620374142148-15bb477652c1"),
+        "Lo que reparamos",
+        [("Maquinaria industrial", "Diagnóstico y reparación en planta."),
+         ("Sistemas eléctricos", "Tableros, motores y controles."),
+         ("Equipos electrónicos", "Reparación de tarjetas y equipos especializados.")],
+        "Técnicos de {ciudad} con experiencia", "¿Un equipo se le dañó?",
+        "Escríbanos y le programamos la visita técnica.", "Pedir visita técnica")),
+    (("reciclaj", "recuperación de materiales", "recuperacion de materiales", "desperdicio", "chatarra"), _perf(
+        "#15803D", "servicios", "Reciclaje", "Lo que sobra también vale",
+        "Compra, recolección y aprovechamiento de materiales reciclables en {ciudad}.",
+        ("1617303331806-3d6b58e03241", "1536094627107-abf98dedaa8f", "1653406384710-08688ec6b979",
+         "1600368544663-05493ab49549", "1611284446314-60a58ac0deb9", "1722695510527-cc033e43be1b"),
+        "Materiales que recibimos",
+        [("Plástico y cartón", "Recolección en empresas y conjuntos."),
+         ("Chatarra y metales", "Compra al mejor precio, pesaje justo."),
+         ("Gestión de residuos", "Separación en la fuente y certificados de aprovechamiento.")],
+        "Una empresa de {ciudad} que cuida el ambiente", "¿Tiene material para reciclar?",
+        "Escríbanos y programamos la recolección.", "Programar recolección")),
+    (("educaci", "preescolar", "jardín infantil", "jardin infantil"), _perf(
+        "#EA580C", "servicios", "Educación", "Aprender jugando, crecer felices",
+        "Educación con amor y acompañamiento en {ciudad}.",
+        ("1567746455504-cb3213f8f5b8", "1583468991267-3f068b607ae1", "1614113036347-9f60df80730a",
+         "1589206946274-929e4da3996b", "1578349035260-9f3d4042f1f7", "1627764940620-90393d0e8c34"),
+        "Nuestra propuesta",
+        [("Juego y exploración", "Aprendizaje a través del juego y la curiosidad."),
+         ("Acompañamiento", "Docentes cercanos y grupos pequeños."),
+         ("Espacios seguros", "Lugares pensados para que los niños se desarrollen.")],
+        "Un lugar en {ciudad} para aprender", "¿Quiere conocernos?",
+        "Agende una visita y conozca nuestras instalaciones.", "Agendar visita")),
+    (("energía", "energia", "solar", "fotovolta"), _perf(
+        "#CA8A04", "servicios", "Energía", "Energía confiable para su hogar o empresa",
+        "Soluciones de energía y paneles solares en {ciudad}.",
+        ("1509391366360-2e959784a276", "1624397640148-949b1732bb0a", "1497435334941-8c899ee9e8e9",
+         "1413882353314-73389f63b6fd", "1660330589257-813305a4a383", "1613665813446-82a78c468a1d"),
+        "Nuestras soluciones",
+        [("Energía solar", "Diseño e instalación de sistemas fotovoltaicos."),
+         ("Suministro de energía", "Energía para empresas con tarifas competitivas."),
+         ("Instalación y mantenimiento", "Técnicos certificados en cada proyecto.")],
+        "Una empresa de energía en {ciudad}", "¿Quiere ahorrar en energía?",
+        "Envíenos su factura y le calculamos el ahorro.", "Calcular mi ahorro")),
+]
+
+
 def _hay(clave: str, texto: str) -> bool:
     """La clave al comienzo de una palabra («obra» no está en «cobranza»)."""
     return re.search(r"\b" + re.escape(clave.strip()), texto) is not None
@@ -291,6 +461,9 @@ def perfil(actividad: str, nombre: str = "") -> dict:
         return _AGRO_TIENDA
     if "veterinari" in n:
         return next(p for c, p in _PERFILES if "veterin" in c)
+    for claves, p in _ESPECIALES:
+        if any(_hay(k, a) for k in claves):
+            return p
     if a.startswith("comercio") and "vehícul" not in a and "motocic" not in a and "partes" not in a:
         return next(p for c, p in _PERFILES if "comercio" in c)
     for claves, p in _PERFILES:
