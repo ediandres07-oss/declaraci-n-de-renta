@@ -53,12 +53,60 @@ _PASOS = {
                   ("Le llevamos su pedido", "Entregas en {ciudad} y el área metropolitana.")],
     "servicios": [("Cuéntenos su necesidad", "Una primera conversación, sin costo ni compromiso."),
                   ("Reciba la propuesta", "Alcance, tiempos y valor claros y por escrito."),
-                  ("Manos a la obra", "Cumplimos lo acordado y le mantenemos informado.")],
+                  ("Cumplimos", "Hacemos lo acordado y le mantenemos informado.")],
 }
 
 # (claves en la actividad, perfil). El primero que coincide manda; el último es el general.
 # fotos: portada, nosotros, banda final; servicios: (foto, título, texto).
 _PERFILES = [
+    (("limpieza", "aseo", "fumig", "lavander"), dict(
+        color="#0369A1", tipo="servicios", ceja="Aseo y desinfección",
+        hero="Espacios limpios y seguros en {ciudad}",
+        sub="Limpieza, desinfección y mantenimiento para hogares, oficinas e industrias.",
+        f_hero="photo-1581578731548-c64695cc6952", f_nos="photo-1686178827149-6d55c72d81df",
+        sec="Limpieza profesional para cada espacio",
+        servicios=[("photo-1627905646269-7f034dcc5738", "Empresas y oficinas", "Planes de aseo y mantenimiento periódico."),
+                   ("photo-1740657254989-42fe9c3b8cce", "Hogares", "Limpieza profunda y de rutina."),
+                   ("photo-1628177142898-93e36e4e3a50", "Desinfección", "Protocolos para áreas de alto tráfico.")],
+        nos="Una empresa de {ciudad} que cuida sus espacios",
+        f_banda="photo-1761558794306-466448dab4bc", banda="¿Necesita un plan de aseo?",
+        banda_txt="Visitamos el lugar y le damos la cotización por escrito, sin costo.", banda_btn="Pedir cotización")),
+    (("veterin",), dict(
+        color="#0E7490", tipo="servicios", ceja="Veterinaria",
+        hero="Cuidamos a su mascota como parte de la familia",
+        sub="Consulta, vacunación y atención veterinaria con calidez y experiencia en {ciudad}.",
+        f_hero="photo-1700665537604-412e89a285c3", f_nos="photo-1700665537650-1bf37979aae0",
+        sec="Atención veterinaria completa",
+        servicios=[("photo-1644675272883-0c4d582528d8", "Consulta", "Revisión completa y orientación para su perro o gato."),
+                   ("photo-1725409796872-8b41e8eca929", "Vacunación y control", "Planes de vacunas y desparasitación al día."),
+                   ("photo-1551076805-e1869033e561", "Procedimientos", "Instalaciones equipadas para procedimientos y cirugías.")],
+        nos="Un equipo veterinario en {ciudad}",
+        f_banda="photo-1553688738-a278b9f063e0", banda="¿Su mascota necesita una cita?",
+        banda_txt="Escríbanos y le asignamos el primer espacio disponible.", banda_btn="Agendar cita")),
+    (("inmobiliari", "bienes raíces", "finca raíz", "propiedad horizontal"), dict(
+        color="#1E3A8A", tipo="servicios", ceja="Inmobiliaria",
+        hero="Su próximo hogar o inversión en {ciudad}",
+        sub="Arriendo, venta y administración de inmuebles con acompañamiento de principio a fin.",
+        f_hero="photo-1624204386084-dd8c05e32226", f_nos="photo-1626178793926-22b28830aa30",
+        sec="Inmuebles con respaldo",
+        servicios=[("photo-1628592102751-ba83b0314276", "Arriendo", "Apartamentos, casas y locales listos para habitar."),
+                   ("photo-1741156386380-0236c72eb6f9", "Venta", "Le ayudamos a comprar o vender al precio justo."),
+                   ("photo-1728825445493-1a6e89164511", "Administración", "Cuidamos su inmueble y le rendimos cuentas cada mes.")],
+        nos="Una inmobiliaria de {ciudad} de confianza",
+        f_banda="photo-1665249934445-1de680641f50", banda="¿Tiene un inmueble para arrendar o vender?",
+        banda_txt="Lo visitamos, le damos un valor de referencia y nos encargamos del resto.", banda_btn="Hablar con un asesor")),
+    (("alojamiento", "hotel", "turístic", "turistic", "agencias de viaje", "reserva", "convenciones", "eventos"), dict(
+        color="#9A3412", tipo="servicios", ceja="Turismo y eventos",
+        hero="Viva {ciudad} y Antioquia con nosotros",
+        sub="Alojamiento, planes y eventos con atención cálida y todos los detalles resueltos.",
+        f_hero="photo-1737914692031-4cd02e08dffd", f_nos="photo-1621293954908-907159247fc8",
+        sec="Experiencias bien atendidas",
+        servicios=[("photo-1582719478250-c89cae4dc85b", "Alojamiento", "Espacios cómodos, limpios y bien ubicados."),
+                   ("photo-1570197820006-3e46f5ee01bb", "Planes y tours", "Recorridos por los pueblos y paisajes de Antioquia."),
+                   ("photo-1540575467063-178a50c2df87", "Eventos", "Convenciones, reuniones y celebraciones organizadas.")],
+        nos="Una empresa de {ciudad} que recibe bien",
+        f_banda="photo-1596436889106-be35e843f974", banda="¿Planea un viaje o un evento?",
+        banda_txt="Cuéntenos fechas y número de personas, y le enviamos la propuesta.", banda_btn="Pedir cotización")),
     (("animal", "mascota", "veterin"), dict(
         color="#B4501A", tipo="productos", ceja="Alimento para mascotas",
         hero="Nutrición de verdad para perros y gatos",
@@ -143,7 +191,7 @@ _PERFILES = [
         nos="Un equipo de salud en {ciudad}",
         f_banda="photo-1577962917302-cd874c4e31d2", banda="¿Busca un programa de salud para su empresa?",
         banda_txt="Diseñamos planes de atención para equipos de trabajo.", banda_btn="Hablar con nosotros")),
-    (("software", "sistemas inform", "datos", "telecomunic", "programaci", "hosting", "tecnolog", "digital", "internet"), dict(
+    (("software", "sistemas inform", "datos", "telecomunic", "programaci", "hosting", "tecnolog", "digital", "internet", "informátic", "portales web"), dict(
         color="#6D28D9", tipo="servicios", ceja="Tecnología",
         hero="Tecnología que hace crecer su negocio",
         sub="Soluciones digitales a la medida, con soporte cercano desde {ciudad}.",
@@ -155,18 +203,6 @@ _PERFILES = [
         nos="Un equipo de tecnología en {ciudad}",
         f_banda="photo-1541746972996-4e0b0f43e02a", banda="¿Tiene un proceso que quiere automatizar?",
         banda_txt="Lo revisamos con usted y le proponemos la solución.", banda_btn="Agendar reunión")),
-    (("limpieza", "aseo", "fumig", "lavander"), dict(
-        color="#0369A1", tipo="servicios", ceja="Aseo y desinfección",
-        hero="Espacios limpios y seguros en {ciudad}",
-        sub="Limpieza, desinfección y mantenimiento para hogares, oficinas e industrias.",
-        f_hero="photo-1581578731548-c64695cc6952", f_nos="photo-1686178827149-6d55c72d81df",
-        sec="Limpieza profesional para cada espacio",
-        servicios=[("photo-1627905646269-7f034dcc5738", "Empresas y oficinas", "Planes de aseo y mantenimiento periódico."),
-                   ("photo-1740657254989-42fe9c3b8cce", "Hogares", "Limpieza profunda y de rutina."),
-                   ("photo-1628177142898-93e36e4e3a50", "Desinfección", "Protocolos para áreas de alto tráfico.")],
-        nos="Una empresa de {ciudad} que cuida sus espacios",
-        f_banda="photo-1761558794306-466448dab4bc", banda="¿Necesita un plan de aseo?",
-        banda_txt="Visitamos el lugar y le damos la cotización por escrito, sin costo.", banda_btn="Pedir cotización")),
     (("comercio", "venta", "tienda", "distribu"), dict(
         color="#BE123C", tipo="productos", ceja="Comercio",
         hero="Lo que busca, al mejor precio en {ciudad}",
@@ -195,7 +231,9 @@ _PERFILES = [
 
 
 def perfil(actividad: str) -> dict:
-    a = (actividad or "").lower()
+    a = (actividad or "").lower().strip()
+    if a.startswith("comercio") and "vehícul" not in a and "motocic" not in a and "partes" not in a:
+        return next(p for c, p in _PERFILES if "comercio" in c)
     for claves, p in _PERFILES:
         if not claves or any(k in a for k in claves):
             return p
