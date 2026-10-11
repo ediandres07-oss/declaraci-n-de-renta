@@ -13,7 +13,7 @@ import re
 from urllib.parse import quote
 
 PRECIO_DISENO = 700000        # diseño y publicación, una vez (Edison 10-oct-2026)
-PRECIO_ANUAL = 150000         # dominio .com.co + hosting, al año
+PRECIO_ANUAL = 150000         # solo el dominio, al año; el hosting (mensual) lo paga la empresa (Edison 11-oct)
 
 
 def token_sitio(email: str) -> str:

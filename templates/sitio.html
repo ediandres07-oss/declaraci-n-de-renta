@@ -309,7 +309,7 @@ footer{background:var(--noche);color:#A9ABB2;padding-top:clamp(64px,8vw,96px);ov
 <body>
 <div class="borrador">
   <span>Borrador de página web hecho por <strong>Tributando.co</strong> para {{ s.razon_social }}</span>
-  <span>Diseño y publicación <strong>{{ s.precio_diseno }}</strong> + <strong>{{ s.precio_anual }} al año</strong> (dominio y hosting)</span>
+  <span>Diseño y publicación <strong>{{ s.precio_diseno }}</strong> + <strong>{{ s.precio_anual }} al año</strong> de dominio · el hosting mensual lo paga la empresa</span>
   <a href="{{ s.wa_publicar }}" data-clic="sitio_publicar">¿La publicamos?</a>
 </div>
 
@@ -541,7 +541,7 @@ footer{background:var(--noche);color:#A9ABB2;padding-top:clamp(64px,8vw,96px);ov
 </footer>
 
 <a class="flotante" id="flotante" href="{{ s.wa_publicar }}" data-clic="sitio_publicar" aria-label="¿La publicamos? Escribir a Tributando por WhatsApp">
-  {{ icono('whats', 24) }}<span>¿La publicamos?<small>{{ s.precio_diseno }} + {{ s.precio_anual }}/año</small></span>
+  {{ icono('whats', 24) }}<span>¿La publicamos?<small>{{ s.precio_diseno }} + dominio {{ s.precio_anual }}/año</small></span>
 </a>
 
 <script>
