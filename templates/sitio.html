@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>{{ s.marca }} · {{ s.ciudad }}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--prim:{{ s.color }};--tinte:{{ s.tinte }};--tinta:#1B1A17;--suave:#5C5850;--borde:#ECE7E1}
+*{box-sizing:border-box}
+body{margin:0;font-family:"DM Sans",system-ui,sans-serif;color:var(--tinta);background:#fff;font-size:16px;line-height:1.6}
+h1,h2,h3{font-family:"Bricolage Grotesque","DM Sans",sans-serif;margin:0}
+a{color:var(--prim)}img{display:block;max-width:100%}
+.env{max-width:1200px;margin:0 auto;padding:0 24px}.ancho{max-width:1248px;margin:0 auto;padding:0 24px}
+.borrador{background:#14231D;color:#EEF3EF;padding:10px 20px;display:flex;flex-wrap:wrap;gap:8px 16px;justify-content:center;align-items:center;font-size:14px;text-align:center}
+.borrador strong{color:#5BE0A4}.borrador a{background:#5BE0A4;color:#0E1A15;font-weight:700;text-decoration:none;padding:6px 14px;border-radius:8px}
+header{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;padding-top:18px;padding-bottom:18px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--tinta)}
+.logo i{font-style:normal;width:42px;height:42px;border-radius:12px;background:var(--prim);color:#fff;display:flex;align-items:center;justify-content:center;font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:22px}
+.logo b{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:22px;letter-spacing:.5px}
+nav{display:flex;flex-wrap:wrap;gap:8px 28px;align-items:center;font-weight:500}
+nav a{color:#3A3833;text-decoration:none}
+.btn{display:inline-block;background:var(--prim);color:#fff;text-decoration:none;font-weight:700;padding:14px 24px;border-radius:12px;border:0;font:inherit;font-weight:700;cursor:pointer}
+nav .btn{padding:11px 20px;color:#fff}
+@media(max-width:760px){nav a:not(.btn){display:none}}
+.portada{position:relative;border-radius:28px;overflow:hidden;min-height:600px;display:flex;align-items:flex-end}
+.portada>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.portada::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,rgba(15,12,9,.84) 0%,rgba(15,12,9,.55) 45%,rgba(15,12,9,0) 78%)}
+@media(max-width:760px){.portada{min-height:540px}.portada::before{background:linear-gradient(0deg,rgba(15,12,9,.88) 10%,rgba(15,12,9,.35) 70%)}}
+.portada .txt{position:relative;z-index:2;padding:clamp(28px,5vw,56px);max-width:640px;color:#fff;display:flex;flex-direction:column;gap:20px}
+.pildora{align-self:flex-start;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);padding:6px 14px;border-radius:999px;font-size:14px;font-weight:500}
+.portada h1{font-size:clamp(36px,5vw,64px);line-height:1.03;font-weight:800}
+.portada p{margin:0;font-size:19px;color:#EDE7E0}
+.botones{display:flex;flex-wrap:wrap;gap:12px;margin-top:6px}
+.btn.blanco{background:#fff;color:var(--tinta)}.btn.borde{background:transparent;border:2px solid rgba(255,255,255,.7);padding:12px 22px}
+.sellos{display:flex;flex-wrap:wrap;gap:14px 40px;justify-content:center;padding:26px 0 0;color:#3A3833;font-weight:500}
+.sellos span{display:flex;gap:8px;align-items:center}
+section.bloque{padding:88px 0 40px}
+.ceja{margin:0 0 8px;color:var(--prim);font-weight:700;letter-spacing:1px;text-transform:uppercase;font-size:13px}
+h2{font-size:clamp(30px,3.6vw,44px);line-height:1.1}
+.cabeza{display:flex;flex-wrap:wrap;gap:16px 40px;justify-content:space-between;align-items:flex-end;margin-bottom:36px}
+.cabeza a{font-weight:700}
+.rejilla{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px}
+.tarjeta{border:1px solid var(--borde);border-radius:22px;overflow:hidden;background:#fff}
+.tarjeta img{width:100%;height:240px;object-fit:cover}
+.tarjeta div{padding:22px 24px 26px}.tarjeta h3{font-size:22px;margin-bottom:6px}.tarjeta p{margin:0;color:var(--suave)}
+.dos{display:flex;flex-wrap:wrap;gap:48px;align-items:center}
+.dos>*{flex:1 1 420px;min-width:0}
+.dos>img{height:460px;width:100%;object-fit:cover;border-radius:24px}
+.dos .col{display:flex;flex-direction:column;gap:18px}
+.dos .col>p{margin:0;color:var(--suave);font-size:18px}
+.valores{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:8px}
+.valores div{background:var(--tinte);border-radius:16px;padding:18px 20px}.valores h3{font-size:18px;margin-bottom:4px}.valores p{margin:0;color:var(--suave);font-size:15px}
+.oscura{background:#1F1B17;color:#F4EFE9;margin-top:48px}
+.oscura .env{padding-top:88px;padding-bottom:88px}
+.pasos{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:24px;margin-top:36px}
+.pasos div{border-top:2px solid var(--prim);padding-top:18px}
+.pasos b{display:block;font-family:"Bricolage Grotesque",sans-serif;font-size:40px;font-weight:800;color:#fff;opacity:.9}
+.pasos h3{font-size:21px;margin:4px 0 6px}.pasos p{margin:0;color:#CFC7BD}
+.banda{display:flex;flex-wrap:wrap;border-radius:28px;overflow:hidden;background:var(--tinte)}
+.banda .col{flex:1 1 460px;min-width:0;padding:clamp(28px,5vw,56px);display:flex;flex-direction:column;gap:16px;justify-content:center}
+.banda .col p{margin:0;color:var(--suave);font-size:18px}.banda .btn{align-self:flex-start;margin-top:6px}
+.banda img{flex:1 1 460px;min-width:0;width:100%;height:420px;object-fit:cover}
+.contacto{display:flex;flex-wrap:wrap;gap:48px;padding:72px 0 96px}
+.contacto .datos{flex:1 1 360px;min-width:0;display:flex;flex-direction:column;gap:18px}
+.contacto .datos>p{margin:0;color:var(--suave);font-size:18px}
+.dato{display:flex;gap:12px;align-items:center;word-break:break-all}
+form{flex:1 1 460px;min-width:0;border:1px solid var(--borde);border-radius:24px;padding:32px;display:flex;flex-direction:column;gap:16px}
+.fila{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px}
+label{display:flex;flex-direction:column;gap:6px;font-weight:500;font-size:15px}
+input,textarea{font:inherit;border:1px solid #D9D2C9;border-radius:10px;padding:12px 14px}
+form .btn{align-self:flex-start}
+footer{border-top:1px solid var(--borde)}
+footer .env{padding-top:28px;padding-bottom:28px;display:flex;flex-wrap:wrap;gap:10px 24px;justify-content:space-between;color:#6A655C;font-size:14px}
+</style>
+</head>
+<body>
+<div class="borrador">
+  <span>Borrador de página web hecho por <strong>Tributando.co</strong> para {{ s.razon_social }}</span>
+  <span>Diseño y publicación <strong>{{ s.precio_diseno }}</strong> + <strong>{{ s.precio_anual }} al año</strong> (dominio y hosting)</span>
+  <a href="{{ s.wa_publicar }}" data-clic="sitio_publicar">¿La publicamos?</a>
+</div>
+
+<header class="env">
+  <a class="logo" href="#inicio"><i>{{ s.inicial }}</i><b>{{ s.marca }}</b></a>
+  <nav aria-label="Principal">
+    <a href="#servicios">{{ s.tipo|capitalize }}</a><a href="#nosotros">Nosotros</a><a href="#contacto">Contacto</a>
+    <a class="btn" href="#contacto">{% if s.tipo == 'productos' %}Hacer un pedido{% else %}Cotizar{% endif %}</a>
+  </nav>
+</header>
+
+<section id="inicio" class="ancho">
+  <div class="portada">
+    <img src="{{ s.f_hero }}" alt="">
+    <div class="txt">
+      <span class="pildora">{{ s.ceja }}</span>
+      <h1>{{ s.hero }}</h1>
+      <p>{{ s.sub }}</p>
+      <div class="botones">
+        <a class="btn blanco" href="#servicios">Ver {{ s.tipo }}</a>
+        <a class="btn borde" href="#contacto">Contáctenos</a>
+      </div>
+    </div>
+  </div>
+  <div class="sellos">
+    {% for t in ['Empresa de ' ~ s.ciudad, 'Atención directa', 'Respuesta el mismo día'] %}
+    <span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="color:var(--prim)" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>{{ t }}</span>
+    {% endfor %}
+  </div>
+</section>
+
+<section id="servicios" class="bloque env">
+  <div class="cabeza">
+    <div style="max-width:640px"><p class="ceja">Nuestros {{ s.tipo }}</p><h2>{{ s.sec }}</h2></div>
+    <a href="#contacto">{% if s.tipo == 'productos' %}Pedir catálogo y precios{% else %}Pedir una cotización{% endif %} →</a>
+  </div>
+  <div class="rejilla">
+    {% for foto, t, d in s.servicios %}
+    <article class="tarjeta"><img src="{{ foto }}" alt="{{ t }}" loading="lazy"><div><h3>{{ t }}</h3><p>{{ d }}</p></div></article>
+    {% endfor %}
+  </div>
+</section>
+
+<section id="nosotros" class="bloque env">
+  <div class="dos">
+    <img src="{{ s.f_nos }}" alt="" loading="lazy">
+    <div class="col">
+      <p class="ceja" style="margin:0">Quiénes somos</p>
+      <h2>{{ s.nos }}</h2>
+      <p>{{ s.nos_txt }}</p>
+      <div class="valores">
+        <div><h3>Calidad en cada detalle</h3><p>Hacemos las cosas bien desde el primer día.</p></div>
+        <div><h3>Atención directa</h3><p>Hable con nosotros, no con un intermediario.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="oscura">
+  <div class="env">
+    <h2 style="max-width:640px">{% if s.tipo == 'productos' %}Hacer un pedido es fácil{% else %}Así trabajamos{% endif %}</h2>
+    <div class="pasos">
+      {% for t, d in s.pasos %}<div><b>0{{ loop.index }}</b><h3>{{ t }}</h3><p>{{ d }}</p></div>{% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="bloque ancho">
+  <div class="banda">
+    <div class="col">
+      <h2 style="font-size:clamp(28px,3.2vw,40px)">{{ s.banda }}</h2>
+      <p>{{ s.banda_txt }}</p>
+      <a class="btn" href="#contacto">{{ s.banda_btn }}</a>
+    </div>
+    <img src="{{ s.f_banda }}" alt="" loading="lazy">
+  </div>
+</section>
+
+<section id="contacto" class="env">
+  <div class="contacto">
+    <div class="datos">
+      <h2>Hablemos</h2>
+      <p>Escríbanos y le respondemos el mismo día hábil.</p>
+      <div class="dato"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--prim);flex:none" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>{{ s.ciudad }}, Colombia</span></div>
+      <div class="dato"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--prim);flex:none" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg><a href="mailto:{{ s.correo }}">{{ s.correo }}</a></div>
+    </div>
+    <form action="mailto:{{ s.correo }}" method="post" enctype="text/plain">
+      <div class="fila">
+        <label>Nombre<input type="text" name="nombre" placeholder="Su nombre"></label>
+        <label>Teléfono<input type="tel" name="telefono" placeholder="300 000 0000"></label>
+      </div>
+      <label>Correo<input type="email" name="correo" placeholder="nombre@correo.com"></label>
+      <label>Mensaje<textarea name="mensaje" rows="4" placeholder="¿Qué necesita?"></textarea></label>
+      <button class="btn" type="submit">Enviar mensaje</button>
+    </form>
+  </div>
+</section>
+
+<footer><div class="env">
+  <span>© 2026 {{ s.razon_social }}{% if s.nit %} · NIT {{ s.nit }}{% endif %} · {{ s.ciudad }}, Colombia</span>
+  <span>Página web por Tributando.co</span>
+</div></footer>
+{% include "_clics.html" %}
+</body>
+</html>

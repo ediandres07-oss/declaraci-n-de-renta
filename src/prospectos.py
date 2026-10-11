@@ -221,6 +221,11 @@ Si no quieres recibir más mensajes, <a href="{url_baja(email)}" style="color:#8
 </div></body></html>"""
 
 
+def _url_sitio(email: str) -> str:
+    from src.sitios import url_sitio
+    return url_sitio(email)
+
+
 def plantilla(p: Prospecto) -> tuple[str, str]:
     if p.segmento == "contador":
         n = p.n_empresas or 1
@@ -245,7 +250,8 @@ def plantilla(p: Prospecto) -> tuple[str, str]:
 <li>Presentar las declaraciones que salen en su RUT (IVA, retención en la fuente).</li>
 <li><b>Renovar la matrícula</b> antes del 31 de marzo.</li>
 </ul>
-<p>En <b>Tributando</b> te llevamos la <b>contabilidad en la nube</b>, alimentada sola con tus facturas de la DIAN, la <b>nómina electrónica</b> y los impuestos, con un contador que lo revisa. Responde este correo y te cuento cuánto cuesta para {nombre}.</p>"""
+<p>En <b>Tributando</b> te llevamos la <b>contabilidad en la nube</b>, alimentada sola con tus facturas de la DIAN, la <b>nómina electrónica</b> y los impuestos, con un contador que lo revisa. Responde este correo y te cuento cuánto cuesta para {nombre}.</p>
+<p>🎁 <b>Además te armamos un borrador de la página web de {nombre}</b>: <a href="{_url_sitio(p.email)}" style="color:#b8955f;font-weight:700">mírala aquí</a>.</p>"""
     return asunto, _envolver(cuerpo, p.email, "Ver nuestro portafolio", url_portafolio(p.email))
 
 

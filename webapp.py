@@ -1114,6 +1114,22 @@ def portafolio():
                            wa_texto=quote("Hola Edison, vi el portafolio de Tributando y quiero una propuesta para mi empresa."))
 
 
+@app.get("/sitio")
+def sitio_empresa():
+    """Borrador de página web de una empresa de la prospección (enlace firmado, no se indexa)."""
+    import hmac as _hmac
+    from src import sitios as sitios_mod
+    email = (request.args.get("e") or "").lower().strip()
+    if not email or not _hmac.compare_digest(request.args.get("t") or "", sitios_mod.token_sitio(email)):
+        return redirect("/portafolio")
+    p = prosp_mod.db.session.get(prosp_mod.Prospecto, email)
+    if not p or p.segmento == "contador":
+        return redirect("/portafolio")
+    resp = Response(render_template("sitio.html", s=sitios_mod.datos_sitio(p)), mimetype="text/html")
+    resp.headers["X-Robots-Tag"] = "noindex, nofollow"
+    return resp
+
+
 @app.post("/admin/prospectos/cargar")
 @autorizado_requerido
 def admin_prospectos_cargar():
