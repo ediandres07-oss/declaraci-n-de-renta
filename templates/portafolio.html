@@ -37,6 +37,21 @@
   .cierre{background:var(--osc);color:#F4F6F1;text-align:center;padding:64px 0}
   .cierre p{color:var(--claro-t)}
   footer{font-size:13px;color:var(--suave);padding:24px 0;text-align:center}
+  .calc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;align-items:start}
+  @media(max-width:760px){.calc{grid-template-columns:1fr}}
+  .campo{margin:0 0 18px}.campo label{display:block;font-weight:700;margin:0 0 8px}
+  .cuenta{display:flex;align-items:center;gap:10px}
+  .cuenta button{width:42px;height:42px;border-radius:10px;border:1.5px solid var(--borde);background:var(--blanco);font-size:22px;font-weight:800;cursor:pointer;color:var(--tinta)}
+  .cuenta output{min-width:48px;text-align:center;font-size:26px;font-weight:800}
+  .chk{display:flex;gap:10px;align-items:flex-start;cursor:pointer;font-size:15.5px}
+  .chk input{width:20px;height:20px;accent-color:var(--verde-t);margin-top:2px}
+  .fila{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--borde);font-size:16px}
+  .fila span:last-child{font-weight:700;white-space:nowrap}
+  .total{display:flex;justify-content:space-between;align-items:baseline;padding:16px 0 6px;gap:12px}
+  .total b{font-size:34px;font-weight:800;color:var(--verde-t);white-space:nowrap}
+  .faq details{background:var(--blanco);border:1px solid var(--borde);border-radius:12px;padding:16px 20px;margin:0 0 12px}
+  .faq summary{font-weight:700;cursor:pointer;font-size:17px}
+  .faq p{margin:10px 0 0;color:var(--suave)}
 </style>
 </head>
 <body>
@@ -46,7 +61,7 @@
     <p class="ceja">Portafolio de servicios contables</p>
     <h1>Su empresa al día con la DIAN<br>desde el primer mes</h1>
     <p>Contabilidad, impuestos, nómina y cumplimiento para empresas que empiezan, con un contador de verdad y un software que causa sus facturas solo.</p>
-    <a class="btn" href="https://wa.me/{{ whatsapp }}?text={{ wa_texto }}" data-clic="whatsapp">Pedir mi propuesta por WhatsApp</a>
+    <a class="btn" href="#precios" data-clic="ver_precios">Ver mi precio</a>
     <a class="btn sec" href="#servicios">Ver servicios</a>
   </div>
 </header>
@@ -89,6 +104,51 @@
   </div>
 </section>
 
+<section id="precios">
+  <div class="env">
+    <p class="ceja2">Precios claros</p>
+    <h2>Calcule su precio en un minuto</h2>
+    <div class="calc">
+      <div class="tarjeta">
+        <div class="campo">
+          <label>¿Cuántos empleados tiene o va a tener?</label>
+          <div class="cuenta">
+            <button type="button" onclick="emp(-1)" aria-label="Menos empleados">−</button>
+            <output id="nEmp">0</output>
+            <button type="button" onclick="emp(1)" aria-label="Más empleados">+</button>
+          </div>
+          <p style="margin:8px 0 0;font-size:14px">Nómina electrónica: $25.000 por empleado al mes (mínimo $150.000).</p>
+        </div>
+        <div class="campo">
+          <label class="chk"><input type="checkbox" id="fe" onchange="calc()"> Quiero la facturación electrónica de Tributando ($230.000 al año, hasta 120 documentos)</label>
+        </div>
+        <p style="margin:0;font-size:14px">Incluido siempre: montaje inicial (RUT, responsabilidades y habilitación como facturador), contabilidad completa, IVA, retención e ICA, conciliación bancaria, estados financieros y asesoría con el contador.</p>
+      </div>
+      <div class="tarjeta">
+        <div class="fila"><span>Honorarios contables</span><span>$875.000 / mes</span></div>
+        <div class="fila" id="filaNom" style="display:none"><span id="txtNom">Nómina electrónica</span><span id="valNom"></span></div>
+        <div class="total"><span style="font-weight:700">Total al mes</span><b id="tot">$875.000</b></div>
+        <div class="fila" id="filaFe" style="display:none;border-bottom:0"><span>Facturación electrónica</span><span>$230.000 / año</span></div>
+        <p style="font-size:14px;margin:6px 0 18px">Renta y exógena del año: el valor de una mensualidad de honorarios.</p>
+        <a class="btn" id="btnContratar" href="#" data-clic="contratar" style="display:block;text-align:center">Contratar por WhatsApp</a>
+        <p style="font-size:13px;margin:10px 0 0;text-align:center">Le escribimos el mismo día hábil para arrancar.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="faq" style="padding-top:0">
+  <div class="env">
+    <p class="ceja2">Preguntas frecuentes</p>
+    <h2>Lo que nos preguntan antes de empezar</h2>
+    <details><summary>¿Qué software usan?</summary><p>Tributando, nuestro propio software contable en la nube. Va incluido en los honorarios: no tiene que comprar Siigo ni ningún otro programa. Sus facturas de la DIAN entran y se contabilizan solas, y usted ve sus balances desde el celular.</p></details>
+    <details><summary>¿Qué necesito para empezar?</summary><p>El RUT, el certificado de cámara de comercio y el acceso de la empresa a la DIAN. Con eso hacemos el montaje y dejamos lista la facturación.</p></details>
+    <details><summary>¿Qué pasa si contrato más empleados?</summary><p>La nómina se cobra a $25.000 por empleado al mes, con un mínimo de $150.000. Si crece, solo se ajusta ese valor.</p></details>
+    <details><summary>¿La renta y la exógena tienen costo aparte?</summary><p>Sí: cuestan el valor de una mensualidad de honorarios al año.</p></details>
+    <details><summary>¿Ya tengo facturador, tengo que cambiarlo?</summary><p>No. Si ya factura con otro proveedor, sus facturas igual entran solas a la contabilidad. La facturación de Tributando es opcional.</p></details>
+  </div>
+</section>
+
 <section style="padding-top:0">
   <div class="env">
     <p class="ceja2">Cómo empezamos</p>
@@ -104,13 +164,33 @@
 
 <div class="cierre">
   <div class="env">
-    <h2>Tarifa de arranque, a la medida de su empresa</h2>
-    <p>Le enviamos una propuesta según su actividad, sus documentos y sus empleados.</p>
-    <a class="btn" href="https://wa.me/{{ whatsapp }}?text={{ wa_texto }}" data-clic="whatsapp">Pedir mi propuesta por WhatsApp</a>
+    <h2>¿Listo para arrancar?</h2>
+    <p>Calcule su precio y contrátelo por WhatsApp. Si tiene una duda puntual, también le respondemos.</p>
+    <a class="btn" href="#precios" data-clic="ver_precios">Calcular mi precio</a>
+    <a class="btn sec" href="https://wa.me/{{ whatsapp }}?text={{ wa_texto }}" data-clic="whatsapp">Tengo una pregunta</a>
     <p style="margin-top:22px">Edison Monsalve, Contador Público · <a href="https://tributando.co" style="color:#F4F6F1">tributando.co</a></p>
   </div>
 </div>
 <footer>Tributando.co · Contabilidad e impuestos para empresas en Colombia</footer>
+<script>
+const EMPRESA={{ empresa|tojson }}, WA="{{ whatsapp }}";
+let nEmp=0;
+const peso=v=>"$"+Math.round(v).toLocaleString("es-CO");
+function emp(d){nEmp=Math.max(0,Math.min(200,nEmp+d));document.getElementById("nEmp").textContent=nEmp;calc();}
+function calc(){
+  const nom=nEmp>0?Math.max(150000,25000*nEmp):0, fe=document.getElementById("fe").checked;
+  document.getElementById("filaNom").style.display=nom?"flex":"none";
+  document.getElementById("txtNom").textContent="Nómina electrónica ("+nEmp+(nEmp===1?" empleado)":" empleados)");
+  document.getElementById("valNom").textContent=peso(nom)+" / mes";
+  document.getElementById("filaFe").style.display=fe?"flex":"none";
+  document.getElementById("tot").textContent=peso(875000+nom);
+  let t="Hola Edison, quiero contratar Tributando"+(EMPRESA?" para "+EMPRESA:"")+": honorarios $875.000"
+       +(nom?" + nómina de "+nEmp+(nEmp===1?" empleado ":" empleados ")+peso(nom):"")
+       +" = "+peso(875000+nom)+" al mes"+(fe?", más la facturación electrónica de $230.000 al año":"")+".";
+  document.getElementById("btnContratar").href="https://wa.me/"+WA+"?text="+encodeURIComponent(t);
+}
+calc();
+</script>
 {% include "_clics.html" %}
 </body>
 </html>
