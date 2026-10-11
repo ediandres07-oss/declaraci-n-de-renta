@@ -95,6 +95,18 @@ _PERFILES = [
         nos="Una inmobiliaria de {ciudad} de confianza",
         f_banda="photo-1665249934445-1de680641f50", banda="¿Tiene un inmueble para arrendar o vender?",
         banda_txt="Lo visitamos, le damos un valor de referencia y nos encargamos del resto.", banda_btn="Hablar con un asesor")),
+    (("software", "sistemas inform", "datos", "telecomunic", "programaci", "hosting", "tecnolog", "digital", "internet", "informátic", "portales web"), dict(
+        color="#6D28D9", tipo="servicios", ceja="Tecnología",
+        hero="Tecnología que hace crecer su negocio",
+        sub="Soluciones digitales a la medida, con soporte cercano desde {ciudad}.",
+        f_hero="photo-1522071820081-009f0129c71c", f_nos="photo-1517048676732-d65bc937f952",
+        sec="Soluciones digitales para su empresa",
+        servicios=[("photo-1555066931-4365d14bab8c", "Desarrollo a la medida", "Software y aplicaciones para su operación."),
+                   ("photo-1558494949-ef010cbdcc31", "Infraestructura y nube", "Su información segura y siempre disponible."),
+                   ("photo-1626863905121-3b0c0ed7b94c", "Soporte", "Acompañamiento cuando lo necesita.")],
+        nos="Un equipo de tecnología en {ciudad}",
+        f_banda="photo-1541746972996-4e0b0f43e02a", banda="¿Tiene un proceso que quiere automatizar?",
+        banda_txt="Lo revisamos con usted y le proponemos la solución.", banda_btn="Agendar reunión")),
     (("alojamiento", "hotel", "turístic", "turistic", "viaje", "reserva", "convenciones", "eventos"), dict(
         color="#9A3412", tipo="servicios", ceja="Turismo y eventos",
         hero="Viva {ciudad} y Antioquia con nosotros",
@@ -143,18 +155,6 @@ _PERFILES = [
         nos="Una fábrica de {ciudad} que cumple",
         f_banda="photo-1644079446600-219068676743", banda="¿Compra para su empresa o para distribuir?",
         banda_txt="Manejamos volúmenes, precios por cantidad y entregas programadas.", banda_btn="Pedir cotización")),
-    (("software", "sistemas inform", "datos", "telecomunic", "programaci", "hosting", "tecnolog", "digital", "internet", "informátic", "portales web"), dict(
-        color="#6D28D9", tipo="servicios", ceja="Tecnología",
-        hero="Tecnología que hace crecer su negocio",
-        sub="Soluciones digitales a la medida, con soporte cercano desde {ciudad}.",
-        f_hero="photo-1522071820081-009f0129c71c", f_nos="photo-1517048676732-d65bc937f952",
-        sec="Soluciones digitales para su empresa",
-        servicios=[("photo-1555066931-4365d14bab8c", "Desarrollo a la medida", "Software y aplicaciones para su operación."),
-                   ("photo-1558494949-ef010cbdcc31", "Infraestructura y nube", "Su información segura y siempre disponible."),
-                   ("photo-1626863905121-3b0c0ed7b94c", "Soporte", "Acompañamiento cuando lo necesita.")],
-        nos="Un equipo de tecnología en {ciudad}",
-        f_banda="photo-1541746972996-4e0b0f43e02a", banda="¿Tiene un proceso que quiere automatizar?",
-        banda_txt="Lo revisamos con usted y le proponemos la solución.", banda_btn="Agendar reunión")),
     (("construcci", "obra", "instalac", "terminaci", "arquitect", "remodel", "edific"), dict(
         color="#A14A07", tipo="servicios", ceja="Construcción",
         hero="Construimos y remodelamos en {ciudad}",
@@ -246,6 +246,11 @@ _AGRO_TIENDA = dict(
     banda_txt="Le damos precios por volumen y le despachamos el pedido.", banda_btn="Pedir cotización")
 
 
+def _hay(clave: str, texto: str) -> bool:
+    """La clave al comienzo de una palabra («obra» no está en «cobranza»)."""
+    return re.search(r"\b" + re.escape(clave.strip()), texto) is not None
+
+
 def perfil(actividad: str, nombre: str = "") -> dict:
     a = (actividad or "").lower().strip()
     n = (nombre or "").lower()
@@ -256,11 +261,11 @@ def perfil(actividad: str, nombre: str = "") -> dict:
     if a.startswith("comercio") and "vehícul" not in a and "motocic" not in a and "partes" not in a:
         return next(p for c, p in _PERFILES if "comercio" in c)
     for claves, p in _PERFILES:
-        if claves and any(k in a for k in claves):
+        if claves and any(_hay(k, a) for k in claves):
             return p
     # La actividad no dice nada útil («ingeniería», «administración»…): probar con el nombre.
     for claves, p in _PERFILES:
-        if claves and any(re.search(r"\b" + re.escape(k.strip()), n) for k in claves):
+        if claves and any(_hay(k, n) for k in claves):
             return p
     return _PERFILES[-1][1]
 
