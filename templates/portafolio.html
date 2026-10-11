@@ -58,8 +58,8 @@
 <header>
   <div class="env">
     <div class="marca">Tributando<span>.co</span></div>
-    <p class="ceja">Portafolio de servicios contables</p>
-    <h1>Su empresa al día con la DIAN<br>desde el primer mes</h1>
+    <p class="ceja">{% if empresa %}Portafolio para {{ empresa }}{% else %}Portafolio de servicios contables{% endif %}</p>
+    <h1>{% if empresa %}{{ empresa }}, al día con la DIAN<br>desde el primer mes{% else %}Su empresa al día con la DIAN<br>desde el primer mes{% endif %}</h1>
     <p>Contabilidad, impuestos, nómina y cumplimiento para empresas que empiezan, con un contador de verdad y un software que causa sus facturas solo.</p>
     <a class="btn" href="#precios" data-clic="ver_precios">Ver mi precio</a>
     <a class="btn sec" href="#servicios">Ver servicios</a>
@@ -107,7 +107,7 @@
 <section id="precios">
   <div class="env">
     <p class="ceja2">Precios claros</p>
-    <h2>Calcule su precio en un minuto</h2>
+    <h2>{% if empresa %}El precio para {{ empresa }}, en un minuto{% else %}Calcule su precio en un minuto{% endif %}</h2>
     <div class="calc">
       <div class="tarjeta">
         <div class="campo">
