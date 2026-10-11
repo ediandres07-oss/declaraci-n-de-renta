@@ -230,8 +230,29 @@ _PERFILES = [
 ]
 
 
-def perfil(actividad: str) -> dict:
+# Almacén agropecuario: lo decide el NOMBRE (el RUES suele decir «comercio de
+# productos farmacéuticos» o «materias primas agropecuarias»).
+_AGRO_TIENDA = dict(
+    color="#3F6212", tipo="productos", ceja="Agropecuaria",
+    hero="Todo para el campo y sus animales",
+    sub="Concentrados, salud animal e insumos agrícolas, con asesoría de gente que conoce el campo.",
+    f_hero="photo-1612225330565-f79af9f92168", f_nos="photo-1650397306390-86caaefce1a3",
+    sec="Lo que necesita su finca",
+    servicios=[("photo-1740126104974-e5bad141f188", "Concentrados y alimentos", "Para ganado, caballos, aves y mascotas."),
+               ("photo-1685633224332-3b270212cf63", "Salud animal", "Medicamentos veterinarios, vitaminas y vacunas."),
+               ("photo-1625246333195-78d9c38ad449", "Insumos agrícolas", "Semillas, abonos y productos para sus cultivos.")],
+    nos="Una agropecuaria al servicio del campo antioqueño",
+    f_banda="photo-1504867991871-57c29096e624", banda="¿Compra para su finca o su negocio?",
+    banda_txt="Le damos precios por volumen y le despachamos el pedido.", banda_btn="Pedir cotización")
+
+
+def perfil(actividad: str, nombre: str = "") -> dict:
     a = (actividad or "").lower().strip()
+    n = (nombre or "").lower()
+    if "agropecuari" in n or "agroveterin" in n or "agroinsum" in n:
+        return _AGRO_TIENDA
+    if "veterinari" in n:
+        return next(p for c, p in _PERFILES if "veterin" in c)
     if a.startswith("comercio") and "vehícul" not in a and "motocic" not in a and "partes" not in a:
         return next(p for c, p in _PERFILES if "comercio" in c)
     for claves, p in _PERFILES:
@@ -249,7 +270,7 @@ def _tinte(hexa: str, k: float = 0.92) -> str:
 def datos_sitio(p) -> dict:
     """Todo lo que la plantilla necesita a partir del Prospecto."""
     c = ciudad(p.municipio)
-    pf = perfil(p.actividad)
+    pf = perfil(p.actividad, p.razon_social)
     f = lambda t: t.format(ciudad=c)
     nombre = (p.razon_social or "").strip()
     act = (p.actividad or "").strip().rstrip(".")
