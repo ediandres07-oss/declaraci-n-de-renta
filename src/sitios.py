@@ -246,6 +246,37 @@ _AGRO_TIENDA = dict(
     banda_txt="Le damos precios por volumen y le despachamos el pedido.", banda_btn="Pedir cotización")
 
 
+# Deportes y recreación (escuelas deportivas, gimnasios, clubes). Va antes del
+# perfil general, que es el último de la lista.
+_PERFILES.insert(len(_PERFILES) - 1, (("deport", "recreativ", "gimnas", "fitness", "acondicionamiento físico"), dict(
+    color="#B45309", tipo="servicios", ceja="Deporte y recreación",
+    hero="Deporte y diversión para toda la familia en {ciudad}",
+    sub="Clases, entrenamiento y actividades recreativas para niños, jóvenes y adultos.",
+    f_hero="photo-1526232761682-d26e03ac148e", f_nos="photo-1609422644211-a85c36ee36a7",
+    sec="Actividades para cada edad",
+    servicios=[("photo-1544333323-ec9ed3218dd1", "Escuela deportiva", "Formación por niveles con entrenadores de experiencia."),
+               ("photo-1787647089849-d082bb425a4a", "Clases grupales", "Grupos pequeños y horarios entre semana y fines de semana."),
+               ("photo-1574629810360-7efbbe195018", "Entrenamiento", "Planes para mejorar técnica, condición física y disciplina.")],
+    nos="Un espacio en {ciudad} para aprender jugando",
+    f_banda="photo-1787647089627-5866477a33f1", banda="¿Quiere inscribirse?",
+    banda_txt="Escríbanos y le contamos horarios, grupos y valores.", banda_btn="Pedir información")))
+
+# Escuela de equitación / haras: lo decide el NOMBRE (el RUES dice solo
+# «enseñanza deportiva y recreativa» o «cría de caballos»).
+_ECUESTRE = dict(
+    color="#7C2D12", tipo="servicios", ceja="Escuela ecuestre",
+    hero="Equitación con pasión y respeto por el caballo",
+    sub="Clases para niños y adultos, salto y pesebrera en {ciudad}.",
+    f_hero="photo-1726209431921-71cb661b4dbf", f_nos="photo-1590839823121-c253bf8d1e7d",
+    sec="Viva la experiencia del caballo",
+    servicios=[("photo-1607273225241-035d579b8452", "Clases de equitación", "Desde el primer contacto con el caballo hasta montar con seguridad."),
+               ("photo-1789985478605-9485876472e4", "Salto y entrenamiento", "Preparación para jinetes que quieren competir."),
+               ("photo-1576692192914-9abed71b3ef9", "Pesebrera", "Alojamiento, alimentación y cuidado diario de su caballo.")],
+    nos="Un haras en {ciudad} para aprender y disfrutar",
+    f_banda="photo-1511746687876-42cb762f6ac1", banda="¿Quiere su primera clase?",
+    banda_txt="Agende una clase de prueba y conozca nuestras instalaciones.", banda_btn="Agendar clase")
+
+
 def _hay(clave: str, texto: str) -> bool:
     """La clave al comienzo de una palabra («obra» no está en «cobranza»)."""
     return re.search(r"\b" + re.escape(clave.strip()), texto) is not None
@@ -254,6 +285,8 @@ def _hay(clave: str, texto: str) -> bool:
 def perfil(actividad: str, nombre: str = "") -> dict:
     a = (actividad or "").lower().strip()
     n = (nombre or "").lower()
+    if any(_hay(k, n) for k in ("haras", "ecuestre", "hípic", "hipic", "equitaci", "caballeriz")):
+        return _ECUESTRE
     if "agropecuari" in n or "agroveterin" in n or "agroinsum" in n:
         return _AGRO_TIENDA
     if "veterinari" in n:
