@@ -52,9 +52,12 @@
   .faq details{background:var(--blanco);border:1px solid var(--borde);border-radius:12px;padding:16px 20px;margin:0 0 12px}
   .faq summary{font-weight:700;cursor:pointer;font-size:17px}
   .faq p{margin:10px 0 0;color:var(--suave)}
+  .aviso-sitio{display:block;background:var(--verde);color:var(--osc);text-align:center;padding:12px 16px;font-weight:600;text-decoration:none}
+  .aviso-sitio:hover{background:#5BE0A4}
 </style>
 </head>
 <body>
+{% if sitio %}<a class="aviso-sitio" href="{{ sitio }}" target="_blank" data-clic="portafolio_ver_sitio">🎁 Le armamos la página web de <b>{{ empresa }}</b>: <u>véala aquí</u></a>{% endif %}
 <header>
   <div class="env">
     <div class="marca">Tributando<span>.co</span></div>

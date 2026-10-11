@@ -1101,7 +1101,7 @@ def portafolio():
     wa = IA_CFG.get("negocio", {}).get("whatsapp") or "573332470715"
     from urllib.parse import quote
     import hmac as _hmac
-    empresa = ""
+    empresa = sitio = ""
     if request.args.get("e"):
         try:
             prosp_mod.registrar_visita(request.args.get("e", ""), request.args.get("t", ""))
@@ -1109,9 +1109,12 @@ def portafolio():
             if _hmac.compare_digest(request.args.get("t") or "", prosp_mod.token_portafolio(em)):
                 p = prosp_mod.db.session.get(prosp_mod.Prospecto, em)
                 empresa = (p.razon_social or "") if p else ""
+                if p and p.segmento != "contador":
+                    from src.sitios import url_sitio
+                    sitio = url_sitio(em)
         except Exception:  # noqa: BLE001 — una visita nunca tumba la página
             prosp_mod.db.session.rollback()
-    return render_template("portafolio.html", whatsapp=wa, empresa=empresa,
+    return render_template("portafolio.html", whatsapp=wa, empresa=empresa, sitio=sitio,
                            wa_texto=quote("Hola Edison, vi el portafolio de Tributando y quiero una propuesta para mi empresa."))
 
 
