@@ -488,6 +488,61 @@ def _tinte(hexa: str, k: float = 0.92) -> str:
     return "#%02X%02X%02X" % tuple(round(c + (255 - c) * k) for c in (r, g, b))
 
 
+# «Por qué elegirnos» y preguntas frecuentes según vendan productos o servicios.
+# Solo afirmaciones genéricas que cualquier empresa formal puede sostener: nada de
+# cifras, años de experiencia, premios ni precios. {nit_txt} = «con NIT 9001…» o «».
+_POR_QUE = {
+    "servicios": [("chat", "Atención directa", "Habla con quien hace el trabajo, sin intermediarios ni call center."),
+                  ("doc", "Propuesta por escrito", "Alcance, tiempos y valor claros antes de empezar."),
+                  ("check", "Compromiso con lo acordado", "Cumplimos lo pactado y le mantenemos informado en cada paso."),
+                  ("pin", "Empresa de {ciudad}", "Cerca de usted y legalmente constituida{nit_txt}.")],
+    "productos": [("chat", "Asesoría al comprar", "Le ayudamos a elegir lo que de verdad necesita."),
+                  ("doc", "Cotización clara", "Referencias, presentaciones y valores por escrito."),
+                  ("truck", "Entregas en {ciudad}", "Le llevamos su pedido en {ciudad} y el área metropolitana."),
+                  ("shield", "Compra con respaldo", "Empresa legalmente constituida{nit_txt}, con factura en cada compra.")],
+}
+_FAQ = {
+    "servicios": [("¿Cómo solicito una cotización?",
+                   "Escríbanos por el formulario de esta página o a nuestro correo contándonos qué necesita. "
+                   "Le respondemos con una propuesta por escrito."),
+                  ("¿La primera conversación tiene costo?",
+                   "No. La primera conversación es para entender su necesidad y no tiene costo ni compromiso."),
+                  ("¿Atienden fuera de {ciudad}?",
+                   "Nuestra base está en {ciudad}. Si usted está en otro municipio, cuéntenos dónde y le confirmamos si podemos atenderle."),
+                  ("¿Entregan factura?",
+                   "Sí. Somos una empresa legalmente constituida{nit_txt} y cada servicio queda respaldado con su factura.")],
+    "productos": [("¿Cómo hago un pedido?",
+                   "Escríbanos por el formulario de esta página o a nuestro correo con los productos y cantidades que necesita. "
+                   "Le enviamos la cotización y coordinamos la entrega."),
+                  ("¿Hacen entregas?",
+                   "Sí, entregamos en {ciudad} y el área metropolitana. Para otros municipios, consúltenos."),
+                  ("¿Atienden pedidos para negocios?",
+                   "Sí. Cuéntenos las cantidades que maneja su negocio y le enviamos la cotización correspondiente."),
+                  ("¿Qué medios de pago reciben?",
+                   "Se los confirmamos junto con la cotización, según el pedido y la forma de entrega.")],
+}
+_MESES = ("enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto",
+          "septiembre", "octubre", "noviembre", "diciembre")
+# Correos gratuitos: con ellos no hay dominio propio de dónde sacar el logo.
+_CORREO_GRATIS = ("gmail.", "googlemail.", "hotmail.", "outlook.", "live.", "msn.", "yahoo.", "ymail.",
+                  "icloud.", "me.com", "mac.com", "aol.", "proton", "pm.me", "zoho.", "gmx.", "mail.com", "une.net")
+
+
+def dominio_propio(email: str) -> str:
+    """«chris@cardanel.com» → «cardanel.com»; «x@gmail.com» → «» (correo gratuito)."""
+    d = (email or "").rsplit("@", 1)[-1].lower().strip() if "@" in (email or "") else ""
+    return "" if not d or any(d.startswith(g) or d == g for g in _CORREO_GRATIS) else d
+
+
+def _fecha_larga(iso: str) -> tuple[str, str]:
+    """«2026-09-10» → («2026», «10 de septiembre de 2026»); vacío si no sirve."""
+    m = re.match(r"^(\d{4})-(\d{2})-(\d{2})", (iso or "").strip())
+    if not m or not 1 <= int(m.group(2)) <= 12:
+        return "", ""
+    a, mes, d = m.groups()
+    return a, f"{int(d)} de {_MESES[int(mes) - 1]} de {a}"
+
+
 def datos_sitio(p) -> dict:
     """Todo lo que la plantilla necesita a partir del Prospecto."""
     c = ciudad(p.municipio)
@@ -496,9 +551,12 @@ def datos_sitio(p) -> dict:
     nombre = (p.razon_social or "").strip()
     act = (p.actividad or "").strip().rstrip(".")
     wa_txt = quote(f"Hola Edison, quiero publicar la página web de {nombre}")
+    anio, matricula = _fecha_larga(getattr(p, "fecha_matricula", "") or "")
+    nit_txt = f" (NIT {p.nit})" if p.nit else ""
+    f2 = lambda t: t.format(ciudad=c, nit_txt=nit_txt)
     return {"razon_social": nombre, "marca": marca(nombre), "inicial": (marca(nombre) or "E")[0].upper(),
             "ciudad": c, "correo": p.email, "nit": p.nit or "", "actividad": act,
-            "color": pf["color"], "tinte": _tinte(pf["color"]), "tipo": pf["tipo"],
+            "color": pf["color"], "tinte": _tinte(pf["color"]), "claro": _tinte(pf["color"], 0.55), "tipo": pf["tipo"],
             "ceja": f"{pf['ceja']} · {c}", "hero": f(pf["hero"]), "sub": f(pf["sub"]),
             "f_hero": _u(pf["f_hero"], 1800), "f_nos": _u(pf["f_nos"], 1100), "f_banda": _u(pf["f_banda"], 1000),
             "sec": pf["sec"], "servicios": [(_u(ft, 800), t, d) for ft, t, d in pf["servicios"]],
@@ -509,4 +567,13 @@ def datos_sitio(p) -> dict:
             "banda": pf["banda"], "banda_txt": pf["banda_txt"], "banda_btn": pf["banda_btn"],
             "precio_diseno": f"${PRECIO_DISENO:,.0f}".replace(",", "."),
             "precio_anual": f"${PRECIO_ANUAL:,.0f}".replace(",", "."),
-            "wa_publicar": f"https://wa.me/573332470715?text={wa_txt}"}
+            "wa_publicar": f"https://wa.me/573332470715?text={wa_txt}",
+            # Rediseño 11-oct: datos REALES del registro y textos genéricos por tipo.
+            "anio": anio, "matricula": matricula,
+            "por_que": [(i, f2(t), f2(d)) for i, t, d in pf.get("por_que") or _POR_QUE[pf["tipo"]]],
+            "faq": [(f2(q), f2(r)) for q, r in pf.get("faq") or _FAQ[pf["tipo"]]],
+            "galeria": [_u(pf["f_hero"], 900), _u(pf["servicios"][0][0], 700), _u(pf["f_nos"], 700),
+                        _u(pf["servicios"][1][0], 700), _u(pf["f_banda"], 900), _u(pf["servicios"][2][0], 700)],
+            "mapa": "https://www.google.com/maps?q=" + quote(f"{c}, Antioquia, Colombia") + "&output=embed",
+            "dominio": dominio_propio(p.email),
+            "logo_url": (getattr(p, "logo_url", "") or "").strip()}
