@@ -57,7 +57,8 @@
     {% for p in filas %}
     <tr>
       <td><b>{{ p.razon_social[:90] }}</b><div class="sub">{{ 'Contador · ' ~ p.n_empresas ~ ' empresa(s)' if p.segmento=='contador' else (p.actividad[:70] if p.actividad else '') }}</div>
-        <div class="sub">{{ p.municipio }}{% if p.nit %} · NIT {{ p.nit }}{% endif %}{% if p.fecha_matricula %} · matrícula {{ p.fecha_matricula }}{% endif %}</div></td>
+        <div class="sub">{{ p.municipio }}{% if p.nit %} · NIT {{ p.nit }}{% endif %}{% if p.fecha_matricula %} · matrícula {{ p.fecha_matricula }}{% endif %}</div>
+        {% if p.segmento != 'contador' %}<div class="sub"><a href="{{ url_sitio(p.email) }}" target="_blank">Ver su página web →</a></div>{% endif %}</td>
       <td><a href="mailto:{{ p.email }}">{{ p.email }}</a>{% if p.respondio_en %}<div class="sub">respondió {{ p.respondio_en.strftime('%d/%m %H:%M') }}</div>{% endif %}
         {% if p.visto_en %}<div class="sub" style="color:#1c7a50;font-weight:600">vio el portafolio {{ p.visitas or 1 }} vez/veces · {{ p.visto_en.strftime('%d/%m %H:%M') }}</div>{% endif %}
         {% if p.bienvenida_en %}<div class="sub">saludo enviado {{ p.bienvenida_en.strftime('%d/%m %H:%M') }}</div>{% endif %}</td>

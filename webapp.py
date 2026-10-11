@@ -1044,8 +1044,9 @@ def admin_prospectos_crm():
     q = request.args.get("q", "")
     filas = prosp_mod.lista_crm(etapa, estado, q)
     r = prosp_mod.resumen()
+    from src.sitios import url_sitio
     return render_template("prospectos_crm.html", filas=filas, etapas=prosp_mod.ETAPAS,
-                           etapa=etapa, estado=estado or "", q=q, r=r)
+                           etapa=etapa, estado=estado or "", q=q, r=r, url_sitio=url_sitio)
 
 
 @app.post("/admin/prospectos/etapa")
