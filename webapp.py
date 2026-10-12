@@ -1104,7 +1104,11 @@ def portafolio():
     empresa = sitio = ""
     if request.args.get("e"):
         try:
-            prosp_mod.registrar_visita(request.args.get("e", ""), request.args.get("t", ""))
+            # Las aperturas de Edison (o del personal autorizado) no cuentan como visita.
+            from src.auth import es_autorizado as _es_aut
+            _u = usuario_actual()
+            if not (_u is not None and _es_aut(_u)):
+                prosp_mod.registrar_visita(request.args.get("e", ""), request.args.get("t", ""))
             em = (request.args.get("e") or "").lower().strip()
             if _hmac.compare_digest(request.args.get("t") or "", prosp_mod.token_portafolio(em)):
                 p = prosp_mod.db.session.get(prosp_mod.Prospecto, em)
@@ -1116,6 +1120,13 @@ def portafolio():
             prosp_mod.db.session.rollback()
     return render_template("portafolio.html", whatsapp=wa, empresa=empresa, sitio=sitio,
                            wa_texto=quote("Hola Edison, vi el portafolio de Tributando y quiero una propuesta para mi empresa."))
+
+
+@app.template_filter("hora_co")
+def _hora_co(dt, fmt="%d/%m %H:%M"):
+    """Las fechas se guardan en UTC; en pantalla van en hora de Colombia (UTC-5)."""
+    from datetime import timedelta
+    return (dt - timedelta(hours=5)).strftime(fmt) if dt else ""
 
 
 @app.get("/sitio")
