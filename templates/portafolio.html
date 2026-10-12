@@ -5,178 +5,749 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Portafolio de servicios contables · Tributando</title>
 <meta name="description" content="Contabilidad, impuestos, nómina y cumplimiento ante la DIAN para empresas que empiezan, con un contador de verdad y un software que causa solo.">
+<meta name="theme-color" content="#07110D">
+<script>document.documentElement.classList.add('js')</script>
+<link rel="icon" href="/static/img/logo-tributando.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://images.unsplash.com">
+<link rel="preload" as="image" href="https://images.unsplash.com/photo-1551836022-4c4c79ecde51?auto=format&fit=crop&w=1100&q=72">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Instrument+Serif:ital@1&display=swap" rel="stylesheet">
+{%- macro icono(n, t=24) -%}
+<svg width="{{ t }}" height="{{ t }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+{%- if n == 'calc' -%}<rect x="5" y="2.5" width="14" height="19" rx="2.6"/><path d="M8.5 6.5h7M8.5 11h.01M12 11h.01M15.5 11h.01M8.5 14.5h.01M12 14.5h.01M8.5 18h.01M12 18h.01M15.5 14.5V18"/>
+{%- elif n == 'pct' -%}<path d="M18.5 5.5 5.5 18.5"/><circle cx="7.5" cy="7.5" r="2.5"/><circle cx="16.5" cy="16.5" r="2.5"/>
+{%- elif n == 'users' -%}<circle cx="9" cy="8" r="3.2"/><path d="M3 20c.6-3.3 3-5.2 6-5.2s5.4 1.9 6 5.2"/><path d="M16 4.8a3.2 3.2 0 0 1 0 6.4M18 14.9c1.6.7 2.7 2.4 3 5.1"/>
+{%- elif n == 'cal' -%}<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4M8 13.5h3M8 16.5h6"/>
+{%- elif n == 'llave' -%}<path d="M14.7 6.3a4 4 0 0 0-5.4 5.2L3.5 17.3v3.2h3.2l5.8-5.8a4 4 0 0 0 5.2-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/>
+{%- elif n == 'chat' -%}<path d="M21 12a8.5 8.5 0 0 1-12.4 7.6L3.5 21l1.4-4.9A8.5 8.5 0 1 1 21 12z"/><path d="M8.5 11h7M8.5 14.5h4.5"/>
+{%- elif n == 'lupa' -%}<circle cx="11" cy="11" r="6.8"/><path d="m20.5 20.5-4.6-4.6M8.3 11.1l1.9 1.9 3.4-3.5"/>
+{%- elif n == 'gorro' -%}<path d="M2.5 9.5 12 5l9.5 4.5L12 14z"/><path d="M6.5 11.6v4.2c1.4 1.4 3.4 2.2 5.5 2.2s4.1-.8 5.5-2.2v-4.2M21.5 9.5v5"/>
+{%- elif n == 'nube' -%}<path d="M7 18.5h10.5a4 4 0 0 0 .6-7.95A6 6 0 0 0 6.6 9.2 4.7 4.7 0 0 0 7 18.5z"/>
+{%- elif n == 'doc' -%}<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>
+{%- elif n == 'check' -%}<circle cx="12" cy="12" r="9"/><path d="m8 12.2 2.8 2.8L16 9.5"/>
+{%- elif n == 'ok' -%}<path d="m5 12.5 4.5 4.5L19 7.5"/>
+{%- elif n == 'arrow' -%}<path d="M7 17 17 7M8.5 7H17v8.5"/>
+{%- elif n == 'abajo' -%}<path d="M12 5v14M6 13l6 6 6-6"/>
+{%- elif n == 'clock' -%}<circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/>
+{%- elif n == 'spark' -%}<path d="M12 3c.6 4.4 2.6 6.4 7 7-4.4.6-6.4 2.6-7 7-.6-4.4-2.6-6.4-7-7 4.4-.6 6.4-2.6 7-7z"/>
+{%- elif n == 'rayo' -%}<path d="M13 2.5 4.5 13.5H12l-1 8 8.5-11H12z"/>
+{%- elif n == 'grafica' -%}<path d="M4 4v16h16"/><path d="m7.5 15 3.5-4 3 2.5 5-6"/>
+{%- elif n == 'libros' -%}<path d="M4 5.5C4 4.1 5.1 3 6.5 3H20v14.5H6.5A2.5 2.5 0 0 0 4 20z"/><path d="M4 20a2.5 2.5 0 0 0 2.5 1H20v-3.5M8.5 7.5h7M8.5 11h5"/>
+{%- elif n == 'sube' -%}<path d="M3.5 17 9.5 11l4 4 7-7.5"/><path d="M15 7.5h5.5V13"/>
+{%- elif n == 'escudo' -%}<path d="M12 3 4.5 6v5.2c0 4.4 3.1 8.3 7.5 9.8 4.4-1.5 7.5-5.4 7.5-9.8V6z"/><path d="m9 12 2.2 2.2L15.5 10"/>
+{%- elif n == 'menu' -%}<path d="M4 7h16M4 12h16M4 17h16"/>
+{%- elif n == 'regalo' -%}<rect x="3.5" y="8" width="17" height="4" rx="1"/><path d="M5 12v8.5h14V12M12 8v12.5M12 8C10.5 4.5 7 4.5 7 6.5S10 8 12 8zm0 0c1.5-3.5 5-3.5 5-1.5S14 8 12 8z"/>
+{%- elif n == 'whats' -%}<path d="M20.5 11.8a8.5 8.5 0 0 1-12.6 7.4L3.5 20.5l1.3-4.3a8.5 8.5 0 1 1 15.7-4.4z"/><path d="M9 8.3c.2-.4.5-.5.8-.5h.5c.2 0 .4.1.5.4l.7 1.7c.1.2 0 .5-.1.7l-.5.6c-.1.2-.1.4 0 .6.6 1 1.4 1.8 2.4 2.4.2.1.4.1.6 0l.6-.5c.2-.2.5-.2.7-.1l1.7.7c.3.1.4.3.4.5v.5c0 .3-.1.6-.5.8-.6.4-1.5.6-2.4.3-2.6-.8-4.6-2.8-5.4-5.4-.3-.9-.1-1.8.3-2.4z"/>
+{%- endif -%}</svg>
+{%- endmacro %}
 <style>
-  :root{--osc:#0F2A22;--osc2:#163A30;--claro:#F6F7F2;--blanco:#FFFFFF;--tinta:#14231D;--suave:#4A5A52;--verde:#37D38F;--verde-t:#1C7A50;--borde:#DDE3DA;--claro-t:#BFD8CC}
-  *{box-sizing:border-box}
-  body{margin:0;font-family:'Plus Jakarta Sans',Arial,sans-serif;color:var(--tinta);background:var(--claro);line-height:1.55}
-  a{color:inherit}
-  .env{max-width:1080px;margin:0 auto;padding:0 20px}
-  header{background:var(--osc);color:#F4F6F1;padding:56px 0 64px;border-left:10px solid var(--verde)}
-  .marca{font-weight:800;font-size:20px}.marca span{color:var(--verde)}
-  .ceja{color:var(--verde);font-weight:700;letter-spacing:3px;text-transform:uppercase;font-size:13px;margin:40px 0 12px}
-  h1{font-size:clamp(32px,5vw,54px);line-height:1.08;margin:0 0 18px;font-weight:800}
-  header p{color:var(--claro-t);font-size:18px;max-width:640px;margin:0 0 28px}
-  .btn{display:inline-block;background:var(--verde);color:var(--osc);font-weight:800;text-decoration:none;padding:14px 22px;border-radius:10px}
-  .btn.sec{background:transparent;color:#F4F6F1;border:1.5px solid var(--claro-t);margin-left:8px}
-  section{padding:56px 0}
-  h2{font-size:clamp(26px,3.4vw,38px);line-height:1.15;margin:0 0 28px;font-weight:800}
-  .rejilla{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px}
-  .tarjeta{background:var(--blanco);border:1px solid var(--borde);border-radius:16px;padding:24px}
-  .tarjeta h3{margin:0 0 8px;font-size:19px}
-  .tarjeta p{margin:0;color:var(--suave);font-size:15.5px}
-  .oscuro{background:var(--osc);color:#F4F6F1}
-  .oscuro .tarjeta{background:var(--osc2);border-color:var(--osc2)}
-  .oscuro .tarjeta p{color:var(--claro-t)}
-  .oscuro .ceja2{color:var(--verde)}
-  .ceja2{color:var(--verde-t);font-weight:700;letter-spacing:3px;text-transform:uppercase;font-size:13px;margin:0 0 10px}
-  .pasos{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:22px}
-  .num{font-size:44px;font-weight:800;color:var(--verde);line-height:1}
-  .pasos h3{margin:8px 0 4px;font-size:18px}.pasos p{margin:0;color:var(--suave);font-size:15px}
-  .cierre{background:var(--osc);color:#F4F6F1;text-align:center;padding:64px 0}
-  .cierre p{color:var(--claro-t)}
-  footer{font-size:13px;color:var(--suave);padding:24px 0;text-align:center}
-  .calc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;align-items:start}
-  @media(max-width:760px){.calc{grid-template-columns:1fr}}
-  .campo{margin:0 0 18px}.campo label{display:block;font-weight:700;margin:0 0 8px}
-  .cuenta{display:flex;align-items:center;gap:10px}
-  .cuenta button{width:42px;height:42px;border-radius:10px;border:1.5px solid var(--borde);background:var(--blanco);font-size:22px;font-weight:800;cursor:pointer;color:var(--tinta)}
-  .cuenta output{min-width:48px;text-align:center;font-size:26px;font-weight:800}
-  .chk{display:flex;gap:10px;align-items:flex-start;cursor:pointer;font-size:15.5px}
-  .chk input{width:20px;height:20px;accent-color:var(--verde-t);margin-top:2px}
-  .fila{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--borde);font-size:16px}
-  .fila span:last-child{font-weight:700;white-space:nowrap}
-  .total{display:flex;justify-content:space-between;align-items:baseline;padding:16px 0 6px;gap:12px}
-  .total b{font-size:34px;font-weight:800;color:var(--verde-t);white-space:nowrap}
-  .faq details{background:var(--blanco);border:1px solid var(--borde);border-radius:12px;padding:16px 20px;margin:0 0 12px}
-  .faq summary{font-weight:700;cursor:pointer;font-size:17px}
-  .faq p{margin:10px 0 0;color:var(--suave)}
-  .aviso-sitio{display:block;background:var(--verde);color:var(--osc);text-align:center;padding:12px 16px;font-weight:600;text-decoration:none}
-  .aviso-sitio:hover{background:#5BE0A4}
+:root{
+  --noche:#07110D;--noche2:#0C1A14;--noche3:#11241B;
+  --papel:#F6F7F2;--blanco:#FFFFFF;--menta:#E9F6EE;
+  --tinta:#0F1A15;--suave:#51605A;--borde:#E1E6DE;
+  --verde:#37D38F;--verde2:#5BE0A4;--verde-t:#1C7A50;
+  --gris-o:#A3B3AB;--linea-o:rgba(255,255,255,.09);
+  --r-xl:32px;--r-l:24px;--r-m:16px;
+  --gut:clamp(16px,4vw,40px);--ancho:1220px;
+  --ease:cubic-bezier(.2,.7,.2,1);
+  --serif:"Instrument Serif",Georgia,serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+section[id]{scroll-margin-top:70px}
+body{margin:0;font-family:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--tinta);background:var(--papel);font-size:17px;line-height:1.6;overflow-x:hidden;overflow-x:clip;-webkit-font-smoothing:antialiased}
+h1,h2,h3{margin:0;letter-spacing:-.03em;line-height:1.06;font-weight:800}
+p{margin:0}a{color:inherit}img{display:block;max-width:100%}
+.env{max-width:var(--ancho);margin:0 auto;padding:0 var(--gut)}
+.ceja{display:inline-flex;align-items:center;gap:10px;color:var(--verde-t);font-weight:700;letter-spacing:.14em;text-transform:uppercase;font-size:12.5px;margin-bottom:18px}
+.ceja::before{content:"";width:22px;height:2px;border-radius:2px;background:currentColor}
+.oscuro .ceja{color:var(--verde)}
+h2{font-size:clamp(32px,4.3vw,56px)}
+h2 em,h1 em{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:-.01em}
+h2 em{color:var(--verde-t)}.oscuro h2 em{color:var(--verde)}
+.lead{font-size:clamp(17px,1.4vw,19px);color:var(--suave);max-width:560px}
+.oscuro .lead{color:var(--gris-o)}
+
+/* Botones */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;font:inherit;font-weight:700;font-size:16px;text-decoration:none;border:0;cursor:pointer;border-radius:999px;padding:15px 26px;transition:transform .3s var(--ease),box-shadow .3s var(--ease),background .3s,border-color .3s;white-space:nowrap}
+.btn svg{transition:transform .3s var(--ease);flex:none}
+.btn:hover{transform:translateY(-2px)}.btn:hover svg{transform:translate(2px,-2px)}
+.btn-verde{background:var(--verde);color:#062014;box-shadow:0 12px 32px -12px rgba(55,211,143,.8),inset 0 1px 0 rgba(255,255,255,.35)}
+.btn-verde:hover{background:var(--verde2);box-shadow:0 18px 40px -14px rgba(55,211,143,.9),inset 0 1px 0 rgba(255,255,255,.35)}
+.btn-vidrio{background:rgba(255,255,255,.06);color:#fff;border:1px solid rgba(255,255,255,.2);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.btn-vidrio:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.34)}
+.btn-tinta{background:var(--tinta);color:#fff}
+.enlace{display:inline-flex;align-items:center;gap:8px;font-weight:700;color:var(--verde-t);text-decoration:none}
+.enlace svg{transition:transform .3s var(--ease)}.enlace:hover svg{transform:translate(2px,-2px)}
+.oscuro .enlace{color:var(--verde)}
+
+/* Aviso de la página web del prospecto */
+.aviso-sitio{position:relative;z-index:60;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 14px;background:linear-gradient(90deg,#2BC07F,var(--verde) 50%,#6BE6AE);color:#062014;text-align:center;padding:11px 16px;font-weight:600;font-size:15px;text-decoration:none;line-height:1.4}
+.aviso-sitio svg{flex:none}
+.aviso-sitio .ir{display:inline-flex;align-items:center;gap:6px;background:#062014;color:#fff;border-radius:999px;padding:5px 13px;font-size:13.5px;font-weight:700;white-space:nowrap;transition:background .3s}
+.aviso-sitio:hover .ir{background:#0F2A22}
+
+/* Navegación */
+.nav{position:sticky;top:0;z-index:50;height:74px;margin-bottom:-74px;color:#fff;transition:background .35s,box-shadow .35s}
+.nav .env{height:100%;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.nav.solida{background:rgba(7,17,13,.9);backdrop-filter:saturate(1.5) blur(16px);-webkit-backdrop-filter:saturate(1.5) blur(16px);box-shadow:0 1px 0 rgba(255,255,255,.07)}
+.logo{display:flex;align-items:center;gap:11px;text-decoration:none;font-weight:800;font-size:19px;letter-spacing:-.02em}
+.logo i{font-style:normal;width:36px;height:36px;border-radius:11px;display:grid;place-items:center;background:linear-gradient(140deg,#8FF0C2,var(--verde) 55%,#22A86B);color:#062014;font-size:18px;box-shadow:0 8px 22px -8px rgba(55,211,143,.75),inset 0 1px 0 rgba(255,255,255,.5)}
+.logo b{font-weight:800}.logo span{color:var(--verde)}
+.links{display:flex;align-items:center;gap:30px;font-weight:500;font-size:15px}
+.links a:not(.btn){text-decoration:none;opacity:.82;position:relative}
+.links a:not(.btn)::after{content:"";position:absolute;left:0;right:0;bottom:-5px;height:1.5px;background:var(--verde);transform:scaleX(0);transform-origin:left;transition:transform .3s var(--ease)}
+.links a:not(.btn):hover{opacity:1}.links a:not(.btn):hover::after{transform:scaleX(1)}
+.links .btn{padding:11px 20px;font-size:15px}
+.menu{display:none;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.2);border-radius:12px;color:inherit;width:44px;height:44px;place-items:center;cursor:pointer}
+@media(max-width:900px){
+  .menu{display:grid}
+  .links{position:absolute;top:68px;left:var(--gut);right:var(--gut);flex-direction:column;align-items:stretch;gap:2px;padding:10px;background:#fff;color:var(--tinta);border-radius:20px;box-shadow:0 30px 60px -20px rgba(0,0,0,.45);opacity:0;transform:translateY(-8px);pointer-events:none;transition:opacity .25s,transform .25s var(--ease)}
+  .nav.abierto .links{opacity:1;transform:none;pointer-events:auto}
+  .links a:not(.btn){padding:12px 14px;border-radius:12px;opacity:1}.links a:not(.btn)::after{display:none}
+  .links a:not(.btn):hover{background:var(--papel)}
+  .links .btn{margin-top:6px}
+}
+
+/* Portada */
+.portada{position:relative;background:var(--noche);color:#fff;overflow:hidden;isolation:isolate}
+.portada::before{content:"";position:absolute;inset:0;z-index:-1;background:
+  radial-gradient(900px 520px at 78% 18%,rgba(55,211,143,.22),transparent 62%),
+  radial-gradient(700px 500px at -8% 100%,rgba(55,211,143,.12),transparent 60%)}
+.portada::after{content:"";position:absolute;inset:0;z-index:-1;opacity:.5;
+  background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:56px 56px;
+  -webkit-mask-image:radial-gradient(ellipse 70% 70% at 60% 30%,#000 20%,transparent 75%);mask-image:radial-gradient(ellipse 70% 70% at 60% 30%,#000 20%,transparent 75%)}
+.portada .env{display:grid;grid-template-columns:minmax(0,1.04fr) minmax(0,1fr);gap:clamp(36px,5vw,72px);align-items:center;padding-top:clamp(124px,13vw,168px);padding-bottom:clamp(64px,8vw,112px)}
+.pildora{display:inline-flex;align-items:center;gap:10px;max-width:100%;padding:7px 15px 7px 7px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);font-size:14px;font-weight:600;color:#DCE7E1;margin-bottom:26px}
+.pildora i{flex:none;display:grid;place-items:center;width:26px;height:26px;border-radius:999px;background:var(--verde);color:#062014}
+.pildora span{overflow-wrap:anywhere;line-height:1.35}
+.portada h1{font-size:clamp(40px,5.5vw,76px);line-height:1.02;letter-spacing:-.04em;text-wrap:balance;overflow-wrap:break-word}
+.portada h1 em{color:var(--verde);font-size:1.06em;line-height:.9}
+.portada h1.largo{font-size:clamp(36px,4.3vw,62px)}
+.portada h1 .w{display:inline-block}
+.js .portada h1 .w{opacity:0;transform:translateY(.42em);animation:sube .9s var(--ease) forwards;animation-delay:calc(.12s + var(--i) * .055s)}
+.js .entra{opacity:0;transform:translateY(16px);animation:sube .9s var(--ease) forwards;animation-delay:var(--d,.5s)}
+@keyframes sube{to{opacity:1;transform:none}}
+.portada .sub{margin-top:24px;font-size:clamp(17px,1.45vw,19.5px);color:#C3D0C9;max-width:560px}
+.portada .sub b{color:#fff;font-weight:700}
+.botones{display:flex;flex-wrap:wrap;gap:12px;margin-top:34px}
+.sellos{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:36px;font-size:14.5px;color:#C3D0C9}
+.sellos span{display:inline-flex;align-items:center;gap:8px}
+.sellos svg{color:var(--verde)}
+
+/* Maqueta del software (ilustrativa) */
+.maqueta{position:relative;margin:0}
+.h-foto{margin:0 0 0 auto;width:90%;border-radius:28px;overflow:hidden;aspect-ratio:4/3.5;box-shadow:0 40px 80px -40px rgba(0,0,0,.8);position:relative}
+.h-foto::after{content:"";position:absolute;inset:0;background:linear-gradient(200deg,transparent 45%,rgba(7,17,13,.55));border-radius:inherit;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+.h-foto img{width:100%;height:100%;object-fit:cover;object-position:70% 60%;animation:acerca 14s var(--ease) both}
+@keyframes acerca{from{transform:scale(1.1)}to{transform:scale(1)}}
+.ventana{position:relative;z-index:2;width:70%;margin-top:-26%;border-radius:22px;background:linear-gradient(180deg,#10211A,#0B1712);border:1px solid rgba(255,255,255,.1);box-shadow:0 50px 100px -40px rgba(0,0,0,.8),0 0 0 1px rgba(55,211,143,.06),inset 0 1px 0 rgba(255,255,255,.06);overflow:hidden}
+.v-barra{display:flex;align-items:center;gap:7px;padding:12px 16px;border-bottom:1px solid var(--linea-o);font-size:12.5px;color:#8FA39A}
+.v-barra i{width:10px;height:10px;border-radius:50%;background:#2A3B33}
+.v-barra i:nth-child(1){background:#F26B5B}.v-barra i:nth-child(2){background:#F5C451}.v-barra i:nth-child(3){background:#3FCB80}
+.v-barra b{margin-left:10px;font-weight:600;color:#C9D6CF;white-space:nowrap}
+.v-barra .ej{margin-left:auto;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--verde);background:rgba(55,211,143,.1);border:1px solid rgba(55,211,143,.25);padding:3px 9px;border-radius:999px;white-space:nowrap}
+.v-cuerpo{display:block}
+.v-lado{border-right:1px solid var(--linea-o);padding:14px 0;display:flex;flex-direction:column;align-items:center;gap:10px;color:#5F7469}
+.v-lado span{width:32px;height:32px;border-radius:10px;display:grid;place-items:center}
+.v-lado span.act{background:rgba(55,211,143,.14);color:var(--verde)}
+.v-main{padding:16px;min-width:0}
+.v-tit{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:12px}
+.v-tit b{font-size:15px;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.v-tit small{color:#7F948A;font-size:12px}
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.kpi{background:rgba(255,255,255,.035);border:1px solid var(--linea-o);border-radius:12px;padding:10px 11px;min-width:0}
+.kpi small{display:block;color:#81958B;font-size:11px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi b{display:block;font-size:17px;letter-spacing:-.02em;margin-top:3px;white-space:nowrap}
+.kpi em{font-style:normal;font-size:11px;color:var(--verde);font-weight:700;white-space:nowrap}
+.v-graf{margin-top:10px;background:rgba(255,255,255,.025);border:1px solid var(--linea-o);border-radius:12px;padding:12px 12px 8px}
+.v-graf .t{display:flex;justify-content:space-between;font-size:11.5px;color:#81958B;margin-bottom:8px}
+.barras{display:flex;align-items:flex-end;gap:7px;height:78px}
+.barras span{flex:1;border-radius:6px 6px 3px 3px;background:linear-gradient(180deg,rgba(55,211,143,.55),rgba(55,211,143,.12));height:var(--h);transform-origin:bottom}
+.barras span:last-child{background:linear-gradient(180deg,var(--verde),rgba(55,211,143,.35))}
+.js .barras span{animation:crece 1.1s var(--ease) both;animation-delay:calc(.9s + var(--i) * .07s)}
+@keyframes crece{from{transform:scaleY(0)}}
+.v-meses{display:flex;gap:7px;margin-top:6px}.v-meses span{flex:1;text-align:center;font-size:10px;color:#5F7469}
+.v-lista{margin-top:10px;border:1px solid var(--linea-o);border-radius:12px;overflow:hidden}
+.v-lista .cab{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#7F948A;font-weight:700;padding:9px 12px;background:rgba(255,255,255,.025)}
+.v-fila{display:flex;align-items:center;gap:10px;padding:9px 12px;border-top:1px solid var(--linea-o);font-size:12.5px}
+.v-fila .ic{flex:none;width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:rgba(255,255,255,.05);color:#B6C6BE}
+.v-fila .tx{min-width:0;flex:1}.v-fila .tx b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.v-fila .tx small{color:#7F948A;font-size:11px}
+.v-fila .vl{font-weight:700;white-space:nowrap}
+.estado{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;color:var(--verde);background:rgba(55,211,143,.1);padding:3px 8px;border-radius:999px;white-space:nowrap}
+.flota{position:absolute;display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:16px;background:rgba(255,255,255,.96);color:var(--tinta);box-shadow:0 24px 50px -18px rgba(0,0,0,.55);font-size:13px;line-height:1.3;max-width:240px}
+.flota i{flex:none;width:32px;height:32px;border-radius:10px;display:grid;place-items:center;background:var(--menta);color:var(--verde-t)}
+.flota b{display:block;font-size:13.5px}.flota small{color:var(--suave);font-size:12px}
+.flota{z-index:3}
+.flota.f1{left:4%;top:9%;animation:flota 6s ease-in-out infinite}
+.flota.f2{right:-14px;bottom:14%;animation:flota 6s ease-in-out 1.5s infinite}
+@keyframes flota{50%{transform:translateY(-8px)}}
+.nota-ilu{margin-top:14px;font-size:12.5px;color:#7F948A;text-align:center}
+@media(max-width:1100px){.flota.f2{right:-6px}}
+@media(max-width:960px){.portada .env{grid-template-columns:1fr}.maqueta{max-width:680px}}
+@media(max-width:560px){
+  .botones .btn{flex:1 1 100%}
+  .v-main{padding:12px}
+  .kpi{padding:8px}.kpi b{font-size:14.5px}.kpi small{font-size:10px}
+  .flota{display:none}
+  .h-foto{width:100%;aspect-ratio:4/3;border-radius:22px}
+  .ventana{width:94%;margin-top:-18%}
+}
+
+/* Cinta */
+.cinta{background:var(--noche);color:#fff;border-top:1px solid var(--linea-o);border-bottom:1px solid var(--linea-o);overflow:hidden;padding:20px 0}
+.cinta .pista{display:flex;width:max-content;animation:corre 46s linear infinite}
+.cinta .grupo{display:flex;align-items:center;gap:30px;padding-right:30px;font-weight:700;font-size:clamp(18px,2vw,24px);letter-spacing:-.02em;white-space:nowrap;color:#DCE7E1}
+.cinta .grupo span:nth-child(4n+3){color:var(--verde)}
+.cinta svg{color:var(--verde);flex:none;opacity:.8}
+@keyframes corre{to{transform:translateX(-50%)}}
+
+/* Secciones */
+.seccion{padding:clamp(80px,10vw,136px) 0}
+.cabeza{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:22px 64px;align-items:end;margin-bottom:clamp(40px,5vw,64px)}
+.cabeza .der{display:flex;flex-direction:column;gap:18px;align-items:flex-start}
+@media(max-width:860px){.cabeza{grid-template-columns:1fr}}
+.oscuro{background:var(--noche);color:#fff;position:relative;overflow:hidden;isolation:isolate}
+.oscuro::before{content:"";position:absolute;width:1000px;height:1000px;right:-360px;top:-520px;z-index:-1;background:radial-gradient(closest-side,rgba(55,211,143,.2),transparent);pointer-events:none}
+
+/* Servicios (bento) */
+.bento{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr) minmax(0,1fr);grid-template-rows:auto auto;gap:18px}
+.caja{position:relative;background:var(--blanco);border:1px solid var(--borde);border-radius:var(--r-l);padding:30px 28px;display:flex;flex-direction:column;transition:transform .5s var(--ease),box-shadow .5s var(--ease),border-color .4s}
+.caja:hover{transform:translateY(-4px);box-shadow:0 30px 60px -36px rgba(15,26,21,.35);border-color:#CFE6D8}
+.ico{width:52px;height:52px;border-radius:15px;display:grid;place-items:center;background:var(--menta);color:var(--verde-t);border:1px solid #CDEBDA;margin-bottom:auto}
+.caja h3{font-size:25px;margin:34px 0 10px}
+.caja p{color:var(--suave);font-size:16px}
+.caja .num{position:absolute;top:28px;right:28px;font-size:13px;font-weight:700;color:#9AA8A1;letter-spacing:.06em}
+.caja.foto{grid-row:span 2;color:#fff;border:0;overflow:hidden;isolation:isolate;min-height:520px;justify-content:flex-end;background:var(--noche)}
+.caja.foto img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2;transition:transform 1.2s var(--ease)}
+.caja.foto:hover img{transform:scale(1.05)}
+.caja.foto::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(7,17,13,.1) 0%,rgba(7,17,13,.25) 35%,rgba(7,17,13,.94) 100%)}
+.caja.foto .ico{position:absolute;top:28px;left:28px;background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.25);color:#fff;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.caja.foto .num{color:rgba(255,255,255,.75)}
+.caja.foto h3{font-size:clamp(28px,2.6vw,36px);margin-top:0}
+.caja.foto p{color:#D3DED8}
+.etiquetas{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.etiquetas span{font-size:13px;font-weight:600;padding:6px 12px;border-radius:999px;background:var(--papel);border:1px solid var(--borde);color:var(--tinta)}
+.caja.foto .etiquetas span{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#fff;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.caja.ancha{grid-column:span 2;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px 32px;align-items:end}
+.caja.ancha .ico{margin-bottom:0}
+.caja.ancha h3{margin-top:30px}
+.anual{display:flex;flex-direction:column;gap:10px;margin-top:34px}
+.anual div{display:flex;align-items:center;gap:12px;padding:13px 16px;border-radius:14px;background:var(--papel);border:1px solid var(--borde);font-weight:600;font-size:15.5px}
+.anual svg{color:var(--verde-t);flex:none}
+@media(max-width:1000px){.bento{grid-template-columns:1fr 1fr}.caja.foto{grid-row:auto;grid-column:1/-1;min-height:420px}.caja.ancha{grid-column:1/-1}}
+@media(max-width:640px){.bento{grid-template-columns:1fr}.caja.ancha{grid-template-columns:1fr}.caja.foto{min-height:440px}.caja{padding:26px 22px}.caja .num{top:24px;right:22px}.caja.foto .ico{top:24px;left:22px}}
+
+/* Cómo trabajamos */
+.equipo{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) minmax(0,1fr);gap:16px;margin-bottom:16px}
+.equipo figure{margin:0;border-radius:var(--r-l);overflow:hidden;height:clamp(220px,26vw,340px);background:var(--noche3);position:relative}
+.equipo figure::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);background:linear-gradient(180deg,transparent 60%,rgba(7,17,13,.35))}
+.equipo img{width:100%;height:100%;object-fit:cover;transition:transform 1.2s var(--ease)}
+.equipo figure:hover img{transform:scale(1.05)}
+@media(max-width:760px){.equipo{grid-template-columns:1fr 1fr}.equipo figure:first-child{grid-column:1/-1}.equipo figure{height:180px}.equipo figure:first-child{height:240px}}
+.razones{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.razon{position:relative;padding:30px 26px 32px;border-radius:var(--r-l);background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.015));border:1px solid var(--linea-o);transition:border-color .4s,transform .5s var(--ease),background .4s}
+.razon:hover{border-color:rgba(55,211,143,.4);transform:translateY(-4px)}
+.razon .ico{background:rgba(55,211,143,.12);color:var(--verde);border-color:rgba(55,211,143,.28);margin-bottom:38px}
+.razon h3{font-size:22px;margin-bottom:10px;letter-spacing:-.02em}
+.razon p{color:var(--gris-o);font-size:15.5px}
+@media(max-width:1060px){.razones{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.razones{grid-template-columns:1fr}.razon .ico{margin-bottom:24px}}
+.pasos-cab{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:18px;margin:clamp(72px,8vw,104px) 0 34px;padding-top:clamp(48px,6vw,72px);border-top:1px solid var(--linea-o)}
+.pasos-cab h3{font-size:clamp(26px,3vw,38px)}
+.pasos{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
+.paso .n{display:flex;align-items:center;gap:14px;margin-bottom:22px}
+.paso .n b{flex:none;width:50px;height:50px;border-radius:50%;display:grid;place-items:center;background:var(--verde);color:#062014;font-size:17px;box-shadow:0 0 0 6px rgba(55,211,143,.12)}
+.paso .n span{flex:1;height:1.5px;background:repeating-linear-gradient(90deg,rgba(55,211,143,.45) 0 6px,transparent 6px 12px)}
+.paso:last-child .n span{background:none}
+.paso h4{margin:0 0 6px;font-size:20px;letter-spacing:-.02em}
+.paso p{color:var(--gris-o);font-size:15.5px;max-width:30ch}
+@media(max-width:900px){.pasos{grid-template-columns:1fr 1fr;gap:30px 18px}.paso:nth-child(2) .n span{background:none}}
+@media(max-width:520px){.pasos{grid-template-columns:1fr;gap:0}.paso{display:grid;grid-template-columns:50px 1fr;gap:0 18px;padding-bottom:26px;position:relative}
+  .paso .n{margin:0;grid-row:span 2;flex-direction:column;align-self:stretch}.paso .n span{width:1.5px;height:auto;flex:1;background:repeating-linear-gradient(180deg,rgba(55,211,143,.45) 0 6px,transparent 6px 12px)!important}
+  .paso:last-child .n span{background:none!important}.paso h4{margin-top:12px}}
+
+/* Software incluido */
+.software{background:var(--menta)}
+.sw{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(40px,6vw,88px);align-items:center}
+.funciones{display:flex;flex-direction:column;gap:6px;margin-top:34px}
+.funcion{display:flex;gap:16px;padding:18px;border-radius:18px;transition:background .3s}
+.funcion:hover{background:rgba(255,255,255,.65)}
+.funcion i{flex:none;width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:#fff;color:var(--verde-t);border:1px solid #CDEBDA;box-shadow:0 8px 20px -14px rgba(28,122,80,.5)}
+.funcion b{display:block;font-size:18px;letter-spacing:-.015em;margin-bottom:3px}
+.funcion span{color:var(--suave);font-size:15.5px}
+.flujo{position:relative;background:var(--noche);color:#fff;border-radius:var(--r-xl);padding:clamp(22px,3vw,34px);box-shadow:0 50px 90px -50px rgba(7,17,13,.7);overflow:hidden;isolation:isolate}
+.flujo::before{content:"";position:absolute;width:520px;height:520px;right:-220px;top:-260px;z-index:-1;background:radial-gradient(closest-side,rgba(55,211,143,.28),transparent)}
+.flujo .t{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:20px;font-size:13px;color:#8FA39A;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.flujo .t .ej{font-size:11px;color:var(--verde);background:rgba(55,211,143,.1);border:1px solid rgba(55,211,143,.25);padding:3px 9px;border-radius:999px;letter-spacing:.06em}
+.etapa{position:relative;display:flex;gap:14px;padding:0 0 22px}
+.etapa:not(:last-child)::before{content:"";position:absolute;left:19px;top:42px;bottom:4px;width:1.5px;background:linear-gradient(180deg,rgba(55,211,143,.6),rgba(55,211,143,.1))}
+.etapa>i{flex:none;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:rgba(55,211,143,.12);border:1px solid rgba(55,211,143,.3);color:var(--verde)}
+.etapa .c{flex:1;min-width:0}
+.etapa b{display:block;font-size:16px}.etapa small{display:block;color:#8FA39A;font-size:13.5px;line-height:1.45}
+.asiento{margin-top:12px;border:1px solid var(--linea-o);border-radius:14px;overflow:hidden;font-size:13px;background:rgba(255,255,255,.03)}
+.asiento div{display:flex;justify-content:space-between;gap:10px;padding:9px 13px;border-top:1px solid var(--linea-o)}
+.asiento div:first-child{border-top:0;color:#8FA39A;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:700}
+.asiento span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.asiento em{font-style:normal;color:#7F948A;margin-right:6px;font-weight:700}
+.asiento b{display:inline;font-size:13px;white-space:nowrap}
+.burbuja{margin-top:4px;display:flex;flex-direction:column;gap:8px}
+.burbuja p{max-width:88%;padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.45}
+.burbuja .yo{align-self:flex-end;background:var(--verde);color:#062014;border-bottom-right-radius:5px;font-weight:600}
+.burbuja .ia{background:rgba(255,255,255,.07);border:1px solid var(--linea-o);border-bottom-left-radius:5px;color:#DCE7E1}
+@media(max-width:900px){.sw{grid-template-columns:1fr}}
+@media(max-width:520px){.funcion{padding:14px 4px}}
+
+/* Crecemos con ustedes */
+.crece{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:clamp(40px,6vw,88px);align-items:center}
+.crece .foto{position:relative}
+.crece .foto img{width:100%;aspect-ratio:4/4.4;object-fit:cover;border-radius:var(--r-xl)}
+.crece .sello{position:absolute;left:20px;right:20px;bottom:20px;max-width:390px;display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);padding:14px 16px;border-radius:18px;box-shadow:0 20px 40px -20px rgba(0,0,0,.4)}
+.crece .sello i{flex:none;width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:var(--menta);color:var(--verde-t)}
+.crece .sello b{display:block;font-size:15.5px;line-height:1.3}.crece .sello small{color:var(--suave);font-size:13.5px}
+.crece h2{margin-bottom:22px}
+.escalones{display:flex;align-items:flex-end;gap:12px;margin-top:38px}
+.escalon{flex:1;border-radius:18px;padding:16px;background:#fff;border:1px solid var(--borde);display:flex;flex-direction:column;justify-content:space-between;gap:16px;min-width:0}
+.escalon:nth-child(1){min-height:120px}.escalon:nth-child(2){min-height:150px}.escalon:nth-child(3){min-height:180px;background:var(--noche);color:#fff;border-color:var(--noche)}
+.escalon i{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:var(--menta);color:var(--verde-t)}
+.escalon:nth-child(3) i{background:rgba(55,211,143,.16);color:var(--verde)}
+.escalon b{font-size:16px;letter-spacing:-.01em}
+.crece .nota{margin-top:22px;font-size:15px;color:var(--suave);display:flex;gap:10px;align-items:flex-start}
+.crece .nota svg{flex:none;color:var(--verde-t);margin-top:2px}
+@media(max-width:900px){.crece{grid-template-columns:1fr}.crece .foto img{aspect-ratio:16/11}}
+@media(max-width:520px){.crece .foto img{aspect-ratio:4/3.6}.crece .sello{left:12px;right:12px;bottom:12px;padding:12px}.crece .sello small{display:none}.escalones{gap:8px}.escalon{padding:12px;border-radius:14px}.escalon b{font-size:14px}.escalon i{width:34px;height:34px}}
+
+/* Precio */
+.precio{background:var(--blanco);border-top:1px solid var(--borde)}
+.calc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:stretch}
+.panel{border-radius:var(--r-xl);padding:clamp(24px,3.4vw,40px);border:1px solid var(--borde);background:var(--papel)}
+.paso-c{display:flex;align-items:center;gap:12px;font-size:12.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--verde-t);margin-bottom:12px}
+.paso-c b{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--verde-t);color:#fff;font-size:12.5px;letter-spacing:0}
+.campo{padding-bottom:26px;margin-bottom:26px;border-bottom:1px solid var(--borde)}
+.campo>label{display:block;font-weight:700;font-size:19px;letter-spacing:-.015em;margin:0 0 16px}
+.cuenta{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--borde);border-radius:999px;padding:6px}
+.cuenta button{width:48px;height:48px;border-radius:50%;border:0;background:var(--menta);font-size:24px;font-weight:700;cursor:pointer;color:var(--verde-t);display:grid;place-items:center;transition:background .25s,color .25s,transform .2s}
+.cuenta button:hover{background:var(--verde);color:#062014}.cuenta button:active{transform:scale(.94)}
+.cuenta output{min-width:64px;text-align:center;font-size:28px;font-weight:800;letter-spacing:-.03em}
+.ayuda{margin:12px 0 0;font-size:14.5px;color:var(--suave)}
+.chk{display:flex;gap:14px;align-items:flex-start;cursor:pointer;font-size:16px;font-weight:600;background:#fff;border:1px solid var(--borde);border-radius:18px;padding:16px 18px;transition:border-color .3s,box-shadow .3s}
+.campo>label.chk{display:flex;font-size:16px;letter-spacing:0;margin:0}
+.chk:hover{border-color:#B9DCC8}
+.chk:has(input:checked){border-color:var(--verde-t);box-shadow:0 0 0 3px rgba(55,211,143,.18)}
+.chk input{appearance:none;-webkit-appearance:none;flex:none;width:24px;height:24px;margin:1px 0 0;border-radius:8px;border:1.8px solid #A9BAB1;background:#fff;display:grid;place-items:center;cursor:pointer;transition:background .2s,border-color .2s}
+.chk input::after{content:"";width:6px;height:11px;border:solid #fff;border-width:0 2.4px 2.4px 0;transform:translateY(-1px) rotate(45deg) scale(0);transition:transform .2s var(--ease)}
+.chk input:checked{background:var(--verde-t);border-color:var(--verde-t)}
+.chk input:checked::after{transform:translateY(-1px) rotate(45deg) scale(1)}
+.incluido h4{margin:0 0 14px;font-size:15px;letter-spacing:.02em}
+.incluido ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:10px 18px}
+.incluido li{display:flex;gap:9px;align-items:flex-start;font-size:14.5px;color:var(--suave);line-height:1.45}
+.incluido li svg{flex:none;color:var(--verde-t);margin-top:1px}
+.incluido li.full{grid-column:1/-1}
+@media(max-width:520px){.incluido ul{grid-template-columns:1fr}}
+.recibo{background:var(--noche);color:#fff;border-color:var(--noche);position:relative;overflow:hidden;isolation:isolate;display:flex;flex-direction:column}
+.recibo::before{content:"";position:absolute;width:560px;height:560px;right:-240px;top:-300px;z-index:-1;background:radial-gradient(closest-side,rgba(55,211,143,.25),transparent)}
+.recibo .r-cab{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px 12px;margin-bottom:14px;font-size:12.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#8FA39A}
+.recibo .r-cab span:last-child{color:var(--verde);background:rgba(55,211,143,.1);border:1px solid rgba(55,211,143,.25);padding:4px 10px;border-radius:999px;letter-spacing:.04em;text-transform:none;font-size:12.5px}
+.fila{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid var(--linea-o);font-size:16px}
+.fila span:last-child{font-weight:700;white-space:nowrap}
+.fila small{display:block;font-size:12.5px;color:#8FA39A;font-weight:500;margin-top:2px}
+.total{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;padding:22px 0 10px;flex-wrap:wrap}
+.total span{font-weight:700;color:#C3D0C9;padding-bottom:8px}
+.total b{font-size:clamp(38px,4.4vw,54px);font-weight:800;letter-spacing:-.04em;color:var(--verde);white-space:nowrap;line-height:1}
+.recibo .renta{font-size:14.5px;color:#C3D0C9;margin:12px 0 0;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid var(--linea-o)}
+.recibo .crece-t{font-size:14.5px;color:#C3D0C9;margin:12px 0 22px}
+.recibo .crece-t b{color:#fff}
+.recibo .btn{width:100%;margin-top:auto;font-size:17px;padding:17px 26px}
+.recibo .mismo{font-size:13.5px;margin:12px 0 0;text-align:center;color:#8FA39A}
+@media(max-width:900px){.calc{grid-template-columns:1fr}}
+
+/* Preguntas */
+.faq{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.3fr);gap:clamp(32px,6vw,88px);align-items:start}
+.faq .izq{position:sticky;top:110px}
+.faq .izq .lead{margin-top:18px}
+.faq .izq .enlace{margin-top:22px}
+.acordeon details{border-bottom:1px solid var(--borde)}
+.acordeon details:first-child{border-top:1px solid var(--borde)}
+.acordeon summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:20px;padding:24px 0;font-weight:700;font-size:clamp(18px,1.7vw,21px);letter-spacing:-.02em;line-height:1.3}
+.acordeon summary::-webkit-details-marker{display:none}
+.acordeon .mas{flex:none;width:38px;height:38px;border-radius:50%;border:1px solid var(--borde);position:relative;transition:background .3s,border-color .3s}
+.acordeon .mas::before,.acordeon .mas::after{content:"";position:absolute;left:50%;top:50%;width:13px;height:1.8px;background:currentColor;transform:translate(-50%,-50%);border-radius:2px}
+.acordeon .mas::after{transform:translate(-50%,-50%) rotate(90deg);transition:transform .4s var(--ease)}
+.acordeon details[open] .mas{background:var(--verde);border-color:var(--verde);color:#062014}
+.acordeon details[open] .mas::after{transform:translate(-50%,-50%) rotate(0)}
+.acordeon summary:hover .mas{border-color:var(--verde-t)}
+.acordeon .resp{padding:0 56px 26px 0;color:var(--suave);font-size:16.5px}
+@media(max-width:860px){.faq{grid-template-columns:1fr}.faq .izq{position:static}.acordeon .resp{padding-right:0}}
+
+/* Banda final */
+.banda{position:relative;border-radius:var(--r-xl);overflow:hidden;color:#fff;isolation:isolate;padding:clamp(40px,7vw,96px) clamp(26px,6vw,80px);display:grid;grid-template-columns:minmax(0,1.3fr) auto;gap:32px;align-items:end;background:var(--noche)}
+.banda img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2;opacity:.55}
+.banda::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(100deg,rgba(7,17,13,.96) 0%,rgba(7,17,13,.75) 55%,rgba(28,122,80,.55) 100%)}
+.banda h2{font-size:clamp(36px,4.6vw,62px);max-width:14ch}
+.banda p{margin-top:18px;color:#C9D6CF;font-size:18px;max-width:520px}
+.banda .firma{margin-top:26px;font-size:15px;color:#A3B3AB}
+.banda .firma a{color:#fff}
+.banda .acc{display:flex;flex-direction:column;gap:12px;min-width:240px}
+@media(max-width:760px){.banda{grid-template-columns:1fr}.banda .acc{min-width:0}}
+
+/* Pie */
+footer{background:var(--noche);color:var(--gris-o);padding-top:clamp(64px,8vw,96px);overflow:hidden;margin-top:clamp(80px,10vw,136px)}
+.pie-arriba{display:grid;grid-template-columns:minmax(0,1.5fr) repeat(2,minmax(0,1fr));gap:40px;padding-bottom:56px}
+.pie-arriba .logo{color:#fff}
+.pie-arriba p{margin-top:18px;max-width:380px;font-size:15.5px}
+.pie-arriba h4{margin:0 0 16px;color:#fff;font-size:13px;letter-spacing:.12em;text-transform:uppercase}
+.pie-arriba ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;font-size:15.5px}
+.pie-arriba a{text-decoration:none}.pie-arriba a:hover{color:#fff}
+.marca-gigante{font-weight:800;letter-spacing:-.06em;line-height:.8;font-size:clamp(48px,14vw,200px);color:rgba(255,255,255,.05);white-space:nowrap;user-select:none;margin-bottom:-.12em;overflow:hidden}
+.marca-gigante>b{display:inline-block;font-weight:800}
+.marca-gigante span{color:rgba(55,211,143,.12)}
+.pie-abajo{border-top:1px solid var(--linea-o);position:relative;background:var(--noche);font-size:13.5px}
+.pie-abajo .env{padding-top:22px;padding-bottom:26px;display:flex;flex-wrap:wrap;gap:8px 24px;justify-content:space-between}
+@media(max-width:760px){.pie-arriba{grid-template-columns:1fr 1fr}.pie-arriba>div:first-child{grid-column:1/-1}}
+@media(max-width:520px){.pie-abajo .env{padding-bottom:88px}}
+
+/* WhatsApp flotante */
+.flotante{position:fixed;right:20px;bottom:20px;z-index:70;display:inline-flex;align-items:center;gap:10px;padding:13px 20px 13px 15px;border-radius:999px;background:#25D366;color:#062014;text-decoration:none;font-weight:700;font-size:15px;box-shadow:0 20px 40px -12px rgba(0,0,0,.45);transform:translateY(120px);opacity:0;transition:transform .5s var(--ease),opacity .5s,background .3s}
+.flotante.ver{transform:none;opacity:1}
+.flotante:hover{background:#3BE07A}
+.flotante span{line-height:1.2}
+@media(max-width:560px){.flotante{right:14px;bottom:14px;padding:14px}.flotante span{display:none}}
+
+/* Aparición al hacer scroll */
+.js .rv{opacity:0;transform:translateY(28px);transition:opacity .9s var(--ease),transform .9s var(--ease);transition-delay:var(--d,0s)}
+.js .rv.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .js .rv,.js .entra,.js .portada h1 .w{opacity:1!important;transform:none!important}
+  .cinta .pista{transform:none}
+}
+:focus-visible{outline:2px solid var(--verde);outline-offset:3px;border-radius:6px}
 </style>
 </head>
 <body>
-{% if sitio %}<a class="aviso-sitio" href="{{ sitio }}" target="_blank" data-clic="portafolio_ver_sitio">🎁 Le armamos la página web de <b>{{ empresa }}</b>: <u>véala aquí</u></a>{% endif %}
-<header>
+{% if sitio %}<a class="aviso-sitio" href="{{ sitio }}" target="_blank" data-clic="portafolio_ver_sitio">{{ icono('regalo', 20) }}<span>Le armamos la página web de <b>{{ empresa }}</b></span><span class="ir">Véala aquí {{ icono('arrow', 14) }}</span></a>{% endif %}
+
+<header class="nav" id="nav">
   <div class="env">
-    <div class="marca">Tributando<span>.co</span></div>
-    <p class="ceja">{% if empresa %}Portafolio para {{ empresa }}{% else %}Portafolio de servicios contables{% endif %}</p>
-    <h1>{% if empresa %}{{ empresa }}, al día con la DIAN<br>desde el primer mes{% else %}Su empresa al día con la DIAN<br>desde el primer mes{% endif %}</h1>
-    <p>Contabilidad, impuestos, nómina y cumplimiento para empresas que empiezan, con un contador de verdad y un software que causa sus facturas solo.</p>
-    <a class="btn" href="#precios" data-clic="ver_precios">Ver mi precio</a>
-    <a class="btn sec" href="#servicios">Ver servicios</a>
+    <a class="logo" href="#inicio" aria-label="Tributando, inicio"><i aria-hidden="true">T</i><b>Tributando<span>.co</span></b></a>
+    <button class="menu" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="links">{{ icono('menu', 22) }}</button>
+    <nav class="links" id="links" aria-label="Principal">
+      <a href="#servicios">Servicios</a>
+      <a href="#como">Cómo trabajamos</a>
+      <a href="#precios">Precio</a>
+      <a href="#preguntas">Preguntas</a>
+      <a class="btn btn-verde" href="#precios" data-clic="ver_precios">Ver mi precio</a>
+    </nav>
   </div>
 </header>
 
-<section id="servicios">
+<main>
+<section id="inicio" class="portada">
   <div class="env">
-    <p class="ceja2">Qué hacemos cada mes</p>
-    <h2>Toda la contabilidad y los impuestos en un solo equipo</h2>
-    <div class="rejilla">
-      <div class="tarjeta"><h3>Contabilidad</h3><p>Causación de compras y ventas, conciliación bancaria, cierre mensual y estados financieros.</p></div>
-      <div class="tarjeta"><h3>Impuestos</h3><p>IVA, retención en la fuente, autorretención e industria y comercio, presentados a tiempo.</p></div>
-      <div class="tarjeta"><h3>Nómina</h3><p>Liquidación mensual, nómina electrónica, planilla PILA, prestaciones y liquidaciones.</p></div>
-      <div class="tarjeta"><h3>Cumplimiento anual</h3><p>Declaración de renta, información exógena y certificados de ingresos y retenciones.</p></div>
+    <div>
+      <p class="pildora entra" style="--d:.05s"><i>{{ icono('spark', 14) }}</i><span>{% if empresa %}Portafolio para {{ empresa }}{% else %}Portafolio de servicios contables{% endif %}</span></p>
+      {%- set t1 = (empresa ~ ', al día con la DIAN') if empresa else 'Su empresa al día con la DIAN' %}
+      {%- set n1 = t1.split()|length %}
+      <h1{% if empresa|length > 16 %} class="largo"{% endif %}>{% for w in t1.split() %}<span class="w" style="--i:{{ loop.index0 }}">{{ w }}</span> {% endfor %}<em>{% for w in ['desde', 'el', 'primer', 'mes'] %}<span class="w" style="--i:{{ n1 + loop.index0 }}">{{ w }}</span>{% if not loop.last %} {% endif %}{% endfor %}</em></h1>
+      <p class="sub entra" style="--d:.6s"><b>Un contador de verdad y nuestro propio software contable en la nube.</b> Contabilidad, impuestos, nómina y cumplimiento para empresas que empiezan, con un software que causa sus facturas solo.</p>
+      <div class="botones entra" style="--d:.75s">
+        <a class="btn btn-verde" href="#precios" data-clic="ver_precios">Ver mi precio {{ icono('arrow', 18) }}</a>
+        <a class="btn btn-vidrio" href="#servicios">Ver servicios</a>
+      </div>
+      <div class="sellos entra" style="--d:.9s">
+        <span>{{ icono('check', 18) }}Software incluido en los honorarios</span>
+        <span>{{ icono('check', 18) }}Montaje incluido</span>
+        <span>{{ icono('check', 18) }}Respuesta el mismo día hábil</span>
+      </div>
+    </div>
+
+    <div class="maqueta entra" style="--d:.5s">
+      <figure class="h-foto"><img src="https://images.unsplash.com/photo-1551836022-4c4c79ecde51?auto=format&fit=crop&w=1100&q=72" alt="Reunión de trabajo con una clienta, revisando cifras en una tableta" fetchpriority="high"></figure>
+      <div class="ventana" role="img" aria-label="Ilustración del software Tributando con cifras de ejemplo">
+        <div class="v-barra"><i></i><i></i><i></i><b>Resumen del mes</b><span class="ej">Cifras de ejemplo</span></div>
+        <div class="v-cuerpo">
+          <div class="v-main">
+            <div class="v-tit"><b>Empresa de ejemplo S.A.S.</b><small>Septiembre</small></div>
+            <div class="kpis">
+              <div class="kpi"><small>Ventas del mes</small><b>$38,4 M</b><em>+12%</em></div>
+              <div class="kpi"><small>Facturas DIAN</small><b>46</b><em>46 causadas</em></div>
+              <div class="kpi"><small>IVA bimestre</small><b>$2,1 M</b><em>Borrador listo</em></div>
+            </div>
+            <div class="v-graf">
+              <div class="t"><span>Ventas por mes</span><span>2026</span></div>
+              <div class="barras" aria-hidden="true">
+                {% for h in [38, 52, 45, 63, 58, 71, 66, 84, 96] %}<span style="--h:{{ h }}%;--i:{{ loop.index0 }}"></span>{% endfor %}
+              </div>
+              <div class="v-meses" aria-hidden="true">{% for m in ['E','F','M','A','M','J','J','A','S'] %}<span>{{ m }}</span>{% endfor %}</div>
+            </div>
+            <div class="v-lista" hidden>
+              <div class="cab">Entraron desde la DIAN</div>
+              <div class="v-fila"><span class="ic">{{ icono('doc', 15) }}</span><span class="tx"><b>Compra · Proveedor de ejemplo</b><small>Factura electrónica</small></span><span class="estado">{{ icono('ok', 11) }}Causada</span></div>
+              <div class="v-fila"><span class="ic">{{ icono('doc', 15) }}</span><span class="tx"><b>Venta · Cliente de ejemplo</b><small>Factura electrónica</small></span><span class="estado">{{ icono('ok', 11) }}Causada</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="flota f1" aria-hidden="true"><i>{{ icono('rayo', 18) }}</i><span><b>Factura causada sola</b><small>Sin digitarla</small></span></div>
+      <div class="flota f2" aria-hidden="true"><i>{{ icono('users', 18) }}</i><span><b>Nómina electrónica</b><small>En la misma plataforma</small></span></div>
+      <p class="nota-ilu">Ilustración del software con cifras de ejemplo.</p>
     </div>
   </div>
 </section>
 
-<section class="oscuro">
+<div class="cinta" aria-hidden="true">
+  <div class="pista">
+    {% for _ in range(2) %}
+    <div class="grupo">
+      {% for t in ['Contabilidad', 'IVA', 'Retención en la fuente', 'Industria y comercio', 'Nómina electrónica', 'Planilla PILA', 'Conciliación bancaria', 'Estados financieros', 'Declaración de renta', 'Información exógena', 'Software en la nube', 'Asesoría con el contador'] %}<span>{{ t }}</span>{{ icono('spark', 18) }}{% endfor %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<section id="servicios" class="seccion">
   <div class="env">
-    <p class="ceja2">Cómo trabajamos</p>
-    <h2>Un contador de verdad, no solo un programa</h2>
-    <div class="rejilla">
-      <div class="tarjeta"><h3>Montaje incluido</h3><p>Dejamos listos el plan de cuentas y los terceros, y le acompañamos a habilitarse como facturador electrónico ante la DIAN. Si no tienen facturador, también se lo ofrecemos.</p></div>
-      <div class="tarjeta"><h3>Respuesta el mismo día</h3><p>Soporte con el contador el mismo día hábil, por WhatsApp o llamada.</p></div>
-      <div class="tarjeta"><h3>Revisión mensual</h3><p>Cruzamos lo que reporta la DIAN contra los libros y le avisamos de cualquier diferencia.</p></div>
-      <div class="tarjeta"><h3>Capacitación</h3><p>Le enseñamos a su equipo a facturar y a consultar sus cifras.</p></div>
+    <div class="cabeza">
+      <div class="rv"><p class="ceja">Qué hacemos cada mes</p><h2>Toda la contabilidad y los impuestos <em>en un solo equipo</em></h2></div>
+      <div class="der rv" style="--d:.1s">
+        <p class="lead">Un contador de verdad se encarga de cada obligación, con nuestro software trabajando por detrás para que nada se digite dos veces.</p>
+        <a class="enlace" href="#precios" data-clic="ver_precios">Ver mi precio {{ icono('arrow', 18) }}</a>
+      </div>
+    </div>
+    <div class="bento">
+      <article class="caja foto rv">
+        <img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1100&q=70" alt="" loading="lazy">
+        <span class="ico">{{ icono('calc', 26) }}</span><span class="num">01</span>
+        <h3>Contabilidad</h3>
+        <p>Causación de compras y ventas, conciliación bancaria, cierre mensual y estados financieros.</p>
+        <div class="etiquetas"><span>Causación</span><span>Conciliación bancaria</span><span>Cierre mensual</span><span>Estados financieros</span></div>
+      </article>
+      <article class="caja rv" style="--d:.08s">
+        <span class="ico">{{ icono('pct', 26) }}</span><span class="num">02</span>
+        <h3>Impuestos</h3>
+        <p>IVA, retención en la fuente, autorretención e industria y comercio, presentados a tiempo.</p>
+      </article>
+      <article class="caja rv" style="--d:.16s">
+        <span class="ico">{{ icono('users', 26) }}</span><span class="num">03</span>
+        <h3>Nómina</h3>
+        <p>Liquidación mensual, nómina electrónica, planilla PILA, prestaciones y liquidaciones.</p>
+      </article>
+      <article class="caja ancha rv" style="--d:.1s">
+        <div>
+          <span class="ico">{{ icono('cal', 26) }}</span><span class="num">04</span>
+          <h3>Cumplimiento anual</h3>
+          <p>Declaración de renta, información exógena y certificados de ingresos y retenciones.</p>
+        </div>
+        <div class="anual">
+          <div>{{ icono('check', 20) }}Declaración de renta</div>
+          <div>{{ icono('check', 20) }}Información exógena</div>
+          <div>{{ icono('check', 20) }}Certificados de ingresos y retenciones</div>
+        </div>
+      </article>
     </div>
   </div>
 </section>
 
-<section>
+<section id="como" class="seccion oscuro">
   <div class="env">
-    <p class="ceja2">Tecnología incluida</p>
-    <h2>Su contabilidad en línea, causada de forma automática</h2>
-    <div class="rejilla">
-      <div class="tarjeta"><h3>Facturas DIAN leídas solas</h3><p>Las facturas electrónicas de compra y venta se descargan y se causan sin digitarlas.</p></div>
-      <div class="tarjeta"><h3>Todo en los mismos libros</h3><p>Contabilidad, nómina y punto de venta en una sola plataforma.</p></div>
-      <div class="tarjeta"><h3>Sus cifras cuando las necesite</h3><p>Acceso a balances, cartera y reportes desde el celular o el computador.</p></div>
+    <div class="cabeza">
+      <div class="rv"><p class="ceja">Cómo trabajamos</p><h2>Un contador de verdad, <em>no solo un programa</em></h2></div>
+      <div class="der rv" style="--d:.1s"><p class="lead">Detrás del software hay un contador que responde, revisa y le enseña a su equipo.</p></div>
+    </div>
+    <div class="equipo">
+      <figure class="rv"><img src="https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=1200&q=70" alt="Equipo trabajando en una mesa de reunión" loading="lazy"></figure>
+      <figure class="rv" style="--d:.08s"><img src="https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=800&q=70" alt="Dos personas revisando cifras en un computador portátil" loading="lazy"></figure>
+      <figure class="rv" style="--d:.16s"><img src="https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&w=800&q=70" alt="Personas trabajando en una oficina moderna" loading="lazy"></figure>
+    </div>
+    <div class="razones">
+      <article class="razon rv"><div class="ico">{{ icono('llave', 26) }}</div><h3>Montaje incluido</h3><p>Dejamos listos el plan de cuentas y los terceros, y le acompañamos a habilitarse como facturador electrónico ante la DIAN. Si no tienen facturador, también se lo ofrecemos.</p></article>
+      <article class="razon rv" style="--d:.08s"><div class="ico">{{ icono('chat', 26) }}</div><h3>Respuesta el mismo día</h3><p>Soporte con el contador el mismo día hábil, por WhatsApp o llamada.</p></article>
+      <article class="razon rv" style="--d:.16s"><div class="ico">{{ icono('lupa', 26) }}</div><h3>Revisión mensual</h3><p>Cruzamos lo que reporta la DIAN contra los libros y le avisamos de cualquier diferencia.</p></article>
+      <article class="razon rv" style="--d:.24s"><div class="ico">{{ icono('gorro', 26) }}</div><h3>Capacitación</h3><p>Le enseñamos a su equipo a facturar y a consultar sus cifras.</p></article>
+    </div>
+
+    <div class="pasos-cab rv">
+      <div><p class="ceja">Cómo empezamos</p><h3>En cuatro pasos queda al día</h3></div>
+      <a class="btn btn-vidrio" href="#precios" data-clic="ver_precios">Calcular mi precio {{ icono('arrow', 18) }}</a>
+    </div>
+    <div class="pasos">
+      {% for t, d in [('Reunión', 'Revisamos RUT, cámara de comercio y accesos a la DIAN.'), ('Montaje', 'Plan de cuentas, terceros, nómina y habilitación como facturador.'), ('Primer cierre', 'Causamos el mes y presentamos las declaraciones.'), ('Informe mensual', 'Estados financieros y alertas de cada mes.')] %}
+      <article class="paso rv" style="--d:{{ loop.index0 * 0.1 }}s">
+        <div class="n"><b>0{{ loop.index }}</b><span></span></div>
+        <div><h4>{{ t }}</h4><p>{{ d }}</p></div>
+      </article>
+      {% endfor %}
     </div>
   </div>
 </section>
 
-<section id="precios">
+<section id="software" class="seccion software">
+  <div class="env sw">
+    <div class="rv">
+      <p class="ceja">Tecnología incluida</p>
+      <h2>Su contabilidad en línea, <em>causada de forma automática</em></h2>
+      <p class="lead" style="margin-top:20px">Tributando es nuestro propio software contable en la nube. Va incluido en los honorarios: no tiene que comprar Siigo ni ningún otro programa.</p>
+      <p class="lead" style="margin-top:12px"><b>¿Ya trabaja con otro programa contable?</b> No importa: también llevamos su contabilidad en el software que usted ya maneja, como Siigo, World Office, Alegra o Helisa.</p>
+      <div class="funciones">
+        <div class="funcion"><i>{{ icono('rayo', 22) }}</i><div><b>Facturas DIAN leídas solas</b><span>Las facturas electrónicas de compra y venta se descargan y se causan sin digitarlas.</span></div></div>
+        <div class="funcion"><i>{{ icono('libros', 22) }}</i><div><b>Todo en los mismos libros</b><span>Contabilidad, nómina electrónica y punto de venta en una sola plataforma.</span></div></div>
+        <div class="funcion"><i>{{ icono('grafica', 22) }}</i><div><b>Sus cifras cuando las necesite</b><span>Acceso a balances, cartera y reportes desde el celular o el computador.</span></div></div>
+        <div class="funcion"><i>{{ icono('spark', 22) }}</i><div><b>Pregúntele a sus cifras con IA</b><span>Conecte Claude o ChatGPT a sus libros y consulte en español, con los mismos controles.</span></div></div>
+      </div>
+    </div>
+    <div class="flujo rv" style="--d:.12s" aria-label="Ejemplo de cómo se causa una factura">
+      <div class="t"><span>Así entra una factura</span><span class="ej">Ejemplo</span></div>
+      <div class="etapa"><i>{{ icono('nube', 20) }}</i><div class="c"><b>Llega la factura a la DIAN</b><small>Su proveedor la emite como siempre; no tiene que reenviarla.</small></div></div>
+      <div class="etapa"><i>{{ icono('doc', 20) }}</i><div class="c"><b>El software la lee</b><small>Proveedor, valores e IVA salen del documento electrónico.</small></div></div>
+      <div class="etapa"><i>{{ icono('ok', 20) }}</i><div class="c"><b>Queda causada en los libros</b>
+        <div class="asiento">
+          <div><span>Cuenta</span><span>Valor</span></div>
+          <div><span><em>DB</em>Gasto de papelería</span><b>$100.000</b></div>
+          <div><span><em>DB</em>IVA descontable</span><b>$19.000</b></div>
+          <div><span><em>CR</em>Proveedores</span><b>$119.000</b></div>
+        </div>
+      </div></div>
+      <div class="burbuja">
+        <p class="yo">¿Cuánto llevamos de IVA este bimestre?</p>
+        <p class="ia">Le muestro el borrador con lo causado hasta hoy, cuenta por cuenta.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="crecemos" class="seccion">
+  <div class="env crece">
+    <div class="foto rv">
+      <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=1100&q=70" alt="" loading="lazy">
+      <div class="sello"><i>{{ icono('escudo', 22) }}</i><span><b>Un solo equipo para su empresa</b><small>Contador y software, desde el primer mes</small></span></div>
+    </div>
+    <div class="rv" style="--d:.1s">
+      <p class="ceja">Crecemos con ustedes</p>
+      <h2>A medida que su empresa crece, <em>crecemos con ustedes</em></h2>
+      <p class="lead">Los $875.000 son para empresas que apenas comienzan; cuando aumentan las ventas, los documentos y los empleados, el honorario se ajusta a ese nuevo tamaño.</p>
+      <div class="escalones" aria-hidden="true">
+        <div class="escalon"><i>{{ icono('sube', 20) }}</i><b>Ventas</b></div>
+        <div class="escalon"><i>{{ icono('doc', 20) }}</i><b>Documentos</b></div>
+        <div class="escalon"><i>{{ icono('users', 20) }}</i><b>Empleados</b></div>
+      </div>
+      <p class="nota">{{ icono('check', 18) }}<span>¿Ya factura con otro proveedor? No tiene que cambiarlo: sus facturas igual entran solas a la contabilidad.</span></p>
+    </div>
+  </div>
+</section>
+
+<section id="precios" class="seccion precio">
   <div class="env">
-    <p class="ceja2">Precio para empresas que apenas comienzan</p>
-    <h2>{% if empresa %}El precio para {{ empresa }}, en un minuto{% else %}Calcule su precio en un minuto{% endif %}</h2>
+    <div class="cabeza">
+      <div class="rv"><p class="ceja">Precio para empresas que apenas comienzan</p><h2>{% if empresa %}El precio para {{ empresa }}, en un minuto{% else %}Calcule su precio en un minuto{% endif %}</h2></div>
+      <div class="der rv" style="--d:.1s"><p class="lead">Elija cuántos empleados tiene y si quiere nuestra facturación electrónica. El total se actualiza al instante.</p></div>
+    </div>
     <div class="calc">
-      <div class="tarjeta">
+      <div class="panel rv">
         <div class="campo">
+          <p class="paso-c"><b>1</b>Nómina</p>
           <label>¿Cuántos empleados tiene o va a tener?</label>
           <div class="cuenta">
             <button type="button" onclick="emp(-1)" aria-label="Menos empleados">−</button>
-            <output id="nEmp">0</output>
+            <output id="nEmp" aria-live="polite">0</output>
             <button type="button" onclick="emp(1)" aria-label="Más empleados">+</button>
           </div>
-          <p style="margin:8px 0 0;font-size:14px">Nómina electrónica: $25.000 por empleado al mes (mínimo $150.000).</p>
+          <p class="ayuda">Nómina electrónica: $25.000 por empleado al mes (mínimo $150.000).</p>
         </div>
         <div class="campo">
-          <label class="chk"><input type="checkbox" id="fe" onchange="calc()"> Quiero la facturación electrónica de Tributando ($230.000 al año, hasta 120 documentos)</label>
+          <p class="paso-c"><b>2</b>Facturación</p>
+          <label class="chk"><input type="checkbox" id="fe" onchange="calc()"><span>Quiero la facturación electrónica de Tributando ($230.000 al año, hasta 120 documentos)</span></label>
         </div>
-        <p style="margin:0;font-size:14px">Incluido siempre: montaje inicial (RUT, responsabilidades y habilitación como facturador), contabilidad completa, IVA, retención e ICA, conciliación bancaria, estados financieros y asesoría con el contador.</p>
+        <div class="incluido">
+          <h4>Incluido siempre:</h4>
+          <ul>
+            <li class="full">{{ icono('ok', 17) }}Montaje inicial (RUT, responsabilidades y habilitación como facturador)</li>
+            <li>{{ icono('ok', 17) }}Contabilidad completa</li>
+            <li>{{ icono('ok', 17) }}IVA, retención e ICA</li>
+            <li>{{ icono('ok', 17) }}Conciliación bancaria</li>
+            <li>{{ icono('ok', 17) }}Estados financieros</li>
+            <li class="full">{{ icono('ok', 17) }}Asesoría con el contador</li>
+          </ul>
+        </div>
       </div>
-      <div class="tarjeta">
-        <div class="fila"><span>Honorarios contables<br><small style="font-size:12px;opacity:.75">Empresa que apenas comienza</small></span><span>$875.000 / mes</span></div>
+      <div class="panel recibo rv" style="--d:.1s">
+        <div class="r-cab"><span>Su plan mensual</span><span>{% if empresa %}{{ empresa }}{% else %}Tributando.co{% endif %}</span></div>
+        <div class="fila"><span>Honorarios contables<small>Empresa que apenas comienza</small></span><span>$875.000 / mes</span></div>
         <div class="fila" id="filaNom" style="display:none"><span id="txtNom">Nómina electrónica</span><span id="valNom"></span></div>
-        <div class="total"><span style="font-weight:700">Total al mes</span><b id="tot">$875.000</b></div>
+        <div class="total"><span>Total al mes</span><b id="tot">$875.000</b></div>
         <div class="fila" id="filaFe" style="display:none;border-bottom:0"><span>Facturación electrónica</span><span>$230.000 / año</span></div>
-        <p style="font-size:14px;margin:6px 0 8px">Renta y exógena del año: el valor de una mensualidad de honorarios.</p>
-        <p style="font-size:14px;margin:0 0 18px"><b>A medida que su empresa crece, crecemos con ustedes:</b> los $875.000 son para empresas que apenas comienzan; cuando aumentan las ventas, los documentos y los empleados, el honorario se ajusta a ese nuevo tamaño.</p>
-        <a class="btn" id="btnContratar" href="#" data-clic="contratar" style="display:block;text-align:center">Contratar por WhatsApp</a>
-        <p style="font-size:13px;margin:10px 0 0;text-align:center">Le escribimos el mismo día hábil para arrancar.</p>
+        <p class="renta">Renta y exógena del año: el valor de una mensualidad de honorarios.</p>
+        <p class="crece-t"><b>A medida que su empresa crece, crecemos con ustedes:</b> los $875.000 son para empresas que apenas comienzan; cuando aumentan las ventas, los documentos y los empleados, el honorario se ajusta a ese nuevo tamaño.</p>
+        <a class="btn btn-verde" id="btnContratar" href="#" data-clic="contratar">{{ icono('whats', 20) }}Contratar por WhatsApp</a>
+        <p class="mismo">Le escribimos el mismo día hábil para arrancar.</p>
       </div>
     </div>
   </div>
 </section>
 
-<section class="faq" style="padding-top:0">
-  <div class="env">
-    <p class="ceja2">Preguntas frecuentes</p>
-    <h2>Lo que nos preguntan antes de empezar</h2>
-    <details><summary>¿Qué software usan?</summary><p>Tributando, nuestro propio software contable en la nube. Va incluido en los honorarios: no tiene que comprar Siigo ni ningún otro programa. Sus facturas de la DIAN entran y se contabilizan solas, y usted ve sus balances desde el celular.</p></details>
-    <details><summary>¿Qué necesito para empezar?</summary><p>El RUT, el certificado de cámara de comercio y el acceso de la empresa a la DIAN. Con eso hacemos el montaje y dejamos lista la facturación.</p></details>
-    <details><summary>¿Los $875.000 son para siempre?</summary><p>Ese valor es para empresas que apenas comienzan. A medida que su empresa crece en ventas, documentos y empleados, crecemos con ustedes y el honorario se ajusta a ese tamaño.</p></details>
-    <details><summary>¿Qué pasa si contrato más empleados?</summary><p>La nómina se cobra a $25.000 por empleado al mes, con un mínimo de $150.000. Si la empresa también crece en ventas y documentos, los honorarios se ajustan a ese nuevo tamaño.</p></details>
-    <details><summary>¿La renta y la exógena tienen costo aparte?</summary><p>Sí: cuestan el valor de una mensualidad de honorarios al año.</p></details>
-    <details><summary>¿Ya tengo facturador, tengo que cambiarlo?</summary><p>No. Si ya factura con otro proveedor, sus facturas igual entran solas a la contabilidad. La facturación de Tributando es opcional.</p></details>
-  </div>
-</section>
-
-<section style="padding-top:0">
-  <div class="env">
-    <p class="ceja2">Cómo empezamos</p>
-    <h2>En cuatro pasos queda al día</h2>
-    <div class="pasos">
-      <div><div class="num">01</div><h3>Reunión</h3><p>Revisamos RUT, cámara de comercio y accesos a la DIAN.</p></div>
-      <div><div class="num">02</div><h3>Montaje</h3><p>Plan de cuentas, terceros, nómina y habilitación como facturador.</p></div>
-      <div><div class="num">03</div><h3>Primer cierre</h3><p>Causamos el mes y presentamos las declaraciones.</p></div>
-      <div><div class="num">04</div><h3>Informe mensual</h3><p>Estados financieros y alertas de cada mes.</p></div>
+<section id="preguntas" class="seccion">
+  <div class="env faq">
+    <div class="izq rv">
+      <p class="ceja">Preguntas frecuentes</p>
+      <h2>Lo que nos preguntan <em>antes de empezar</em></h2>
+      <p class="lead">¿Tiene una duda puntual? Escríbanos y le respondemos.</p>
+      <a class="enlace" href="https://wa.me/{{ whatsapp }}?text={{ wa_texto }}" data-clic="whatsapp">Tengo una pregunta {{ icono('arrow', 18) }}</a>
+    </div>
+    <div class="acordeon rv" style="--d:.1s">
+      <details open><summary>¿Qué software usan?<span class="mas" aria-hidden="true"></span></summary><p class="resp">Tributando, nuestro propio software contable en la nube. Va incluido en los honorarios: no tiene que comprar Siigo ni ningún otro programa. Sus facturas de la DIAN entran y se contabilizan solas, y usted ve sus balances desde el celular.</p></details>
+      <details><summary>¿Tengo que usar la plataforma de Tributando?<span class="mas" aria-hidden="true"></span></summary><p class="resp">No. Si su empresa ya maneja otro software contable (Siigo, World Office, Alegra, Helisa u otro), llevamos su contabilidad en ese mismo programa. Tributando va incluido por si lo quiere usar, pero no es obligatorio.</p></details>
+      <details><summary>¿Qué necesito para empezar?<span class="mas" aria-hidden="true"></span></summary><p class="resp">El RUT, el certificado de cámara de comercio y el acceso de la empresa a la DIAN. Con eso hacemos el montaje y dejamos lista la facturación.</p></details>
+      <details><summary>¿Los $875.000 son para siempre?<span class="mas" aria-hidden="true"></span></summary><p class="resp">Ese valor es para empresas que apenas comienzan. A medida que su empresa crece en ventas, documentos y empleados, crecemos con ustedes y el honorario se ajusta a ese tamaño.</p></details>
+      <details><summary>¿Qué pasa si contrato más empleados?<span class="mas" aria-hidden="true"></span></summary><p class="resp">La nómina se cobra a $25.000 por empleado al mes, con un mínimo de $150.000. Si la empresa también crece en ventas y documentos, los honorarios se ajustan a ese nuevo tamaño.</p></details>
+      <details><summary>¿La renta y la exógena tienen costo aparte?<span class="mas" aria-hidden="true"></span></summary><p class="resp">Sí: cuestan el valor de una mensualidad de honorarios al año.</p></details>
+      <details><summary>¿Ya tengo facturador, tengo que cambiarlo?<span class="mas" aria-hidden="true"></span></summary><p class="resp">No. Si ya factura con otro proveedor, sus facturas igual entran solas a la contabilidad. La facturación de Tributando es opcional.</p></details>
     </div>
   </div>
 </section>
 
-<div class="cierre">
+<section class="seccion" style="padding-top:0;padding-bottom:0">
   <div class="env">
-    <h2>¿Listo para arrancar?</h2>
-    <p>Calcule su precio y contrátelo por WhatsApp. Si tiene una duda puntual, también le respondemos.</p>
-    <a class="btn" href="#precios" data-clic="ver_precios">Calcular mi precio</a>
-    <a class="btn sec" href="https://wa.me/{{ whatsapp }}?text={{ wa_texto }}" data-clic="whatsapp">Tengo una pregunta</a>
-    <p style="margin-top:22px">Edison Monsalve, Contador Público · <a href="https://tributando.co" style="color:#F4F6F1">tributando.co</a></p>
+    <div class="banda rv">
+      <img src="https://images.unsplash.com/photo-1553877522-43269d4ea984?auto=format&fit=crop&w=1600&q=70" alt="" loading="lazy">
+      <div>
+        <h2>¿Listo para <em>arrancar?</em></h2>
+        <p>Calcule su precio y contrátelo por WhatsApp. Si tiene una duda puntual, también le respondemos.</p>
+        <p class="firma">Edison Monsalve, Contador Público · <a href="https://tributando.co">tributando.co</a></p>
+      </div>
+      <div class="acc">
+        <a class="btn btn-verde" href="#precios" data-clic="ver_precios">Calcular mi precio {{ icono('arrow', 18) }}</a>
+        <a class="btn btn-vidrio" href="https://wa.me/{{ whatsapp }}?text={{ wa_texto }}" data-clic="whatsapp">Tengo una pregunta</a>
+      </div>
+    </div>
   </div>
-</div>
-<footer>Tributando.co · Contabilidad e impuestos para empresas en Colombia</footer>
+</section>
+</main>
+
+<footer>
+  <div class="env">
+    <div class="pie-arriba">
+      <div>
+        <a class="logo" href="#inicio"><i aria-hidden="true">T</i><b>Tributando<span>.co</span></b></a>
+        <p>Contabilidad, impuestos, nómina y cumplimiento para empresas que empiezan, con un contador de verdad y un software que causa sus facturas solo.</p>
+      </div>
+      <div>
+        <h4>Portafolio</h4>
+        <ul><li><a href="#servicios">Servicios</a></li><li><a href="#como">Cómo trabajamos</a></li><li><a href="#precios">Precio</a></li><li><a href="#preguntas">Preguntas</a></li></ul>
+      </div>
+      <div>
+        <h4>Contacto</h4>
+        <ul><li><a href="https://wa.me/{{ whatsapp }}?text={{ wa_texto }}" data-clic="whatsapp">WhatsApp</a></li><li><a href="https://tributando.co">tributando.co</a></li><li>Edison Monsalve, Contador Público</li></ul>
+      </div>
+    </div>
+    <div class="marca-gigante" aria-hidden="true"><b>Tributando<span>.co</span></b></div>
+  </div>
+  <div class="pie-abajo"><div class="env">
+    <span>Tributando.co · Contabilidad e impuestos para empresas en Colombia</span>
+    <span>Edison Monsalve, Contador Público</span>
+  </div></div>
+</footer>
+
+<a class="flotante" id="flotante" href="https://wa.me/{{ whatsapp }}?text={{ wa_texto }}" data-clic="whatsapp" aria-label="Escribir a Tributando por WhatsApp">{{ icono('whats', 24) }}<span>¿Hablamos?</span></a>
+
 <script>
 const EMPRESA={{ empresa|tojson }}, WA="{{ whatsapp }}";
 let nEmp=0;
@@ -195,6 +766,42 @@ function calc(){
   document.getElementById("btnContratar").href="https://wa.me/"+WA+"?text="+encodeURIComponent(t);
 }
 calc();
+
+(function(){
+  var nav = document.getElementById('nav'), flot = document.getElementById('flotante');
+  var portada = document.getElementById('inicio');
+  function alScroll(){
+    var y = window.scrollY || 0, h = portada ? portada.offsetHeight : 600;
+    nav.classList.toggle('solida', y > 40);
+    flot.classList.toggle('ver', y > Math.min(h * 0.6, 520));
+  }
+  window.addEventListener('scroll', alScroll, {passive:true}); alScroll();
+
+  var btn = nav.querySelector('.menu');
+  btn.addEventListener('click', function(){
+    var a = nav.classList.toggle('abierto'); btn.setAttribute('aria-expanded', a ? 'true' : 'false');
+  });
+  nav.querySelectorAll('.links a').forEach(function(a){ a.addEventListener('click', function(){ nav.classList.remove('abierto'); btn.setAttribute('aria-expanded','false'); }); });
+
+  // La marca grande del pie ocupa justo el ancho disponible.
+  var gig = document.querySelector('.marca-gigante');
+  function ajustar(){
+    if (!gig) return;
+    gig.style.fontSize = '100px';
+    var r = gig.clientWidth / Math.max(gig.firstElementChild.offsetWidth, 1);
+    gig.style.fontSize = Math.min(240, Math.floor(100 * r * 0.98)) + 'px';
+  }
+  ajustar(); window.addEventListener('resize', ajustar); window.addEventListener('load', ajustar);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(ajustar);
+
+  var els = document.querySelectorAll('.rv');
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function(ents){
+      ents.forEach(function(e){ if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, {rootMargin:'0px 0px -8% 0px', threshold:0.08});
+    els.forEach(function(el){ io.observe(el); });
+  } else { els.forEach(function(el){ el.classList.add('in'); }); }
+})();
 </script>
 {% include "_clics.html" %}
 </body>
