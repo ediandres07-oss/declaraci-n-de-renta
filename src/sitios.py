@@ -453,6 +453,20 @@ _ESPECIALES = [
 ]
 
 
+# Ventanería en vidrio y aluminio: lo decide el NOMBRE («VIDRIOS Y ALUMINIOS…»;
+# el RUES dice «productos metálicos para uso estructural» o «acabados»).
+_VIDRIO_ALUMINIO = _perf(
+    "#0E7490", "servicios", "Vidrio y aluminio", "Ventanas y puertas en aluminio a su medida en {ciudad}",
+    "Fabricación e instalación de ventanería, puertas corredizas, divisiones de baño y fachadas en vidrio.",
+    ("1748063578185-3d68121b11ff", "1522195491553-dbda973beac4", "1641035856054-55ee7bf8b02a",
+     "1525570665650-76bb26af503d", "1462396240927-52058a6a84ec", "1513584684374-8bab748fbf90"),
+    "Lo que fabricamos e instalamos",
+    [("Ventanas", "Corredizas, proyectantes y fijas, en la línea y el color que necesite."),
+     ("Puertas y divisiones", "Puertas corredizas, divisiones de baño y oficina en vidrio templado."),
+     ("Fachadas en vidrio", "Ventanería arquitectónica y fachadas para proyectos y edificios.")],
+    "Un taller de {ciudad} que trabaja a la medida", "¿Necesita cotizar ventanas?",
+    "Envíenos las medidas o una foto del espacio y le damos la cotización.", "Pedir cotización")
+
 def _hay(clave: str, texto: str) -> bool:
     """La clave al comienzo de una palabra («obra» no está en «cobranza»)."""
     return re.search(r"\b" + re.escape(clave.strip()), texto) is not None
@@ -461,6 +475,8 @@ def _hay(clave: str, texto: str) -> bool:
 def perfil(actividad: str, nombre: str = "") -> dict:
     a = (actividad or "").lower().strip()
     n = (nombre or "").lower()
+    if any(_hay(k, n) for k in ("alumini", "vidrio", "ventaner", "ventana")):
+        return _VIDRIO_ALUMINIO
     if any(_hay(k, n) for k in ("haras", "ecuestre", "hípic", "hipic", "equitaci", "caballeriz")):
         return _ECUESTRE
     if "agropecuari" in n or "agroveterin" in n or "agroinsum" in n:

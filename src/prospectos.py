@@ -562,3 +562,58 @@ def enviar_propuesta_correo(p: Prospecto) -> bool:
             s and s.quit()
         except Exception:  # noqa: BLE001
             pass
+
+
+def enviar_propuesta_ventaneria(p: Prospecto, nombre_rl: str = "") -> bool:
+    """Propuesta para empresas de vidrio y aluminio: cotizador de ventanería
+    (módulo aparte) + contabilidad, con botones a SU página web y al portafolio
+    firmados, y de adjuntos la ventana desde foto y una cotización de ejemplo.
+    Marca el prospecto como enviado y en etapa «propuesta» (el lote ya no le
+    manda el correo general)."""
+    cfg = _config_smtp()
+    if not cfg or not p or not p.email or esta_de_baja(p.email):
+        return False
+    from src.correo import armar_mensaje
+    razon = (p.razon_social or "su empresa").strip()
+    ciudad = (p.municipio or "").strip().title()
+    saludo = f"Buenos días, {nombre_rl}:" if nombre_rl else "Buenos días:"
+    asunto = f"{razon}: cotice ventanas desde una foto y lleve su contabilidad en el mismo programa"
+    cuerpo = f"""<p>{saludo}</p>
+<p>Soy Edison Monsalve, contador público de Tributando.co. Vimos que <b>{razon}</b> arrancó hace poco{(' en ' + ciudad) if ciudad else ''}, y le escribo porque tenemos algo hecho justo para empresas de vidrio y aluminio:</p>
+<ul style="padding-left:18px">
+<li><b>Cotizador de ventanería:</b> escoge el diseño (corrediza, proyectante, fija…), pone las medidas y sale la cotización con perfiles, vidrio y accesorios calculados con sus precios.</li>
+<li><b>Ventana desde una foto:</b> le toma una foto al vano y el sistema le muestra al cliente cómo queda la ventana instalada, sin modificar el espacio. Va un antes y después adjunto.</li>
+<li><b>Por WhatsApp:</b> la cotización, la remisión o la factura le llegan al cliente en PDF por WhatsApp o por correo (adjunto un ejemplo).</li>
+<li><b>Contabilidad completa:</b> lo que cotiza y factura pasa a la contabilidad, con IVA, retención, nómina electrónica y declaraciones con la DIAN, con un contador detrás.</li>
+</ul>
+<p>El cotizador de ventanería es un módulo aparte de la contabilidad; con gusto le doy el valor en una videollamada de 15 minutos, donde se lo muestro con un diseño de su empresa.</p>
+<p>Además le armamos un borrador de página web para {razon}: véalo con el botón de abajo.</p>"""
+    html = _envolver(cuerpo, p.email, "Ver mi página web", _url_sitio(p.email),
+                     "Ver el portafolio y mi precio", url_portafolio(p.email))
+    base = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "static", "propuestas")
+    adjuntos = []
+    for nombre, archivo, mime in (("Ventana desde foto - antes y despues.jpg", "ventana-desde-foto.jpg", "image/jpeg"),
+                                  ("Ejemplo cotizacion ventana por WhatsApp.pdf", "ejemplo-cotizacion-ventana.pdf", "application/pdf")):
+        try:
+            with open(os.path.join(base, archivo), "rb") as fh:
+                adjuntos.append((nombre, fh.read(), mime))
+        except OSError:
+            pass
+    s = None
+    try:
+        s = _abrir_smtp(cfg)
+        s.send_message(armar_mensaje(p.email, asunto, html, cfg, adjuntos=adjuntos))
+        p.estado, p.enviado_en, p.error = "enviado", datetime.utcnow(), ""
+        p.etapa = "propuesta"
+        db.session.commit()
+        return True
+    except Exception as exc:  # noqa: BLE001
+        db.session.rollback()
+        p.error = ("propuesta ventanería: " + str(exc))[:300]
+        db.session.commit()
+        return False
+    finally:
+        try:
+            s and s.quit()
+        except Exception:  # noqa: BLE001
+            pass

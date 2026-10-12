@@ -1019,6 +1019,23 @@ def admin_prospectos_enviar_ahora():
             f"<h3>{msg}</h3><p><a href='/admin/prospectos'>Volver</a> · <a href='/admin/prospectos/crm'>CRM</a></p></div>")
 
 
+@app.post("/admin/prospectos/propuesta-ventaneria")
+@autorizado_requerido
+def admin_propuesta_ventaneria():
+    """Envía la propuesta de ventanería (cotizador + contabilidad, con su página
+    web) a los correos indicados, uno por línea «correo|nombre del representante»."""
+    hechos = []
+    for linea in (request.form.get("destinos") or "").splitlines():
+        em, _, rl = linea.partition("|")
+        em = em.strip().lower()
+        if not em:
+            continue
+        p = prosp_mod.db.session.get(prosp_mod.Prospecto, em)
+        ok = bool(p) and prosp_mod.enviar_propuesta_ventaneria(p, rl.strip())
+        hechos.append({"correo": em, "enviado": ok, "error": (p.error if p else "no está en prospectos")})
+    return jsonify(hechos)
+
+
 @app.post("/admin/prospectos/revisar")
 @autorizado_requerido
 def admin_prospectos_revisar():
