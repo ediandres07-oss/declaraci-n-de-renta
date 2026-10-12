@@ -583,7 +583,7 @@ def enviar_propuesta_ventaneria(p: Prospecto, nombre_rl: str = "") -> bool:
 <ul style="padding-left:18px">
 <li><b>Cotizador de ventanería:</b> escoge el diseño (corrediza, proyectante, fija…), pone las medidas y sale la cotización con perfiles, vidrio y accesorios calculados con sus precios.</li>
 <li><b>Ventana desde una foto:</b> le toma una foto al vano y el sistema le muestra al cliente cómo queda la ventana instalada, sin modificar el espacio. Va un antes y después adjunto.</li>
-<li><b>Por WhatsApp:</b> la cotización, la remisión o la factura le llegan al cliente en PDF por WhatsApp o por correo (adjunto un ejemplo).</li>
+<li><b>Por WhatsApp:</b> la cotización, la remisión o la factura le llegan al cliente en PDF por WhatsApp o por correo.</li>
 <li><b>Contabilidad completa:</b> lo que cotiza y factura pasa a la contabilidad, con IVA, retención, nómina electrónica y declaraciones con la DIAN, con un contador detrás.</li>
 </ul>
 <p>El cotizador de ventanería es un módulo aparte de la contabilidad; con gusto le doy el valor en una videollamada de 15 minutos, donde se lo muestro con un diseño de su empresa.</p>
@@ -592,8 +592,9 @@ def enviar_propuesta_ventaneria(p: Prospecto, nombre_rl: str = "") -> bool:
                      "Ver el portafolio y mi precio", url_portafolio(p.email))
     base = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "static", "propuestas")
     adjuntos = []
-    for nombre, archivo, mime in (("Ventana desde foto - antes y despues.jpg", "ventana-desde-foto.jpg", "image/jpeg"),
-                                  ("Ejemplo cotizacion ventana por WhatsApp.pdf", "ejemplo-cotizacion-ventana.pdf", "application/pdf")):
+    # OJO: nunca adjuntar documentos de un cliente real (11-oct se fue una cotización
+    # con el nombre, NIT y precios de Alumital). Solo material genérico.
+    for nombre, archivo, mime in (("Ventana desde foto - antes y despues.jpg", "ventana-desde-foto.jpg", "image/jpeg"),):
         try:
             with open(os.path.join(base, archivo), "rb") as fh:
                 adjuntos.append((nombre, fh.read(), mime))
