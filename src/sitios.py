@@ -44,7 +44,15 @@ def marca(razon_social: str) -> str:
 
 def ciudad(municipio: str) -> str:
     c = (municipio or "").strip().title()
-    return {"Medellin": "Medellín", "Itagui": "Itagüí", "Bogota": "Bogotá"}.get(c, c) or "Colombia"
+    if c.replace(".", "").replace(",", "").startswith("Bogota"):
+        return "Bogotá D.C."
+    return {"Medellin": "Medellín", "Itagui": "Itagüí"}.get(c, c) or "Colombia"
+
+
+def region(c: str) -> str:
+    """Departamento para los textos y el mapa. La base del RUES hasta ahora es
+    de Antioquia y de Bogotá D.C. (que no lleva departamento)."""
+    return "" if c.startswith("Bogotá") else "Antioquia"
 
 
 def _u(foto: str, w: int = 1200) -> str:
@@ -115,12 +123,12 @@ _PERFILES = [
         banda_txt="Lo revisamos con usted y le proponemos la solución.", banda_btn="Agendar reunión")),
     (("alojamiento", "hotel", "turístic", "turistic", "viaje", "reserva", "convenciones", "eventos"), dict(
         color="#9A3412", tipo="servicios", ceja="Turismo y eventos",
-        hero="Viva {ciudad} y Antioquia con nosotros",
+        hero="Viva {ciudad} y {region} con nosotros",
         sub="Alojamiento, planes y eventos con atención cálida y todos los detalles resueltos.",
         f_hero="photo-1737914692031-4cd02e08dffd", f_nos="photo-1621293954908-907159247fc8",
         sec="Experiencias bien atendidas",
         servicios=[("photo-1582719478250-c89cae4dc85b", "Alojamiento", "Espacios cómodos, limpios y bien ubicados."),
-                   ("photo-1570197820006-3e46f5ee01bb", "Planes y tours", "Recorridos por los pueblos y paisajes de Antioquia."),
+                   ("photo-1570197820006-3e46f5ee01bb", "Planes y tours", "Recorridos por los pueblos y paisajes de {region}."),
                    ("photo-1540575467063-178a50c2df87", "Eventos", "Convenciones, reuniones y celebraciones organizadas.")],
         nos="Una empresa de {ciudad} que recibe bien",
         f_banda="photo-1596436889106-be35e843f974", banda="¿Planea un viaje o un evento?",
@@ -187,7 +195,7 @@ _PERFILES = [
         banda_txt="Cuéntenos origen, destino y volumen, y le damos el valor el mismo día.", banda_btn="Cotizar envío")),
     (("cultivo", "cría", "cria ", "agrícol", "agricol", "ganad", "pecuar", "agropec", "palma"), dict(
         color="#15803D", tipo="productos", ceja="Agro",
-        hero="Del campo de Antioquia a su mesa",
+        hero="Del campo de {region} a su mesa",
         sub="Producción agropecuaria con buenas prácticas y calidad constante.",
         f_hero="photo-1560493676-04071c5f467b", f_nos="photo-1537721664796-76f77222a5d0",
         sec="Producción del campo con buenas prácticas",
@@ -352,7 +360,7 @@ _ESPECIALES = [
         "Ingenieros de {ciudad} comprometidos con cada proyecto", "¿Tiene un proyecto por diseñar?",
         "Cuéntenos el alcance y le enviamos la propuesta técnica.", "Pedir propuesta")),
     (("extracci", "minería", "mineria", "minero"), _perf(
-        "#92400E", "servicios", "Minería", "Minería responsable en Antioquia",
+        "#92400E", "servicios", "Minería", "Minería responsable en {region}",
         "Exploración, extracción y operación minera con seguridad y respeto por el entorno.",
         ("1587919968590-fbc98cea6c9a", "1691068343106-159ec5b344e9", "1719411321415-acfbe793c0aa",
          "1610375461246-83df859d849d", "1586161148512-64a1b3dac527", "1571223641822-b82408a0e705"),
@@ -562,20 +570,22 @@ def _fecha_larga(iso: str) -> tuple[str, str]:
 def datos_sitio(p) -> dict:
     """Todo lo que la plantilla necesita a partir del Prospecto."""
     c = ciudad(p.municipio)
+    reg = region(c)
+    ubic = f"{c}, {reg}" if reg else c
     pf = perfil(p.actividad, p.razon_social)
-    f = lambda t: t.format(ciudad=c)
+    f = lambda t: t.format(ciudad=c, region=reg or "Colombia")
     nombre = (p.razon_social or "").strip()
     act = (p.actividad or "").strip().rstrip(".")
     wa_txt = quote(f"Hola Edison, quiero publicar la página web de {nombre}")
     anio, matricula = _fecha_larga(getattr(p, "fecha_matricula", "") or "")
     nit_txt = f" (NIT {p.nit})" if p.nit else ""
-    f2 = lambda t: t.format(ciudad=c, nit_txt=nit_txt)
+    f2 = lambda t: t.format(ciudad=c, nit_txt=nit_txt, region=reg or "Colombia")
     return {"razon_social": nombre, "marca": marca(nombre), "inicial": (marca(nombre) or "E")[0].upper(),
-            "ciudad": c, "correo": p.email, "nit": p.nit or "", "actividad": act,
+            "ciudad": c, "ubicacion": ubic, "correo": p.email, "nit": p.nit or "", "actividad": act,
             "color": pf["color"], "tinte": _tinte(pf["color"]), "claro": _tinte(pf["color"], 0.55), "tipo": pf["tipo"],
             "ceja": f"{pf['ceja']} · {c}", "hero": f(pf["hero"]), "sub": f(pf["sub"]),
             "f_hero": _u(pf["f_hero"], 1800), "f_nos": _u(pf["f_nos"], 1100), "f_banda": _u(pf["f_banda"], 1000),
-            "sec": pf["sec"], "servicios": [(_u(ft, 800), t, d) for ft, t, d in pf["servicios"]],
+            "sec": pf["sec"], "servicios": [(_u(ft, 800), f(t), f(d)) for ft, t, d in pf["servicios"]],
             "nos": f(pf["nos"]),
             "nos_txt": f"Somos {nombre}, dedicados a {act[:1].lower() + act[1:] if act else 'servir a nuestros clientes'}. "
                        f"Trabajamos para que nuestros clientes en {c} tengan una empresa cercana, seria y con atención directa.",
@@ -590,6 +600,6 @@ def datos_sitio(p) -> dict:
             "faq": [(f2(q), f2(r)) for q, r in pf.get("faq") or _FAQ[pf["tipo"]]],
             "galeria": [_u(pf["f_hero"], 900), _u(pf["servicios"][0][0], 700), _u(pf["f_nos"], 700),
                         _u(pf["servicios"][1][0], 700), _u(pf["f_banda"], 900), _u(pf["servicios"][2][0], 700)],
-            "mapa": "https://www.google.com/maps?q=" + quote(f"{c}, Antioquia, Colombia") + "&output=embed",
+            "mapa": "https://www.google.com/maps?q=" + quote(f"{ubic}, Colombia") + "&output=embed",
             "dominio": dominio_propio(p.email),
             "logo_url": (getattr(p, "logo_url", "") or "").strip()}

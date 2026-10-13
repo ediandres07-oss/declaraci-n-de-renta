@@ -413,7 +413,7 @@ footer{background:var(--noche);color:#A9ABB2;padding-top:clamp(64px,8vw,96px);ov
   <div class="env nos">
     <div class="foto rv">
       <img src="{{ s.f_nos }}" alt="" loading="lazy">
-      <div class="sello"><i>{{ icono('pin', 22) }}</i><span><b>{{ s.ciudad }}, Antioquia</b><small>Aquí estamos para atenderle</small></span></div>
+      <div class="sello"><i>{{ icono('pin', 22) }}</i><span><b>{{ s.ubicacion }}</b><small>Aquí estamos para atenderle</small></span></div>
     </div>
     <div class="rv" style="--d:.1s">
       <p class="ceja">Quiénes somos</p>
@@ -424,7 +424,7 @@ footer{background:var(--noche);color:#A9ABB2;padding-top:clamp(64px,8vw,96px);ov
         <dl>
           <div class="full">{{ icono('briefcase', 20) }}<span><dt>Razón social</dt><dd>{{ s.razon_social }}</dd></span></div>
           {% if s.nit %}<div class="par">{{ icono('id', 20) }}<span><dt>NIT</dt><dd>{{ s.nit }}</dd></span></div>{% endif %}
-          <div class="{{ 'full' if not s.nit and not s.matricula else ('par' if not s.nit else '') }}">{{ icono('pin', 20) }}<span><dt>Ciudad</dt><dd>{{ s.ciudad }}, Antioquia</dd></span></div>
+          <div class="{{ 'full' if not s.nit and not s.matricula else ('par' if not s.nit else '') }}">{{ icono('pin', 20) }}<span><dt>Ciudad</dt><dd>{{ s.ubicacion }}</dd></span></div>
           {% if s.matricula %}<div class="{{ 'full' if s.nit else '' }}">{{ icono('cal', 20) }}<span><dt>Matrícula mercantil</dt><dd>{{ s.matricula }}</dd></span></div>{% endif %}
           {% if s.actividad %}<div class="full">{{ icono('doc', 20) }}<span><dt>Actividad</dt><dd>{{ s.actividad }}</dd></span></div>{% endif %}
         </dl>
@@ -496,8 +496,8 @@ footer{background:var(--noche);color:#A9ABB2;padding-top:clamp(64px,8vw,96px);ov
     <div class="contacto">
       <div class="info rv">
         <a class="canal" href="mailto:{{ s.correo }}"><i>{{ icono('mail', 22) }}</i><span><small>Correo</small><b>{{ s.correo }}</b></span></a>
-        <div class="canal"><i>{{ icono('pin', 22) }}</i><span><small>Ubicación</small><b>{{ s.ciudad }}, Antioquia, Colombia</b></span></div>
-        <div class="mapa"><a class="respaldo" href="https://www.google.com/maps?q={{ (s.ciudad ~ ', Antioquia, Colombia')|urlencode }}" target="_blank" rel="noopener">{{ icono('pin', 34) }}Ver {{ s.ciudad }} en Google Maps</a><iframe src="{{ s.mapa }}" title="Mapa de {{ s.ciudad }}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
+        <div class="canal"><i>{{ icono('pin', 22) }}</i><span><small>Ubicación</small><b>{{ s.ubicacion }}, Colombia</b></span></div>
+        <div class="mapa"><a class="respaldo" href="https://www.google.com/maps?q={{ (s.ubicacion ~ ', Colombia')|urlencode }}" target="_blank" rel="noopener">{{ icono('pin', 34) }}Ver {{ s.ciudad }} en Google Maps</a><iframe src="{{ s.mapa }}" title="Mapa de {{ s.ciudad }}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
       </div>
       <form class="formulario rv" style="--d:.1s" id="formulario" data-para="{{ s.correo }}" data-marca="{{ s.marca }}" novalidate>
         <h3>Escríbanos</h3>
@@ -529,7 +529,7 @@ footer{background:var(--noche);color:#A9ABB2;padding-top:clamp(64px,8vw,96px);ov
       </div>
       <div>
         <h4>Contacto</h4>
-        <ul><li><a href="mailto:{{ s.correo }}" style="overflow-wrap:anywhere">{{ s.correo }}</a></li><li>{{ s.ciudad }}, Antioquia</li></ul>
+        <ul><li><a href="mailto:{{ s.correo }}" style="overflow-wrap:anywhere">{{ s.correo }}</a></li><li>{{ s.ubicacion }}</li></ul>
       </div>
     </div>
     <div class="marca-gigante" aria-hidden="true"><span>{{ s.marca }}</span></div>
