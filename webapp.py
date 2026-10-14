@@ -66,6 +66,10 @@ app.register_blueprint(auth_bp)
 # Gestor de vencimientos para contadores (gratis con login)
 app.register_blueprint(venc_bp)
 
+# Puente al feed de sismos del SGC para la app «Sismos en Vivo» (CORS abierto)
+from src.sismos_sgc import sismos_bp  # noqa: E402
+app.register_blueprint(sismos_bp)
+
 
 # Pre-carga zoneinfo al arranque: si dos hilos lo importan a la vez por primera
 # vez, uno ve el módulo "partially initialized" y el buscador IA da 502.
