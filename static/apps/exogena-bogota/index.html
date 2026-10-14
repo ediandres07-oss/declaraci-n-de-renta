@@ -40,7 +40,7 @@ footer{color:var(--m);font-size:12.5px;margin-top:30px;line-height:1.6}a{color:v
    <input type="file" id="arch" multiple accept=".zip,.xml" style="display:none">
   </div>
  </div>
- <p class="sub" style="margin:12px 0 0">¿No tienes los XML? El reporte de la DIAN no trae la ciudad ni la dirección del proveedor, así que no sirve para este formato. Descarga <b>gratis</b> el <a href="https://contabilidad-tributando.onrender.com/descargador.zip" rel="nofollow">Recolector Tributando</a> (Windows): entras a la DIAN con el enlace que te llega al correo, baja los XML de compras del año y los subes aquí.</p>
+ <p class="sub" style="margin:12px 0 0">¿No tienes los XML? El reporte de la DIAN no trae la ciudad ni la dirección del proveedor, así que no sirve para este formato. <a href="https://wa.me/573332470715?text=Hola%2C%20quiero%20el%20Recolector%20gratis%20para%20bajar%20los%20XML%20de%20la%20ex%C3%B3gena%20Bogot%C3%A1" target="_blank" rel="noopener">Escríbenos por WhatsApp</a> y te damos <b>gratis</b> el Recolector Tributando para bajarlos de la DIAN.</p>
  <p class="sub" id="aviso_rec"></p>
 </div>
 
@@ -178,27 +178,22 @@ function kpis(nTodos){
   $("kpis").innerHTML="<div>Proveedores en total<b>"+nTodos+"</b></div><div>De Bogotá<b>"+provs.length+"</b></div><div>Para reportar<b>"+sel.length+"</b></div><div>Compras a reportar<b>"+fmt(tot)+"</b></div>";
 }
 function esc(s){return String(s||"").replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
-function limpiaDir(s){return String(s||"").toUpperCase().replace(/[.,\-#°º]/g," ").replace(/\s+/g," ").trim().slice(0,70)}
+// ficha técnica: sin caracteres especiales (!:"$%&/()¿?=…), mayúsculas como el registro de ejemplo
+function limpiaNom(s){return String(s||"").replace(/\./g,"").toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/Ñ/g,"N").replace(/[^A-Z0-9 ]/g," ").replace(/\s+/g," ").trim().slice(0,70)}
+function limpiaDir(s){return String(s||"").toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^A-Z0-9Ñ ]/g," ").replace(/\s+/g," ").trim().slice(0,70)}
 
 function excel(){
   var anio=$("anio").value;
-  var filas=[["VIGENCIA","TIPO DOCUMENTO","NÚMERO DOCUMENTO","NOMBRE O RAZON SOCIAL","DIRECCIÓN DE NOTIFICACIÓN","TELÉFONO","E-MAIL","CÓDIGO MUNICIPIO","CÓDIGO DPTO","CONCEPTO PAGO O ABONO EN CUENTA","VALOR COMPRAS ANUAL","VALOR DEVOLUCIONES"]];
+  var filas=[];   // ficha técnica: «No se colocarán los títulos de las columnas»; un solo registro por fila
   provs.filter(function(p){return p.ok}).forEach(function(p){
     var mun=(p.mun||"11001").replace(/\D/g,"").padStart(5,"0").slice(0,5);
-    filas.push([+anio,TIPODOC[p.esquema]||(esNatural(p)?"CC":"NIT"),p.nit.slice(0,11),String(p.nombre).slice(0,70),limpiaDir(p.dir),
-      (p.tel||"").replace(/\D/g,"").slice(-10),String(p.mail||"").slice(0,70),mun,mun.slice(0,2),+p.concepto,Math.round(p.compras),Math.round(p.dev)]);
+    filas.push([+anio,TIPODOC[p.esquema]||(esNatural(p)?"CC":"NIT"),p.nit.slice(0,11),limpiaNom(p.nombre),limpiaDir(p.dir),
+      (p.tel||"").replace(/\D/g,"").slice(-10),String(p.mail||"").toUpperCase().replace(/[^A-Z0-9@._-]/g,"").slice(0,70),mun,mun.slice(0,2),+p.concepto,Math.round(p.compras),Math.round(p.dev)]);
   });
   var wb=XLSX.utils.book_new(), ws=XLSX.utils.aoa_to_sheet(filas);
   ws["!cols"]=[{wch:9},{wch:9},{wch:13},{wch:40},{wch:36},{wch:12},{wch:30},{wch:10},{wch:8},{wch:12},{wch:16},{wch:16}];
   XLSX.utils.book_append_sheet(wb,ws,"Articulo 2");
-  var lee=[["Exógena Bogotá · Artículo 2 · Res. DDI-024115 de 2026 · generado en tributando.co/apps/exogena-bogota"],[""],
-    ["Fuente: XML de facturas electrónicas de compra (valor sin IVA = LineExtensionAmount; notas crédito = devoluciones)."],
-    ["Solo proveedores con domicilio en Bogotá (DANE 11001) en la factura. Revisa otras compras en Bogotá que la norma incluye (contrato firmado en Bogotá, despacho desde Bogotá, sucursales)."],
-    ["Tope: 4 UVT acumuladas en el año por proveedor. Excluidos: servicios públicos, gastos bancarios, aportes a seguridad social, impuestos y siniestros (parágrafo 5)."],
-    ["Concepto: 1 servicios · 2 bienes · 4 servicios de profesionales independientes. Revísalo antes de cargar."],
-    ["Dirección sin puntos, guiones ni comas; teléfono sin separadores; valores sin decimales."],
-    ["Herramienta de apoyo: el contador debe revisar el resultado antes de presentarlo en PIDO."]];
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(lee),"Léeme");
+  // el archivo para PIDO lleva SOLO la hoja de registros; las notas quedan en la página
   XLSX.writeFile(wb,"Exogena_Bogota_Art2_"+anio+".xlsx");
 }
 
