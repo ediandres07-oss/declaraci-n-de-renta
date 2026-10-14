@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Exógena Bogotá · Artículo 2 · Tributando</title>
+<meta name="description" content="Gratis: arma el reporte de compras (artículo 2, Res. DDI-024115 de 2026) para PIDO desde los XML de las facturas. Los archivos no salen de tu computador.">
+<meta name="theme-color" content="#0b1512">
+<style>
+:root{--v:#37d38f;--f:#0b1512;--c:#11201b;--b:#1f3a30;--t:#eaf5ef;--m:#9fb5aa;--a:#f0b35a}
+*{box-sizing:border-box}body{margin:0;background:var(--f);color:var(--t);font-family:-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:1100px;margin:0 auto;padding:26px 16px 60px}
+h1{font-size:26px;margin:0 0 6px}h1 span{color:var(--v)}h2{font-size:18px;margin:26px 0 10px}
+.sub{color:var(--m);font-size:14px;line-height:1.5}.tarjeta{background:var(--c);border:1px solid var(--b);border-radius:14px;padding:16px;margin:12px 0}
+.pasos{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.paso b{color:var(--v)}label{font-size:13px;color:var(--m);display:block;margin:8px 0 4px}
+input,select{background:#0e1a16;border:1px solid var(--b);color:var(--t);border-radius:10px;padding:10px;font-size:15px}
+input[type=text],input[type=email],input[type=tel]{width:100%}
+.btn{background:var(--v);color:#06261a;border:0;border-radius:10px;padding:12px 18px;font-weight:800;font-size:15px;cursor:pointer}
+.btn[disabled]{opacity:.5;cursor:default}.btn2{background:transparent;color:var(--v);border:1px solid var(--v)}
+.drop{border:2px dashed var(--b);border-radius:14px;padding:26px;text-align:center;cursor:pointer}.drop:hover{border-color:var(--v)}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:7px 6px;border-top:1px solid var(--b);text-align:left;vertical-align:top}
+th{color:var(--m);font-weight:600;position:sticky;top:0;background:var(--c)}td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.off td{opacity:.45}.tag{display:inline-block;font-size:11px;padding:2px 6px;border-radius:6px;background:#2a2410;color:var(--a);margin-left:4px}
+.ok{color:var(--v)}.warn{color:var(--a)}.kpi{display:flex;gap:16px;flex-wrap:wrap}.kpi div{background:#0e1a16;border:1px solid var(--b);border-radius:12px;padding:10px 14px}
+.kpi b{display:block;font-size:20px;color:var(--v)}.scroll{max-height:520px;overflow:auto;border-radius:10px}
+footer{color:var(--m);font-size:12.5px;margin-top:30px;line-height:1.6}a{color:var(--v)}
+</style></head><body><main>
+<h1>Exógena Bogotá · <span>Artículo 2 (compras)</span></h1>
+<p class="sub">Herramienta <b>gratuita</b> para contadores. Arma el reporte de compras de bienes y servicios en Bogotá (Resolución DDI-024115 de 2026, año gravable 2025) desde los <b>XML de las facturas electrónicas de compra</b>, listo para cargar en la plataforma <b>PIDO</b>. <b>Tus archivos no salen de tu computador</b>: todo se procesa en este navegador.</p>
+
+<div class="tarjeta pasos">
+ <div class="paso"><b>1.</b> Sube los XML de compras del año (un ZIP, varios ZIP o los .xml sueltos).</div>
+ <div class="paso"><b>2.</b> Revisa: deja solo proveedores de Bogotá, suma por proveedor, aplica el tope de 4 UVT y quita lo que la norma excluye.</div>
+ <div class="paso"><b>3.</b> Ajusta el concepto (bienes, servicios o profesionales) si hace falta y descarga el Excel para PIDO.</div>
+</div>
+
+<div class="tarjeta">
+ <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:end">
+  <div><label for="anio">Año gravable</label><select id="anio"><option>2025</option><option>2026</option></select></div>
+  <div style="flex:1;min-width:240px"><label>XML de facturas de compra</label>
+   <div class="drop" id="drop" onclick="document.getElementById('arch').click()">Arrastra aquí los ZIP o XML, o haz clic para escogerlos<br><span class="sub" id="estado">Ninguno escogido</span></div>
+   <input type="file" id="arch" multiple accept=".zip,.xml" style="display:none">
+  </div>
+ </div>
+ <p class="sub" id="aviso_rec"></p>
+</div>
+
+<div id="res" style="display:none">
+ <div class="tarjeta">
+  <div class="kpi" id="kpis"></div>
+  <p class="sub" style="margin-top:10px">Solo cuentan proveedores con domicilio en Bogotá (código DANE 11001 en el XML). Tope: <b>4 UVT acumuladas en el año por proveedor</b> (<span id="tope"></span>). Valor <b>sin IVA</b>; las notas crédito van en devoluciones. Desmarcados por defecto: servicios públicos, gastos bancarios, aportes a seguridad social, impuestos y siniestros (parágrafo 5 del art. 2).</p>
+ </div>
+ <h2>Proveedores de Bogotá</h2>
+ <div class="tarjeta scroll"><table id="tabla"><thead><tr><th>✓</th><th>Proveedor</th><th>Doc.</th><th>Ubicación / contacto</th><th>Concepto</th><th class="n">Compras sin IVA</th><th class="n">Devoluciones</th></tr></thead><tbody></tbody></table></div>
+
+ <h2>Descargar el Excel para PIDO</h2>
+ <div class="tarjeta" style="max-width:640px">
+  <p class="sub">Déjanos tus datos y te lo descargas ya. Te escribimos solo para temas tributarios; puedes darte de baja cuando quieras.</p>
+  <label>Nombre</label><input type="text" id="l_nombre" autocomplete="name">
+  <label>Correo</label><input type="email" id="l_correo" autocomplete="email">
+  <label>WhatsApp</label><input type="tel" id="l_wa" autocomplete="tel" placeholder="300 123 4567">
+  <label style="display:flex;gap:8px;align-items:center;margin-top:12px;color:var(--t)"><input type="checkbox" id="l_ok"> Acepto que Tributando.co me contacte (Ley 1581 de 2012).</label>
+  <p style="margin-top:14px"><button class="btn" id="bajar">Descargar Excel PIDO</button></p>
+  <p class="sub" id="l_msg"></p>
+ </div>
+</div>
+
+<footer>Hecho por <a href="https://tributando.co">Tributando.co</a> · Edison Monsalve, Contador Público · WhatsApp 333 247 0715.<br>
+Herramienta de apoyo: revisa el resultado antes de presentarlo. La norma considera «compra en Bogotá» también otros casos (contrato firmado en Bogotá, despacho desde Bogotá, sucursales); aquí se usa el domicilio del proveedor en la factura. Columnas según el artículo 2 de la Res. DDI-024115 de 2026.</footer>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+(function(){"use strict";
+var UVT={2025:49799,2026:52374}, TOPE_UVT=4;
+var $=function(i){return document.getElementById(i)};
+var fmt=function(n){return "$ "+Math.round(n).toLocaleString("es-CO")};
+var docs=[], provs=[];
+var EXCLUIR=/(acueducto|alcantarillado|\benel\b|codensa|vanti|gas natural|empresas p[uú]blicas|\betb\b|banco|bancolombia|davivienda|\bbbva\b|scotiabank|itau|ita[uú]|av villas|occidente|bogot[aá] s\.?a|caja social|credibanco|redeban|nequi|daviplata|colpensiones|porvenir|protecci[oó]n|colfondos|eps\b|sanitas|compensar|cafam|colsubsidio|nueva eps|salud total|famisanar|sura\b|positiva|secretar[ií]a distrital de hacienda|dian\b|direcci[oó]n de impuestos)/i;
+var SERV=/(servicio|prima|p[oó]liza|seguro|soat|arriendo|arrendamiento|alquiler|mantenimiento|transporte|flete|asesor|consultor|honorario|publicidad|licencia|suscripci|hosting|internet|soporte|capacitaci|vigilancia|aseo|reparaci|instalaci|mensajer|comisi[oó]n|outsourcing|auditor|dise[nñ]o|software|plan )/i;
+var HON=/(honorario|asesor|consultor|profesional|abogad|contador|revisor|auditor)/i;
+var TIPODOC={"31":"NIT","13":"CC","22":"CE","41":"PA","47":"PEP","48":"PPT","12":"TI","42":"NITE","50":"NITE"};
+
+function L(el,name){if(!el)return [];return Array.prototype.slice.call(el.getElementsByTagNameNS("*",name))}
+function T(el,name){var x=L(el,name)[0];return x?(x.textContent||"").trim():""}
+function hijo(el,name){if(!el)return null;for(var i=0;i<el.children.length;i++){if(el.children[i].localName===name)return el.children[i]}return null}
+
+function parsear(txt){
+  var doc=new DOMParser().parseFromString(txt,"application/xml"), r=doc.documentElement;
+  if(!r||r.localName==="parsererror")return null;
+  if(r.localName==="AttachedDocument"){   // el XML que llega por correo envuelve la factura en un CDATA
+    var d=L(r,"Description").map(function(x){return x.textContent}).filter(function(t){return /<(\w+:)?(Invoice|CreditNote|DebitNote)[\s>]/.test(t)})[0];
+    if(!d)return null; doc=new DOMParser().parseFromString(d.trim(),"application/xml"); r=doc.documentElement;
+  }
+  var tipo=r.localName; if(["Invoice","CreditNote","DebitNote"].indexOf(tipo)<0)return null;
+  var sup=L(r,"AccountingSupplierParty")[0], cus=L(r,"AccountingCustomerParty")[0];
+  if(!sup)return null;
+  var pts=L(sup,"PartyTaxScheme")[0], cid=pts?L(pts,"CompanyID")[0]:L(sup,"CompanyID")[0];
+  var nit=cid?(cid.textContent||"").replace(/\D/g,""):"", esquema=cid?(cid.getAttribute("schemeName")||""):"";
+  var nombre=T(pts,"RegistrationName")||T(sup,"RegistrationName")||T(sup,"Name");
+  var addr=L(sup,"RegistrationAddress")[0]||L(sup,"Address")[0];
+  var mun="",ciudad="",dir="";
+  if(addr){var id=hijo(addr,"ID");mun=id?(id.textContent||"").trim():"";ciudad=T(addr,"CityName");dir=T(addr,"Line")||T(addr,"StreetName")}
+  var contacto=L(sup,"Contact")[0];
+  var tel=contacto?T(contacto,"Telephone"):"", mail=contacto?T(contacto,"ElectronicMail"):"";
+  var ccid=cus?L(cus,"CompanyID")[0]:null, nitRec=ccid?(ccid.textContent||"").replace(/\D/g,""):"", nomRec=cus?(T(cus,"RegistrationName")||T(cus,"Name")):"";
+  var lmt=L(r,"LegalMonetaryTotal")[0], sub=parseFloat(T(lmt,"LineExtensionAmount"))||0;
+  var fecha=T(r,"IssueDate"), items=L(r,"Item").map(function(i){return T(i,"Description")}).join(" | ").slice(0,600);
+  return {tipo:tipo,fecha:fecha,nit:nit,esquema:esquema,nombre:nombre,mun:mun,ciudad:ciudad,dir:dir,tel:tel,mail:mail,
+          nitRec:nitRec,nomRec:nomRec,sub:sub,items:items,num:T(r,"ID")};
+}
+
+function leerArchivos(files){
+  docs=[]; var pend=0, n=0, malos=0; $("estado").textContent="Leyendo…";
+  function listo(){ if(--pend===0){ $("estado").textContent=n+" documentos leídos"+(malos?(" · "+malos+" no eran factura/nota"):""); procesar(); } }
+  function txt(s){var d=parsear(s); if(d){docs.push(d);n++}else malos++}
+  Array.prototype.forEach.call(files,function(f){
+    pend++;
+    if(/\.zip$/i.test(f.name)){
+      JSZip.loadAsync(f).then(function(z){
+        var ps=[]; z.forEach(function(p,e){ if(!e.dir&&/\.xml$/i.test(p)) ps.push(e.async("string").then(txt)) });
+        return Promise.all(ps);
+      }).catch(function(){malos++}).then(listo);
+    } else { var fr=new FileReader(); fr.onload=function(){txt(fr.result);listo()}; fr.onerror=function(){malos++;listo()}; fr.readAsText(f); }
+  });
+}
+
+function esNatural(p){return p.esquema==="13"||!(p.nit.length===9&&/^[89]/.test(p.nit))}
+function esBogota(d){return /^11001/.test(d.mun)||/bogot/i.test(d.ciudad)}
+
+function procesar(){
+  var anio=$("anio").value, tope=TOPE_UVT*UVT[anio];
+  var del=docs.filter(function(d){return (d.fecha||"").slice(0,4)===anio});
+  // receptor = el NIT que más se repite (el declarante); avisar si hay varios
+  var cnt={}; del.forEach(function(d){cnt[d.nitRec]=(cnt[d.nitRec]||0)+1});
+  var rec=Object.keys(cnt).sort(function(a,b){return cnt[b]-cnt[a]})[0]||"";
+  var nomRec=(del.filter(function(d){return d.nitRec===rec})[0]||{}).nomRec||"";
+  $("aviso_rec").innerHTML=del.length?("Empresa que compra (receptor): <b>"+nomRec+"</b> · NIT "+rec+(Object.keys(cnt).length>1?(' <span class="warn">· Ojo: venían facturas de '+Object.keys(cnt).length+" receptores; solo se toma este.</span>"):"")):'<span class="warn">No hay facturas del año '+anio+" en lo que subiste.</span>";
+  var m={};
+  del.filter(function(d){return d.nitRec===rec}).forEach(function(d){
+    var p=m[d.nit]||(m[d.nit]={nit:d.nit,esquema:d.esquema,nombre:d.nombre,mun:"",ciudad:"",dir:"",tel:"",mail:"",compras:0,dev:0,items:"",n:0,bog:false});
+    if(d.tipo==="CreditNote")p.dev+=d.sub; else p.compras+=d.sub;
+    p.n++; if(esBogota(d)){p.bog=true;p.mun=p.mun||d.mun;p.ciudad=p.ciudad||d.ciudad;p.dir=p.dir||d.dir;p.tel=p.tel||d.tel;p.mail=p.mail||d.mail}
+    if(p.items.length<600)p.items+=" "+d.items;
+  });
+  var todos=Object.keys(m).map(function(k){return m[k]});
+  provs=todos.filter(function(p){return p.bog}).map(function(p){
+    var excl=EXCLUIR.test(p.nombre), bajo=p.compras<tope;
+    p.concepto=(esNatural(p)&&HON.test(p.items))?"4":(SERV.test(p.items)?"1":"2");
+    p.motivo=excl?"servicio público / bancario / aportes / impuestos":(bajo?"no llega a 4 UVT":"");
+    p.ok=!excl&&!bajo; return p;
+  }).sort(function(a,b){return b.compras-a.compras});
+  $("tope").textContent=fmt(tope);
+  pintar(todos.length);
+  $("res").style.display="";
+}
+
+function pintar(nTodos){
+  var tb=$("tabla").querySelector("tbody"); tb.innerHTML="";
+  provs.forEach(function(p,i){
+    var tr=document.createElement("tr"); if(!p.ok)tr.className="off";
+    var falta=[]; if(!p.dir)falta.push("dirección"); if(!p.tel)falta.push("teléfono"); if(!p.mail)falta.push("correo");
+    tr.innerHTML='<td><input type="checkbox" data-i="'+i+'" '+(p.ok?"checked":"")+'></td>'+
+      "<td>"+esc(p.nombre)+(p.motivo?'<span class="tag">'+p.motivo+"</span>":"")+'<div class="sub">'+p.n+" documento(s)</div></td>"+
+      "<td>"+(TIPODOC[p.esquema]||(esNatural(p)?"CC":"NIT"))+" "+p.nit+"</td>"+
+      "<td>"+esc(p.dir||"—")+'<div class="sub">'+esc((p.mun||"")+" "+(p.ciudad||""))+" · "+esc(p.tel||"sin tel.")+" · "+esc(p.mail||"sin correo")+"</div>"+(falta.length?'<div class="warn" style="font-size:12px">Falta '+falta.join(", ")+": complétalo en el Excel</div>":"")+"</td>"+
+      '<td><select data-c="'+i+'"><option value="2"'+(p.concepto==="2"?" selected":"")+'>2 · Bienes</option><option value="1"'+(p.concepto==="1"?" selected":"")+'>1 · Servicios</option><option value="4"'+(p.concepto==="4"?" selected":"")+'>4 · Profesional independiente</option></select></td>'+
+      '<td class="n">'+fmt(p.compras)+'</td><td class="n">'+fmt(p.dev)+"</td>";
+    tb.appendChild(tr);
+  });
+  tb.querySelectorAll("input[data-i]").forEach(function(c){c.onchange=function(){var p=provs[+c.dataset.i];p.ok=c.checked;c.closest("tr").className=p.ok?"":"off";kpis(nTodos)}});
+  tb.querySelectorAll("select[data-c]").forEach(function(s){s.onchange=function(){provs[+s.dataset.c].concepto=s.value}});
+  kpis(nTodos);
+}
+function kpis(nTodos){
+  var sel=provs.filter(function(p){return p.ok});
+  var tot=sel.reduce(function(a,p){return a+p.compras},0);
+  $("kpis").innerHTML="<div>Proveedores en total<b>"+nTodos+"</b></div><div>De Bogotá<b>"+provs.length+"</b></div><div>Para reportar<b>"+sel.length+"</b></div><div>Compras a reportar<b>"+fmt(tot)+"</b></div>";
+}
+function esc(s){return String(s||"").replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function limpiaDir(s){return String(s||"").toUpperCase().replace(/[.,\-#°º]/g," ").replace(/\s+/g," ").trim().slice(0,70)}
+
+function excel(){
+  var anio=$("anio").value;
+  var filas=[["VIGENCIA","TIPO DOCUMENTO","NÚMERO DOCUMENTO","NOMBRE O RAZON SOCIAL","DIRECCIÓN DE NOTIFICACIÓN","TELÉFONO","E-MAIL","CÓDIGO MUNICIPIO","CÓDIGO DPTO","CONCEPTO PAGO O ABONO EN CUENTA","VALOR COMPRAS ANUAL","VALOR DEVOLUCIONES"]];
+  provs.filter(function(p){return p.ok}).forEach(function(p){
+    var mun=(p.mun||"11001").replace(/\D/g,"").padStart(5,"0").slice(0,5);
+    filas.push([+anio,TIPODOC[p.esquema]||(esNatural(p)?"CC":"NIT"),p.nit.slice(0,11),String(p.nombre).slice(0,70),limpiaDir(p.dir),
+      (p.tel||"").replace(/\D/g,"").slice(-10),String(p.mail||"").slice(0,70),mun,mun.slice(0,2),+p.concepto,Math.round(p.compras),Math.round(p.dev)]);
+  });
+  var wb=XLSX.utils.book_new(), ws=XLSX.utils.aoa_to_sheet(filas);
+  ws["!cols"]=[{wch:9},{wch:9},{wch:13},{wch:40},{wch:36},{wch:12},{wch:30},{wch:10},{wch:8},{wch:12},{wch:16},{wch:16}];
+  XLSX.utils.book_append_sheet(wb,ws,"Articulo 2");
+  var lee=[["Exógena Bogotá · Artículo 2 · Res. DDI-024115 de 2026 · generado en tributando.co/apps/exogena-bogota"],[""],
+    ["Fuente: XML de facturas electrónicas de compra (valor sin IVA = LineExtensionAmount; notas crédito = devoluciones)."],
+    ["Solo proveedores con domicilio en Bogotá (DANE 11001) en la factura. Revisa otras compras en Bogotá que la norma incluye (contrato firmado en Bogotá, despacho desde Bogotá, sucursales)."],
+    ["Tope: 4 UVT acumuladas en el año por proveedor. Excluidos: servicios públicos, gastos bancarios, aportes a seguridad social, impuestos y siniestros (parágrafo 5)."],
+    ["Concepto: 1 servicios · 2 bienes · 4 servicios de profesionales independientes. Revísalo antes de cargar."],
+    ["Dirección sin puntos, guiones ni comas; teléfono sin separadores; valores sin decimales."],
+    ["Herramienta de apoyo: el contador debe revisar el resultado antes de presentarlo en PIDO."]];
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(lee),"Léeme");
+  XLSX.writeFile(wb,"Exogena_Bogota_Art2_"+anio+".xlsx");
+}
+
+$("arch").onchange=function(){ if(this.files.length) leerArchivos(this.files) };
+var dz=$("drop");
+dz.ondragover=function(e){e.preventDefault();dz.style.borderColor="var(--v)"};
+dz.ondragleave=function(){dz.style.borderColor=""};
+dz.ondrop=function(e){e.preventDefault();dz.style.borderColor="";if(e.dataTransfer.files.length)leerArchivos(e.dataTransfer.files)};
+$("anio").onchange=function(){ if(docs.length) procesar() };
+$("bajar").onclick=function(){
+  var nom=$("l_nombre").value.trim(), co=$("l_correo").value.trim(), wa=$("l_wa").value.trim();
+  if(!nom||!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(co)||wa.replace(/\D/g,"").length<7){$("l_msg").innerHTML='<span class="warn">Escribe tu nombre, un correo válido y tu WhatsApp.</span>';return}
+  if(!$("l_ok").checked){$("l_msg").innerHTML='<span class="warn">Marca la autorización de contacto.</span>';return}
+  var b=this; b.disabled=true;
+  var nProv=provs.filter(function(p){return p.ok}).length;
+  fetch("/api/apps/lead",{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({app:"exogena-bogota",nombre:nom,correo:co,whatsapp:wa,nota:"Exógena Bogotá art. 2 · "+nProv+" proveedores"})})
+    .catch(function(){}).then(function(){ excel(); $("l_msg").innerHTML='<span class="ok">¡Listo! Revisa tus descargas. Si te sirvió, compártela con tus colegas.</span>'; b.disabled=false; });
+};
+})();
+</script>
+</body></html>

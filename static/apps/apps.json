@@ -10,5 +10,11 @@
     "nombre": "Calculadora de retención",
     "descripcion": "Retención en la fuente 2026 por concepto, con las bases mínimas del Decreto 0572 (10 UVT compras, 2 UVT servicios) y el neto a pagar.",
     "fecha": "2026-10-13"
+  },
+  {
+    "slug": "exogena-bogota",
+    "nombre": "Exógena Bogotá · Artículo 2",
+    "descripcion": "Gratis para contadores: arma el reporte de compras en Bogotá (Res. DDI-024115/2026) para PIDO desde los XML de las facturas, sin que los archivos salgan del computador.",
+    "fecha": "2026-10-14"
   }
 ]
