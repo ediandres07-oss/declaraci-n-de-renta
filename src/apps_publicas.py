@@ -15,7 +15,7 @@ import html
 import json
 from pathlib import Path
 
-from flask import Blueprint, Response, abort, redirect, send_from_directory
+from flask import Blueprint, Response, abort, jsonify, redirect, request, send_from_directory
 
 apps_bp = Blueprint("apps_publicas", __name__)
 
@@ -71,3 +71,37 @@ def apps_archivo(slug, archivo="index.html"):
     if not slug.replace("-", "").isalnum() or not carpeta.is_dir():
         abort(404)
     return _noindex(send_from_directory(carpeta, archivo))
+
+
+@apps_bp.route("/api/apps/lead", methods=["POST"])
+def apps_lead():
+    """14-oct: contacto que deja un contador al descargar de una app gratis (exógena Bogotá…).
+    Queda en el CRM de prospectos como segmento «contador» con estado «lead»: NO entra a la
+    tanda diaria de correos (esa solo toma «pendiente»)."""
+    import re
+    from datetime import datetime
+    from src.auth import db
+    from src.prospectos import Prospecto
+    d = request.get_json(silent=True) or {}
+    correo = (d.get("correo") or "").strip().lower()[:200]
+    if not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", correo):
+        return jsonify(ok=False, error="correo"), 400
+    app_ = re.sub(r"[^a-z0-9-]", "", (d.get("app") or "app").lower())[:30]
+    nombre = (d.get("nombre") or "").strip()[:120]
+    wa = re.sub(r"[^0-9+ ]", "", d.get("whatsapp") or "")[:20]
+    nota = f"{nombre} · WhatsApp {wa} · {(d.get('nota') or '')[:200]} · {datetime.now():%Y-%m-%d %H:%M}"
+    p = db.session.get(Prospecto, correo)
+    if p is None:
+        p = Prospecto(email=correo, segmento="contador", razon_social=nombre, origen=f"app-{app_}",
+                      estado="lead", municipio="Bogotá" if "bogota" in app_ else "", nota=nota[:500])
+        db.session.add(p)
+    else:
+        p.nota = ((p.nota or "") + " | " + nota)[-500:]
+    try:
+        db.session.commit()
+    except Exception:                                            # noqa: BLE001
+        db.session.rollback()
+        return jsonify(ok=False), 500
+    resp = jsonify(ok=True)
+    resp.headers["X-Robots-Tag"] = "noindex"
+    return resp
