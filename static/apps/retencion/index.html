@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex"><title>Calculadora de retención · Tributando</title>
+<meta name="theme-color" content="#0b1512">
+<style>
+:root{--v:#37d38f;--f:#0b1512;--c:#11201b;--b:#1f3a30;--t:#eaf5ef;--m:#9fb5aa}
+*{box-sizing:border-box}body{margin:0;background:var(--f);color:var(--t);font-family:-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:560px;margin:0 auto;padding:28px 16px 40px}
+h1{font-size:24px;margin:0 0 4px}h1 span{color:var(--v)}.sub{color:var(--m);margin:0 0 22px;font-size:14px}
+label{display:block;font-size:13px;color:var(--m);margin:14px 0 6px}
+select,input[type=text]{width:100%;padding:13px 12px;border-radius:12px;border:1px solid var(--b);background:var(--c);color:var(--t);font-size:16px}
+.fila{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.chk{flex:1 1 150px;display:flex;gap:8px;align-items:center;background:var(--c);border:1px solid var(--b);border-radius:12px;padding:11px 12px;font-size:14px;color:var(--t);margin:0;cursor:pointer}
+.chk input{accent-color:var(--v);width:18px;height:18px}
+.res{margin-top:22px;background:var(--c);border:1px solid var(--b);border-radius:16px;padding:18px}
+.grande{font-size:34px;font-weight:800;color:var(--v);margin:2px 0 6px}
+.no{color:#f0b35a}
+.lin{display:flex;justify-content:space-between;padding:7px 0;border-top:1px solid var(--b);font-size:15px}
+.lin:first-of-type{border-top:0}.lin b{font-variant-numeric:tabular-nums}
+.nota{font-size:12.5px;color:var(--m);margin-top:18px;line-height:1.5}
+a{color:var(--v)}
+</style></head><body><main>
+<h1>Calculadora de <span>retención</span></h1>
+<p class="sub">Retención en la fuente a título de renta · 2026 · UVT $52.374 · cuantías mínimas del Decreto 0572 de 2025</p>
+
+<label for="con">Concepto</label>
+<select id="con"></select>
+
+<label for="base">Base: valor antes de IVA de la factura</label>
+<input id="base" type="text" inputmode="numeric" placeholder="$ 0" autocomplete="off">
+
+<label for="iva">IVA de la factura (opcional, para el neto a pagar)</label>
+<input id="iva" type="text" inputmode="numeric" placeholder="$ 0" autocomplete="off">
+
+<div class="fila">
+  <label class="chk"><input type="checkbox" id="decl" checked> Proveedor declarante de renta</label>
+  <label class="chk"><input type="checkbox" id="exento"> Autorretenedor o régimen simple</label>
+</div>
+
+<div class="res" id="res" aria-live="polite"></div>
+
+<p class="nota">Cada factura se compara sola contra la base mínima. A los autorretenedores (O-15) y a los del régimen simple (O-47) no se les practica retención en renta.
+Herramienta de apoyo: confirme el caso con su contador. Hecha por <a href="https://tributando.co">Tributando.co</a> · WhatsApp 333 247 0715.</p>
+</main>
+<script>
+(function(){"use strict";
+var UVT=52374, C=[{"clave": "compras", "nombre": "Compras generales", "decl": 2.5, "nodecl": 3.5, "uvt": 10}, {"clave": "combustibles", "nombre": "Combustibles (derivados del petróleo)", "decl": 0.1, "nodecl": 0.1, "uvt": 0}, {"clave": "compras_agro", "nombre": "Compras de bienes agrícolas sin procesar", "decl": 1.5, "nodecl": 1.5, "uvt": 70}, {"clave": "cafe", "nombre": "Compra de café pergamino o cereza", "decl": 0.5, "nodecl": 0.5, "uvt": 70}, {"clave": "servicios", "nombre": "Servicios generales", "decl": 4.0, "nodecl": 6.0, "uvt": 2}, {"clave": "servicios_temporales", "nombre": "Servicios de empresas temporales/vigilancia (AIU)", "decl": 1.0, "nodecl": 2.0, "uvt": 2}, {"clave": "salud_ips", "nombre": "Servicios integrales de salud (IPS)", "decl": 2.0, "nodecl": 2.0, "uvt": 2}, {"clave": "honorarios", "nombre": "Honorarios y comisiones", "decl": 11.0, "nodecl": 10.0, "uvt": 0}, {"clave": "arriendo_inmueble", "nombre": "Arrendamiento de bienes inmuebles", "decl": 3.5, "nodecl": 3.5, "uvt": 10}, {"clave": "arriendo_mueble", "nombre": "Arrendamiento de bienes muebles", "decl": 4.0, "nodecl": 4.0, "uvt": 0}, {"clave": "transporte_carga", "nombre": "Transporte nacional de carga", "decl": 1.0, "nodecl": 1.0, "uvt": 2}, {"clave": "transporte_pasajeros", "nombre": "Transporte nacional de pasajeros", "decl": 3.5, "nodecl": 3.5, "uvt": 10}, {"clave": "restaurante_hotel", "nombre": "Restaurante, hotel y hospedaje", "decl": 3.5, "nodecl": 3.5, "uvt": 2}, {"clave": "licitacion", "nombre": "Contratos de construcción y obra", "decl": 2.0, "nodecl": 2.0, "uvt": 10}, {"clave": "rendimientos", "nombre": "Rendimientos financieros", "decl": 7.0, "nodecl": 7.0, "uvt": 0}, {"clave": "emolumentos", "nombre": "Emolumentos eclesiásticos", "decl": 3.5, "nodecl": 4.0, "uvt": 10}, {"clave": "loterias", "nombre": "Loterías, rifas, apuestas y similares", "decl": 20.0, "nodecl": 20.0, "uvt": 48}, {"clave": "tarjetas", "nombre": "Compras con tarjeta débito/crédito", "decl": 1.5, "nodecl": 1.5, "uvt": 0}, {"clave": "oro", "nombre": "Compra de oro", "decl": 2.5, "nodecl": 2.5, "uvt": 0}, {"clave": "aseo_vigilancia", "nombre": "Servicios de aseo y vigilancia (sobre AIU)", "decl": 2.0, "nodecl": 2.0, "uvt": 2}, {"clave": "transporte_aereo", "nombre": "Transporte de pasajeros aéreo/marítimo", "decl": 1.0, "nodecl": 1.0, "uvt": 2}, {"clave": "consultoria_obras", "nombre": "Consultoría de obras públicas", "decl": 2.0, "nodecl": 2.0, "uvt": 0}, {"clave": "software", "nombre": "Licenciamiento y uso de software", "decl": 3.5, "nodecl": 3.5, "uvt": 0}, {"clave": "activos_fijos_pn", "nombre": "Enajenación de activos fijos (persona natural)", "decl": 1.0, "nodecl": 1.0, "uvt": 0}, {"clave": "bienes_raices_viv", "nombre": "Compra de bienes raíces — vivienda (hasta 10.000 UVT)", "decl": 1.0, "nodecl": 1.0, "uvt": 0}, {"clave": "bienes_raices_otros", "nombre": "Compra de bienes raíces — comercial/otros", "decl": 2.5, "nodecl": 2.5, "uvt": 0}, {"clave": "otros_ingresos", "nombre": "Otros ingresos tributarios", "decl": 2.5, "nodecl": 3.5, "uvt": 10}];
+var $=function(i){return document.getElementById(i)};
+var fmt=function(n){return "$ "+Math.round(n).toLocaleString("es-CO")};
+var num=function(s){return parseFloat(String(s).replace(/[^0-9,]/g,"").replace(",","."))||0};
+C.forEach(function(c,i){var o=document.createElement("option");o.value=i;
+  o.textContent=c.nombre+" — "+(c.decl===c.nodecl?c.decl+"%":c.decl+"% / "+c.nodecl+"%");$("con").appendChild(o)});
+function enPesos(el){el.addEventListener("input",function(){var v=num(el.value);
+  el.value=v?Math.round(v).toLocaleString("es-CO"):"";calc()})}
+enPesos($("base"));enPesos($("iva"));
+["con","decl","exento"].forEach(function(i){$(i).addEventListener("change",calc)});
+function calc(){
+  var c=C[$("con").value], b=num($("base").value), iva=num($("iva").value);
+  var t=$("decl").checked?c.decl:c.nodecl, min=c.uvt*UVT, r=$("res");
+  var lin=function(a,v){return '<div class="lin"><span>'+a+'</span><b>'+v+'</b></div>'};
+  var h="", ret=0;
+  if(!b){r.innerHTML='<div style="color:var(--m)">Escriba la base para calcular.</div>';return}
+  if($("exento").checked){h='<div>No se practica retención</div><div class="grande no">$ 0</div>'+
+     '<div style="color:var(--m);font-size:14px">El proveedor es autorretenedor o del régimen simple.</div>'}
+  else if(b<min){h='<div>No llega a la base mínima</div><div class="grande no">$ 0</div>'+
+     '<div style="color:var(--m);font-size:14px">Base mínima: '+c.uvt+' UVT = '+fmt(min)+'. Le faltan '+fmt(min-b)+'.</div>'}
+  else{ret=Math.round(b*t/100);h='<div>Retención a practicar</div><div class="grande">'+fmt(ret)+'</div>'}
+  h+=lin("Tarifa",t+"%")+lin("Base mínima",c.uvt?c.uvt+" UVT · "+fmt(min):"Sin base mínima")+lin("Base",fmt(b));
+  if(iva)h+=lin("IVA",fmt(iva));
+  h+=lin("Neto a pagar al proveedor",fmt(b+iva-ret));
+  r.innerHTML=h}
+calc();
+})();
+</script></body></html>

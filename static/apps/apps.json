@@ -1,3 +1,14 @@
 [
-  {"slug": "sismos", "nombre": "Sismos en Vivo", "descripcion": "Monitor mundial de sismos con USGS, EMSC en vivo y el Servicio Geológico Colombiano; alertas y réplicas.", "fecha": "2026-10-13"}
+  {
+    "slug": "sismos",
+    "nombre": "Sismos en Vivo",
+    "descripcion": "Monitor mundial de sismos con USGS, EMSC en vivo y el Servicio Geológico Colombiano; alertas y réplicas.",
+    "fecha": "2026-10-13"
+  },
+  {
+    "slug": "retencion",
+    "nombre": "Calculadora de retención",
+    "descripcion": "Retención en la fuente 2026 por concepto, con las bases mínimas del Decreto 0572 (10 UVT compras, 2 UVT servicios) y el neto a pagar.",
+    "fecha": "2026-10-13"
+  }
 ]
