@@ -104,14 +104,15 @@ function parsear(txt){
   var ccid=cus?L(cus,"CompanyID")[0]:null, nitRec=ccid?(ccid.textContent||"").replace(/\D/g,""):"", nomRec=cus?(T(cus,"RegistrationName")||T(cus,"Name")):"";
   var lmt=L(r,"LegalMonetaryTotal")[0], sub=parseFloat(T(lmt,"LineExtensionAmount"))||0;
   var fecha=T(r,"IssueDate"), items=L(r,"Item").map(function(i){return T(i,"Description")}).join(" | ").slice(0,600);
-  return {tipo:tipo,fecha:fecha,nit:nit,esquema:esquema,nombre:nombre,mun:mun,ciudad:ciudad,dir:dir,tel:tel,mail:mail,
+  return {uuid:T(r,"UUID"),tipo:tipo,fecha:fecha,nit:nit,esquema:esquema,nombre:nombre,mun:mun,ciudad:ciudad,dir:dir,tel:tel,mail:mail,
           nitRec:nitRec,nomRec:nomRec,sub:sub,items:items,num:T(r,"ID")};
 }
 
 function leerArchivos(files){
   docs=[]; var pend=0, n=0, malos=0; $("estado").textContent="Leyendo…";
-  function listo(){ if(--pend===0){ $("estado").textContent=n+" documentos leídos"+(malos?(" · "+malos+" no eran factura/nota"):""); procesar(); } }
-  function txt(s){var d=parsear(s); if(d){docs.push(d);n++}else malos++}
+  function listo(){ if(--pend===0){ $("estado").textContent=n+" documentos leídos"+(rep?(" · "+rep+" repetidos (no se cuentan dos veces)"):"")+(malos?(" · "+malos+" no eran factura/nota"):""); procesar(); } }
+  var vistos={}, rep=0;   // el mismo documento puede venir en XML y en AttachedDocument: se cuenta una vez
+  function txt(s){var d=parsear(s); if(!d){malos++;return} var k=d.uuid||(d.nit+"|"+d.tipo+"|"+d.num); if(vistos[k]){rep++;return} vistos[k]=1; docs.push(d);n++}
   Array.prototype.forEach.call(files,function(f){
     pend++;
     if(/\.zip$/i.test(f.name)){
@@ -144,7 +145,7 @@ function procesar(){
   var todos=Object.keys(m).map(function(k){return m[k]});
   provs=todos.filter(function(p){return p.bog}).map(function(p){
     var excl=EXCLUIR.test(p.nombre), bajo=p.compras<tope;
-    p.concepto=(esNatural(p)&&HON.test(p.items))?"4":(SERV.test(p.items)?"1":"2");
+    p.concepto=(esNatural(p)&&HON.test(p.items))?"4":((SERV.test(p.items)||/(segur|previsora|aseguradora)/i.test(p.nombre))?"1":"2");
     p.motivo=excl?"servicio público / bancario / aportes / impuestos":(bajo?"no llega a 4 UVT":"");
     p.ok=!excl&&!bajo; return p;
   }).sort(function(a,b){return b.compras-a.compras});
