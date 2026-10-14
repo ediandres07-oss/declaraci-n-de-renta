@@ -70,6 +70,10 @@ app.register_blueprint(venc_bp)
 from src.sismos_sgc import sismos_bp  # noqa: E402
 app.register_blueprint(sismos_bp)
 
+# Vitrina tributando.co/apps (lo que construye Jarvis; sin datos de clientes)
+from src.apps_publicas import apps_bp  # noqa: E402
+app.register_blueprint(apps_bp)
+
 
 # Pre-carga zoneinfo al arranque: si dos hilos lo importan a la vez por primera
 # vez, uno ve el módulo "partially initialized" y el buscador IA da 502.
