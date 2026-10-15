@@ -1071,7 +1071,8 @@ def admin_prospectos_crm():
     r = prosp_mod.resumen()
     from src.sitios import url_sitio
     return render_template("prospectos_crm.html", filas=filas, etapas=prosp_mod.ETAPAS,
-                           etapa=etapa, estado=estado or "", q=q, r=r, url_sitio=url_sitio)
+                           etapa=etapa, estado=estado or "", q=q, r=r, url_sitio=url_sitio,
+                           apps=prosp_mod.resumen_apps())
 
 
 @app.post("/admin/prospectos/etapa")

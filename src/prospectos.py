@@ -55,6 +55,53 @@ class Prospecto(db.Model):
     bienvenida_en = db.Column(db.DateTime)      # saludo al abrir el portafolio (una sola vez)
 
 
+class AppVisita(db.Model):
+    """Visitantes únicos por día de cada app pública de tributando.co/apps (14-oct-2026).
+    Una fila por (app, día, huella de IP+navegador): no se guarda la IP, solo su hash."""
+    __tablename__ = "app_visitas"
+    id = db.Column(db.Integer, primary_key=True)
+    slug = db.Column(db.String(60), index=True)
+    dia = db.Column(db.String(10), index=True)          # AAAA-MM-DD (hora Colombia)
+    huella = db.Column(db.String(16))
+    __table_args__ = (db.UniqueConstraint("slug", "dia", "huella", name="uq_app_visita"),)
+
+
+_BOT = re.compile(r"bot|crawl|spider|preview|whatsapp|facebookexternalhit|slurp|curl|python|headless|monitor", re.I)
+
+
+def registrar_visita_app(slug: str, ip: str, ua: str) -> None:
+    """Cuenta una visita humana (sin bots ni vistas previas de WhatsApp). Nunca falla."""
+    try:
+        if not ua or _BOT.search(ua):
+            return
+        from datetime import timedelta
+        dia = (datetime.utcnow() - timedelta(hours=5)).strftime("%Y-%m-%d")
+        h = hashlib.sha256(f"{ip}|{ua}|{dia}".encode()).hexdigest()[:16]
+        if AppVisita.query.filter_by(slug=slug, dia=dia, huella=h).first():
+            return
+        db.session.add(AppVisita(slug=slug, dia=dia, huella=h))
+        db.session.commit()
+    except Exception:                                            # noqa: BLE001
+        db.session.rollback()
+
+
+def resumen_apps() -> list[dict]:
+    """Por app: visitantes totales, de hoy y descargas (leads con origen app-<slug>)."""
+    from datetime import timedelta
+    hoy = (datetime.utcnow() - timedelta(hours=5)).strftime("%Y-%m-%d")
+    out = []
+    try:
+        filas = db.session.query(AppVisita.slug, db.func.count(), db.func.sum(
+            db.case((AppVisita.dia == hoy, 1), else_=0))).group_by(AppVisita.slug).all()
+        for slug, total, de_hoy in filas:
+            leads = Prospecto.query.filter(Prospecto.origen == f"app-{slug}",
+                                           ~Prospecto.email.like("prueba%")).count()
+            out.append({"slug": slug, "visitas": int(total or 0), "hoy": int(de_hoy or 0), "leads": leads})
+    except Exception:                                            # noqa: BLE001
+        db.session.rollback()
+    return sorted(out, key=lambda x: -x["visitas"])
+
+
 class BajaCorreo(db.Model):
     """Correos que pidieron no recibir más mensajes comerciales (todas las campañas)."""
     __tablename__ = "bajas_correo"

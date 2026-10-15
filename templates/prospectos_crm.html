@@ -37,6 +37,9 @@
     {% for k, rot in etapas %}{% if k %}<div class="kpi"><b>{{ r.por_etapa.get(k, 0) }}</b><span>{{ rot }}</span></div>{% endif %}{% endfor %}
   </div>
 
+  {% if apps %}<div class="sub" style="margin:10px 0 14px">Apps gratis (tributando.co/apps):
+    {% for x in apps %}<b>{{ x.slug }}</b> · {{ x.visitas }} visitante(s){% if x.hoy %} ({{ x.hoy }} hoy){% endif %} · {{ x.leads }} descarga(s) con datos
+      (<a href="/admin/prospectos/crm?estado=lead">ver</a>){% if not loop.last %} &nbsp;|&nbsp; {% endif %}{% endfor %}</div>{% endif %}
   <form class="filtros" method="get">
     <select name="etapa">
       <option value="todas" {{ 'selected' if etapa=='todas' }}>Todas las etapas</option>

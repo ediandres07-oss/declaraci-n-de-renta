@@ -70,6 +70,10 @@ def apps_archivo(slug, archivo="index.html"):
     carpeta = BASE / slug
     if not slug.replace("-", "").isalnum() or not carpeta.is_dir():
         abort(404)
+    if archivo == "index.html":                  # solo la página, no sus recursos (video, imágenes)
+        from src.prospectos import registrar_visita_app
+        ip = (request.headers.get("X-Forwarded-For") or request.remote_addr or "").split(",")[0].strip()
+        registrar_visita_app(slug, ip, request.headers.get("User-Agent", ""))
     return _noindex(send_from_directory(carpeta, archivo))
 
 
