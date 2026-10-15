@@ -62,13 +62,13 @@ footer{color:var(--m);font-size:12.5px;margin-top:30px;line-height:1.6}a{color:v
 
  <h2>Descargar el Excel para PIDO</h2>
  <div class="tarjeta" style="max-width:640px">
-  <p class="sub">El Excel trae solo las filas, sin títulos y sin caracteres especiales, como pide la ficha técnica. Para presentarlo: en <b>Storm User</b> abre la plantilla del artículo 2, importa o pega estas filas (Herramientas → Hoja de cálculo), valida, genera el archivo <b>.STR</b> y envíalo por PIDO.</p>
+  <p class="sub">El Excel trae solo las filas, sin títulos y sin caracteres especiales, como pide la ficha técnica. Además se descarga el <b>.str.zip</b> con el mismo formato que arma <b>Storm User</b> (un CSV por formulario; el 10011 es el artículo 2): ábrelo en Storm, valida y transmite por PIDO.</p>
   <p class="sub">Déjanos tus datos y te lo descargas ya. Te escribimos solo para temas tributarios; puedes darte de baja cuando quieras.</p>
   <label>Nombre</label><input type="text" id="l_nombre" autocomplete="name">
   <label>Correo</label><input type="email" id="l_correo" autocomplete="email">
   <label>WhatsApp</label><input type="tel" id="l_wa" autocomplete="tel" placeholder="300 123 4567">
   <label style="display:flex;gap:8px;align-items:center;margin-top:12px;color:var(--t)"><input type="checkbox" id="l_ok"> Acepto que Tributando.co me contacte (Ley 1581 de 2012).</label>
-  <p style="margin-top:14px"><button class="btn" id="bajar">Descargar Excel PIDO</button></p>
+  <p style="margin-top:14px"><button class="btn" id="bajar">Descargar Excel + archivo de Storm (.str.zip)</button></p>
   <p class="sub" id="l_msg"></p>
  </div>
 </div>
@@ -144,6 +144,7 @@ function procesar(){
   var cnt={}; del.forEach(function(d){cnt[d.nitRec]=(cnt[d.nitRec]||0)+1});
   var rec=Object.keys(cnt).sort(function(a,b){return cnt[b]-cnt[a]})[0]||"";
   var nomRec=(del.filter(function(d){return d.nitRec===rec})[0]||{}).nomRec||"";
+  window.__nitRec=rec;
   $("aviso_rec").innerHTML=del.length?("Empresa que compra (receptor): <b>"+nomRec+"</b> · NIT "+rec+(Object.keys(cnt).length>1?(' <span class="warn">· Ojo: venían facturas de '+Object.keys(cnt).length+" receptores; solo se toma este.</span>"):"")):'<span class="warn">No hay facturas del año '+anio+" en lo que subiste.</span>";
   var m={};
   del.filter(function(d){return d.nitRec===rec}).forEach(function(d){
@@ -197,13 +198,26 @@ function excel(){
   provs.filter(function(p){return p.ok}).forEach(function(p){
     var mun=(p.mun||"11001").replace(/\D/g,"").padStart(5,"0").slice(0,5);
     filas.push([+anio,TIPODOC[p.esquema]||(esNatural(p)?"CC":"NIT"),p.nit.slice(0,11),limpiaNom(p.nombre),limpiaDir(p.dir),
-      (p.tel||"").replace(/\D/g,"").slice(-10),String(p.mail||"").toUpperCase().replace(/[^A-Z0-9@._-]/g,"").slice(0,70),mun,mun.slice(0,2),+p.concepto,Math.round(p.compras),Math.round(p.dev)]);
+      (p.tel||"").replace(/\D/g,"").slice(-10),String(p.mail||"").toLowerCase().replace(/[^a-z0-9@._-]/g,"").slice(0,70),mun,mun.slice(0,2),+p.concepto,Math.round(p.compras),Math.round(p.dev)]);
   });
   var wb=XLSX.utils.book_new(), ws=XLSX.utils.aoa_to_sheet(filas);
   ws["!cols"]=[{wch:9},{wch:9},{wch:13},{wch:40},{wch:36},{wch:12},{wch:30},{wch:10},{wch:8},{wch:12},{wch:16},{wch:16}];
   XLSX.utils.book_append_sheet(wb,ws,"Articulo 2");
   // el archivo para PIDO lleva SOLO la hoja de registros; las notas quedan en la página
   XLSX.writeFile(wb,"Exogena_Bogota_Art2_"+anio+".xlsx");
+  strZip(anio,filas);
+}
+// 15-oct: el mismo «.str.zip» que arma Storm User (visto en una exógena aceptada por la SDH):
+// un CSV por formulario; el 10011 es el artículo 2, separado por «;», CRLF, COL4…COL48, listas en código.
+var FORMS=["10010","10011","10012","10013","10014","10015","10016","10017","10018","10019","10021","10022","10023","10024","10025","10100","10101","10102","10103","10104","10105","10106","10107"];
+function strZip(anio,filas){
+  if(!filas.length||!window.JSZip)return;
+  var cab=["BLOQUE","FILA"]; for(var i=0;i<filas[0].length;i++)cab.push("COL"+(4*(i+1)));
+  var txt=cab.join(";")+"\r\n"+filas.map(function(f,i){return ["1",String(i+1)].concat(f.map(function(v){return String(v).replace(/;/g," ")})).join(";")}).join("\r\n")+"\r\n";
+  var z=new JSZip(); FORMS.forEach(function(f){z.file(f+".csv",f==="10011"?txt:"")});
+  var nit=String(window.__nitRec||"").replace(/\D/g,"").slice(0,9); while(nit.length<9)nit="0"+nit;
+  z.generateAsync({type:"blob"}).then(function(b){var a=document.createElement("a");a.href=URL.createObjectURL(b);
+    a.download="170_"+nit+"_"+anio+"1231.str.zip";document.body.appendChild(a);a.click();a.remove();});
 }
 
 $("arch").onchange=function(){ if(this.files.length) leerArchivos(this.files) };
