@@ -571,6 +571,11 @@
         <div class="value" id="statLatest" style="font-size:15px;">–</div>
         <div class="sub" id="statLatestPlace"></div>
       </div>
+      <div class="tile" style="grid-column:1/-1" title="Energía sísmica total de los sismos mostrados (E = 10^(1,5·M + 4,8) julios)">
+        <div class="label">Energía liberada</div>
+        <div class="value" id="statEnergy" style="font-size:17px;">–</div>
+        <div class="sub" id="statEnergySub"></div>
+      </div>
     </div>
     <div id="aftershockBox" class="as-box" hidden role="button" tabindex="0" aria-label="Aviso de réplicas"></div>
     <details id="chartsBox" open>
@@ -1056,6 +1061,34 @@
     return '<span class="pager-tag" style="background:' + a.c + '" title="Alerta PAGER de USGS: ' + a.t + '">' + a.n + '</span>';
   }
 
+  // ---------- Energía, profundidad e intensidad (15-oct: Edison mandaba enlaces para saberlo) ----------
+  function energiaJ(m) { return Math.pow(10, 1.5 * m + 4.8); }
+  function fmtEnergia(j) {
+    var kt = j / 4.184e12;
+    if (kt >= 1000) return "≈ " + (kt / 1000).toLocaleString("es-CO", { maximumFractionDigits: 1 }) + " megatones de TNT";
+    if (kt >= 1) return "≈ " + Math.round(kt).toLocaleString("es-CO") + " kilotones de TNT";
+    var t = kt * 1000;
+    if (t < 1) {                                        // sismos pequeños: kilos o gramos de TNT
+      var kg = t * 1000;
+      return kg >= 1 ? "≈ " + Math.round(kg).toLocaleString("es-CO") + " kg de TNT"
+        : "≈ " + Math.max(1, Math.round(kg * 1000)).toLocaleString("es-CO") + " g de TNT";
+    }
+    return "≈ " + (t >= 10 ? Math.round(t).toLocaleString("es-CO") : t.toLocaleString("es-CO", { maximumFractionDigits: 1 })) + " toneladas de TNT";
+  }
+  function hiroshimas(j) {
+    var n = j / 4.184e12 / 15;
+    return n >= 1 ? "≈ " + Math.round(n).toLocaleString("es-CO") + (Math.round(n) === 1 ? " bomba" : " bombas") + " de Hiroshima" : "";
+  }
+  function claseProf(d) {
+    if (d == null) return "";
+    if (d < 70) return "superficial: se siente con más fuerza";
+    if (d <= 300) return "intermedia: se siente más suave en la superficie";
+    return "profunda: rara vez causa daños";
+  }
+  var MERCALLI = ["", "I · no se siente", "II · débil", "III · débil", "IV · ligero", "V · moderado", "VI · fuerte",
+    "VII · muy fuerte", "VIII · severo", "IX · violento", "X · extremo", "XI · extremo", "XII · extremo"];
+  function mercalli(v) { var n = Math.round(Number(v) || 0); return n >= 1 && n <= 12 ? MERCALLI[n] : ""; }
+
   function popupHtml(f) {
     var p = f.properties;
     var c = f.geometry.coordinates;
@@ -1065,7 +1098,9 @@
       '<div class="popup-place">' + esc(p.place || "Ubicación desconocida") + '</div>' +
       (p.cercanos ? '<div class="popup-row">Cerca de: ' + esc(p.cercanos) + '</div>' : '') +
       '<div class="popup-row">' + fmtLocal(p.time) + ' · ' + relTime(p.time) + '</div>' +
-      '<div class="popup-row">Profundidad: ' + (c[2] != null ? Math.round(c[2]) + " km" : "n/d") + '</div>' +
+      '<div class="popup-row">Profundidad: ' + (c[2] != null ? Math.round(c[2]) + " km · " + claseProf(c[2]) : "n/d") + '</div>' +
+      (p.mag != null ? '<div class="popup-row">Energía: ' + fmtEnergia(energiaJ(p.mag)) +
+        (hiroshimas(energiaJ(p.mag)) ? ' (' + hiroshimas(energiaJ(p.mag)) + ')' : '') + '</div>' : '') +
       (userLoc ? '<div class="popup-row">A ' + distToUser(f) + ' km de tu ubicación</div>' : '') +
       '<div class="popup-row">Intensidad: ' + band.name + (p.felt ? ' · ' + p.felt + ' reportes' : '') + '</div>';
     var rep = replicaOf(f);
@@ -1073,7 +1108,10 @@
     if ((p.mag || 0) >= 4.5) html += '<div class="popup-row">Área de percepción: ~' + Math.round(feltRadiusKm(p.mag)) + ' km de radio (estimada)</div>';
     if (PAGER[p.alert]) html += '<div class="popup-row">Alerta PAGER (USGS): <b style="color:' + PAGER[p.alert].c + '">' +
       PAGER[p.alert].n + '</b> · ' + PAGER[p.alert].t + '</div>';
+    if (mercalli(p.mmi)) html += '<div class="popup-row">Intensidad máxima estimada (Mercalli, USGS): <b>' + mercalli(p.mmi) + '</b></div>';
+    if (mercalli(p.cdi)) html += '<div class="popup-row">Intensidad que reportó la gente: <b>' + mercalli(p.cdi) + '</b></div>';
     if (p.tsunami) html += '<span class="tsunami-flag">⚠ Posible tsunami</span>';
+    if (p.tsunami || (p.mag || 0) >= 6.5) html += '<a class="popup-link" href="https://www.tsunami.gov/" target="_blank" rel="noopener">🌊 Alertas de tsunami (NOAA)</a> ';
     if ((p.mag || 0) >= NEWS_MAG) html += '<a class="popup-link popup-news" href="' + esc(newsUrl(f)) + '" target="_blank" rel="noopener">📰 Ver noticias</a>';
     html += '<a class="popup-link popup-copy" href="#" data-id="' + esc(f.id) + '">Copiar resumen</a>';
     if (p.url) html += ' <a class="popup-link" href="' + esc(p.url) + '" target="_blank" rel="noopener">Ver detalle →</a>';
@@ -1179,6 +1217,14 @@
     visible.forEach(function (f) { if (!latest || f.properties.time > latest.properties.time) latest = f; });
     document.getElementById("statLatest").textContent = latest ? relTime(latest.properties.time) : "–";
     document.getElementById("statLatestPlace").textContent = latest ? (latest.properties.place || "") : "";
+
+    var ej = visible.reduce(function (a, f) { return a + (f.properties.mag != null ? energiaJ(f.properties.mag) : 0); }, 0);
+    document.getElementById("statEnergy").textContent = ej ? fmtEnergia(ej).replace("≈ ", "") : "–";
+    document.getElementById("statEnergySub").textContent = ej
+      ? "como un solo sismo M " + fmtMag((Math.log10(ej) - 4.8) / 1.5) + (hiroshimas(ej) ? " · " + hiroshimas(ej) : "") +
+        (maxF && maxF.properties.mag != null ? " · el M " + fmtMag(maxF.properties.mag) + " aporta el " +
+          Math.round(100 * energiaJ(maxF.properties.mag) / ej) + " %" : "")
+      : "";
 
     var near = userLoc ? visible.filter(function (f) { return distToUser(f) <= 300; }).length : null;
     document.getElementById("statNear").textContent = near != null ? near + " a ≤ 300 km de ti" : "";
