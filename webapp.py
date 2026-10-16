@@ -150,7 +150,9 @@ def _bucle_avisos_vencimientos():
                                 print(f"[venc-wa] {n} recordatorio(s) por WhatsApp")
                         # Prospección de empresas nuevas (RUES): tope diario, apagado
                         # salvo PROSPECTOS_ON=1, desde contacto@ (PROSP_SMTP_*).
-                        if _candado(f"prospectos|{hoy}"):
+                        # 16-oct-2026: solo de lunes a viernes (Edison: «envíalos el lunes»);
+                        # a las empresas no se les escribe el fin de semana.
+                        if ahora.weekday() < 5 and _candado(f"prospectos|{hoy}"):
                             n = prosp_mod.enviar_lote()
                             if n:
                                 print(f"[prospectos] {n} correo(s) a empresas nuevas")
