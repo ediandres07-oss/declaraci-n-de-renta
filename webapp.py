@@ -960,15 +960,32 @@ def vencimientos_wa_api():
     return jsonify({"ok": True, "proximos": salida, "whatsapp": wa_ok})
 
 
-@app.get("/baja")
+@app.route("/baja", methods=["GET", "POST"])
 def baja_correo():
-    """Enlace de «darse de baja» de los correos comerciales (prospección y campañas)."""
-    ok = prosp_mod.dar_de_baja(request.args.get("e", ""), request.args.get("t", ""))
-    msg = ("Listo. No te volveremos a escribir a este correo." if ok
-           else "El enlace no es válido. Escríbenos a contacto@tributando.co y te retiramos a mano.")
-    return (f"<!doctype html><meta name=viewport content='width=device-width,initial-scale=1'>"
-            f"<title>Tributando</title><div style='font-family:sans-serif;max-width:480px;margin:60px auto;"
-            f"padding:0 16px;color:#1e2432'><h2>Tributando.co</h2><p>{msg}</p></div>")
+    """Enlace de «darse de baja» de los correos comerciales (prospección y campañas).
+
+    19-oct-2026: el GET solo PREGUNTA y la baja se hace con el botón (POST). Los filtros de
+    seguridad de los correos corporativos abren todos los enlaces apenas llega el mensaje y
+    nos daban de baja empresas que nunca lo pidieron (4–8 «visitas» en el mismo minuto del
+    envío). El «cancelar suscripción» de Gmail/Outlook (List-Unsubscribe-Post) llega por POST
+    y sigue funcionando de un clic."""
+    import html as _h
+    e, t = request.values.get("e", ""), request.values.get("t", "")
+    caja = ("<!doctype html><meta name=viewport content='width=device-width,initial-scale=1'>"
+            "<title>Tributando</title><div style='font-family:sans-serif;max-width:480px;margin:60px auto;"
+            "padding:0 16px;color:#1e2432'><h2>Tributando.co</h2>{}</div>")
+    if request.method == "POST":
+        ok = prosp_mod.dar_de_baja(e, t)
+        msg = ("Listo. No te volveremos a escribir a este correo." if ok
+               else "El enlace no es válido. Escríbenos a contacto@tributando.co y te retiramos a mano.")
+        return caja.format(f"<p>{msg}</p>")
+    return caja.format(
+        f"<p>¿Quieres dejar de recibir nuestros correos en <b>{_h.escape(e)}</b>?</p>"
+        f"<form method=post action='/baja'><input type=hidden name=e value='{_h.escape(e, quote=True)}'>"
+        f"<input type=hidden name=t value='{_h.escape(t, quote=True)}'>"
+        "<button style='background:#1e2432;color:#fff;border:0;border-radius:8px;padding:10px 18px;font-size:1rem;cursor:pointer'>"
+        "Sí, darme de baja</button></form>"
+        "<p style='color:#6b7079;font-size:.85rem'>Si llegaste aquí por error, cierra esta página y no pasa nada.</p>")
 
 
 @app.get("/admin/prospectos")
