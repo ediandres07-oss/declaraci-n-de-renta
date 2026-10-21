@@ -309,8 +309,10 @@ _ESPECIALES = [
     (("biomédic", "biomedic", "electromédic", "electromedic"), _perf(
         "#0A6CFF", "servicios", "Ingeniería biomédica", "Equipos biomédicos listos para atender pacientes en {ciudad}",
         "Mantenimiento preventivo y correctivo, calibración y venta de equipos y repuestos biomédicos.",
-        ("1631217868264-e5b90bb7e133", "1516841273335-e39b37888115", "1666214277730-e9c7e755e5a3",
-         "1504813184591-01572f98c85f", "1519494026892-80bbd2d6fd0d", "1577962917302-cd874c4e31d2"),
+        # Fotos de equipos reales (Unsplash, licencia libre): monitor, quirófano, técnico
+        # ajustando un equipo, diagnóstico de pared, monitor multiparámetro, bombas de infusión.
+        ("1513224502586-d1e602410265", "1516549655169-df83a0774514", "1770836037412-0dbb782e11e8",
+         "1766299892549-b56b257d1ddd", "1645685491865-42a4fbbc9912", "1766299892683-d50398e31823"),
         "Sus equipos al día y documentados",
         [("Mantenimiento preventivo y correctivo", "Cronograma por clase de riesgo, reparación y reporte técnico de cada visita."),
          ("Venta de productos biomédicos", "Monitores, tensiómetros, oxímetros, autoclaves, repuestos y consumibles con garantía."),
