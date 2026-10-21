@@ -962,7 +962,8 @@ def _migrar_columnas_faltantes():
         cols_p = {c["name"] for c in insp.get_columns("prospectos")}
         for nombre, tipo in {"etapa": "VARCHAR(20) DEFAULT ''", "nota": "VARCHAR(500) DEFAULT ''",
                              "respondio_en": marca_tiempo, "visto_en": marca_tiempo,
-                             "visitas": "INTEGER DEFAULT 0", "bienvenida_en": marca_tiempo}.items():
+                             "visitas": "INTEGER DEFAULT 0", "bienvenida_en": marca_tiempo,
+                             "logo_url": "VARCHAR(300) DEFAULT ''"}.items():
             if nombre not in cols_p:
                 try:
                     with db.engine.begin() as con:

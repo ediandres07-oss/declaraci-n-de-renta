@@ -53,6 +53,7 @@ class Prospecto(db.Model):
     visto_en = db.Column(db.DateTime)
     visitas = db.Column(db.Integer, default=0)
     bienvenida_en = db.Column(db.DateTime)      # saludo al abrir el portafolio (una sola vez)
+    logo_url = db.Column(db.String(300), default="")  # logo propio en su página /sitio
 
 
 class AppVisita(db.Model):

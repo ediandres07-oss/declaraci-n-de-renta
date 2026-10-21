@@ -304,6 +304,19 @@ def _perf(color, tipo, ceja, hero, sub, fotos, sec, servicios, nos, banda, banda
 # que los demás perfiles, porque sus claves son más específicas: «producción de
 # películas» no es fábrica, «colocación de empleo» no es turismo.
 _ESPECIALES = [
+    # 21-oct-2026 (MEB Services, Eider): mantenimiento y venta de equipos biomédicos.
+    # Va antes que «salud» para no salir como consultorio («Cuidamos su salud»).
+    (("biomédic", "biomedic", "electromédic", "electromedic"), _perf(
+        "#0A6CFF", "servicios", "Ingeniería biomédica", "Equipos biomédicos listos para atender pacientes en {ciudad}",
+        "Mantenimiento preventivo y correctivo, calibración y venta de equipos y repuestos biomédicos.",
+        ("1631217868264-e5b90bb7e133", "1516841273335-e39b37888115", "1666214277730-e9c7e755e5a3",
+         "1504813184591-01572f98c85f", "1519494026892-80bbd2d6fd0d", "1577962917302-cd874c4e31d2"),
+        "Sus equipos al día y documentados",
+        [("Mantenimiento preventivo y correctivo", "Cronograma por clase de riesgo, reparación y reporte técnico de cada visita."),
+         ("Venta de productos biomédicos", "Monitores, tensiómetros, oxímetros, autoclaves, repuestos y consumibles con garantía."),
+         ("Calibración y hoja de vida", "Verificación con certificado y la hoja de vida de cada equipo lista para habilitación.")],
+        "Ingeniería biomédica en {ciudad}", "¿Tiene la visita de habilitación encima?",
+        "Levantamos el inventario y la hoja de vida de sus equipos y le dejamos el cronograma del año.", "Agendar visita técnica")),
     (("vehícul", "vehicul", "motocic", "autopart", "automotor"), _perf(
         "#B91C1C", "servicios", "Automotriz", "Su vehículo en buenas manos en {ciudad}",
         "Repuestos, mantenimiento y asesoría para carros y motos.",

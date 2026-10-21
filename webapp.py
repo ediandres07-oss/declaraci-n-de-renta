@@ -1094,6 +1094,30 @@ def admin_prospectos_crm():
                            apps=prosp_mod.resumen_apps())
 
 
+@app.post("/admin/prospectos/manual")
+@autorizado_requerido
+def admin_prospectos_manual():
+    """Agrega a mano una empresa (no viene del RUES) para mostrarle su página /sitio.
+    Queda con estado «manual»: el envío automático solo toma «pendiente», así que
+    nunca le llega el correo de prospección."""
+    from src.sitios import url_sitio
+    d = request.get_json(silent=True) or request.form
+    email = (d.get("email") or "").strip().lower()
+    if "@" not in email:
+        return jsonify({"ok": False, "error": "Falta el correo"}), 400
+    p = prosp_mod.db.session.get(prosp_mod.Prospecto, email) or prosp_mod.Prospecto(email=email)
+    p.segmento = "empresa"
+    p.estado = "manual"
+    p.origen = "manual"
+    for campo, largo in (("razon_social", 250), ("nit", 20), ("municipio", 80), ("actividad", 250),
+                         ("fecha_matricula", 10), ("nota", 500), ("logo_url", 300), ("etapa", 20)):
+        if d.get(campo) is not None:
+            setattr(p, campo, str(d.get(campo)).strip()[:largo])
+    prosp_mod.db.session.add(p)
+    prosp_mod.db.session.commit()
+    return jsonify({"ok": True, "email": email, "sitio": url_sitio(email)})
+
+
 @app.post("/admin/prospectos/etapa")
 @autorizado_requerido
 def admin_prospectos_etapa():
