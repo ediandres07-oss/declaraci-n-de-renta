@@ -145,6 +145,10 @@ h2{font-size:clamp(34px,4.6vw,60px)}
 .catalogo{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid color-mix(in srgb,var(--prim) 18%,#e6e6e6);border-radius:22px;overflow:hidden;background:#fff}
 .catalogo div{padding:24px;border-right:1px solid color-mix(in srgb,var(--prim) 12%,#eee);border-bottom:1px solid color-mix(in srgb,var(--prim) 12%,#eee);min-width:0}
 .catalogo h3{font-size:1.08rem;margin:0 0 6px}
+.cat-foto{margin:0 0 16px;border-radius:14px;overflow:hidden;aspect-ratio:4/3;max-width:100%;background:#eef2f6}
+.cat-foto img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s cubic-bezier(.2,.7,.2,1)}
+.catalogo div:hover .cat-foto img,.catalogo div:focus-within .cat-foto img{transform:scale(1.12)}
+@media (prefers-reduced-motion:reduce){.cat-foto img{transition:none}}
 .catalogo p{margin:0;color:#5f6470;font-size:.95rem;line-height:1.55}
 .cat-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
 .cat-chips span{font-size:.82rem;font-weight:600;padding:7px 13px;border-radius:999px;background:color-mix(in srgb,var(--prim) 10%,#fff);color:var(--prim)}
@@ -410,7 +414,7 @@ footer{background:var(--noche);color:#A9ABB2;padding-top:clamp(64px,8vw,96px);ov
         <a class="enlace" href="#contacto">Pedir catálogo y precios {{ icono('arrow', 18) }}</a></div>
     </div>
     <div class="catalogo rv">
-      {% for t, d in s.catalogo %}<div><h3>{{ t }}</h3><p>{{ d }}</p></div>{% endfor %}
+      {% for t, d, foto in s.catalogo %}<div>{% if foto %}<figure class="cat-foto"><img src="{{ foto }}" alt="{{ t }}" loading="lazy"></figure>{% endif %}<h3>{{ t }}</h3><p>{{ d }}</p></div>{% endfor %}
     </div>
     {% if s.catalogo_chips %}<div class="cat-chips">{% for c in s.catalogo_chips %}<span>{{ c }}</span>{% endfor %}</div>{% endif %}
   </div>

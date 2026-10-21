@@ -321,14 +321,14 @@ _ESPECIALES = [
         "Levantamos el inventario y la hoja de vida de sus equipos y le dejamos el cronograma del año.", "Agendar visita técnica")
      | {"catalogo_titulo": "Productos biomédicos para su consultorio o IPS",
         "catalogo_txt": "Vendemos equipos nuevos, repuestos y accesorios, con instalación, capacitación al personal y garantía.",
-        "catalogo": [("Monitoreo", "Monitores de signos vitales, oxímetros de pulso y tensiómetros digitales."),
-                     ("Diagnóstico", "Electrocardiógrafos, doppler fetal, otoscopios y equipos de órganos de los sentidos."),
-                     ("Esterilización", "Autoclaves, selladoras e indicadores biológicos y químicos."),
-                     ("Estética", "Equipos de aparatología estética y sus repuestos."),
-                     ("Repuestos", "Sensores de SpO2, brazaletes, cables de ECG, baterías y lámparas."),
-                     ("Mobiliario", "Camillas, lámparas de examen, carros de paro y atriles."),
-                     ("Consumibles", "Electrodos, papel de registro, gel conductor y accesorios."),
-                     ("Instalación", "Puesta en marcha, capacitación del personal y hoja de vida desde el primer día.")],
+        "catalogo": [("Monitoreo", "Monitores de signos vitales, oxímetros de pulso y tensiómetros digitales.", "1682706841297-5524ba1faa9c"),
+                     ("Diagnóstico", "Electrocardiógrafos, doppler fetal, otoscopios y equipos de órganos de los sentidos.", "1526256262350-7da7584cf5eb"),
+                     ("Esterilización", "Autoclaves, selladoras e indicadores biológicos y químicos.", "1688565631957-0306970fdd74"),
+                     ("Estética", "Equipos de aparatología estética y sus repuestos.", "1689103722266-1f2f837145e7"),
+                     ("Repuestos", "Sensores de SpO2, brazaletes, cables de ECG, baterías y lámparas.", "1646768878729-ac69ab1cdb42"),
+                     ("Mobiliario", "Camillas, lámparas de examen, carros de paro y atriles.", "1538108149393-fbbd81895907"),
+                     ("Consumibles", "Electrodos, papel de registro, gel conductor y accesorios.", "1561328165-f0b762a9508e"),
+                     ("Instalación", "Puesta en marcha, capacitación del personal y hoja de vida desde el primer día.", "1748002897584-af9200c9b181")],
         "catalogo_chips": ["Riesgo I", "Riesgo IIa", "Riesgo IIb", "Riesgo III", "Registro INVIMA vigente"]}),
     (("vehícul", "vehicul", "motocic", "autopart", "automotor"), _perf(
         "#B91C1C", "servicios", "Automotriz", "Su vehículo en buenas manos en {ciudad}",
@@ -630,5 +630,5 @@ def datos_sitio(p) -> dict:
             "dominio": dominio_propio(p.email),
             "logo_url": (getattr(p, "logo_url", "") or "").strip(),
             # Catálogo de productos (solo los perfiles que lo traen, p. ej. biomédico).
-            "catalogo": pf.get("catalogo") or [], "catalogo_titulo": pf.get("catalogo_titulo", ""),
+            "catalogo": [(c[0], c[1], _u("photo-" + c[2], 700) if len(c) > 2 else "") for c in (pf.get("catalogo") or [])], "catalogo_titulo": pf.get("catalogo_titulo", ""),
             "catalogo_txt": pf.get("catalogo_txt", ""), "catalogo_chips": pf.get("catalogo_chips") or []}
