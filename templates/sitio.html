@@ -329,7 +329,8 @@ footer{background:var(--noche);color:#A9ABB2;padding-top:clamp(64px,8vw,96px);ov
     </a>
     <button class="menu" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="links">{{ icono('menu', 22) }}</button>
     <nav class="links" id="links" aria-label="Principal">
-      <a href="#servicios">{{ s.tipo|capitalize }}</a>
+      <a href="#servicios">{{ s.tipo|capitalize }}</a>{% if s.catalogo %}
+      <a href="#productos">Productos</a>{% endif %}
       <a href="#nosotros">Nosotros</a>
       <a href="#proceso">Cómo trabajamos</a>
       <a href="#preguntas">Preguntas</a>
@@ -348,7 +349,7 @@ footer{background:var(--noche);color:#A9ABB2;padding-top:clamp(64px,8vw,96px);ov
       <p class="sub entra" style="--d:.55s">{{ s.sub }}</p>
       <div class="botones entra" style="--d:.7s">
         <a class="btn btn-prim" href="#contacto">{{ s.banda_btn }} {{ icono('arrow', 18) }}</a>
-        <a class="btn btn-vidrio" href="#servicios">Ver {{ s.tipo }}</a>
+        {% if s.catalogo %}<a class="btn btn-vidrio" href="#productos">Ver productos</a>{% else %}<a class="btn btn-vidrio" href="#servicios">Ver {{ s.tipo }}</a>{% endif %}
       </div>
       <div class="sellos entra" style="--d:.85s">
         {% for t in ['Empresa de ' ~ s.ciudad, 'Atención directa', 'Respuesta el mismo día'] %}
@@ -549,7 +550,7 @@ footer{background:var(--noche);color:#A9ABB2;padding-top:clamp(64px,8vw,96px);ov
       </div>
       <div>
         <h4>Navegación</h4>
-        <ul><li><a href="#servicios">{{ s.tipo|capitalize }}</a></li><li><a href="#nosotros">Nosotros</a></li><li><a href="#proceso">Cómo trabajamos</a></li><li><a href="#preguntas">Preguntas</a></li></ul>
+        <ul><li><a href="#servicios">{{ s.tipo|capitalize }}</a></li>{% if s.catalogo %}<li><a href="#productos">Productos</a></li>{% endif %}<li><a href="#nosotros">Nosotros</a></li><li><a href="#proceso">Cómo trabajamos</a></li><li><a href="#preguntas">Preguntas</a></li></ul>
       </div>
       <div>
         <h4>Contacto</h4>
