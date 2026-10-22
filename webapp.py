@@ -2286,9 +2286,9 @@ LECTOR_VERSION_LATEST = os.environ.get("LECTOR_VERSION", "1.2.3")
 # dentro del Lector). Se puede sobrescribir con la variable de entorno del mismo
 # nombre sin recompilar el servidor. Usa saltos de línea para viñetas.
 LECTOR_NOVEDADES = os.environ.get("LECTOR_NOVEDADES",
-    "• Nuevo menú «Conectar con Claude»: conecta el Lector con Claude para escritorio y pregúntale por tus clientes en tus palabras: «lista las compras de septiembre de este cliente», «¿cuánto IVA descontable tiene en el bimestre?», «arma el plano para Siigo». Si Claude está abierto, el Lector lo cierra un momento, guarda la conexión y lo vuelve a abrir.\n"
-    "• Claude puede ver tus clientes y su ficha, listar facturas de compra y venta por fechas, armar el borrador del 300 y del 350 y generar el plano para Siigo, World Office, Helisa, Alegra, Loggro o Contai. Lee los datos de tu computador; no presenta nada ante la DIAN ni borra información.\n"
-    "• Documento soporte (a no obligados a facturar): ahora va a COMPRAS en el 300, el 350 y la renta del comerciante; antes inflaba las ventas.")
+    "• Claude ahora te entrega el Formulario 300 OFICIAL de la DIAN lleno: pídele «hazme el 300 oficial del bimestre (o cuatrimestre) de este cliente» y lo guarda en los documentos del cliente, listo para revisar y pasar al MUISCA.\n"
+    "• Plano para ContaI: cada factura se parte por tarifa de IVA y toma las cuentas por tarifa del balance del cliente.\n"
+    "• Recuerda: con «Conectar con Claude» le preguntas por tus clientes en tus palabras (compras por fechas, borrador del 300 y del 350, planos para Siigo, World Office, Helisa, Alegra, Loggro, Contai o Syscafé).")
 
 
 @app.post("/api/lector-suscripcion/crear")
