@@ -2288,7 +2288,7 @@ LECTOR_VERSION_LATEST = os.environ.get("LECTOR_VERSION", "1.2.3")
 LECTOR_NOVEDADES = os.environ.get("LECTOR_NOVEDADES",
     "• Claude ahora te entrega el Formulario 300 OFICIAL de la DIAN lleno: pídele «hazme el 300 oficial del bimestre (o cuatrimestre) de este cliente» y lo guarda en los documentos del cliente, listo para revisar y pasar al MUISCA.\n"
     "• Plano para ContaI: cada factura se parte por tarifa de IVA y toma las cuentas por tarifa del balance del cliente.\n"
-    "• Recuerda: con «Conectar con Claude» le preguntas por tus clientes en tus palabras (compras por fechas, borrador del 300 y del 350, planos para Siigo, World Office, Helisa, Alegra, Loggro, Contai o Syscafé).")
+    "• Recuerda: con «Conectar con Claude» le preguntas por tus clientes en tus palabras (compras por fechas, borrador del 300 y del 350, planos para Siigo, World Office, Helisa, Alegra, Loggro o Contai).")
 
 
 @app.post("/api/lector-suscripcion/crear")
