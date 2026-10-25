@@ -32,7 +32,7 @@ _MESES = ["", "enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "a
 class Prospecto(db.Model):
     __tablename__ = "prospectos"
     email = db.Column(db.String(200), primary_key=True)
-    segmento = db.Column(db.String(12), default="empresa")      # empresa | contador
+    segmento = db.Column(db.String(12), default="empresa")      # empresa | contador | comerciante
     razon_social = db.Column(db.String(250), default="")        # contador: lista de empresas
     n_empresas = db.Column(db.Integer, default=1)
     nit = db.Column(db.String(20), default="")
@@ -218,23 +218,32 @@ def cargar_csv(datos: bytes, origen: str = "rues") -> dict:
         except UnicodeDecodeError:
             continue
     sep = ";" if txt[:600].count(";") > txt[:600].count(",") else ","
+    # Personas naturales solo si vienen VERIFICADAS como comerciantes: el archivo trae la
+    # columna «establecimiento» (cruce con los establecimientos de comercio del RUES por
+    # correo o dirección). Ese segmento es «comerciante» y recibe su propio correo.
     filas = [f for f in csv.DictReader(io.StringIO(txt), delimiter=sep)
              if "@" in (f.get("correo_comercial") or "")
-             and "jur" in (f.get("org_juridica") or "").lower()]
+             and ("jur" in (f.get("org_juridica") or "").lower()
+                  or ("natural" in (f.get("org_juridica") or "").lower()
+                      and (f.get("establecimiento") or "").strip()))]
     usos = Counter(f["correo_comercial"].strip().lower() for f in filas)
     por_correo = defaultdict(list)
     for f in filas:
         por_correo[f["correo_comercial"].strip().lower()].append(f)
-    nuevos = {"empresa": 0, "contador": 0, "ya_estaban": 0}
+    nuevos = {"empresa": 0, "contador": 0, "comerciante": 0, "ya_estaban": 0}
     for email, fs in por_correo.items():
         if db.session.get(Prospecto, email):
             nuevos["ya_estaban"] += 1
             continue
-        contador = usos[email] >= 2 or bool(_RE_CONTADOR.search(email))
         f = max(fs, key=lambda x: x.get("fecha_matricula", ""))
+        natural = "natural" in (f.get("org_juridica") or "").lower()
+        contador = not natural and (usos[email] >= 2 or bool(_RE_CONTADOR.search(email)))
+        segmento = "comerciante" if natural else ("contador" if contador else "empresa")
         p = Prospecto(
-            email=email, segmento="contador" if contador else "empresa",
-            razon_social=(" · ".join(x["razon_social"].strip() for x in fs) if contador
+            email=email, segmento=segmento,
+            # del comerciante se guarda el NOMBRE DEL NEGOCIO, no el de la persona
+            razon_social=(f["establecimiento"].strip() if natural else
+                          " · ".join(x["razon_social"].strip() for x in fs) if contador
                           else f["razon_social"].strip())[:250],
             n_empresas=len(fs), nit=(f.get("numero_identificacion") or "").lstrip("0")[:20],
             municipio=(f.get("municipio") or "").title()[:80],
@@ -242,7 +251,7 @@ def cargar_csv(datos: bytes, origen: str = "rues") -> dict:
             fecha_matricula=(f.get("fecha_matricula") or "")[:10], origen=origen,
             estado="baja" if esta_de_baja(email) else "pendiente")
         db.session.add(p)
-        nuevos[p.segmento] += 1
+        nuevos[segmento] += 1
     db.session.commit()
     return nuevos
 
@@ -267,7 +276,7 @@ def _envolver(cuerpo: str, email: str, cta_txt: str, cta_url: str,
 <div style="padding:22px 24px;font-size:15px;line-height:1.6">{cuerpo}
 <p style="margin:22px 0"><a href="{cta_url}" style="display:inline-block;margin:6px 0;background:{dorado};color:#fff;text-decoration:none;padding:11px 18px;border-radius:8px;font-weight:700">{cta_txt}</a>{cta2}</p>
 <p>Un saludo,<br><b>Edison Monsalve</b><br>Contador público · Tributando.co<br>WhatsApp: <a href="https://wa.me/573332470715" style="color:{dorado};font-weight:700">333 247 0715</a></p></div></div>
-<p style="font-size:11px;color:#8a94a6;line-height:1.5;padding:12px 8px">Te escribimos porque el correo de tu empresa figura en el Registro Mercantil (RUES), que es público.
+<p style="font-size:11px;color:#8a94a6;line-height:1.5;padding:12px 8px">Te escribimos porque el correo de tu empresa o negocio figura en el Registro Mercantil (RUES), que es público.
 Si no quieres recibir más mensajes, <a href="{url_baja(email)}" style="color:#8a94a6">haz clic aquí para darte de baja</a> y no te volveremos a escribir.</p>
 </div></body></html>"""
 
@@ -291,6 +300,26 @@ def plantilla(p: Prospecto) -> tuple[str, str]:
 <p><b>1 mes gratis con 1 cliente, sin tarjeta.</b> Pones tu correo, te llega un código y entras.</p>
 <p>Y si quieres llevar la <b>contabilidad completa en la nube</b>: la <b>app de Tributando</b> causa sola esas facturas, concilia bancos, saca el IVA, la retención y la exógena, y liquida la <b>nómina electrónica</b>. También con un mes de prueba: <a href="{URL}/contadores/contabilidad" style="color:#b8955f;font-weight:700">ver la app para contadores</a>.</p>"""
         return asunto, _envolver(cuerpo, p.email, "Activar mi prueba del Lector", f"{URL}/contadores/lector")
+    if p.segmento == "comerciante":
+        negocio = (p.razon_social or "tu negocio").strip().title()
+        asunto = f"{negocio}: lo que la DIAN le pide a tu negocio"
+        cuerpo = f"""<p>Hola,</p>
+<p>Vi que abriste <b>{negocio}</b> y te inscribiste en la Cámara de Comercio el {_fecha_larga(p.fecha_matricula)}. ¡Felicitaciones! Como comerciante, esto es lo que más se olvida en el primer año:</p>
+<ul style="padding-left:18px">
+<li><b>Llevar la contabilidad</b> del negocio: el Código de Comercio se la pide a todo comerciante inscrito.</li>
+<li><b>Facturar bien</b>: si eres responsable de IVA o te lo piden tus clientes, necesitas <b>factura electrónica</b> o <b>POS electrónico</b> habilitados ante la DIAN.</li>
+<li>Si tienes empleados: <b>seguridad social y nómina electrónica</b> cada mes.</li>
+<li>Revisar si te conviene el <b>Régimen Simple</b>, que une renta e ICA en un solo pago, y si te toca <b>declarar renta</b>.</li>
+<li><b>Renovar la matrícula</b> antes del 31 de marzo.</li>
+</ul>
+<p>En <b>Tributando</b> te damos todo en un solo lugar:</p>
+<ul style="padding-left:18px">
+<li>📄 <b>Facturación electrónica y POS electrónico</b>: te habilitamos ante la DIAN y facturas desde el celular.</li>
+<li>👥 <b>Nómina electrónica</b> para tus empleados.</li>
+<li>📒 <b>Contabilidad e impuestos</b> en la nube, con un contador que los revisa.</li>
+</ul>
+<p>Responde este correo y te cuento cuánto cuesta para {negocio}.</p>"""
+        return asunto, _envolver(cuerpo, p.email, "Ver nuestro portafolio", url_portafolio(p.email))
     nombre = (p.razon_social or "tu empresa").strip()
     asunto = f"{nombre}: lo que la DIAN le pide a una empresa nueva"
     cuerpo = f"""<p>Hola,</p>
