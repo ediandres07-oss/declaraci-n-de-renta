@@ -315,7 +315,7 @@ def plantilla(p: Prospecto) -> tuple[str, str]:
 <p>En <b>Tributando</b> te damos todo en un solo lugar:</p>
 <ul style="padding-left:18px">
 <li>📄 <b>Facturación electrónica</b>: te habilitamos ante la DIAN y facturas desde el celular. <b>$230.000 al año</b> con hasta 120 documentos (facturas, notas y documentos soporte).</li>
-<li>👥 <b>Nómina electrónica</b> para tus empleados: <b>$150.000 al mes hasta 6 empleados</b>; desde el séptimo, $25.000 por cada uno.</li>
+<li>👥 <b>Nómina electrónica</b> para tus empleados: <b>$25.000 por empleado al mes</b>, con tope de $150.000: de 6 empleados en adelante pagas máximo $150.000.</li>
 <li>📒 <b>Contabilidad e impuestos</b> en la nube, con un contador que los revisa.</li>
 </ul>
 <p>Responde este correo y te cuento cuánto cuesta la contabilidad para {negocio}.</p>"""
