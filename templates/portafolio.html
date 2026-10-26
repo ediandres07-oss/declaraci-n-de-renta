@@ -145,9 +145,14 @@ h2 em{color:var(--verde-t)}.oscuro h2 em{color:var(--verde)}
 .h-foto::after{content:"";position:absolute;inset:0;background:linear-gradient(200deg,transparent 45%,rgba(7,17,13,.55));border-radius:inherit;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
 .h-foto img{width:100%;height:100%;object-fit:cover;object-position:70% 60%;animation:acerca 14s var(--ease) both}
 @keyframes acerca{from{transform:scale(1.1)}to{transform:scale(1)}}
-.h-cel{position:relative;z-index:3;margin:0 0 0 auto;width:60%;aspect-ratio:9/16;border-radius:34px;overflow:hidden;border:7px solid #0B1712;box-shadow:0 40px 80px -40px rgba(0,0,0,.85),0 0 0 1px rgba(255,255,255,.08);background:#0B1712}
+.h-cel{position:relative;z-index:1;margin:0 auto;width:64%;max-width:400px;aspect-ratio:9/16;border-radius:34px;overflow:hidden;border:7px solid #0B1712;box-shadow:0 40px 80px -40px rgba(0,0,0,.85),0 0 0 1px rgba(255,255,255,.08);background:#0B1712}
 .h-cel video{width:100%;height:100%;object-fit:cover;display:block}
-.ventana{position:relative;z-index:2;width:56%;margin:-78% 0 0 -6%;border-radius:22px;background:linear-gradient(180deg,#10211A,#0B1712);border:1px solid rgba(255,255,255,.1);box-shadow:0 50px 100px -40px rgba(0,0,0,.8),0 0 0 1px rgba(55,211,143,.06),inset 0 1px 0 rgba(255,255,255,.06);overflow:hidden}
+.h-cel video,.h-cel .ventana{transition:opacity .8s var(--ease)}
+.h-cel .ventana{position:absolute;inset:0;border-radius:0;border:0;box-shadow:none;opacity:0;overflow:auto}
+.h-cel.resumen .ventana{opacity:1}.h-cel.resumen video{opacity:0}
+.h-cel .kpis{grid-template-columns:1fr}.h-cel .kpi{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}.h-cel .kpi small{flex-basis:100%}
+.h-cel .barras{height:96px}
+.ventana{position:relative;z-index:2;width:100%;margin:0;border-radius:22px;background:linear-gradient(180deg,#10211A,#0B1712);border:1px solid rgba(255,255,255,.1);box-shadow:0 50px 100px -40px rgba(0,0,0,.8),0 0 0 1px rgba(55,211,143,.06),inset 0 1px 0 rgba(255,255,255,.06);overflow:hidden}
 .v-barra{display:flex;align-items:center;gap:7px;padding:12px 16px;border-bottom:1px solid var(--linea-o);font-size:12.5px;color:#8FA39A}
 .v-barra i{width:10px;height:10px;border-radius:50%;background:#2A3B33}
 .v-barra i:nth-child(1){background:#F26B5B}.v-barra i:nth-child(2){background:#F5C451}.v-barra i:nth-child(3){background:#3FCB80}
@@ -184,7 +189,7 @@ h2 em{color:var(--verde-t)}.oscuro h2 em{color:var(--verde)}
 .flota i{flex:none;width:32px;height:32px;border-radius:10px;display:grid;place-items:center;background:var(--menta);color:var(--verde-t)}
 .flota b{display:block;font-size:13.5px}.flota small{color:var(--suave);font-size:12px}
 .flota{z-index:3}
-.flota.f1{left:4%;top:9%;animation:flota 6s ease-in-out infinite}
+.flota.f1{left:-4%;top:6%;animation:flota 6s ease-in-out infinite}
 .flota.f2{right:-14px;bottom:14%;animation:flota 6s ease-in-out 1.5s infinite}
 @keyframes flota{50%{transform:translateY(-8px)}}
 .nota-ilu{margin-top:14px;font-size:12.5px;color:#7F948A;text-align:center}
@@ -196,8 +201,8 @@ h2 em{color:var(--verde-t)}.oscuro h2 em{color:var(--verde)}
   .kpi{padding:8px}.kpi b{font-size:14.5px}.kpi small{font-size:10px}
   .flota{display:none}
   .h-foto{width:100%;aspect-ratio:4/3;border-radius:22px}
-  .h-cel{width:86%;margin:0 auto}
-  .ventana{width:100%;margin-top:18px}
+  .h-cel{width:82%;margin:0 auto}
+
 }
 
 /* Cinta */
@@ -470,8 +475,9 @@ footer{background:var(--noche);color:var(--gris-o);padding-top:clamp(64px,8vw,96
     </div>
 
     <div class="maqueta entra" style="--d:.5s">
-      <figure class="h-cel"><video src="/static/video/tributando-10s.mp4" poster="/static/video/tributando-10s.jpg" autoplay muted loop playsinline preload="metadata" aria-label="Video corto de Tributando: las facturas de la DIAN entran solas a la contabilidad"></video></figure>
-      <div class="ventana" role="img" aria-label="Ilustración del software Tributando con cifras de ejemplo">
+      <figure class="h-cel" id="cel">
+        <video id="celVideo" src="/static/video/tributando-10s.mp4" poster="/static/video/tributando-10s.jpg" autoplay muted playsinline preload="metadata" aria-label="Video corto de Tributando: las facturas de la DIAN entran solas a la contabilidad"></video>
+        <div class="ventana" role="img" aria-label="Ilustración del software Tributando con cifras de ejemplo">
         <div class="v-barra"><i></i><i></i><i></i><b>Resumen del mes</b><span class="ej">Cifras de ejemplo</span></div>
         <div class="v-cuerpo">
           <div class="v-main">
@@ -488,7 +494,7 @@ footer{background:var(--noche);color:var(--gris-o);padding-top:clamp(64px,8vw,96
               </div>
               <div class="v-meses" aria-hidden="true">{% for m in ['E','F','M','A','M','J','J','A','S'] %}<span>{{ m }}</span>{% endfor %}</div>
             </div>
-            <div class="v-lista" hidden>
+            <div class="v-lista">
               <div class="cab">Entraron desde la DIAN</div>
               <div class="v-fila"><span class="ic">{{ icono('doc', 15) }}</span><span class="tx"><b>Compra · Proveedor de ejemplo</b><small>Factura electrónica</small></span><span class="estado">{{ icono('ok', 11) }}Causada</span></div>
               <div class="v-fila"><span class="ic">{{ icono('doc', 15) }}</span><span class="tx"><b>Venta · Cliente de ejemplo</b><small>Factura electrónica</small></span><span class="estado">{{ icono('ok', 11) }}Causada</span></div>
@@ -496,6 +502,7 @@ footer{background:var(--noche);color:var(--gris-o);padding-top:clamp(64px,8vw,96
           </div>
         </div>
       </div>
+      </figure>
       <div class="flota f1" aria-hidden="true"><i>{{ icono('rayo', 18) }}</i><span><b>Factura causada sola</b><small>Sin digitarla</small></span></div>
       <div class="flota f2" aria-hidden="true"><i>{{ icono('users', 18) }}</i><span><b>Nómina electrónica</b><small>En la misma plataforma</small></span></div>
       <p class="nota-ilu">Ilustración del software con cifras de ejemplo.</p>
@@ -827,5 +834,12 @@ calc();
 </script>
 {% include "_clics.html" %}
 <script src="/static/js/red-fondo.js" defer></script>
+<script>
+(function(){var c=document.getElementById('cel'),v=document.getElementById('celVideo');if(!c||!v)return;
+function resumen(){c.classList.add('resumen');setTimeout(function(){c.classList.remove('resumen');try{v.currentTime=0;var p=v.play();if(p&&p.catch)p.catch(function(){});}catch(e){}},7000);}
+v.addEventListener('ended',resumen);
+var p=v.play&&v.play();if(p&&p.catch)p.catch(function(){setInterval(function(){c.classList.toggle('resumen');},8000);});
+})();
+</script>
 </body>
 </html>
