@@ -298,8 +298,10 @@ def plantilla(p: Prospecto) -> tuple[str, str]:
 <li>Multi-cliente: cada empresa con su historial.</li>
 </ul>
 <p><b>1 mes gratis con 1 cliente, sin tarjeta.</b> Pones tu correo, te llega un código y entras.</p>
-<p>Y si quieres llevar la <b>contabilidad completa en la nube</b>: la <b>app de Tributando</b> causa sola esas facturas, concilia bancos, saca el IVA, la retención y la exógena, y liquida la <b>nómina electrónica</b>. También con un mes de prueba: <a href="{URL}/contadores/contabilidad" style="color:#b8955f;font-weight:700">ver la app para contadores</a>.</p>"""
-        return asunto, _envolver(cuerpo, p.email, "Activar mi prueba del Lector", f"{URL}/contadores/lector")
+<p>Y si quieres llevar la <b>contabilidad completa en la nube</b>: la <b>app de Tributando para contadores</b> lleva a todos tus clientes en una sola cuenta, causa sola esas facturas, concilia bancos, saca el IVA, la retención y la exógena, y liquida la <b>nómina electrónica</b>. También con un mes de prueba.</p>
+<p>A tus clientes les puedes ofrecer <b>factura electrónica</b> (con 5 facturas gratis para probar), <b>nómina electrónica</b> y <b>POS electrónico</b>: nosotros los habilitamos ante la DIAN.</p>
+<p>📺 Mira en video cómo el <b>Recolector</b> baja todo de la DIAN y queda causado, con los enlaces y una guía de 6 pasos: <a href="{URL}/contadores/herramientas" style="color:#b8955f;font-weight:700">tributando.co/contadores/herramientas</a>.</p>"""
+        return asunto, _envolver(cuerpo, p.email, "Ver las herramientas para contadores", f"{URL}/contadores/herramientas")
     if p.segmento == "comerciante":
         negocio = (p.razon_social or "tu negocio").strip().title()
         asunto = f"{negocio}: lo que la DIAN le pide a tu negocio"

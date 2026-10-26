@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tributando para contadores · Herramientas para llevar a sus clientes</title>
+<meta name="description" content="App contable en la nube para contadores, Lector XML DIAN y Recolector: la DIAN entra sola a la contabilidad de sus clientes. Factura, nómina y POS electrónico para ofrecerles. Prueba gratis 1 mes.">
+<link rel="icon" href="/static/img/logo-tributando.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--noche:#07110D;--noche2:#0C1A14;--papel:#F6F7F2;--blanco:#fff;--menta:#E9F6EE;--tinta:#0F1A15;--suave:#51605A;--borde:#E1E6DE;--verde:#37D38F;--verde-t:#1C7A50;--gris-o:#A3B3AB;--linea-o:rgba(255,255,255,.09);--gut:clamp(16px,4vw,40px);--ancho:1180px;--serif:"Instrument Serif",Georgia,serif}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;font-family:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--tinta);background:var(--papel);font-size:17px;line-height:1.6}
+h1,h2,h3{margin:0;letter-spacing:-.03em;line-height:1.08;font-weight:800}
+h1 em,h2 em{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:-.01em;color:var(--verde)}
+.claro h2 em{color:var(--verde-t)}
+p{margin:0}a{color:inherit}img,video{display:block;max-width:100%}
+.env{width:min(100% - 2*var(--gut),var(--ancho));margin-inline:auto}
+.btn{display:inline-flex;align-items:center;gap:10px;padding:15px 24px;border-radius:999px;font-weight:700;text-decoration:none;font-size:16px;transition:transform .3s,box-shadow .3s}
+.btn:hover{transform:translateY(-2px)}
+.btn.v{background:var(--verde);color:#062014;box-shadow:0 14px 30px -14px rgba(55,211,143,.7)}
+.btn.o{border:1px solid rgba(255,255,255,.25);color:#fff}
+.btn.n{background:var(--tinta);color:#fff}
+nav{position:sticky;top:0;z-index:10;background:rgba(7,17,13,.88);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--linea-o)}
+nav .env{display:flex;align-items:center;justify-content:space-between;height:64px;gap:16px}
+.marca{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800;font-size:19px}
+.marca i{font-style:normal;width:32px;height:32px;border-radius:10px;background:var(--verde);color:#062014;display:grid;place-items:center}
+.marca span{color:var(--verde)}
+nav .links{display:flex;gap:22px;font-size:15px}
+nav .links a{color:#C9D6CF;text-decoration:none}
+@media(max-width:760px){nav .links{display:none}}
+.portada{background:radial-gradient(900px 500px at 80% 10%,rgba(55,211,143,.2),transparent 60%),var(--noche);color:#fff;padding:clamp(56px,8vw,104px) 0 clamp(64px,8vw,110px)}
+.portada .env{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:clamp(32px,5vw,64px);align-items:center}
+@media(max-width:940px){.portada .env{grid-template-columns:1fr}}
+.chip{display:inline-flex;gap:8px;align-items:center;padding:7px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.18);font-size:14px;color:#C9D6CF;margin-bottom:22px}
+.portada h1{font-size:clamp(40px,5.6vw,72px)}
+.portada .sub{margin-top:22px;color:#C9D6CF;font-size:clamp(17px,1.6vw,20px);max-width:560px}
+.acc{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+.marco{border-radius:22px;overflow:hidden;border:1px solid rgba(255,255,255,.12);box-shadow:0 40px 80px -40px rgba(0,0,0,.85);background:#0B1712}
+.marco video{width:100%;height:auto}
+.leyenda{margin-top:12px;font-size:13.5px;color:var(--gris-o);text-align:center}
+.seccion{padding:clamp(64px,9vw,112px) 0}
+.kick{font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--verde-t);margin-bottom:12px}
+.oscuro{background:var(--noche2);color:#fff}.oscuro .kick{color:var(--verde)}.oscuro p{color:#C9D6CF}
+h2{font-size:clamp(30px,4vw,50px)}
+.intro{margin-top:14px;color:var(--suave);max-width:680px}
+.pasos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:40px}
+@media(max-width:860px){.pasos{grid-template-columns:1fr}}
+.paso{background:var(--blanco);border:1px solid var(--borde);border-radius:22px;padding:28px}
+.paso b{display:inline-grid;place-items:center;width:38px;height:38px;border-radius:12px;background:var(--menta);color:var(--verde-t);font-weight:800;margin-bottom:16px}
+.paso h3{font-size:21px;margin-bottom:8px}.paso p{color:var(--suave);font-size:16px}
+.herr{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:clamp(24px,4vw,56px);align-items:center;margin-top:48px}
+.herr.inv{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr)}
+.herr.inv .media{order:-1}
+@media(max-width:860px){.herr,.herr.inv{grid-template-columns:1fr}.herr.inv .media{order:0}}
+.herr h3{font-size:clamp(24px,2.6vw,32px);margin-bottom:12px}
+.herr ul{margin:18px 0 0;padding:0;list-style:none;display:grid;gap:10px}
+.herr li{display:flex;gap:10px;align-items:flex-start}
+.herr li::before{content:"";flex:none;width:20px;height:20px;margin-top:3px;border-radius:50%;background:var(--verde) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23062014' stroke-width='3'%3E%3Cpath d='M5 12l5 5 9-10'/%3E%3C/svg%3E") center/12px no-repeat}
+.precio{margin-top:20px;padding:16px 18px;border-radius:16px;background:var(--menta);border:1px solid #CDEBDA;font-size:15.5px}
+.oscuro .precio{background:rgba(55,211,143,.08);border-color:rgba(55,211,143,.25);color:#E6EFEA}
+.herr .acc{margin-top:22px}
+.vertical{max-width:340px;margin-inline:auto}
+.ofrece{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:40px}
+@media(max-width:860px){.ofrece{grid-template-columns:1fr}}
+.of{background:var(--blanco);border:1px solid var(--borde);border-radius:22px;padding:28px}
+.of h3{font-size:21px;margin-bottom:8px}.of p{color:var(--suave);font-size:16px}
+.of .tag{display:inline-block;margin-top:14px;font-size:13.5px;font-weight:700;color:var(--verde-t);background:var(--menta);border:1px solid #CDEBDA;border-radius:999px;padding:5px 12px}
+.guia{counter-reset:g;margin-top:36px;display:grid;gap:14px}
+.guia li{list-style:none;counter-increment:g;display:grid;grid-template-columns:48px 1fr;gap:16px;align-items:start;background:rgba(255,255,255,.04);border:1px solid var(--linea-o);border-radius:18px;padding:20px}
+.guia li::before{content:counter(g);display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:var(--verde);color:#062014;font-weight:800}
+.guia b{color:#fff}.guia{padding:0}
+.enlaces{margin-top:36px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media(max-width:760px){.enlaces{grid-template-columns:1fr}}
+.enlaces a{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:18px 20px;border-radius:16px;background:var(--blanco);border:1px solid var(--borde);text-decoration:none;font-weight:700}
+.enlaces a small{display:block;font-weight:500;color:var(--suave);font-size:14px}
+.enlaces a span.fl{color:var(--verde-t);font-size:20px}
+.final{background:var(--noche);color:#fff;text-align:center;padding:clamp(64px,9vw,110px) 0}
+.final p{color:#C9D6CF;margin:16px auto 0;max-width:560px}
+.final .acc{justify-content:center}
+footer{background:var(--noche);color:var(--gris-o);font-size:14px;padding:0 0 40px;text-align:center}
+</style>
+</head>
+<body>
+<nav><div class="env">
+  <a class="marca" href="/"><i>T</i>Tributando<span>.co</span></a>
+  <div class="links"><a href="#como">Cómo funciona</a><a href="#herramientas">Herramientas</a><a href="#ofrecer">Para sus clientes</a><a href="#guia">Guía</a></div>
+  <a class="btn v" style="padding:10px 18px;font-size:15px" href="/contadores/contabilidad">Probar gratis</a>
+</div></nav>
+
+<header class="portada"><div class="env">
+  <div>
+    <div class="chip">Para contadores y asesores que constituyen empresas</div>
+    <h1>Usted crea la empresa. <em>Tributando le ayuda a llevarla.</em></h1>
+    <p class="sub">Una app contable en la nube <b>para contadores</b>: lleva a todos sus clientes en un solo lugar, la DIAN entra sola a cada contabilidad y usted solo revisa. Además, factura, nómina y POS electrónico para ofrecerles.</p>
+    <div class="acc">
+      <a class="btn v" href="/contadores/contabilidad">Probar 1 mes gratis →</a>
+      <a class="btn o" href="https://wa.me/{{ whatsapp }}?text={{ 'Hola Edison, soy contador y quiero conocer las herramientas de Tributando.'|urlencode }}">Hablar por WhatsApp</a>
+    </div>
+  </div>
+  <div>
+    <div class="marco"><video src="/static/video/recolector-contabilidad.mp4" poster="/static/video/recolector-contabilidad.jpg" controls playsinline preload="metadata"></video></div>
+    <p class="leyenda">Video: el Recolector baja los documentos de la DIAN y quedan causados en la contabilidad (1:46).</p>
+  </div>
+</div></header>
+
+<section id="como" class="seccion claro"><div class="env">
+  <div class="kick">Cómo funciona</div>
+  <h2>De la DIAN a la contabilidad <em>sin digitar</em></h2>
+  <p class="intro">Tres pasos, para cada uno de sus clientes.</p>
+  <div class="pasos">
+    <div class="paso"><b>1</b><h3>El Recolector baja todo</h3><p>Pega el enlace del token de la DIAN de su cliente, elige las fechas y baja facturas, notas, documentos soporte, POS y nómina. Todos los tipos, de una.</p></div>
+    <div class="paso"><b>2</b><h3>La app lo causa solo</h3><p>Cada XML entra a la empresa correcta por el NIT, con el IVA discriminado y la retención, y queda causado con las cuentas que aprende de cada tercero.</p></div>
+    <div class="paso"><b>3</b><h3>Usted revisa y declara</h3><p>Borradores del IVA (300), retención (350), exógena y estados financieros, cuadrados contra la DIAN. Usted revisa, firma y presenta.</p></div>
+  </div>
+</div></section>
+
+<section id="herramientas" class="seccion oscuro"><div class="env">
+  <div class="kick">Herramientas para usted</div>
+  <h2>Tres herramientas, <em>un mismo flujo</em></h2>
+
+  <div class="herr">
+    <div>
+      <h3>App contable para contadores</h3>
+      <p>Todos sus clientes en una sola cuenta: contabilidad, impuestos, nómina e informes, en la nube.</p>
+      <ul>
+        <li>Multi-empresa: cada cliente con su NIT, su plan de cuentas y su historial.</li>
+        <li>Conciliación bancaria, cierre mensual y estados financieros.</li>
+        <li>IVA, retención, exógena y calendario de vencimientos con alertas.</li>
+        <li>Contador IA: pregúntele a la contabilidad de cada cliente en español.</li>
+      </ul>
+      <div class="precio"><b>1 mes gratis con 1 empresa, sin tarjeta.</b> Luego $69.900 por empresa al mes, y baja hasta $49.900 según cuántas lleve.</div>
+      <div class="acc"><a class="btn v" href="/contadores/contabilidad">Ver la app y probarla →</a></div>
+    </div>
+    <div class="media"><div class="marco vertical"><video src="/static/video/app-contadores.mp4" poster="/static/video/app-contadores.jpg" controls playsinline preload="metadata"></video></div></div>
+  </div>
+
+  <div class="herr inv">
+    <div>
+      <h3>Lector XML DIAN</h3>
+      <p>Si sus clientes siguen en Siigo, World Office, Helisa o Contai, el Lector arma el plano listo para importar.</p>
+      <ul>
+        <li>Lee las facturas electrónicas con el IVA por tarifa y la retención.</li>
+        <li>Aprende las cuentas de cada cliente con su balance de prueba.</li>
+        <li>Plano para su programa contable en un clic, y el 300 y el 350 consolidados.</li>
+      </ul>
+      <div class="precio"><b>1 mes gratis con 1 cliente.</b> Luego $49.900 por empresa al mes, y baja hasta $29.900.</div>
+      <div class="acc"><a class="btn v" href="/contadores/lector">Activar el Lector →</a></div>
+    </div>
+    <div class="media"><div class="marco vertical"><video src="/static/video/lector-contadores.mp4" poster="/static/video/lector-contadores.jpg" controls playsinline preload="metadata"></video></div></div>
+  </div>
+
+  <div class="herr">
+    <div>
+      <h3>Recolector de la DIAN</h3>
+      <p>El programa que baja masivamente los documentos de la DIAN de cada cliente y los manda a la contabilidad. Funciona en su computador, con el enlace del token que la DIAN le envía al cliente.</p>
+      <ul>
+        <li>Facturas, notas, documentos soporte, POS y nómina electrónica.</li>
+        <li>Por rango de fechas, sin descargar uno por uno.</li>
+        <li>Incluido con la app y con el Lector.</li>
+      </ul>
+      <div class="acc"><a class="btn v" href="https://github.com/ediandres07-oss/tributando-descargas/raw/main/Descargador-Tributando.zip">Descargar el Recolector →</a></div>
+    </div>
+    <div class="media"><div class="marco"><video src="/static/video/recolector-contabilidad.mp4" poster="/static/video/recolector-contabilidad.jpg" controls playsinline preload="metadata"></video></div></div>
+  </div>
+</div></section>
+
+<section id="ofrecer" class="seccion claro"><div class="env">
+  <div class="kick">Para sus clientes</div>
+  <h2>Lo que le puede ofrecer <em>a cada empresa nueva</em></h2>
+  <p class="intro">Usted no tiene que buscar proveedor: nosotros habilitamos a su cliente ante la DIAN y todo lo que emite entra solo a la contabilidad que usted lleva.</p>
+  <div class="ofrece">
+    <div class="of"><h3>Factura electrónica</h3><p>Su cliente factura desde el celular o el computador. Nosotros lo habilitamos ante la DIAN.</p><span class="tag">5 facturas gratis para probar · luego $230.000 al año (120 documentos)</span></div>
+    <div class="of"><h3>Nómina electrónica</h3><p>Liquidación, transmisión a la DIAN, planilla PILA y desprendibles para los empleados de su cliente.</p><span class="tag">Desde $25.000 por empleado al mes</span></div>
+    <div class="of"><h3>POS electrónico</h3><p>El documento equivalente electrónico que hoy exige la DIAN a quien vende al detal.</p><span class="tag">Se cotiza según el volumen</span></div>
+  </div>
+</div></section>
+
+<section id="guia" class="seccion oscuro"><div class="env">
+  <div class="kick">Guía rápida</div>
+  <h2>Empiece hoy, <em>en seis pasos</em></h2>
+  <ol class="guia">
+    <li><span><b>Cree su cuenta de prueba</b> en <a href="/contadores/contabilidad">tributando.co/contadores/contabilidad</a>, sin tarjeta.</span></li>
+    <li><span><b>Cree la empresa de su cliente</b> con su NIT y los datos del RUT.</span></li>
+    <li><span><b>Descargue el Recolector</b> en su computador y ábralo. Pegue el enlace del token que la DIAN le envía a su cliente al correo, más su correo y clave de Tributando.</span></li>
+    <li><span><b>Elija las fechas y dele «Descargar».</b> Los documentos bajan de la DIAN y quedan en la empresa de su cliente, causados.</span></li>
+    <li><span><b>Revise y saque los informes:</b> IVA (300), retención (350), exógena y estados financieros, desde el menú de la empresa.</span></li>
+    <li><span><b>¿Su cliente necesita factura, nómina o POS electrónico?</b> Escríbanos por WhatsApp y lo habilitamos ante la DIAN.</span></li>
+  </ol>
+</div></section>
+
+<section class="seccion claro"><div class="env">
+  <div class="kick">Enlaces</div>
+  <h2>Todo <em>a un clic</em></h2>
+  <div class="enlaces">
+    <a href="/contadores/contabilidad"><span>App contable para contadores<small>tributando.co/contadores/contabilidad</small></span><span class="fl">→</span></a>
+    <a href="/contadores/lector"><span>Lector XML DIAN<small>tributando.co/contadores/lector</small></span><span class="fl">→</span></a>
+    <a href="https://github.com/ediandres07-oss/tributando-descargas/raw/main/Descargador-Tributando.zip"><span>Descargar el Recolector<small>Programa para su computador</small></span><span class="fl">↓</span></a>
+    <a href="/descargar-xml-dian"><span>Cómo funciona el Recolector<small>tributando.co/descargar-xml-dian</small></span><span class="fl">→</span></a>
+    <a href="https://contabilidad-tributando.onrender.com"><span>Entrar a la app<small>contabilidad-tributando.onrender.com</small></span><span class="fl">→</span></a>
+    <a href="/portafolio"><span>Portafolio de servicios para empresas<small>tributando.co/portafolio</small></span><span class="fl">→</span></a>
+  </div>
+</div></section>
+
+<section class="final"><div class="env">
+  <h2>¿Lo probamos con <em>uno de sus clientes</em>?</h2>
+  <p>Un mes gratis con una empresa. Si quiere, le hacemos el montaje juntos por videollamada.</p>
+  <div class="acc">
+    <a class="btn v" href="/contadores/contabilidad">Probar 1 mes gratis →</a>
+    <a class="btn o" href="https://wa.me/{{ whatsapp }}?text={{ 'Hola Edison, soy contador y quiero conocer las herramientas de Tributando.'|urlencode }}">WhatsApp 333 247 0715</a>
+  </div>
+</div></section>
+<footer>Edison Monsalve · Contador Público · Tributando.co</footer>
+</body>
+</html>

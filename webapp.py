@@ -1332,7 +1332,7 @@ _URLS_PUBLICAS = ["/", "/calendario-tributario-2026", "/contabilidad",
                   "/lector-xml-dian", "/plano-contable-siigo",
                   "/plano-contable-contai", "/plano-contable-world-office",
                   "/plano-contable-helisa", "/iva-descontable-xml-dian",
-                  "/descargar-xml-dian"]
+                  "/descargar-xml-dian", "/contadores/herramientas"]
 
 
 @app.get("/robots.txt")
@@ -1924,6 +1924,14 @@ def contadores():
                            chat_ia_contador=asistente_ia_activo(IA_CFG),
                            chat_whatsapp=IA_CFG.get("negocio", {}).get("whatsapp", ""),
                            chat_ia_nombre=IA_CFG.get("nombre_asistente", "Asistente Contadores"))
+
+
+@app.get("/contadores/herramientas")
+def contadores_herramientas():
+    """Portafolio para contadores y tramitadores que constituyen empresas: app,
+    Lector, Recolector (con videos), lo que pueden ofrecer y una guía rápida."""
+    wa = IA_CFG.get("negocio", {}).get("whatsapp") or "573332470715"
+    return render_template("contadores_herramientas.html", whatsapp=re.sub(r"\D", "", str(wa)))
 
 
 @app.get("/contadores/demo")
