@@ -1926,6 +1926,20 @@ def contadores():
                            chat_ia_nombre=IA_CFG.get("nombre_asistente", "Asistente Contadores"))
 
 
+_MUESTRAS = {"central-san-ignacio": "muestras/central_san_ignacio.html"}
+
+
+@app.get("/muestra/<slug>")
+def muestra_pagina(slug):
+    """Páginas web de muestra hechas a la medida de un prospecto (no se indexan)."""
+    tpl = _MUESTRAS.get(slug)
+    if not tpl:
+        return redirect("/portafolio")
+    resp = Response(render_template(tpl), mimetype="text/html")
+    resp.headers["X-Robots-Tag"] = "noindex, nofollow"
+    return resp
+
+
 @app.get("/contadores/herramientas")
 def contadores_herramientas():
     """Portafolio para contadores y tramitadores que constituyen empresas: app,

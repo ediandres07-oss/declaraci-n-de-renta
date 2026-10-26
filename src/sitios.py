@@ -501,6 +501,21 @@ _VIDRIO_ALUMINIO = _perf(
     "Un taller de {ciudad} que trabaja a la medida", "¿Necesita cotizar ventanas?",
     "Envíenos las medidas o una foto del espacio y le damos la cotización.", "Pedir cotización")
 
+# Central de receptoras bovinas (transferencia de embriones): lo decide el NOMBRE
+# o «central» + ganado bovino (el RUES dice solo «cría de ganado bovino»).
+# 26-oct-2026: Central San Ignacio (Adriana Ospina) pidió la página web.
+_RECEPTORAS = _perf(
+    "#8B5A2B", "servicios", "Central de receptoras", "Receptoras bovinas listas para sus embriones",
+    "Genética, control y resultados: receptoras seleccionadas y manejadas para transferencia de embriones.",
+    ("1788157980088-f37fe2f4714f", "1774828732384-6c0134c29425", "1767103843277-453cdfee20cc",
+     "1527153857715-3908f2bae5e8", "1648837606835-0005a6e97410", "1500595046743-cd271d694d30"),
+    "Hacer embriones: fácil, claro y rentable",
+    [("Receptoras seleccionadas", "Hembras sanas, sincronizadas y con control veterinario, listas para recibir sus embriones."),
+     ("Jornadas de transferencia", "Días de trabajo programados, con ecografía y el registro de cada animal."),
+     ("Despachos", "Entregamos sus receptoras preñadas en su finca, con transporte y documentos.")],
+    "Una central de receptoras en Bajo Cauca, Córdoba y Antioquia", "¿Buscando receptoras?",
+    "Cuéntenos cuántas necesita, la raza y la fecha de su jornada, y le confirmamos disponibilidad.", "Pedir receptoras")
+
 def _hay(clave: str, texto: str) -> bool:
     """La clave al comienzo de una palabra («obra» no está en «cobranza»)."""
     return re.search(r"\b" + re.escape(clave.strip()), texto) is not None
@@ -509,6 +524,8 @@ def _hay(clave: str, texto: str) -> bool:
 def perfil(actividad: str, nombre: str = "") -> dict:
     a = (actividad or "").lower().strip()
     n = (nombre or "").lower()
+    if _hay("receptor", n) or ("central" in n and ("bovin" in a or "ganad" in a)):
+        return _RECEPTORAS
     if any(_hay(k, n) for k in ("alumini", "vidrio", "ventaner", "ventana")):
         return _VIDRIO_ALUMINIO
     if any(_hay(k, n) for k in ("haras", "ecuestre", "hípic", "hipic", "equitaci", "caballeriz")):
