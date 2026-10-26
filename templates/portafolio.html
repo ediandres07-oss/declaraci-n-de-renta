@@ -145,7 +145,7 @@ h2 em{color:var(--verde-t)}.oscuro h2 em{color:var(--verde)}
 .h-foto::after{content:"";position:absolute;inset:0;background:linear-gradient(200deg,transparent 45%,rgba(7,17,13,.55));border-radius:inherit;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
 .h-foto img{width:100%;height:100%;object-fit:cover;object-position:70% 60%;animation:acerca 14s var(--ease) both}
 @keyframes acerca{from{transform:scale(1.1)}to{transform:scale(1)}}
-.ventana{position:relative;z-index:2;width:70%;margin-top:-26%;border-radius:22px;background:linear-gradient(180deg,#10211A,#0B1712);border:1px solid rgba(255,255,255,.1);box-shadow:0 50px 100px -40px rgba(0,0,0,.8),0 0 0 1px rgba(55,211,143,.06),inset 0 1px 0 rgba(255,255,255,.06);overflow:hidden}
+.ventana{position:relative;z-index:2;width:92%;margin:28px 0 0 auto;border-radius:22px;background:linear-gradient(180deg,#10211A,#0B1712);border:1px solid rgba(255,255,255,.1);box-shadow:0 50px 100px -40px rgba(0,0,0,.8),0 0 0 1px rgba(55,211,143,.06),inset 0 1px 0 rgba(255,255,255,.06);overflow:hidden}
 .v-barra{display:flex;align-items:center;gap:7px;padding:12px 16px;border-bottom:1px solid var(--linea-o);font-size:12.5px;color:#8FA39A}
 .v-barra i{width:10px;height:10px;border-radius:50%;background:#2A3B33}
 .v-barra i:nth-child(1){background:#F26B5B}.v-barra i:nth-child(2){background:#F5C451}.v-barra i:nth-child(3){background:#3FCB80}
@@ -194,7 +194,7 @@ h2 em{color:var(--verde-t)}.oscuro h2 em{color:var(--verde)}
   .kpi{padding:8px}.kpi b{font-size:14.5px}.kpi small{font-size:10px}
   .flota{display:none}
   .h-foto{width:100%;aspect-ratio:4/3;border-radius:22px}
-  .ventana{width:94%;margin-top:-18%}
+  .ventana{width:100%;margin-top:20px}
 }
 
 /* Cinta */
@@ -467,7 +467,6 @@ footer{background:var(--noche);color:var(--gris-o);padding-top:clamp(64px,8vw,96
     </div>
 
     <div class="maqueta entra" style="--d:.5s">
-      <figure class="h-foto"><img src="https://images.unsplash.com/photo-1551836022-4c4c79ecde51?auto=format&fit=crop&w=1100&q=72" alt="Reunión de trabajo con una clienta, revisando cifras en una tableta" fetchpriority="high"></figure>
       <div class="ventana" role="img" aria-label="Ilustración del software Tributando con cifras de ejemplo">
         <div class="v-barra"><i></i><i></i><i></i><b>Resumen del mes</b><span class="ej">Cifras de ejemplo</span></div>
         <div class="v-cuerpo">
@@ -530,7 +529,7 @@ footer{background:var(--noche);color:var(--gris-o);padding-top:clamp(64px,8vw,96
       <article class="caja rv" style="--d:.08s">
         <span class="ico">{{ icono('pct', 26) }}</span><span class="num">02</span>
         <h3>Impuestos</h3>
-        <p>IVA, retención en la fuente, autorretención e industria y comercio, presentados a tiempo.</p>
+        <p>IVA, retención en la fuente, autorretención e industria y comercio, presentados a tiempo, con el calendario de vencimientos y la atención de requerimientos de la DIAN.</p>
       </article>
       <article class="caja rv" style="--d:.16s">
         <span class="ico">{{ icono('users', 26) }}</span><span class="num">03</span>
@@ -541,12 +540,25 @@ footer{background:var(--noche);color:var(--gris-o);padding-top:clamp(64px,8vw,96
         <div>
           <span class="ico">{{ icono('cal', 26) }}</span><span class="num">04</span>
           <h3>Cumplimiento anual</h3>
-          <p>Declaración de renta, información exógena y certificados de ingresos y retenciones.</p>
+          <p>Declaración de renta, información exógena, actualización del RUT y certificados de ingresos y retenciones.</p>
         </div>
         <div class="anual">
           <div>{{ icono('check', 20) }}Declaración de renta</div>
           <div>{{ icono('check', 20) }}Información exógena</div>
           <div>{{ icono('check', 20) }}Certificados de ingresos y retenciones</div>
+          <div>{{ icono('check', 20) }}Actualización del RUT</div>
+        </div>
+      </article>
+      <article class="caja ancha rv" style="--d:.12s;grid-column:1/-1">
+        <div>
+          <span class="ico">{{ icono('doc', 26) }}</span><span class="num">05</span>
+          <h3>Documentos electrónicos</h3>
+          <p>Se lo vendemos y lo dejamos funcionando: su empresa emite desde el celular o el computador, y todo entra solo a la contabilidad. Nosotros hacemos la habilitación ante la DIAN.</p>
+        </div>
+        <div class="anual">
+          <div>{{ icono('check', 20) }}Factura electrónica</div>
+          <div>{{ icono('check', 20) }}Nómina electrónica, con PILA y desprendibles</div>
+          <div>{{ icono('check', 20) }}POS electrónico para ventas al detal</div>
         </div>
       </article>
     </div>
@@ -595,7 +607,7 @@ footer{background:var(--noche);color:var(--gris-o);padding-top:clamp(64px,8vw,96
       <p class="lead" style="margin-top:12px"><b>¿Ya trabaja con otro programa contable?</b> No importa: también llevamos su contabilidad en el software que usted ya maneja, como Siigo, World Office, Alegra o Helisa.</p>
       <div class="funciones">
         <div class="funcion"><i>{{ icono('rayo', 22) }}</i><div><b>Facturas DIAN leídas solas</b><span>Las facturas electrónicas de compra y venta se descargan y se causan sin digitarlas.</span></div></div>
-        <div class="funcion"><i>{{ icono('libros', 22) }}</i><div><b>Todo en los mismos libros</b><span>Contabilidad, nómina electrónica y punto de venta en una sola plataforma.</span></div></div>
+        <div class="funcion"><i>{{ icono('libros', 22) }}</i><div><b>Todo en los mismos libros</b><span>Contabilidad, factura electrónica, nómina electrónica y POS electrónico en una sola plataforma.</span></div></div>
         <div class="funcion"><i>{{ icono('grafica', 22) }}</i><div><b>Sus cifras cuando las necesite</b><span>Acceso a balances, cartera y reportes desde el celular o el computador.</span></div></div>
         <div class="funcion"><i>{{ icono('spark', 22) }}</i><div><b>Pregúntele a sus cifras con IA</b><span>Conecte Claude o ChatGPT a sus libros y consulte en español, con los mismos controles.</span></div></div>
       </div>
@@ -670,7 +682,7 @@ footer{background:var(--noche);color:var(--gris-o);padding-top:clamp(64px,8vw,96
             <li>{{ icono('ok', 17) }}IVA, retención e ICA</li>
             <li>{{ icono('ok', 17) }}Conciliación bancaria</li>
             <li>{{ icono('ok', 17) }}Estados financieros</li>
-            <li class="full">{{ icono('ok', 17) }}Asesoría con el contador</li>
+            <li class="full">{{ icono('ok', 17) }}Asesoría contable permanente con el contador</li>
           </ul>
         </div>
       </div>
@@ -704,6 +716,7 @@ footer{background:var(--noche);color:var(--gris-o);padding-top:clamp(64px,8vw,96
       <details><summary>¿Los $875.000 son para siempre?<span class="mas" aria-hidden="true"></span></summary><p class="resp">Ese valor es para empresas que apenas comienzan. A medida que su empresa crece en ventas, documentos y empleados, crecemos con ustedes y el honorario se ajusta a ese tamaño.</p></details>
       <details><summary>¿Qué pasa si contrato más empleados?<span class="mas" aria-hidden="true"></span></summary><p class="resp">La nómina se cobra a $25.000 por empleado al mes, con un mínimo de $150.000. Si la empresa también crece en ventas y documentos, los honorarios se ajustan a ese nuevo tamaño.</p></details>
       <details><summary>¿La renta y la exógena tienen costo aparte?<span class="mas" aria-hidden="true"></span></summary><p class="resp">Sí: cuestan el valor de una mensualidad de honorarios al año.</p></details>
+      <details><summary>¿Venden la factura, la nómina y el POS electrónico?<span class="mas" aria-hidden="true"></span></summary><p class="resp">Sí. Le vendemos el sistema y lo dejamos funcionando: factura electrónica ($230.000 al año, hasta 120 documentos), nómina electrónica ($25.000 por empleado al mes, mínimo $150.000) y POS electrónico para ventas al detal, que se cotiza según el volumen. Nosotros hacemos la habilitación ante la DIAN.</p></details>
       <details><summary>¿Ya tengo facturador, tengo que cambiarlo?<span class="mas" aria-hidden="true"></span></summary><p class="resp">No. Si ya factura con otro proveedor, sus facturas igual entran solas a la contabilidad. La facturación de Tributando es opcional.</p></details>
     </div>
   </div>
