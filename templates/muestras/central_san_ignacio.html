@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <style>
-:root{--cafe:#8B5A2B;--cafe2:#A9733F;--arena:#E8D6B9;--crema:#F7F1E7;--monte:#18221A;--monte2:#223024;--tinta:#1F241F;--suave:#5E6559;--borde:#E2D5C0;--gut:clamp(16px,4vw,44px);--ancho:1200px}
+:root{--cafe:#8B5A2B;--oro:#E0A63A;--terra:#C2593A;--pasto:#5E9440;--cielo:#4F8BA6;--cafe2:#A9733F;--arena:#E8D6B9;--crema:#F7F1E7;--monte:#18221A;--monte2:#223024;--tinta:#1F241F;--suave:#5E6559;--borde:#E2D5C0;--gut:clamp(16px,4vw,44px);--ancho:1200px}
 *,*::before,*::after{box-sizing:border-box}
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
 body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--tinta);background:var(--crema);font-size:17px;line-height:1.62}
@@ -35,7 +35,7 @@ nav .cta{background:var(--cafe2);color:#fff;text-decoration:none;font-weight:700
 .btn.lin{border:1.5px solid rgba(255,255,255,.55);color:#fff}
 .btn.osc{background:var(--monte);color:#fff}
 /* Portada */
-.portada{position:relative;min-height:min(92vh,860px);display:flex;align-items:flex-end;color:#fff;overflow:hidden;isolation:isolate}
+.portada{--hy:0px;position:relative;min-height:min(92vh,860px);display:flex;align-items:flex-end;color:#fff;overflow:hidden;isolation:isolate}
 .portada>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2;animation:zoom 18s ease-out both}
 @keyframes zoom{from{transform:scale(1.12)}to{transform:scale(1)}}
 .portada::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(14,20,15,.35) 0%,rgba(14,20,15,.15) 35%,rgba(14,20,15,.88) 100%)}
@@ -138,6 +138,74 @@ footer h4{margin:0 0 10px;color:#fff;font-family:"Bebas Neue",sans-serif;font-we
 footer a{color:#E9E2D4;text-decoration:none}
 .legal{margin-top:34px;padding-top:20px;border-top:1px solid rgba(255,255,255,.08);font-size:13px;color:#8E968A;text-align:center}
 .wa{position:fixed;right:18px;bottom:18px;z-index:30;width:60px;height:60px;border-radius:50%;background:#25D366;display:grid;place-items:center;box-shadow:0 14px 30px -10px rgba(0,0,0,.45)}
+
+/* ===== Movimiento ===== */
+.portada>img{animation:zoom 2.2s cubic-bezier(.2,.7,.2,1) both,deriva 26s ease-in-out 2.2s infinite alternate;will-change:transform}
+@keyframes deriva{from{transform:scale(1.02) translate3d(0,0,0)}to{transform:scale(1.1) translate3d(-2%,-1.5%,0)}}
+.portada .env>*{opacity:0;transform:translateY(26px);animation:sube .9s cubic-bezier(.2,.7,.2,1) forwards}
+.portada .sello{animation-delay:.25s}.portada h1{animation-delay:.45s}.portada p.sub{animation-delay:.7s}.portada .acc{animation-delay:.9s}
+@keyframes sube{to{opacity:1;transform:none}}
+.btn.cafe,nav .cta{position:relative;overflow:hidden}
+.btn.cafe::after,nav .cta::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.45) 50%,transparent 70%);transform:translateX(-120%);animation:brillo 3.8s ease-in-out infinite}
+@keyframes brillo{0%,55%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
+.franja{background:var(--cafe);color:#FFF6EA;overflow:hidden;white-space:nowrap;padding:16px 0;border-top:1px solid rgba(255,255,255,.12)}
+.franja .pista{display:inline-flex;gap:46px;animation:corre 32s linear infinite;font-family:"Bebas Neue",sans-serif;font-size:clamp(24px,2.6vw,34px);letter-spacing:.04em}
+.franja .pista span{display:inline-flex;align-items:center;gap:46px}
+.franja .pista span::after{content:"✦";color:var(--arena);font-size:.7em}
+.franja:hover .pista{animation-play-state:paused}
+@keyframes corre{to{transform:translateX(-50%)}}
+.foto-r,.of{cursor:zoom-in;transition:box-shadow .5s,transform .5s}
+.foto-r img,.of img{transition:transform 1.2s cubic-bezier(.2,.7,.2,1),filter .6s;transform:scale(1.12) translate3d(0,var(--py,0px),0)}
+.foto-r:hover,.of:hover{box-shadow:0 0 0 3px var(--cafe2),0 0 46px 6px rgba(201,150,90,.55),0 40px 80px -40px rgba(24,34,26,.7);transform:translateY(-6px)}
+.foto-r:hover img,.of:hover img{transform:scale(1.2) translate3d(0,var(--py,0px),0);filter:brightness(1.12) saturate(1.15)}
+.serv,.paso,.zona,.socio,.fac,.cifra,.trabaje{position:relative;cursor:pointer;transition:transform .35s,box-shadow .35s,border-color .35s,background .35s}
+.serv::before,.paso::after,.zona::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%),rgba(201,150,90,.22),transparent 45%);opacity:0;transition:opacity .35s}
+.serv:hover::before,.paso:hover::after,.zona:hover::before{opacity:1}
+.serv:hover,.paso:hover,.socio:hover{transform:translateY(-6px);border-color:var(--cafe2);box-shadow:0 0 0 1px var(--cafe2),0 26px 50px -30px rgba(139,90,43,.7)}
+.zona:hover{transform:translateY(-6px);border-color:var(--arena);background:rgba(232,214,185,.1);box-shadow:0 0 34px -6px rgba(232,214,185,.35)}
+.fac:hover{transform:translateX(6px)}.fac:hover h3{color:var(--cafe)}
+.serv .n,.paso::before{transition:color .35s,transform .35s}.serv:hover .n{color:var(--cafe2);transform:scale(1.12)}
+.cifra:hover b{text-shadow:0 0 22px rgba(232,214,185,.7)}
+.brilla{animation:resplandor 1s ease-out}
+@keyframes resplandor{0%{box-shadow:0 0 0 0 rgba(201,150,90,.9)}60%{box-shadow:0 0 0 18px rgba(201,150,90,0),0 0 60px 10px rgba(232,214,185,.6)}100%{box-shadow:0 0 0 0 rgba(201,150,90,0)}}
+.rv.d1{transition-delay:.12s}.rv.d2{transition-delay:.24s}.rv.d3{transition-delay:.36s}.rv.d4{transition-delay:.48s}
+.visor{position:fixed;inset:0;z-index:60;background:rgba(10,14,11,.9);backdrop-filter:blur(6px);display:grid;place-items:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .35s;cursor:zoom-out}
+.visor.on{opacity:1;pointer-events:auto}
+.visor img{max-width:min(1100px,100%);max-height:86vh;border-radius:22px;box-shadow:0 0 0 3px var(--cafe2),0 0 80px 10px rgba(201,150,90,.45);transform:scale(.9);transition:transform .45s cubic-bezier(.2,.7,.2,1)}
+.visor.on img{transform:none}
+.visor p{position:absolute;bottom:22px;left:0;right:0;text-align:center;color:var(--arena);font-family:"Instrument Serif",serif;font-style:italic;font-size:20px}
+
+/* ===== Color ===== */
+.portada>img{translate:0 var(--hy)}
+.portada h1 .serif{background:linear-gradient(90deg,#F4D9A8,var(--oro) 55%,#F0B97A);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sello{color:#F4C978}.sello::before{background:var(--oro)}
+h2 .serif{background:linear-gradient(90deg,var(--cafe),var(--terra) 60%,var(--oro));-webkit-background-clip:text;background-clip:text;color:transparent;padding-right:.08em}
+.oscuro h2 .serif,.cifras b{background:linear-gradient(90deg,#F4D9A8,var(--oro));-webkit-background-clip:text;background-clip:text;color:transparent}
+.kick{color:var(--terra)}
+.btn.cafe,nav .cta{background:linear-gradient(135deg,var(--oro),var(--terra));box-shadow:0 16px 34px -14px rgba(194,89,58,.75)}
+.franja{background:linear-gradient(90deg,var(--terra),var(--cafe),var(--pasto),var(--cafe),var(--terra));background-size:300% 100%;animation:fluye 14s linear infinite}
+@keyframes fluye{to{background-position:300% 0}}
+.franja .pista span::after{color:#FFD98A}
+.serv:nth-child(1),.paso:nth-child(1),.zona:nth-child(1){--c:var(--oro)}
+.serv:nth-child(2),.paso:nth-child(2),.zona:nth-child(2){--c:var(--terra)}
+.serv:nth-child(3),.paso:nth-child(3),.zona:nth-child(3){--c:var(--pasto)}
+.serv:nth-child(4),.paso:nth-child(4),.zona:nth-child(4){--c:var(--cielo)}
+.paso:nth-child(5){--c:var(--cafe2)}
+.serv,.paso{border-top:5px solid var(--c)}
+.serv .n,.paso::before{color:var(--c)}
+.serv::before,.paso::after,.zona::before{background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%),color-mix(in srgb,var(--c) 26%,transparent),transparent 45%)}
+.serv:hover,.paso:hover{border-color:var(--c);box-shadow:0 0 0 1px var(--c),0 0 40px -6px color-mix(in srgb,var(--c) 60%,transparent),0 26px 50px -30px rgba(24,34,26,.5)}
+.zona{border-left:4px solid var(--c)}
+.zona:hover{border-color:var(--c);background:color-mix(in srgb,var(--c) 16%,transparent);box-shadow:0 0 40px -6px color-mix(in srgb,var(--c) 55%,transparent)}
+.fac{border-top-color:var(--oro)}.fac:nth-child(2){border-top-color:var(--terra)}.fac:nth-child(3){border-top-color:var(--pasto)}.fac:nth-child(4){border-top-color:var(--cielo)}
+.check li::before{background-color:var(--pasto)}
+.socio .ini{background:linear-gradient(135deg,var(--oro),var(--terra))}
+.socio:nth-child(2) .ini{background:linear-gradient(135deg,var(--pasto),var(--cielo))}
+.cotiza{background:radial-gradient(600px 300px at 0% 0%,rgba(224,166,58,.45),transparent 70%),radial-gradient(500px 300px at 100% 100%,rgba(94,148,64,.3),transparent 70%),var(--arena)}
+.oscuro{background:radial-gradient(900px 420px at 85% 0%,rgba(94,148,64,.28),transparent 70%),radial-gradient(700px 380px at 0% 100%,rgba(194,89,58,.22),transparent 70%),var(--monte2)}
+.cifras{background:linear-gradient(90deg,var(--monte),#24331F,var(--monte))}
+.of:nth-child(1)::before{background:linear-gradient(180deg,transparent 30%,rgba(120,60,20,.92))}
+.of:nth-child(2)::before{background:linear-gradient(180deg,transparent 30%,rgba(30,62,30,.94))}
 .rv{opacity:0;transform:translateY(24px);transition:opacity .9s,transform .9s}.rv.in{opacity:1;transform:none}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rv{opacity:1;transform:none}}
 </style>
@@ -175,6 +243,8 @@ footer a{color:#E9E2D4;text-decoration:none}
   <div class="cifra"><b>1 equipo</b><span>veterinario especializado</span></div>
 </div></section>
 
+<div class="franja" aria-hidden="true"><div class="pista"><span>Sincronización</span><span>Aspiración de donadoras</span><span>Transferencia de embriones</span><span>Diagnóstico de preñez</span><span>Receptoras preñadas</span><span>+1.500 vientres seleccionados</span><span>4 sedes</span><span>Sincronización</span><span>Aspiración de donadoras</span><span>Transferencia de embriones</span><span>Diagnóstico de preñez</span><span>Receptoras preñadas</span><span>+1.500 vientres seleccionados</span><span>4 sedes</span></div></div>
+
 <section class="sec" id="nosotros"><div class="env dos">
   <div class="rv">
     <div class="kick">Genética, control y resultados</div>
@@ -195,9 +265,9 @@ footer a{color:#E9E2D4;text-decoration:none}
   <h2>Todo el proceso reproductivo, <span class="serif">en un solo lugar</span></h2>
   <div class="servs">
     <div class="serv rv"><div class="n">01</div><h3>Sincronización</h3><p>Preparamos a las receptoras con protocolos estandarizados para que el ciclo coincida con la transferencia.</p></div>
-    <div class="serv rv"><div class="n">02</div><h3>Aspiración de donadoras</h3><p>Aspiración folicular (OPU) de sus mejores hembras para multiplicar la genética que vale la pena.</p></div>
-    <div class="serv rv"><div class="n">03</div><h3>Transferencia de embriones</h3><p>Jornadas de trabajo programadas, con el embrión indicado para cada receptora.</p></div>
-    <div class="serv rv"><div class="n">04</div><h3>Diagnóstico de preñez</h3><p>Confirmación por ecografía y seguimiento constante de cada animal.</p></div>
+    <div class="serv rv d2"><div class="n">02</div><h3>Aspiración de donadoras</h3><p>Aspiración folicular (OPU) de sus mejores hembras para multiplicar la genética que vale la pena.</p></div>
+    <div class="serv rv d3"><div class="n">03</div><h3>Transferencia de embriones</h3><p>Jornadas de trabajo programadas, con el embrión indicado para cada receptora.</p></div>
+    <div class="serv rv d4"><div class="n">04</div><h3>Diagnóstico de preñez</h3><p>Confirmación por ecografía y seguimiento constante de cada animal.</p></div>
   </div>
 </div></section>
 
@@ -217,10 +287,10 @@ footer a{color:#E9E2D4;text-decoration:none}
   <p class="lead">Detrás de cada resultado está la genética que se busca, la elección del embrión, la selección de la receptora y un seguimiento constante.</p>
   <div class="pasos">
     <div class="paso rv"><h3>Su objetivo</h3><p>Nos cuenta qué genética quiere multiplicar y cuántas preñeces necesita.</p></div>
-    <div class="paso rv"><h3>Selección</h3><p>Elegimos las receptoras indicadas entre más de 1.500 vientres.</p></div>
-    <div class="paso rv"><h3>Sincronización</h3><p>Preparamos a cada receptora con protocolo estandarizado.</p></div>
-    <div class="paso rv"><h3>Transferencia</h3><p>Jornada de trabajo con el equipo veterinario y el embrión indicado.</p></div>
-    <div class="paso rv"><h3>Preñez confirmada</h3><p>Diagnóstico por ecografía y despacho a su finca.</p></div>
+    <div class="paso rv d2"><h3>Selección</h3><p>Elegimos las receptoras indicadas entre más de 1.500 vientres.</p></div>
+    <div class="paso rv d3"><h3>Sincronización</h3><p>Preparamos a cada receptora con protocolo estandarizado.</p></div>
+    <div class="paso rv d4"><h3>Transferencia</h3><p>Jornada de trabajo con el equipo veterinario y el embrión indicado.</p></div>
+    <div class="paso rv d1"><h3>Preñez confirmada</h3><p>Diagnóstico por ecografía y despacho a su finca.</p></div>
   </div>
 </div></section>
 
@@ -330,6 +400,28 @@ var t="Hola, soy "+v('nom')+(v('gan')?" de la ganadería "+v('gan'):"")+". Neces
 window.open("https://wa.me/573045605251?text="+encodeURIComponent(t),"_blank");return false;}
 (function(){var els=document.querySelectorAll('.rv');if(!('IntersectionObserver' in window)){els.forEach(function(e){e.classList.add('in')});return}
 var io=new IntersectionObserver(function(en){en.forEach(function(x){if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target)}})},{threshold:.12});els.forEach(function(e){io.observe(e)})})();
+</script>
+<div class="visor" id="visor" role="dialog" aria-label="Foto ampliada"><img alt=""><p></p></div>
+<script>
+(function(){
+var red=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+// Cifras que cuentan
+document.querySelectorAll('.cifra b').forEach(function(b){var t=b.textContent.trim(),m=t.match(/^(\+?)([\d.]+)$/);if(!m||red)return;var fin=parseInt(m[2].replace(/\./g,''),10),pre=m[1];b.textContent=pre+'0';
+ var io=new IntersectionObserver(function(e){if(!e[0].isIntersecting)return;io.disconnect();var t0=null;function paso(ts){if(!t0)t0=ts;var p=Math.min((ts-t0)/1600,1),v=Math.round(fin*(1-Math.pow(1-p,3)));b.textContent=pre+v.toLocaleString('es-CO');if(p<1)requestAnimationFrame(paso)}requestAnimationFrame(paso)},{threshold:.6});io.observe(b)});
+// Fotos que se mueven con el scroll
+var fotos=[].slice.call(document.querySelectorAll('.foto-r,.of'));var hero=document.querySelector('.portada>img');
+function mover(){var h=innerHeight;fotos.forEach(function(f){var r=f.getBoundingClientRect();if(r.bottom<0||r.top>h)return;var c=(r.top+r.height/2-h/2)/h;f.style.setProperty('--py',(c*-38).toFixed(1)+'px')});
+ if(hero){var y=scrollY;if(y<h)hero.parentNode.style.setProperty('--hy',(y*.3)+'px')}}
+if(!red){addEventListener('scroll',function(){requestAnimationFrame(mover)},{passive:true});mover()}
+// Luz que sigue el mouse en las tarjetas
+document.querySelectorAll('.serv,.paso,.zona').forEach(function(c){c.addEventListener('pointermove',function(e){var r=c.getBoundingClientRect();c.style.setProperty('--mx',(e.clientX-r.left)+'px');c.style.setProperty('--my',(e.clientY-r.top)+'px')})});
+// Clic: resplandor
+document.querySelectorAll('.serv,.paso,.zona,.socio,.fac,.cifra').forEach(function(c){c.addEventListener('click',function(){c.classList.remove('brilla');void c.offsetWidth;c.classList.add('brilla')})});
+// Clic en foto: se abre en grande
+var v=document.getElementById('visor'),vi=v.querySelector('img'),vp=v.querySelector('p');
+fotos.forEach(function(f){f.addEventListener('click',function(){var i=f.querySelector('img');vi.src=i.currentSrc.replace(/w=\d+/,'w=1800');vi.alt=i.alt;var h=f.querySelector('h3');vp.textContent=h?h.textContent:i.alt;v.classList.add('on')})});
+v.addEventListener('click',function(){v.classList.remove('on')});addEventListener('keydown',function(e){if(e.key==='Escape')v.classList.remove('on')});
+})();
 </script>
 <script async src="https://www.instagram.com/embed.js"></script>
 </body>
