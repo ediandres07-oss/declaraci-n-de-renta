@@ -145,7 +145,9 @@ h2 em{color:var(--verde-t)}.oscuro h2 em{color:var(--verde)}
 .h-foto::after{content:"";position:absolute;inset:0;background:linear-gradient(200deg,transparent 45%,rgba(7,17,13,.55));border-radius:inherit;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
 .h-foto img{width:100%;height:100%;object-fit:cover;object-position:70% 60%;animation:acerca 14s var(--ease) both}
 @keyframes acerca{from{transform:scale(1.1)}to{transform:scale(1)}}
-.ventana{position:relative;z-index:2;width:92%;margin:28px 0 0 auto;border-radius:22px;background:linear-gradient(180deg,#10211A,#0B1712);border:1px solid rgba(255,255,255,.1);box-shadow:0 50px 100px -40px rgba(0,0,0,.8),0 0 0 1px rgba(55,211,143,.06),inset 0 1px 0 rgba(255,255,255,.06);overflow:hidden}
+.h-cel{position:relative;z-index:3;margin:0 0 0 auto;width:42%;aspect-ratio:9/16;border-radius:34px;overflow:hidden;border:7px solid #0B1712;box-shadow:0 40px 80px -40px rgba(0,0,0,.85),0 0 0 1px rgba(255,255,255,.08);background:#0B1712}
+.h-cel video{width:100%;height:100%;object-fit:cover;display:block}
+.ventana{position:relative;z-index:2;width:64%;margin:-62% 0 0 0;border-radius:22px;background:linear-gradient(180deg,#10211A,#0B1712);border:1px solid rgba(255,255,255,.1);box-shadow:0 50px 100px -40px rgba(0,0,0,.8),0 0 0 1px rgba(55,211,143,.06),inset 0 1px 0 rgba(255,255,255,.06);overflow:hidden}
 .v-barra{display:flex;align-items:center;gap:7px;padding:12px 16px;border-bottom:1px solid var(--linea-o);font-size:12.5px;color:#8FA39A}
 .v-barra i{width:10px;height:10px;border-radius:50%;background:#2A3B33}
 .v-barra i:nth-child(1){background:#F26B5B}.v-barra i:nth-child(2){background:#F5C451}.v-barra i:nth-child(3){background:#3FCB80}
@@ -194,7 +196,8 @@ h2 em{color:var(--verde-t)}.oscuro h2 em{color:var(--verde)}
   .kpi{padding:8px}.kpi b{font-size:14.5px}.kpi small{font-size:10px}
   .flota{display:none}
   .h-foto{width:100%;aspect-ratio:4/3;border-radius:22px}
-  .ventana{width:100%;margin-top:20px}
+  .h-cel{width:70%;margin:0 auto}
+  .ventana{width:100%;margin-top:18px}
 }
 
 /* Cinta */
@@ -467,6 +470,7 @@ footer{background:var(--noche);color:var(--gris-o);padding-top:clamp(64px,8vw,96
     </div>
 
     <div class="maqueta entra" style="--d:.5s">
+      <figure class="h-cel"><video src="/static/video/tributando-10s.mp4" poster="/static/video/tributando-10s.jpg" autoplay muted loop playsinline preload="metadata" aria-label="Video corto de Tributando: las facturas de la DIAN entran solas a la contabilidad"></video></figure>
       <div class="ventana" role="img" aria-label="Ilustración del software Tributando con cifras de ejemplo">
         <div class="v-barra"><i></i><i></i><i></i><b>Resumen del mes</b><span class="ej">Cifras de ejemplo</span></div>
         <div class="v-cuerpo">
