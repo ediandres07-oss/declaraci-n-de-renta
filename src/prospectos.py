@@ -314,7 +314,7 @@ def plantilla(p: Prospecto) -> tuple[str, str]:
 </ul>
 <p>En <b>Tributando</b> te damos todo en un solo lugar:</p>
 <ul style="padding-left:18px">
-<li>📄 <b>Facturación electrónica</b>: te habilitamos ante la DIAN y facturas desde el celular. <b>$230.000 al año</b> con hasta 120 documentos (facturas, notas y documentos soporte).</li>
+<li>📄 <b>Facturación electrónica</b>: te habilitamos ante la DIAN y facturas desde el celular. <b>$230.000 al año</b> con hasta 120 documentos (facturas, notas y documentos soporte). <b>Las primeras 5 facturas te las regalamos</b> para que la pruebes.</li>
 <li>👥 <b>Nómina electrónica</b> para tus empleados: <b>$25.000 por empleado al mes</b>, con tope de $150.000: de 6 empleados en adelante pagas máximo $150.000.</li>
 <li>📒 <b>Contabilidad e impuestos</b> en la nube, con un contador que los revisa.</li>
 </ul>
@@ -331,6 +331,7 @@ def plantilla(p: Prospecto) -> tuple[str, str]:
 <li><b>Renovar la matrícula</b> antes del 31 de marzo.</li>
 </ul>
 <p>En <b>Tributando</b> te llevamos la <b>contabilidad en la nube</b>, alimentada sola con tus facturas de la DIAN, la <b>nómina electrónica</b> y los impuestos, con un contador que lo revisa. Responde este correo y te cuento cuánto cuesta para {nombre.rstrip(".")}.</p>
+<p>🧾 <b>Prueba la factura electrónica gratis:</b> te habilitamos ante la DIAN y te regalamos tus <b>primeras 5 facturas electrónicas</b>, sin compromiso.</p>
 <p>🎁 <b>Además te armamos un borrador de la página web de {nombre.rstrip(".")}</b>. Mírala con el botón de abajo.</p>"""
     return asunto, _envolver(cuerpo, p.email, "Ver nuestro portafolio", url_portafolio(p.email),
                              "Ver mi página web", _url_sitio(p.email))
