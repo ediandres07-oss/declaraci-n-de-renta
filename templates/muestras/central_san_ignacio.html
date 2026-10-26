@@ -106,6 +106,12 @@ h2 .serif{color:var(--cafe);font-size:.78em}
 .ig{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:36px;align-items:start}
 @media(max-width:900px){.ig{grid-template-columns:1fr}}
 .ig .instagram-media{min-width:0!important;width:100%!important;margin:0!important}
+.ig-uno{max-width:460px;width:100%;justify-self:center}.ig-uno .instagram-media{min-width:0!important;width:100%!important;margin:0!important}
+.socios{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:28px 0 6px}
+@media(max-width:520px){.socios{grid-template-columns:1fr}}
+.socio{display:flex;align-items:center;gap:14px;background:#FBF8F2;border:1px solid rgba(139,90,43,.18);border-radius:18px;padding:16px}
+.socio .ini{flex:none;width:52px;height:52px;border-radius:50%;background:var(--cafe);color:#fff;display:grid;place-items:center;font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px}
+.socio h3{font-size:22px;line-height:1}.socio p{font-size:13px;color:var(--suave);margin-top:4px}
 /* Cotizador */
 .cotiza{background:var(--arena);border-radius:32px;padding:clamp(28px,5vw,56px);display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:clamp(24px,4vw,56px);align-items:start}
 @media(max-width:900px){.cotiza{grid-template-columns:1fr}}
@@ -145,7 +151,7 @@ footer a{color:#E9E2D4;text-decoration:none}
     <svg width="44" height="44" viewBox="0 0 64 64" aria-hidden="true"><ellipse cx="32" cy="32" rx="30" ry="22" fill="none" stroke="#E8D6B9" stroke-width="2.5"/><path d="M18 28c3-6 8-8 14-8s11 2 14 8c-2 0-4 1-5 3v8c0 5-4 8-9 8s-9-3-9-8v-8c-1-2-3-3-5-3z" fill="#E8D6B9"/><circle cx="27" cy="33" r="1.6" fill="#18221A"/><circle cx="37" cy="33" r="1.6" fill="#18221A"/><path d="M29 43c2 1 4 1 6 0" stroke="#18221A" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>
     <span><b>San Ignacio</b><small>Central de receptoras</small></span>
   </a>
-  <div class="links"><a href="#servicios">Servicios</a><a href="#proceso">Proceso</a><a href="#genetica">Genética</a><a href="#zonas">Sedes</a><a href="#preguntas">Preguntas</a></div>
+  <div class="links"><a href="#servicios">Servicios</a><a href="#proceso">Proceso</a><a href="#genetica">Genética</a><a href="#equipo">Equipo</a><a href="#zonas">Sedes</a><a href="#preguntas">Preguntas</a></div>
   <a class="cta" href="#cotizar">Pedir receptoras</a>
 </div></nav>
 
@@ -232,6 +238,20 @@ footer a{color:#E9E2D4;text-decoration:none}
       <div class="fac"><h3>Salud reproductiva</h3></div>
     </div>
   </div>
+</div></section>
+
+<section class="sec" id="equipo" style="padding-top:0"><div class="env dos">
+  <div class="rv">
+    <div class="kick">Nuestro equipo</div>
+    <h2>Quiénes están <span class="serif">detrás de San Ignacio</span></h2>
+    <p class="lead">Somos Julián González y Nicolás Galdós, dos apasionados por la ganadería y la reproducción que compartimos una misma visión: hacer las cosas bien, con compromiso, criterio y pensando siempre en los resultados de nuestros clientes.</p>
+    <div class="socios">
+      <div class="socio"><span class="ini">JG</span><div><h3>Julián González</h3><p>Central San Ignacio</p></div></div>
+      <div class="socio"><span class="ini">NG</span><div><h3>Nicolás Galdós</h3><p>Central San Ignacio</p></div></div>
+    </div>
+    <p class="lead" style="font-size:16px">Con ellos, un equipo veterinario especializado acompaña cada receptora, cada proceso y cada resultado.</p>
+  </div>
+  <div class="rv ig-uno"><blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/DctelipOEPj/" data-instgrm-version="14"></blockquote></div>
 </div></section>
 
 <section class="sec oscuro" id="zonas"><div class="env">
