@@ -300,6 +300,43 @@ footer{background:var(--noche);color:#A9ABB2;padding-top:clamp(64px,8vw,96px);ov
 :focus-visible{outline:2px solid var(--claro);outline-offset:3px;border-radius:6px}
 .ig-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start}@media(max-width:900px){.ig-grid{grid-template-columns:1fr;max-width:480px;margin:0 auto}}.ig-grid .instagram-media{min-width:0!important;width:100%!important;margin:0!important}
 .rej4{grid-template-columns:repeat(4,minmax(0,1fr))}@media(max-width:960px){.rej4{grid-template-columns:1fr 1fr}.rej4 .tarjeta:first-child{grid-column:auto;aspect-ratio:auto}}@media(max-width:620px){.rej4{grid-template-columns:1fr}}
+
+/* ===== Interactividad ===== */
+.cifras-wp{background:var(--noche);color:#fff;border-top:1px solid rgba(255,255,255,.06)}
+.cifras-wp .env{display:grid;grid-template-columns:repeat(4,1fr)}
+.cifras-wp .cifra{padding:30px 18px;border-left:1px solid rgba(255,255,255,.08)}.cifras-wp .cifra:first-child{border-left:0}
+.cifras-wp b{display:block;font-size:clamp(34px,4vw,54px);line-height:1;font-weight:800;background:linear-gradient(90deg,#F3D99A,var(--claro));-webkit-background-clip:text;background-clip:text;color:transparent}
+.cifras-wp span{display:block;margin-top:8px;color:#B9BCC4;font-size:14.5px}
+@media(max-width:760px){.cifras-wp .env{grid-template-columns:1fr 1fr}.cifras-wp .cifra:nth-child(3){border-left:0}.cifras-wp .cifra{border-top:1px solid rgba(255,255,255,.08)}}
+.portada .foto img{translate:0 var(--hy,0px)}
+.tarjeta{transition:transform .45s var(--ease),box-shadow .45s var(--ease)}
+.tarjeta::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:radial-gradient(380px circle at var(--mx,50%) var(--my,50%),rgba(212,175,97,.35),transparent 45%);opacity:0;transition:opacity .35s;z-index:1}
+.tarjeta:hover{transform:translateY(-8px);box-shadow:0 0 0 2px var(--claro),0 0 46px -4px rgba(212,175,97,.55),0 30px 60px -30px rgba(10,20,40,.6)}
+.tarjeta:hover::after{opacity:1}
+.tarjeta:hover img{transform:scale(1.12);filter:saturate(1.15) brightness(1.06)}
+.ficha a.item{transition:background .3s,transform .3s}.ficha a.item:hover{transform:translateX(6px);background:rgba(212,175,97,.14)}
+.ficha a.item img{transition:transform .5s var(--ease)}.ficha a.item:hover img{transform:scale(1.12) rotate(-2deg)}
+.razon{transition:transform .35s var(--ease),box-shadow .35s,border-color .35s}.razon:hover{transform:translateY(-6px);border-color:var(--claro);box-shadow:0 0 40px -8px rgba(212,175,97,.45)}
+.paso{transition:transform .35s var(--ease),box-shadow .35s}.paso:hover{transform:translateY(-6px);box-shadow:0 0 0 2px var(--claro),0 24px 50px -30px rgba(30,58,110,.6)}
+.btn-prim{position:relative;overflow:hidden}
+.btn-prim::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.4) 50%,transparent 70%);transform:translateX(-120%);animation:brillo 3.8s ease-in-out infinite}
+@keyframes brillo{0%,55%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
+.nos .foto img{cursor:zoom-in;transition:transform .6s var(--ease),box-shadow .6s}
+.nos .foto:hover img{transform:scale(1.02);box-shadow:0 0 0 3px var(--claro),0 0 50px 4px rgba(212,175,97,.4)}
+.pulso{animation:pulso .9s ease-out}
+@keyframes pulso{0%{box-shadow:0 0 0 0 rgba(212,175,97,.9)}100%{box-shadow:0 0 0 22px rgba(212,175,97,0)}}
+.visor{position:fixed;inset:0;z-index:80;background:rgba(8,12,22,.9);backdrop-filter:blur(6px);display:grid;place-items:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .35s;cursor:zoom-out}
+.visor.on{opacity:1;pointer-events:auto}
+.visor img{max-width:min(1100px,100%);max-height:84vh;border-radius:22px;box-shadow:0 0 0 3px var(--claro),0 0 80px 10px rgba(212,175,97,.4);transform:scale(.92);transition:transform .45s var(--ease)}
+.visor.on img{transform:none}
+.contador{display:grid;grid-template-columns:44px 1fr 44px;gap:6px}
+.contador button{border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:#fff;border-radius:12px;font-size:20px;cursor:pointer;transition:background .2s}
+.contador button:hover{background:var(--prim)}
+.contador input{text-align:center}
+form.formulario select{width:100%;font:inherit;font-size:16px;color:#fff;background:rgba(255,255,255,.06) url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2712%27 height=%278%27%3E%3Cpath d=%27M1 1l5 5 5-5%27 stroke=%27%23D4AF61%27 stroke-width=%272%27 fill=%27none%27/%3E%3C/svg%3E") no-repeat right 16px center;border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:14px 40px 14px 16px;-webkit-appearance:none;appearance:none}form.formulario select option{color:#121316}form.formulario input[type=date]{color-scheme:dark}
+.resumen{border:1px dashed rgba(212,175,97,.5);border-radius:14px;padding:12px 14px;color:#E9DDBF;font-size:14.5px;background:rgba(212,175,97,.07)}
+.resumen b{color:#F3D99A}
+@media(prefers-reduced-motion:reduce){.btn-prim::after{animation:none}}
 </style>
 </head>
 <body>
@@ -361,6 +398,12 @@ footer{background:var(--noche);color:#A9ABB2;padding-top:clamp(64px,8vw,96px);ov
   </div>
 </section>
 
+<section class="cifras-wp" aria-label="WorldPeak en cifras"><div class="env">
+  <div class="cifra"><b data-hasta="13100" data-pre="+">13.100</b><span>seguidores en Instagram</span></div>
+  <div class="cifra"><b data-hasta="12">12</b><span>destinos nacionales e internacionales</span></div>
+  <div class="cifra"><b>2027</b><span>salidas garantizadas</span></div>
+  <div class="cifra"><b>RNT</b><span>300617 · Registro Nacional de Turismo</span></div>
+</div></section>
 <div class="cinta" aria-hidden="true">
   <div class="pista">
     
@@ -544,7 +587,7 @@ footer{background:var(--noche);color:#A9ABB2;padding-top:clamp(64px,8vw,96px);ov
       
       <article class="paso rv" style="--d:0.0s">
         <div class="n"><b>01</b><span></span></div>
-        <h3>Cuéntenos su viaje</h3><p>Destino, fechas y número de viajeros, por WhatsApp o en el formulario.</p>
+        <h3>Cuéntenos su viaje</h3><p>Destino, fechas y número de viajeros, por WhatsApp o en el cotizador de esta página.</p>
       </article>
       
       <article class="paso rv" style="--d:0.1s">
@@ -581,7 +624,7 @@ footer{background:var(--noche);color:#A9ABB2;padding-top:clamp(64px,8vw,96px);ov
     </div>
     <div class="acordeon rv" style="--d:.1s">
       
-      <details open><summary>¿Cómo reservo un plan?<span class="mas" aria-hidden="true"></span></summary><p class="resp">Escríbanos por WhatsApp al 323 497 2854 o por el formulario de esta página con el destino, las fechas y el número de viajeros. Le respondemos con la cotización.</p></details>
+      <details open><summary>¿Cómo reservo un plan?<span class="mas" aria-hidden="true"></span></summary><p class="resp">Escríbanos por WhatsApp al 323 497 2854 o con el cotizador de esta página con el destino, las fechas y el número de viajeros. Le respondemos con la cotización.</p></details>
       
       <details><summary>¿Los precios son por persona?<span class="mas" aria-hidden="true"></span></summary><p class="resp">Sí. Por ejemplo, el plan a Río de Janeiro en Semana Santa va desde $5.749.000 por persona en acomodación doble. Cada cotización le dice qué incluye.</p></details>
       
@@ -617,17 +660,26 @@ footer{background:var(--noche);color:#A9ABB2;padding-top:clamp(64px,8vw,96px);ov
         <div class="canal"><i><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></i><span><small>Ubicación</small><b>Medellín, Antioquia, Colombia</b></span></div>
         <div class="mapa"><a class="respaldo" href="https://www.google.com/maps?q=Medell%C3%ADn%2C%20Antioquia%2C%20Colombia" target="_blank" rel="noopener"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Ver Medellín en Google Maps</a><iframe src="https://www.google.com/maps?q=Medell%C3%ADn%2C%20Antioquia%2C%20Colombia&amp;output=embed" title="Mapa de Medellín" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
       </div>
-      <form class="formulario rv" style="--d:.1s" id="formulario" data-para="worldpeaktravelagency@gmail.com" data-marca="WORLDPEAK TRAVEL AGENCY" novalidate>
-        <h3>Escríbanos</h3>
-        <p>Cuéntenos destino, fechas y número de viajeros.</p>
+      <form class="formulario rv" style="--d:.1s" id="formulario" novalidate>
+        <h3>Cotice su viaje</h3>
+        <p>Escoja destino, fechas y viajeros. Le llega armado a nuestro WhatsApp.</p>
         <div class="fila">
           <label>Nombre<input type="text" name="nombre" placeholder="Su nombre" autocomplete="name"></label>
-          <label>Teléfono<input type="tel" name="telefono" placeholder="300 000 0000" autocomplete="tel"></label>
+          <label>Destino<select name="destino"><option>Río de Janeiro (Semana Santa)</option><option>Punta Cana</option><option>Isla Fuerte</option><option>Arboletes</option><option>Puerto Plata</option><option>Dubái</option><option>Costa Rica</option><option>Medellín y Guatapé</option><option>Necoclí</option><option>Betania y Jardín</option><option>Llanos Orientales</option><option>La Guajira, Valledupar y Santa Marta</option><option>Otro destino</option></select></label>
         </div>
-        <label>Correo<input type="email" name="correo" placeholder="nombre@correo.com" autocomplete="email"></label>
-        <label>Mensaje<textarea name="mensaje" rows="4" placeholder="Destino, fechas y número de viajeros"></textarea></label>
-        <button class="btn btn-prim" type="submit">Enviar mensaje <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8.5 7H17v8.5"/></svg></button>
-        <p class="nota">Al enviar se abre su programa de correo con el mensaje listo para worldpeaktravelagency@gmail.com.</p>
+        <div class="fila">
+          <label>Salida<input type="date" name="salida"></label>
+          <label>Regreso<input type="date" name="regreso"></label>
+        </div>
+        <div class="fila">
+          <label>Adultos<div class="contador"><button type="button" data-paso="-1" aria-label="Menos adultos">−</button><input type="number" name="adultos" value="2" min="1" max="30"><button type="button" data-paso="1" aria-label="Más adultos">+</button></div></label>
+          <label>Niños<div class="contador"><button type="button" data-paso="-1" aria-label="Menos niños">−</button><input type="number" name="ninos" value="0" min="0" max="20"><button type="button" data-paso="1" aria-label="Más niños">+</button></div></label>
+        </div>
+        <label>Presupuesto aproximado por persona<select name="presupuesto"><option>Sin definir</option><option>Hasta $1.000.000</option><option>$1.000.000 a $3.000.000</option><option>$3.000.000 a $6.000.000</option><option>Más de $6.000.000</option></select></label>
+        <label>Comentarios<textarea name="mensaje" rows="3" placeholder="Hotel, plan, celebración especial…"></textarea></label>
+        <div class="resumen" id="resumen" aria-live="polite"></div>
+        <button class="btn btn-prim" type="submit">Enviar por WhatsApp <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8.5 7H17v8.5"/></svg></button>
+        <p class="nota">Se abre WhatsApp con su cotización lista para enviar al 323 497 2854.</p>
       </form>
     </div>
   </div>
@@ -701,14 +753,21 @@ footer{background:var(--noche);color:#A9ABB2;padding-top:clamp(64px,8vw,96px);ov
     els.forEach(function(el){ io.observe(el); });
   } else { els.forEach(function(el){ el.classList.add('in'); }); }
 
-  var f = document.getElementById('formulario');
+  var f = document.getElementById('formulario'), res = document.getElementById('resumen');
+  function fecha(v){ if(!v) return ''; var p=v.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
+  function leer(){ var d=new FormData(f); return {n:(d.get('nombre')||'').trim(), dest:d.get('destino'), s:d.get('salida'), r:d.get('regreso'),
+    a:+d.get('adultos')||0, k:+d.get('ninos')||0, pre:d.get('presupuesto'), m:(d.get('mensaje')||'').trim()}; }
+  function pintar(){ var x=leer(), noches='';
+    if(x.s&&x.r){ var dn=Math.round((new Date(x.r)-new Date(x.s))/864e5); if(dn>0) noches=' · '+dn+(dn===1?' noche':' noches'); }
+    var v=x.a+x.k; res.innerHTML='<b>'+x.dest+'</b>'+(x.s?' · '+fecha(x.s)+(x.r?' al '+fecha(x.r):''):'')+noches+' · '+v+(v===1?' viajero':' viajeros'); }
+  f.querySelectorAll('.contador button').forEach(function(b){ b.addEventListener('click', function(){
+    var i=b.parentNode.querySelector('input'), v=(+i.value||0)+(+b.dataset.paso); i.value=Math.max(+i.min||0, Math.min(+i.max||99, v)); pintar(); }); });
+  f.addEventListener('input', pintar); f.addEventListener('change', pintar); pintar();
   f.addEventListener('submit', function(ev){
-    ev.preventDefault();
-    var d = new FormData(f), nombre = (d.get('nombre') || '').trim();
-    var asunto = 'Mensaje desde la página web de ' + f.dataset.marca + (nombre ? ' — ' + nombre : '');
-    var cuerpo = (d.get('mensaje') || '') + '\n\n' +
-      'Nombre: ' + nombre + '\nTeléfono: ' + (d.get('telefono') || '') + '\nCorreo: ' + (d.get('correo') || '');
-    window.location.href = 'mailto:' + f.dataset.para + '?subject=' + encodeURIComponent(asunto) + '&body=' + encodeURIComponent(cuerpo);
+    ev.preventDefault(); var x=leer();
+    var txt='Hola WorldPeak, quiero cotizar un viaje:\n• Destino: '+x.dest+(x.s?'\n• Salida: '+fecha(x.s):'')+(x.r?'\n• Regreso: '+fecha(x.r):'')+
+      '\n• Viajeros: '+x.a+' adulto(s)'+(x.k?' y '+x.k+' niño(s)':'')+'\n• Presupuesto por persona: '+x.pre+(x.m?'\n• Comentarios: '+x.m:'')+(x.n?'\nMi nombre es '+x.n+'.':'');
+    window.open('https://wa.me/573234972854?text='+encodeURIComponent(txt), '_blank');
   });
 })();
 </script>
@@ -747,6 +806,28 @@ footer{background:var(--noche);color:#A9ABB2;padding-top:clamp(64px,8vw,96px);ov
   document.addEventListener('submit', function(ev){
     var f = ev.target; if (f && f.closest && f.closest('#asesoria')) enviar('asesoria_enviada');
   }, true);
+})();
+</script>
+<div class="visor" id="visor"><img alt=""></div>
+<script>
+(function(){
+var red=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+// cifras que cuentan
+document.querySelectorAll('.cifras-wp b[data-hasta]').forEach(function(b){ if(red) return; var fin=+b.dataset.hasta, pre=b.dataset.pre||''; b.textContent=pre+'0';
+  var io=new IntersectionObserver(function(e){ if(!e[0].isIntersecting) return; io.disconnect(); var t0=null;
+    function paso(ts){ if(!t0) t0=ts; var p=Math.min((ts-t0)/1600,1), v=Math.round(fin*(1-Math.pow(1-p,3))); b.textContent=pre+v.toLocaleString('es-CO'); if(p<1) requestAnimationFrame(paso); }
+    requestAnimationFrame(paso); },{threshold:.6}); io.observe(b); });
+// portada con profundidad al bajar
+var pf=document.querySelector('.portada .foto');
+if(pf && !red) addEventListener('scroll',function(){ var y=scrollY; if(y<innerHeight) pf.style.setProperty('--hy',(y*.3)+'px'); },{passive:true});
+// luz que sigue el mouse en las tarjetas
+document.querySelectorAll('.tarjeta').forEach(function(c){ c.addEventListener('pointermove',function(e){ var r=c.getBoundingClientRect(); c.style.setProperty('--mx',(e.clientX-r.left)+'px'); c.style.setProperty('--my',(e.clientY-r.top)+'px'); }); });
+// pulso al tocar razones y pasos
+document.querySelectorAll('.razon,.paso').forEach(function(c){ c.addEventListener('click',function(){ c.classList.remove('pulso'); void c.offsetWidth; c.classList.add('pulso'); }); });
+// foto de "Quiénes somos" en grande
+var v=document.getElementById('visor'), vi=v.querySelector('img');
+document.querySelectorAll('.nos .foto img').forEach(function(i){ i.addEventListener('click',function(){ vi.src=i.currentSrc.replace(/w=\d+/,'w=1800'); v.classList.add('on'); }); });
+v.addEventListener('click',function(){ v.classList.remove('on'); }); addEventListener('keydown',function(e){ if(e.key==='Escape') v.classList.remove('on'); });
 })();
 </script>
 <script async src="https://www.instagram.com/embed.js"></script>
