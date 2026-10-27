@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" class="js">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -143,6 +143,27 @@ footer .env{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
 @media(max-width:560px){.opc td,.opc th{font-size:13px}.mini{display:block;margin:6px 0 0}}
 .opc-tabla{overflow-x:auto;-webkit-overflow-scrolling:touch}.opc-tabla table{min-width:460px}
 .opc{width:min(880px,100%)!important}.pbtn{font:600 14px Inter,sans-serif;color:var(--azul);background:#EEF2F9;border:1px solid transparent;border-radius:10px;padding:7px 10px;cursor:pointer;white-space:nowrap;transition:background .2s,color .2s}.pbtn:hover{background:var(--azul);color:#fff}.pbtn::after{content:" ›";opacity:.6}.opc td b{font-size:14px}
+
+/* ===== Interactividad suave ===== */
+.foto img{animation:deriva 22s ease-in-out infinite alternate}
+@keyframes deriva{from{transform:scale(1.02)}to{transform:scale(1.1) translate(-1.5%,-1%)}}
+.js .rv{opacity:0;transform:translateY(22px);transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1);transition-delay:var(--d,0s)}
+.js .rv.in{opacity:1;transform:none}
+.portada h1,.portada .sub,.portada .acc,.portada .etiqueta,.datos-r{animation:sube .8s cubic-bezier(.2,.7,.2,1) both}
+.portada .etiqueta{animation-delay:.05s}.portada h1{animation-delay:.15s}.portada .sub{animation-delay:.3s}.portada .acc{animation-delay:.42s}.datos-r{animation-delay:.55s}
+@keyframes sube{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.serv .ico{transition:transform .35s,background .35s,color .35s}.serv:hover .ico{transform:rotate(-8deg) scale(1.08);background:var(--azul);color:#fff}
+.plan{transition:border-color .25s,box-shadow .25s,transform .35s cubic-bezier(.2,.7,.2,1),opacity .35s}
+.plan.saliendo{opacity:0;transform:scale(.96)}
+.btn-azul{position:relative;overflow:hidden}
+.btn-azul::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.35) 50%,transparent 65%);transform:translateX(-120%);transition:transform .7s}
+.btn-azul:hover::after{transform:translateX(120%)}
+.opc{transform:translateY(16px) scale(.98);transition:transform .3s cubic-bezier(.2,.7,.2,1)}.opc-fondo.on .opc{transform:none}
+.pbtn{transition:background .2s,color .2s,transform .2s}.pbtn:hover{transform:translateY(-1px)}
+.plan.sel{animation:elegido .7s ease-out}
+@keyframes elegido{0%{box-shadow:0 0 0 0 rgba(30,58,110,.6)}100%{box-shadow:0 0 0 2px var(--azul),0 0 0 16px rgba(30,58,110,0)}}
+.dest-cont{font-variant-numeric:tabular-nums}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.js .rv{opacity:1;transform:none}}
 </style>
 </head>
 <body>
@@ -164,13 +185,13 @@ footer .env{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
     <h1>Viaja fácil, seguro y <em>a tu medida</em></h1>
     <p class="sub">Vuelos, hoteles, paquetes y experiencias nacionales e internacionales, con asesoría de principio a fin.</p>
     <div class="acc"><a class="btn btn-azul" href="#cotizar">Cotizar mi viaje</a><a class="btn btn-borde" href="#servicios">Ver servicios</a></div>
-    <div class="datos-r"><span><b>12</b>destinos este año</span><span><b>2027</b>salidas garantizadas</span><span><b>+13 mil</b>seguidores en Instagram</span></div>
+    <div class="datos-r"><span><b data-hasta="14">14</b>planes</span><span><b data-hasta="132">132</b>salidas y opciones</span><span><b data-hasta="13" data-pre="+" data-suf=" mil">+13 mil</b>seguidores en Instagram</span></div>
   </div>
   <div class="foto"><img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&amp;fit=crop&amp;w=1100&amp;q=70" alt="Playa del Caribe al atardecer" fetchpriority="high"></div>
 </div></section>
 
 <section class="sec gris" id="servicios"><div class="env">
-  <div class="cab"><div><p class="ceja">Servicios</p><h2>Todo lo que hacemos</h2></div><p>Toque un servicio y le respondemos por WhatsApp.</p></div>
+  <div class="cab rv"><div><p class="ceja">Servicios</p><h2>Todo lo que hacemos</h2></div><p>Toque un servicio y le respondemos por WhatsApp.</p></div>
   <div class="servicios">
     {% set servicios = [
       ('Vuelos', 'Tiquetes nacionales e internacionales con la mejor ruta.', '<path d="M2 16l20-6-2-2-7 2-5-6-2 1 3 6-5 2-2-2-1 1z"/>'),
@@ -181,7 +202,7 @@ footer .env{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
       ('Asesoría de viaje', 'Le ayudamos a escoger destino, fechas y presupuesto.', '<path d="M21 12a8 8 0 0 1-11.6 7.1L4 21l1.9-5.4A8 8 0 1 1 21 12z"/>'),
     ] %}
     {% for t, d, ic in servicios %}
-    <a class="serv" href="https://wa.me/573234972854?text={{ ('Hola WorldPeak, quiero información de ' ~ t|lower)|urlencode }}" target="_blank" rel="noopener">
+    <a class="serv rv" href="https://wa.me/573234972854?text={{ ('Hola WorldPeak, quiero información de ' ~ t|lower)|urlencode }}" target="_blank" rel="noopener">
       <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">{{ ic|safe }}</svg></div>
       <h3>{{ t }}</h3><p>{{ d }}</p><span class="ir">Consultar →</span>
     </a>
@@ -190,62 +211,62 @@ footer .env{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
 </div></section>
 
 <section class="sec" id="destinos"><div class="env">
-  <div class="cab"><div><p class="ceja">Planes</p><h2>Escoja su próximo viaje</h2><p style="margin-top:10px">Todas nuestras salidas, con fechas, alojamientos y precios. Toque «Ver opciones», elija y le armamos la cotización.</p></div>
+  <div class="cab rv"><div><p class="ceja">Planes</p><h2>Escoja su próximo viaje</h2><p style="margin-top:10px">Todas nuestras salidas, con fechas, alojamientos y precios. Toque «Ver opciones», elija y le armamos la cotización.</p></div>
     <div class="filtros" role="tablist" aria-label="Filtrar planes"><button class="on" data-f="todos">Todos</button><button data-f="nac">Nacionales</button><button data-f="int">Internacionales</button></div></div>
   <div class="planes">
-    <article class="plan" data-t="int">
+    <article class="plan rv" data-t="int">
       <div class="pimg"><div class="pista"><img src="https://images.unsplash.com/photo-1772603503638-74ca65f96589?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Río de Janeiro · foto 1" loading="lazy"><img src="https://images.unsplash.com/photo-1757697110132-9ff1a030edb6?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Río de Janeiro · foto 2" loading="lazy"><img src="https://images.unsplash.com/photo-1626568941852-70bc179e493e?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Río de Janeiro · foto 3" loading="lazy"></div><button type="button" class="fl izq" aria-label="Foto anterior">‹</button><button type="button" class="fl der" aria-label="Foto siguiente">›</button><div class="puntos"><i class=on></i><i></i><i></i></div><span class="tipo">Internacional</span></div>
       <div class="pcuerpo"><h3>Río de Janeiro</h3><p class="pf">Semana Santa · 24 al 28 de marzo de 2027 · salida garantizada</p><p class="pi">Vuelos Avianca desde Medellín, hotel Othon Palace Copacabana frente al mar, 4 noches con desayuno, traslados, full day en Río</p>
         <div class="ppie"><div class="pp"><small>desde</small><b>$5.749.000</b><small>doble, por persona</small></div><button type="button" class="btn btn-azul" data-opciones="rio">Ver opciones</button></div></div>
-    </article><article class="plan" data-t="int">
+    </article><article class="plan rv" data-t="int">
       <div class="pimg"><div class="pista"><img src="https://images.unsplash.com/photo-1781901227396-34e5fc040091?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Punta Cana · foto 1" loading="lazy"><img src="https://images.unsplash.com/photo-1569700946659-fe1941c71fe4?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Punta Cana · foto 2" loading="lazy"><img src="https://images.unsplash.com/photo-1546708973-b339540b5162?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Punta Cana · foto 3" loading="lazy"></div><button type="button" class="fl izq" aria-label="Foto anterior">‹</button><button type="button" class="fl der" aria-label="Foto siguiente">›</button><div class="puntos"><i class=on></i><i></i><i></i></div><span class="tipo">Internacional</span></div>
       <div class="pcuerpo"><h3>Punta Cana</h3><p class="pf">Salidas garantizadas 2027 · abril, mayo y junio</p><p class="pi">Tiquetes, traslados, alojamiento, alimentación, tours y asistencia médica</p>
         <div class="ppie"><div class="pp"><small>desde</small><b>$2.430.000</b><small>doble, por persona</small></div><button type="button" class="btn btn-azul" data-opciones="puntacana">Ver opciones</button></div></div>
-    </article><article class="plan" data-t="int">
+    </article><article class="plan rv" data-t="int">
       <div class="pimg"><div class="pista"><img src="https://images.unsplash.com/photo-1615657071655-3748ccc3340c?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Argentina · foto 1" loading="lazy"><img src="https://images.unsplash.com/photo-1552751753-0fc84ae5b6c8?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Argentina · foto 2" loading="lazy"><img src="https://images.unsplash.com/photo-1638271267226-a7cf8e3e0dbe?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Argentina · foto 3" loading="lazy"></div><button type="button" class="fl izq" aria-label="Foto anterior">‹</button><button type="button" class="fl der" aria-label="Foto siguiente">›</button><div class="puntos"><i class=on></i><i></i><i></i></div><span class="tipo">Internacional</span></div>
       <div class="pcuerpo"><h3>Argentina</h3><p class="pf">Salida garantizada · 20 al 27 de junio de 2027</p><p class="pi">Excursión 2027</p>
         <div class="ppie"><div class="pp"><small>desde</small><b>$7.499.000</b><small>doble</small></div><button type="button" class="btn btn-azul" data-opciones="argentina">Ver plan</button></div></div>
-    </article><article class="plan" data-t="int">
+    </article><article class="plan rv" data-t="int">
       <div class="pimg"><div class="pista"><img src="https://images.unsplash.com/photo-1768463852105-2a373807af52?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Dubái · foto 1" loading="lazy"><img src="https://images.unsplash.com/photo-1462007895615-c8c073bebcd8?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Dubái · foto 2" loading="lazy"><img src="https://images.unsplash.com/photo-1489516408517-0c0a15662682?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Dubái · foto 3" loading="lazy"></div><button type="button" class="fl izq" aria-label="Foto anterior">‹</button><button type="button" class="fl der" aria-label="Foto siguiente">›</button><div class="puntos"><i class=on></i><i></i><i></i></div><span class="tipo">Internacional</span></div>
       <div class="pcuerpo"><h3>Dubái</h3><p class="pf">Fin de Año · 29 de diciembre al 3 de enero de 2027 · 5 noches · porción terrestre</p><p class="pi">Traslados, 5 noches con desayuno, tours, asistencia médica, impuestos hoteleros</p>
         <div class="ppie"><div class="pp"><small>desde</small><b>USD 1.345</b><small>por persona, sin vuelos</small></div><button type="button" class="btn btn-azul" data-opciones="dubai">Ver opciones</button></div></div>
-    </article><article class="plan" data-t="int">
+    </article><article class="plan rv" data-t="int">
       <div class="pimg"><div class="pista"><img src="https://images.unsplash.com/photo-1776192030922-f0d342487045?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Costa Rica · foto 1" loading="lazy"><img src="https://images.unsplash.com/photo-1611223156134-07ade11dfe6a?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Costa Rica · foto 2" loading="lazy"><img src="https://images.unsplash.com/photo-1552727131-5fc6af16796d?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Costa Rica · foto 3" loading="lazy"></div><button type="button" class="fl izq" aria-label="Foto anterior">‹</button><button type="button" class="fl der" aria-label="Foto siguiente">›</button><div class="puntos"><i class=on></i><i></i><i></i></div><span class="tipo">Internacional</span></div>
       <div class="pcuerpo"><h3>Costa Rica</h3><p class="pf">7 noches · rotativo con tiquete aéreo desde Medellín (Wingo)</p><p class="pi">Tiquete Medellín–San José–Medellín, 7 noches, alimentación y tours según itinerario</p>
         <div class="ppie"><div class="pp"><small>desde</small><b>$5.894.000</b><small>triple, por persona</small></div><button type="button" class="btn btn-azul" data-opciones="costarica">Ver opciones</button></div></div>
-    </article><article class="plan" data-t="int">
+    </article><article class="plan rv" data-t="int">
       <div class="pimg"><div class="pista"><img src="https://images.unsplash.com/photo-1602608099803-96718a589bb3?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Puerto Plata · foto 1" loading="lazy"><img src="https://images.unsplash.com/photo-1617718295766-0f839c2853e7?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Puerto Plata · foto 2" loading="lazy"><img src="https://images.unsplash.com/photo-1778097866468-d1f0580da2fc?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Puerto Plata · foto 3" loading="lazy"></div><button type="button" class="fl izq" aria-label="Foto anterior">‹</button><button type="button" class="fl der" aria-label="Foto siguiente">›</button><div class="puntos"><i class=on></i><i></i><i></i></div><span class="tipo">Internacional</span></div>
       <div class="pcuerpo"><h3>Puerto Plata</h3><p class="pf">Puente festivo · República Dominicana · solo adultos</p><p class="pi">Vuelos Copa desde Medellín, 4 noches todo incluido en Bluebay Villas Doradas, traslados</p>
         <div class="ppie"><div class="pp"><small>desde</small><b>$2.999.000</b><small>doble, por persona</small></div><button type="button" class="btn btn-azul" data-opciones="puertoplata">Ver opciones</button></div></div>
-    </article><article class="plan" data-t="nac">
+    </article><article class="plan rv" data-t="nac">
       <div class="pimg"><div class="pista"><img src="https://images.unsplash.com/photo-1576363399252-36302b835c28?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Isla Fuerte · foto 1" loading="lazy"><img src="https://images.unsplash.com/photo-1683645853740-bdacef81fce5?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Isla Fuerte · foto 2" loading="lazy"><img src="https://images.unsplash.com/photo-1592782985575-a96c6e647155?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Isla Fuerte · foto 3" loading="lazy"></div><button type="button" class="fl izq" aria-label="Foto anterior">‹</button><button type="button" class="fl der" aria-label="Foto siguiente">›</button><div class="puntos"><i class=on></i><i></i><i></i></div><span class="tipo">Nacional</span></div>
       <div class="pcuerpo"><h3>Isla Fuerte</h3><p class="pf">Noviembre, Diciembre y Fin de Año · todo incluido · 4 alojamientos</p><p class="pi">Lancha privada, alojamiento, alimentación, tours y snorkel, guía nativo</p>
         <div class="ppie"><div class="pp"><small>desde</small><b>$620.000</b><small>múltiple, noviembre</small></div><button type="button" class="btn btn-azul" data-opciones="islafuerte">Ver opciones</button></div></div>
-    </article><article class="plan" data-t="nac">
+    </article><article class="plan rv" data-t="nac">
       <div class="pimg"><div class="pista"><img src="https://images.unsplash.com/photo-1651421978782-9817d9feccaa?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Arboletes · foto 1" loading="lazy"><img src="https://images.unsplash.com/photo-1723584571014-fca5dce71413?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Arboletes · foto 2" loading="lazy"><img src="https://images.unsplash.com/photo-1700188223446-883d92810f38?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Arboletes · foto 3" loading="lazy"></div><button type="button" class="fl izq" aria-label="Foto anterior">‹</button><button type="button" class="fl der" aria-label="Foto siguiente">›</button><div class="puntos"><i class=on></i><i></i><i></i></div><span class="tipo">Nacional</span></div>
       <div class="pcuerpo"><h3>Arboletes</h3><p class="pf">En avión · Diciembre 2026 · 2 salidas semanales desde Medellín</p><p class="pi">Vuelo Copa, 4 noches, alimentación todo incluido, traslados</p>
         <div class="ppie"><div class="pp"><small>desde</small><b>$1.879.000</b><small>múltiple, Hotel Celeste Real</small></div><button type="button" class="btn btn-azul" data-opciones="arboletes">Ver opciones</button></div></div>
-    </article><article class="plan" data-t="nac">
+    </article><article class="plan rv" data-t="nac">
       <div class="pimg"><div class="pista"><img src="https://images.unsplash.com/photo-1715503234327-b57d32e5da0f?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Medellín · foto 1" loading="lazy"><img src="https://images.unsplash.com/photo-1512250431446-d0b4b57b27ec?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Medellín · foto 2" loading="lazy"><img src="https://images.unsplash.com/photo-1672263120758-2c2c02eaf977?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Medellín · foto 3" loading="lazy"></div><button type="button" class="fl izq" aria-label="Foto anterior">‹</button><button type="button" class="fl der" aria-label="Foto siguiente">›</button><div class="puntos"><i class=on></i><i></i><i></i></div><span class="tipo">Nacional</span></div>
       <div class="pcuerpo"><h3>Medellín</h3><p class="pf">Conoce Medellín todos los días · y plan de Fin de Año</p><p class="pi">Hotel con desayunos, city tour con Comuna 13 y tour a Guatapé</p>
         <div class="ppie"><div class="pp"><small>desde</small><b>$969.000</b><small>por persona</small></div><button type="button" class="btn btn-azul" data-opciones="medellin">Ver opciones</button></div></div>
-    </article><article class="plan" data-t="nac">
+    </article><article class="plan rv" data-t="nac">
       <div class="pimg"><div class="pista"><img src="https://images.unsplash.com/photo-1651421977680-1abad0df1a40?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Necoclí · foto 1" loading="lazy"><img src="https://images.unsplash.com/photo-1694292918930-ff6335bdaf5b?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Necoclí · foto 2" loading="lazy"><img src="https://images.unsplash.com/photo-1619680939776-4eadd78709a4?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Necoclí · foto 3" loading="lazy"></div><button type="button" class="fl izq" aria-label="Foto anterior">‹</button><button type="button" class="fl der" aria-label="Foto siguiente">›</button><div class="puntos"><i class=on></i><i></i><i></i></div><span class="tipo">Nacional</span></div>
       <div class="pcuerpo"><h3>Necoclí</h3><p class="pf">Playas caribeñas · salidas hasta febrero 2027</p><p class="pi">Bus desde Medellín, 2 a 3 noches con piscina, alimentación completa, recorrido y guía</p>
         <div class="ppie"><div class="pp"><small>desde</small><b>$479.000</b><small>por persona</small></div><button type="button" class="btn btn-azul" data-opciones="necocli">Ver opciones</button></div></div>
-    </article><article class="plan" data-t="nac">
+    </article><article class="plan rv" data-t="nac">
       <div class="pimg"><div class="pista"><img src="https://images.unsplash.com/photo-1671244513749-9d20eb65b89e?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Betania y Jardín · foto 1" loading="lazy"><img src="https://images.unsplash.com/photo-1764815538777-8eb62197eabd?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Betania y Jardín · foto 2" loading="lazy"><img src="https://images.unsplash.com/photo-1625398244649-abc29446b6c6?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Betania y Jardín · foto 3" loading="lazy"></div><button type="button" class="fl izq" aria-label="Foto anterior">‹</button><button type="button" class="fl der" aria-label="Foto siguiente">›</button><div class="puntos"><i class=on></i><i></i><i></i></div><span class="tipo">Nacional</span></div>
       <div class="pcuerpo"><h3>Betania y Jardín</h3><p class="pf">De amanecida · salidas cada fin de semana</p><p class="pi">Transporte, 1 noche en Jardín, almuerzo, cena y desayuno, charcos, mirador y café</p>
         <div class="ppie"><div class="pp"><small>desde</small><b>$349.000</b><small>por persona</small></div><button type="button" class="btn btn-azul" data-opciones="jardin">Ver plan</button></div></div>
-    </article><article class="plan" data-t="nac">
+    </article><article class="plan rv" data-t="nac">
       <div class="pimg"><div class="pista"><img src="https://images.unsplash.com/photo-1530866495561-507c9faab2ed?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Llanos Orientales · foto 1" loading="lazy"><img src="https://images.unsplash.com/photo-1586768019524-c6e902168263?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Llanos Orientales · foto 2" loading="lazy"><img src="https://images.unsplash.com/photo-1587369403245-a10d1784662f?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Llanos Orientales · foto 3" loading="lazy"></div><button type="button" class="fl izq" aria-label="Foto anterior">‹</button><button type="button" class="fl der" aria-label="Foto siguiente">›</button><div class="puntos"><i class=on></i><i></i><i></i></div><span class="tipo">Nacional</span></div>
       <div class="pcuerpo"><h3>Llanos Orientales</h3><p class="pf">5 días en avión · Tiuma Park, Parque Los Ocarros, Mirador Matapalo</p><p class="pi">Tiquetes Medellín–Villavicencio, 5 noches, desayunos y cenas, guía y tours</p>
         <div class="ppie"><div class="pp"><small>desde</small><b>$1.955.000</b><small>múltiple, por persona</small></div><button type="button" class="btn btn-azul" data-opciones="llanos">Ver opciones</button></div></div>
-    </article><article class="plan" data-t="nac">
+    </article><article class="plan rv" data-t="nac">
       <div class="pimg"><div class="pista"><img src="https://images.unsplash.com/photo-1731687501474-d3651894a2bd?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="La Guajira, Valledupar y Santa Marta · foto 1" loading="lazy"><img src="https://images.unsplash.com/photo-1628476323273-f32c319f3d3b?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="La Guajira, Valledupar y Santa Marta · foto 2" loading="lazy"><img src="https://images.unsplash.com/photo-1509316785289-025f5b846b35?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="La Guajira, Valledupar y Santa Marta · foto 3" loading="lazy"></div><button type="button" class="fl izq" aria-label="Foto anterior">‹</button><button type="button" class="fl der" aria-label="Foto siguiente">›</button><div class="puntos"><i class=on></i><i></i><i></i></div><span class="tipo">Nacional</span></div>
       <div class="pcuerpo"><h3>La Guajira, Valledupar y Santa Marta</h3><p class="pf">7 días en avión · Cabo de la Vela, Manaure y el Rodadero</p><p class="pi">Tiquetes, 6 noches, desayunos y cenas, guía y tours</p>
         <div class="ppie"><div class="pp"><small>desde</small><b>$3.295.000</b><small>múltiple, por persona</small></div><button type="button" class="btn btn-azul" data-opciones="guajira">Ver opciones</button></div></div>
-    </article><article class="plan" data-t="nac">
+    </article><article class="plan rv" data-t="nac">
       <div class="pimg"><div class="pista"><img src="https://images.unsplash.com/photo-1634686908374-d9ac531dc658?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Día de sol Guatapé y más · foto 1" loading="lazy"><img src="https://images.unsplash.com/photo-1775584989108-835121fd7e21?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Día de sol Guatapé y más · foto 2" loading="lazy"><img src="https://images.unsplash.com/photo-1683462806368-e13853325aa8?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Día de sol Guatapé y más · foto 3" loading="lazy"></div><button type="button" class="fl izq" aria-label="Foto anterior">‹</button><button type="button" class="fl der" aria-label="Foto siguiente">›</button><div class="puntos"><i class=on></i><i></i><i></i></div><span class="tipo">Nacional</span></div>
       <div class="pcuerpo"><h3>Día de sol Guatapé y más</h3><p class="pf">Pasadías · salidas todos los días</p><p class="pi">Transporte, paseo en embarcación, almuerzo tipo bandeja, guía y asistencia médica</p>
         <div class="ppie"><div class="pp"><b>Precio a consultar</b></div><button type="button" class="btn btn-azul" data-opciones="pasadias">Ver opciones</button></div></div>
@@ -378,7 +399,7 @@ footer .env{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
     <p style="color:var(--suave);margin-top:14px">Escoja destino, fechas y viajeros. La solicitud le llega armada a nuestro WhatsApp y le respondemos con el plan y el valor por persona.</p>
     <ul class="lista"><li>Precios por persona, con lo que incluye cada plan.</li><li>Separe su cupo con un abono.</li><li>Agencia registrada: RNT 300617 · NIT 902117833.</li></ul>
   </div>
-  <form id="cotizador" novalidate>
+  <form class="rv" id="cotizador" novalidate>
     <div class="fila">
       <label>Nombre<input name="nombre" placeholder="Su nombre" autocomplete="name"></label>
       <label>Destino<select name="destino"><option>Río de Janeiro</option><option>Punta Cana</option><option>Argentina</option><option>Dubái</option><option>Costa Rica</option><option>Puerto Plata</option><option>Isla Fuerte</option><option>Arboletes</option><option>Medellín</option><option>Necoclí</option><option>Betania y Jardín</option><option>Llanos Orientales</option><option>La Guajira, Valledupar y Santa Marta</option><option>Día de sol Guatapé y más</option><option>Otro destino</option></select></label>
@@ -395,12 +416,12 @@ footer .env{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
 </div></section>
 
 <section class="sec" id="contacto"><div class="env">
-  <div class="cab"><div><p class="ceja">Contacto</p><h2>Hablemos</h2></div><p>Medellín, Antioquia.</p></div>
+  <div class="cab rv"><div><p class="ceja">Contacto</p><h2>Hablemos</h2></div><p>Medellín, Antioquia.</p></div>
   <div class="contacto">
-    <a class="canal" href="https://wa.me/573234972854?text={{ 'Hola WorldPeak, quiero cotizar un viaje'|urlencode }}" target="_blank" rel="noopener"><small>WhatsApp</small><b>323 497 2854</b></a>
-    <a class="canal" href="https://wa.me/573145689177?text={{ 'Hola WorldPeak, quiero cotizar un viaje'|urlencode }}" target="_blank" rel="noopener"><small>WhatsApp</small><b>314 568 9177</b></a>
-    <a class="canal" href="https://www.instagram.com/worldpeak_travel_agency/" target="_blank" rel="noopener"><small>Instagram</small><b>@worldpeak_travel_agency</b></a>
-    <a class="canal" href="mailto:worldpeaktravelagency@gmail.com"><small>Correo</small><b>worldpeaktravelagency@gmail.com</b></a>
+    <a class="canal rv" href="https://wa.me/573234972854?text={{ 'Hola WorldPeak, quiero cotizar un viaje'|urlencode }}" target="_blank" rel="noopener"><small>WhatsApp</small><b>323 497 2854</b></a>
+    <a class="canal rv" href="https://wa.me/573145689177?text={{ 'Hola WorldPeak, quiero cotizar un viaje'|urlencode }}" target="_blank" rel="noopener"><small>WhatsApp</small><b>314 568 9177</b></a>
+    <a class="canal rv" href="https://www.instagram.com/worldpeak_travel_agency/" target="_blank" rel="noopener"><small>Instagram</small><b>@worldpeak_travel_agency</b></a>
+    <a class="canal rv" href="mailto:worldpeaktravelagency@gmail.com"><small>Correo</small><b>worldpeaktravelagency@gmail.com</b></a>
   </div>
 </div></section>
 </main>
@@ -495,6 +516,26 @@ document.querySelectorAll('[data-opciones]').forEach(function(b){ var m=document
       .finally(function(){ ocupado=false; }); }
   fo.addEventListener('submit',function(ev){ ev.preventDefault(); enviar(tx.value); });
   sug.querySelectorAll('button').forEach(function(x){ x.addEventListener('click',function(){ enviar(x.textContent); }); });
+})();
+</script>
+<script>
+(function(){
+  var red=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // escalonar tarjetas
+  document.querySelectorAll('.servicios,.planes,.contacto').forEach(function(g){ [].forEach.call(g.children,function(c,i){ c.style.setProperty('--d',(i%3)*0.08+'s'); }); });
+  var els=document.querySelectorAll('.rv');
+  if(!('IntersectionObserver' in window)||red){ els.forEach(function(e){e.classList.add('in')}); }
+  else { var io=new IntersectionObserver(function(en){ en.forEach(function(x){ if(x.isIntersecting){ x.target.classList.add('in'); io.unobserve(x.target); } }); },{threshold:.08,rootMargin:'0px 0px -6% 0px'}); els.forEach(function(e){io.observe(e)}); }
+  // cifras que cuentan
+  document.querySelectorAll('.datos-r b[data-hasta]').forEach(function(b){ if(red) return; var fin=+b.dataset.hasta, pre=b.dataset.pre||'', suf=b.dataset.suf||''; var t0=null;
+    function paso(ts){ if(!t0) t0=ts; var p=Math.min((ts-t0)/1400,1), v=Math.round(fin*(1-Math.pow(1-p,3))); b.textContent=pre+v+suf; if(p<1) requestAnimationFrame(paso); }
+    setTimeout(function(){ requestAnimationFrame(paso); },500); });
+  // fotos de cada plan pasan solas con el mouse encima
+  document.querySelectorAll('.plan').forEach(function(c){ var p=c.querySelector('.pista'), id=null; if(!p) return;
+    c.addEventListener('mouseenter',function(){ if(red) return; id=setInterval(function(){ var n=p.children.length, k=Math.round(p.scrollLeft/p.clientWidth); p.scrollTo({left:((k+1)%n)*p.clientWidth,behavior:'smooth'}); },1800); });
+    c.addEventListener('mouseleave',function(){ clearInterval(id); }); });
+  // filtro con transición
+  document.querySelectorAll('.filtros button').forEach(function(b){ b.addEventListener('click',function(){ document.querySelectorAll('.plan').forEach(function(pl){ if(!pl.hidden){ pl.classList.remove('saliendo'); void pl.offsetWidth; } pl.classList.add('in'); }); }); });
 })();
 </script>
 </body>
