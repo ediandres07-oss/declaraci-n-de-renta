@@ -123,6 +123,24 @@ footer .env{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
 .puntos{position:absolute;left:0;right:0;bottom:10px;display:flex;justify-content:center;gap:6px;pointer-events:none}
 .puntos i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.55);transition:background .2s,width .2s}
 .puntos i.on{background:#fff;width:18px;border-radius:4px}
+
+.opc-fondo{position:fixed;inset:0;z-index:60;background:rgba(15,20,30,.55);display:grid;place-items:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .25s}
+.opc-fondo.on{opacity:1;pointer-events:auto}
+.opc{position:relative;background:#fff;border-radius:22px;width:min(720px,100%);max-height:88vh;overflow:auto;padding:clamp(20px,4vw,32px);box-shadow:0 30px 80px -30px rgba(0,0,0,.5)}
+.opc h3{font-size:24px}.opc-x{position:absolute;right:14px;top:10px;border:0;background:none;font-size:28px;cursor:pointer;color:var(--suave)}
+.opc-inc{color:var(--suave);font-size:14.5px;margin:6px 0 14px}
+.opc-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.opc-tabs button{font:inherit;font-size:14px;font-weight:600;padding:9px 14px;border-radius:999px;border:1px solid var(--borde);background:#fff;color:var(--suave);cursor:pointer}
+.opc-tabs button.on{background:var(--azul);border-color:var(--azul);color:#fff}
+.opc-fecha{display:block;margin-bottom:12px;font-size:14px}.opc-fecha select{margin-top:6px}
+.opc table{width:100%;border-collapse:collapse;font-size:14.5px}
+.opc th{text-align:left;font-size:12.5px;color:var(--suave);font-weight:600;padding:8px 6px;border-bottom:1px solid var(--borde)}
+.opc td{padding:10px 6px;border-bottom:1px solid var(--borde);vertical-align:middle}
+.opc td:not(:first-child){white-space:nowrap;color:var(--azul);font-weight:600}
+.mini{margin-left:8px;font:600 12.5px Inter,sans-serif;border:1px solid var(--azul);color:var(--azul);background:#fff;border-radius:999px;padding:4px 10px;cursor:pointer}
+.mini:hover{background:var(--azul);color:#fff}
+.opc-nota{margin-top:12px;font-size:12.5px;color:var(--suave)}
+@media(max-width:560px){.opc td,.opc th{font-size:13px}.mini{display:block;margin:6px 0 0}}
 </style>
 </head>
 <body>
@@ -183,8 +201,8 @@ footer .env{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
         <div class="ppie"><div class="pp"><small>desde</small><b>$2.649.000</b></div><button type="button" class="btn btn-azul elegir" data-plan="Punta Cana">Quiero este plan</button></div></div>
     </article><article class="plan" data-t="nac">
       <div class="pimg"><div class="pista"><img src="https://images.unsplash.com/photo-1576363399252-36302b835c28?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Isla Fuerte · foto 1" loading="lazy"><img src="https://images.unsplash.com/photo-1683645853740-bdacef81fce5?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Isla Fuerte · foto 2" loading="lazy"><img src="https://images.unsplash.com/photo-1592782985575-a96c6e647155?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Isla Fuerte · foto 3" loading="lazy"></div><button type="button" class="fl izq" aria-label="Foto anterior">‹</button><button type="button" class="fl der" aria-label="Foto siguiente">›</button><div class="puntos"><i class=on></i><i></i><i></i></div><span class="tipo">Nacional</span></div>
-      <div class="pcuerpo"><h3>Isla Fuerte</h3><p class="pf">Noviembre, Navidad y Fin de Año</p><p class="pi">Alojamiento, alimentación, lancha privada, tours y guía nativo</p>
-        <div class="ppie"><div class="pp"><b>Precio a consultar</b></div><button type="button" class="btn btn-azul elegir" data-plan="Isla Fuerte">Quiero este plan</button></div></div>
+      <div class="pcuerpo"><h3>Isla Fuerte</h3><p class="pf">Diciembre (2 noches) y Fin de Año (3 noches)</p><p class="pi">Todo incluido: lancha privada, alojamiento, alimentación, tours y snorkel, y guía nativo · 4 alojamientos</p>
+        <div class="ppie"><div class="pp"><small>desde</small><b>$660.000</b><small>acomodación múltiple</small></div><button type="button" class="btn btn-azul" data-opciones="islafuerte">Ver 8 opciones</button></div></div>
     </article><article class="plan" data-t="nac">
       <div class="pimg"><div class="pista"><img src="https://images.unsplash.com/photo-1651421978782-9817d9feccaa?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Arboletes · foto 1" loading="lazy"><img src="https://images.unsplash.com/photo-1723584571014-fca5dce71413?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Arboletes · foto 2" loading="lazy"><img src="https://images.unsplash.com/photo-1700188223446-883d92810f38?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Arboletes · foto 3" loading="lazy"></div><button type="button" class="fl izq" aria-label="Foto anterior">‹</button><button type="button" class="fl der" aria-label="Foto siguiente">›</button><div class="puntos"><i class=on></i><i></i><i></i></div><span class="tipo">Nacional</span></div>
       <div class="pcuerpo"><h3>Arboletes</h3><p class="pf">Diciembre</p><p class="pi">Vuelos desde Medellín, hoteles y tarifas especiales</p>
@@ -226,6 +244,22 @@ footer .env{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
   <p class="nota-planes">Fotos de referencia. Precios y fechas según nuestras publicaciones; confírmelos al cotizar.</p>
 </div></section>
 
+
+<div class="opc-fondo" id="opc-islafuerte" role="dialog" aria-modal="true" aria-label="Opciones de Isla Fuerte"><div class="opc">
+  <button type="button" class="opc-x" aria-label="Cerrar">×</button>
+  <p class="ceja">Isla Fuerte · todo incluido</p><h3>Escoja fecha y alojamiento</h3>
+  <p class="opc-inc">Lancha privada · alojamiento · alimentación · tours y snorkel · guía nativo</p>
+  <div class="opc-tabs"><button type="button" class="on" data-tab="dic">Diciembre · 2 noches</button><button type="button" data-tab="fin">Fin de Año · 3 noches</button></div>
+  <div class="opc-pan" data-pan="dic">
+    <label class="opc-fecha">Fecha de viaje<select id="ifFecha"><option>4 al 7 de diciembre</option><option>11 al 14 de diciembre</option><option>18 al 21 de diciembre</option></select></label>
+    <table><thead><tr><th>Alojamiento</th><th>Doble</th><th>Múltiple</th></tr></thead><tbody><tr><td><b>Puerto Limón o similar</b></td><td>$680.000<button type="button" class="mini" data-elige="Isla Fuerte · Diciembre · Puerto Limón o similar · Doble">Elegir</button></td><td>$660.000<button type="button" class="mini" data-elige="Isla Fuerte · Diciembre · Puerto Limón o similar · Múltiple">Elegir</button></td></tr><tr><td><b>Punta Triptón / Cabañas Isla Bonita</b></td><td>$760.000<button type="button" class="mini" data-elige="Isla Fuerte · Diciembre · Punta Triptón / Cabañas Isla Bonita · Doble">Elegir</button></td><td>$720.000<button type="button" class="mini" data-elige="Isla Fuerte · Diciembre · Punta Triptón / Cabañas Isla Bonita · Múltiple">Elegir</button></td></tr><tr><td><b>La Playita</b></td><td>$980.000<button type="button" class="mini" data-elige="Isla Fuerte · Diciembre · La Playita · Doble">Elegir</button></td><td>$960.000<button type="button" class="mini" data-elige="Isla Fuerte · Diciembre · La Playita · Múltiple">Elegir</button></td></tr><tr><td><b>Coral de Fuego</b></td><td>$1.440.000<button type="button" class="mini" data-elige="Isla Fuerte · Diciembre · Coral de Fuego · Doble">Elegir</button></td><td>$1.300.000<button type="button" class="mini" data-elige="Isla Fuerte · Diciembre · Coral de Fuego · Múltiple">Elegir</button></td></tr></tbody></table>
+  </div>
+  <div class="opc-pan" data-pan="fin" hidden>
+    <p class="opc-fecha">Fecha de viaje: <b>29 de diciembre al 2 de enero</b></p>
+    <table><thead><tr><th>Alojamiento</th><th>Doble</th><th>Múltiple</th></tr></thead><tbody><tr><td><b>Puerto Limón o similar · Don Jeisson</b></td><td>$960.000<button type="button" class="mini" data-elige="Isla Fuerte · Fin de Año (29 dic al 2 ene) · Puerto Limón o similar · Don Jeisson · Doble">Elegir</button></td><td>$940.000<button type="button" class="mini" data-elige="Isla Fuerte · Fin de Año (29 dic al 2 ene) · Puerto Limón o similar · Don Jeisson · Múltiple">Elegir</button></td></tr><tr><td><b>Punta Triptón / Cabañas Isla Bonita</b></td><td>$1.110.000<button type="button" class="mini" data-elige="Isla Fuerte · Fin de Año (29 dic al 2 ene) · Punta Triptón / Cabañas Isla Bonita · Doble">Elegir</button></td><td>$1.050.000<button type="button" class="mini" data-elige="Isla Fuerte · Fin de Año (29 dic al 2 ene) · Punta Triptón / Cabañas Isla Bonita · Múltiple">Elegir</button></td></tr><tr><td><b>La Playita</b></td><td>$1.310.000<button type="button" class="mini" data-elige="Isla Fuerte · Fin de Año (29 dic al 2 ene) · La Playita · Doble">Elegir</button></td><td>$1.250.000<button type="button" class="mini" data-elige="Isla Fuerte · Fin de Año (29 dic al 2 ene) · La Playita · Múltiple">Elegir</button></td></tr><tr><td><b>Coral de Fuego</b></td><td>$1.890.000<button type="button" class="mini" data-elige="Isla Fuerte · Fin de Año (29 dic al 2 ene) · Coral de Fuego · Doble">Elegir</button></td><td>$1.820.000<button type="button" class="mini" data-elige="Isla Fuerte · Fin de Año (29 dic al 2 ene) · Coral de Fuego · Múltiple">Elegir</button></td></tr></tbody></table>
+  </div>
+  <p class="opc-nota">Valores publicados por WorldPeak para acomodación doble o múltiple. Confírmelos al cotizar.</p>
+</div></div>
 <section class="sec gris" id="cotizar"><div class="env cotiza">
   <div>
     <p class="ceja">Cotizador</p><h2>Cotice su viaje en un minuto</h2>
@@ -286,6 +320,17 @@ footer .env{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
     document.querySelectorAll('.plan').forEach(function(p){ p.classList.remove('sel'); p.querySelector('.elegir').textContent='Quiero este plan'; });
     var card=b.closest('.plan'); card.classList.add('sel'); b.textContent='✓ Elegido';
     f.destino.value=b.dataset.plan; pintar(); document.getElementById('cotizar').scrollIntoView({behavior:'smooth'}); }); });
+document.querySelectorAll('[data-opciones]').forEach(function(b){ var m=document.getElementById('opc-'+b.dataset.opciones);
+    b.addEventListener('click',function(){ m.classList.add('on'); });
+    m.addEventListener('click',function(e){ if(e.target===m||e.target.classList.contains('opc-x')) m.classList.remove('on'); });
+    m.querySelectorAll('.opc-tabs button').forEach(function(tb){ tb.addEventListener('click',function(){ m.querySelectorAll('.opc-tabs button').forEach(function(x){x.classList.remove('on')}); tb.classList.add('on');
+      m.querySelectorAll('.opc-pan').forEach(function(pn){ pn.hidden = pn.dataset.pan!==tb.dataset.tab; }); }); });
+    m.querySelectorAll('[data-elige]').forEach(function(x){ x.addEventListener('click',function(){
+      var v=x.dataset.elige; if(v.indexOf('Diciembre')>=0) v=v.replace('Diciembre','Diciembre ('+document.getElementById('ifFecha').value+')');
+      var s=f.destino, o=[].find.call(s.options,function(op){return op.value===v}); if(!o){ o=new Option(v,v); s.add(o,0); } s.value=v;
+      document.querySelectorAll('.plan').forEach(function(p){ p.classList.remove('sel'); }); b.closest('.plan').classList.add('sel');
+      m.classList.remove('on'); pintar(); document.getElementById('cotizar').scrollIntoView({behavior:'smooth'}); }); }); });
+  addEventListener('keydown',function(e){ if(e.key==='Escape') document.querySelectorAll('.opc-fondo.on').forEach(function(m){m.classList.remove('on')}); });
   f.addEventListener('input',pintar); f.addEventListener('change',pintar); pintar();
   f.addEventListener('submit',function(e){ e.preventDefault(); var x=leer();
     var t='Hola WorldPeak, quiero cotizar un viaje:\n• Destino: '+x.dest+(x.s?'\n• Salida: '+fecha(x.s):'')+(x.r?'\n• Regreso: '+fecha(x.r):'')+'\n• Viajeros: '+x.a+' adulto(s)'+(x.k?' y '+x.k+' niño(s)':'')+(x.m?'\n• Comentarios: '+x.m:'')+(x.n?'\nMi nombre es '+x.n+'.':'');

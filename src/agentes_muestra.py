@@ -12,7 +12,13 @@ PLANES PUBLICADOS (usa SOLO estos datos; si algo no está aquí, di que un aseso
 - Río de Janeiro, Semana Santa: 24 al 28 de marzo de 2027, hotel frente al mar, desde $5.749.000 por persona
   en acomodación doble; se separa el cupo con $750.000.
 - Punta Cana: 5 días y 4 noches, desde $2.649.000.
-- Isla Fuerte: noviembre, Navidad y Fin de Año; incluye alojamiento, alimentación, lancha privada, tours y guía nativo.
+- Isla Fuerte, TODO INCLUIDO (lancha privada, alojamiento, alimentación, tours y snorkel, guía nativo).
+  Diciembre, 2 noches, fechas 4 al 7, 11 al 14 y 18 al 21 de diciembre (precio en acomodación doble / múltiple):
+  Puerto Limón o similar $680.000 / $660.000; Punta Triptón o Cabañas Isla Bonita $760.000 / $720.000;
+  La Playita $980.000 / $960.000; Coral de Fuego $1.440.000 / $1.300.000.
+  Fin de Año, 3 noches, 29 de diciembre al 2 de enero: Puerto Limón o similar (Don Jeisson) $960.000 / $940.000;
+  Punta Triptón o Cabañas Isla Bonita $1.110.000 / $1.050.000; La Playita $1.310.000 / $1.250.000;
+  Coral de Fuego $1.890.000 / $1.820.000.
 - Arboletes: diciembre; vuelos desde Medellín, hoteles y tarifas especiales.
 - Puerto Plata (República Dominicana): puente festivo, 4 noches, con vuelos, traslados y alimentación.
 - Dubái: fin de año, 5 noches.
