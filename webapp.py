@@ -1926,7 +1926,8 @@ def contadores():
                            chat_ia_nombre=IA_CFG.get("nombre_asistente", "Asistente Contadores"))
 
 
-_MUESTRAS = {"central-san-ignacio": "muestras/central_san_ignacio.html"}
+_MUESTRAS = {"central-san-ignacio": "muestras/central_san_ignacio.html",
+             "worldpeak": "muestras/worldpeak.html"}
 
 
 @app.get("/muestra/<slug>")

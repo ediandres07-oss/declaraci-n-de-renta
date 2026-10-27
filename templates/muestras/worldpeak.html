@@ -1,0 +1,754 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta name="robots" content="noindex,nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0B0C0E">
+<title>WorldPeak Travel Agency · Viaja fácil, seguro y a tu medida</title>
+<meta name="description" content="Alojamiento, planes y eventos con atención cálida y todos los detalles resueltos.">
+<script>document.documentElement.classList.add('js')</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://images.unsplash.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="https://images.unsplash.com/photo-1590523277543-a94d2e4eb00b?auto=format&amp;fit=crop&amp;w=1800&amp;q=70">
+<style>
+:root{
+  --prim:#1E3A6E;--tinte:#EEF2F8;--claro:#D4AF61;
+  --tinta:#121316;--suave:#5D6066;--borde:#E7E5E0;--papel:#FAF9F6;--noche:#0B0C0E;--noche2:#141519;
+  --r-xl:32px;--r-l:24px;--r-m:16px;
+  --gut:clamp(16px,4vw,40px);--ancho:1240px;
+  --ease:cubic-bezier(.2,.7,.2,1);
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+section[id]{scroll-margin-top:60px}
+body{margin:0;font-family:"DM Sans",system-ui,-apple-system,sans-serif;color:var(--tinta);background:var(--papel);font-size:17px;line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:"Bricolage Grotesque","DM Sans",sans-serif;margin:0;letter-spacing:-.025em;line-height:1.05;font-weight:800}
+p{margin:0}a{color:inherit}img{display:block;max-width:100%}
+.env{max-width:var(--ancho);margin:0 auto;padding:0 var(--gut)}
+.ceja{display:inline-flex;align-items:center;gap:10px;color:var(--prim);font-weight:700;letter-spacing:.14em;text-transform:uppercase;font-size:12.5px;margin-bottom:18px}
+.ceja::before{content:"";width:22px;height:2px;border-radius:2px;background:currentColor}
+.oscuro .ceja{color:var(--claro)}
+h2{font-size:clamp(34px,4.6vw,60px)}
+.lead{font-size:clamp(17px,1.4vw,19px);color:var(--suave);max-width:560px}
+.oscuro .lead{color:#A9ABB2}
+
+/* Botones */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;font:inherit;font-weight:700;font-size:16px;text-decoration:none;border:0;cursor:pointer;border-radius:999px;padding:15px 26px;transition:transform .3s var(--ease),box-shadow .3s var(--ease),background .3s}
+.btn svg{transition:transform .3s var(--ease)}
+.btn:hover{transform:translateY(-2px)}.btn:hover svg{transform:translate(2px,-2px)}
+.btn-prim{background:var(--prim);color:#fff;box-shadow:0 10px 30px -10px var(--prim)}
+.btn-blanco{background:#fff;color:var(--tinta)}
+.btn-vidrio{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.28);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.btn-vidrio:hover{background:rgba(255,255,255,.18)}
+.enlace{display:inline-flex;align-items:center;gap:8px;font-weight:700;color:var(--prim);text-decoration:none}
+.enlace:hover svg{transform:translate(2px,-2px)}.enlace svg{transition:transform .3s var(--ease)}
+
+/* Barra del borrador (Tributando) */
+.borrador{position:relative;z-index:60;background:#0E1A15;color:#DDE8E2;padding:9px 16px;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:center;align-items:center;font-size:13.5px;text-align:center;line-height:1.45}
+.borrador strong{color:#5BE0A4}
+.borrador a{background:#5BE0A4;color:#0E1A15;font-weight:700;text-decoration:none;padding:6px 14px;border-radius:999px;white-space:nowrap}
+
+/* Navegación */
+.nav{position:sticky;top:0;z-index:50;height:76px;margin-bottom:-76px;transition:background .35s,box-shadow .35s,color .35s;color:#fff}
+.nav .env{height:100%;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.nav.solida{background:rgba(250,249,246,.82);backdrop-filter:saturate(1.6) blur(16px);-webkit-backdrop-filter:saturate(1.6) blur(16px);box-shadow:0 1px 0 rgba(18,19,22,.08);color:var(--tinta)}
+.logo{display:flex;align-items:center;gap:12px;text-decoration:none;min-width:0}
+.logo .mono{flex:none;width:40px;height:40px;border-radius:12px;background:linear-gradient(140deg,var(--claro) -40%,var(--prim) 60%);color:#fff;display:grid;place-items:center;font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:20px;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 6px 18px -6px var(--prim)}
+.logo img{height:40px;width:auto;max-width:160px;object-fit:contain}
+.logo b{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:19px;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:min(34vw,360px)}
+.links{display:flex;align-items:center;gap:30px;font-weight:500;font-size:15.5px}
+.links a:not(.btn){text-decoration:none;opacity:.86;position:relative}
+.links a:not(.btn)::after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:1.5px;background:currentColor;transform:scaleX(0);transform-origin:left;transition:transform .3s var(--ease)}
+.links a:not(.btn):hover{opacity:1}.links a:not(.btn):hover::after{transform:scaleX(1)}
+.links .btn{padding:11px 20px;font-size:15px}
+.nav:not(.solida) .links .btn{background:#fff;color:var(--tinta);box-shadow:none}
+@media(max-width:560px){.logo b{font-size:17px;max-width:calc(100vw - 2 * var(--gut) - 120px)}}
+.menu{display:none;background:none;border:1px solid currentColor;border-radius:12px;color:inherit;width:44px;height:44px;place-items:center;cursor:pointer;opacity:.9}
+@media(max-width:900px){
+  .menu{display:grid}
+  .links{position:absolute;top:70px;left:var(--gut);right:var(--gut);flex-direction:column;align-items:stretch;gap:2px;padding:10px;background:#fff;color:var(--tinta);border-radius:20px;box-shadow:0 30px 60px -20px rgba(0,0,0,.35);opacity:0;transform:translateY(-8px);pointer-events:none;transition:opacity .25s,transform .25s var(--ease)}
+  .nav.abierto .links{opacity:1;transform:none;pointer-events:auto}
+  .links a:not(.btn){padding:12px 14px;border-radius:12px}.links a:not(.btn)::after{display:none}
+  .links a:not(.btn):hover{background:var(--papel)}
+  .nav:not(.solida) .links .btn,.links .btn{margin-top:6px;background:var(--prim);color:#fff}
+}
+
+/* Portada */
+.portada{position:relative;min-height:min(100svh,900px);display:flex;align-items:flex-end;color:#fff;background:var(--noche);overflow:hidden;isolation:isolate}
+.portada .foto{position:absolute;inset:0;z-index:-2}
+.portada .foto img{width:100%;height:100%;object-fit:cover;animation:acerca 14s var(--ease) both}
+.portada::before{content:"";position:absolute;inset:0;z-index:-1;background:
+  radial-gradient(120% 80% at 0% 100%,color-mix(in srgb,var(--prim) 55%,transparent) 0%,transparent 55%),
+  linear-gradient(180deg,rgba(8,9,11,.62) 0%,rgba(8,9,11,.28) 38%,rgba(8,9,11,.9) 100%)}
+@keyframes acerca{from{transform:scale(1.12)}to{transform:scale(1)}}
+.portada .env{width:100%;padding-top:150px;padding-bottom:clamp(40px,6vw,72px);display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:48px;align-items:end}
+.pildora{display:inline-flex;align-items:center;gap:10px;padding:7px 14px 7px 8px;border-radius:999px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);font-size:14px;font-weight:500;margin-bottom:26px}
+.pildora i{display:grid;place-items:center;width:24px;height:24px;border-radius:999px;background:var(--prim);color:#fff}
+.portada h1{font-size:clamp(42px,6.6vw,92px);line-height:.98;letter-spacing:-.035em;max-width:13ch;text-wrap:balance}
+.portada h1 .w{display:inline-block}
+.js .portada h1 .w{opacity:0;transform:translateY(.4em);animation:sube .9s var(--ease) forwards;animation-delay:calc(.15s + var(--i) * .06s)}
+.js .entra{opacity:0;transform:translateY(16px);animation:sube .9s var(--ease) forwards;animation-delay:var(--d,.5s)}
+@keyframes sube{to{opacity:1;transform:none}}
+.portada .sub{margin-top:24px;font-size:clamp(17px,1.5vw,20px);color:#E2E3E6;max-width:540px}
+.botones{display:flex;flex-wrap:wrap;gap:12px;margin-top:34px}
+.sellos{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:40px;font-size:14.5px;color:#D7D8DC}
+.sellos span{display:inline-flex;align-items:center;gap:8px}
+.sellos svg{color:var(--claro)}
+.ficha{background:rgba(18,19,22,.55);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);border-radius:var(--r-l);padding:10px;box-shadow:0 40px 80px -30px rgba(0,0,0,.6)}
+.ficha .cab{display:flex;justify-content:space-between;align-items:center;padding:10px 12px 12px;font-size:13px;color:#B7B9BF;letter-spacing:.06em;text-transform:uppercase;font-weight:700}
+.ficha a.item{display:flex;align-items:center;gap:14px;padding:10px;border-radius:16px;text-decoration:none;transition:background .25s}
+.ficha a.item:hover{background:rgba(255,255,255,.07)}
+.ficha a.item img{width:58px;height:58px;border-radius:12px;object-fit:cover;flex:none}
+.ficha a.item b{display:block;font-size:16px}
+.ficha a.item small{display:block;color:#A9ABB2;font-size:13.5px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.ficha a.item svg{margin-left:auto;flex:none;color:#8B8E96;transition:transform .3s var(--ease),color .3s}
+.ficha a.item:hover svg{transform:translate(2px,-2px);color:#fff}
+.ficha .pie{margin-top:6px;display:flex;align-items:center;gap:10px;padding:12px;border-top:1px solid rgba(255,255,255,.1);font-size:14px;color:#D7D8DC}
+.punto{width:8px;height:8px;border-radius:50%;background:#4ADE80;box-shadow:0 0 0 0 rgba(74,222,128,.6);animation:late 2.2s infinite;flex:none}
+@keyframes late{70%{box-shadow:0 0 0 9px rgba(74,222,128,0)}100%{box-shadow:0 0 0 0 rgba(74,222,128,0)}}
+@media(max-width:960px){.portada .env{grid-template-columns:1fr;gap:36px;padding-top:130px}.portada{min-height:auto}
+  .portada::before{background:radial-gradient(120% 60% at 0% 100%,color-mix(in srgb,var(--prim) 55%,transparent) 0%,transparent 60%),linear-gradient(180deg,rgba(8,9,11,.7) 0%,rgba(8,9,11,.55) 40%,rgba(8,9,11,.92) 100%)}}
+@media(max-width:560px){.botones .btn{flex:1 1 100%}.sellos{gap:10px 18px}}
+
+/* Cinta */
+.cinta{background:var(--noche);color:#fff;border-top:1px solid rgba(255,255,255,.08);overflow:hidden;padding:22px 0}
+.cinta .pista{display:flex;width:max-content;animation:corre 38s linear infinite}
+.cinta .grupo{display:flex;align-items:center;gap:34px;padding-right:34px;font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:clamp(20px,2.2vw,28px);letter-spacing:-.01em;white-space:nowrap}
+.cinta .grupo span:nth-child(4n+3){color:var(--claro)}
+.cinta svg{color:var(--prim);flex:none}
+@keyframes corre{to{transform:translateX(-50%)}}
+
+/* Secciones */
+.seccion{padding:clamp(80px,10vw,136px) 0}
+.catalogo{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid color-mix(in srgb,var(--prim) 18%,#e6e6e6);border-radius:22px;overflow:hidden;background:#fff}
+.catalogo div{padding:24px;border-right:1px solid color-mix(in srgb,var(--prim) 12%,#eee);border-bottom:1px solid color-mix(in srgb,var(--prim) 12%,#eee);min-width:0}
+.catalogo h3{font-size:1.08rem;margin:0 0 6px}
+.cat-foto{margin:0 0 16px;border-radius:14px;overflow:hidden;aspect-ratio:4/3;max-width:100%;background:#eef2f6}
+.cat-foto img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s cubic-bezier(.2,.7,.2,1)}
+.catalogo div:hover .cat-foto img,.catalogo div:focus-within .cat-foto img{transform:scale(1.12)}
+@media (prefers-reduced-motion:reduce){.cat-foto img{transition:none}}
+.catalogo p{margin:0;color:#5f6470;font-size:.95rem;line-height:1.55}
+.cat-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.cat-chips span{font-size:.82rem;font-weight:600;padding:7px 13px;border-radius:999px;background:color-mix(in srgb,var(--prim) 10%,#fff);color:var(--prim)}
+@media (max-width:900px){.catalogo{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.catalogo{grid-template-columns:1fr}}
+.cabeza{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:24px 64px;align-items:end;margin-bottom:clamp(40px,5vw,64px)}
+.cabeza .der{display:flex;flex-direction:column;gap:18px;align-items:flex-start}
+@media(max-width:860px){.cabeza{grid-template-columns:1fr}}
+
+/* Servicios */
+.rejilla{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.tarjeta{position:relative;border-radius:var(--r-l);overflow:hidden;aspect-ratio:4/5;color:#fff;background:var(--noche2);isolation:isolate;text-decoration:none;display:flex;flex-direction:column;justify-content:space-between;padding:20px;transition:transform .5s var(--ease),box-shadow .5s var(--ease)}
+.tarjeta img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2;transition:transform 1s var(--ease)}
+.tarjeta::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(8,9,11,.15) 0%,rgba(8,9,11,0) 35%,rgba(8,9,11,.88) 100%);transition:background .5s}
+.tarjeta:hover{transform:translateY(-6px);box-shadow:0 40px 60px -30px rgba(0,0,0,.45)}
+.tarjeta:hover img{transform:scale(1.07)}
+.tarjeta .arriba{display:flex;justify-content:space-between;align-items:center}
+.tarjeta .num{font-size:13px;font-weight:700;letter-spacing:.08em;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.tarjeta .flecha{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:#fff;color:var(--tinta);transition:transform .5s var(--ease),background .3s,color .3s}
+.tarjeta:hover .flecha{transform:rotate(45deg);background:var(--prim);color:#fff}
+.tarjeta h3{font-size:clamp(24px,2.2vw,30px);margin-bottom:8px}
+.tarjeta p{color:#D8D9DD;font-size:15.5px;max-width:34ch}
+@media(max-width:960px){.rejilla{grid-template-columns:1fr 1fr}.rejilla .tarjeta:first-child{grid-column:1/-1;aspect-ratio:16/10}}
+@media(max-width:620px){.rejilla{grid-template-columns:1fr}.rejilla .tarjeta,.rejilla .tarjeta:first-child{aspect-ratio:4/4.3}}
+
+/* Por qué (oscuro) */
+.oscuro{background:var(--noche);color:#fff;position:relative;overflow:hidden;isolation:isolate}
+.oscuro::before{content:"";position:absolute;width:900px;height:900px;right:-300px;top:-420px;z-index:-1;background:radial-gradient(closest-side,color-mix(in srgb,var(--prim) 45%,transparent),transparent);opacity:.7}
+.razones{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.razon{position:relative;padding:30px 26px 32px;border-radius:var(--r-l);background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.09);transition:border-color .4s,transform .5s var(--ease),background .4s}
+.razon:hover{border-color:color-mix(in srgb,var(--claro) 55%,transparent);transform:translateY(-4px);background:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.02))}
+.razon .ico{width:52px;height:52px;border-radius:15px;display:grid;place-items:center;background:color-mix(in srgb,var(--prim) 30%,transparent);color:var(--claro);border:1px solid color-mix(in srgb,var(--claro) 30%,transparent);margin-bottom:40px}
+.razon h3{font-size:22px;margin-bottom:10px;letter-spacing:-.015em}
+.razon p{color:#A9ABB2;font-size:15.5px}
+@media(max-width:1060px){.razones{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.razones{grid-template-columns:1fr}.razon .ico{margin-bottom:24px}}
+
+/* Nosotros */
+.nos{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:clamp(40px,6vw,88px);align-items:center}
+.nos .foto{position:relative}
+.nos .foto img{width:100%;aspect-ratio:4/4.6;object-fit:cover;border-radius:var(--r-xl)}
+.nos .sello{position:absolute;left:20px;bottom:20px;right:20px;max-width:330px;display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.9);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);padding:14px 16px;border-radius:18px;box-shadow:0 20px 40px -20px rgba(0,0,0,.35)}
+.nos .sello i{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:var(--tinte);color:var(--prim);flex:none}
+.nos .sello b{display:block;font-size:15.5px;line-height:1.3}.nos .sello small{color:var(--suave);font-size:13.5px}
+.nos h2{font-size:clamp(32px,3.8vw,50px);margin-bottom:22px}
+.datos{margin-top:34px;border:1px solid var(--borde);border-radius:var(--r-l);background:#fff;overflow:hidden}
+.datos .titulo{padding:14px 22px;font-size:12.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--suave);background:#F4F2EE;border-bottom:1px solid var(--borde)}
+.datos dl{margin:0;display:grid;grid-template-columns:1fr 1fr}
+.datos dl div{padding:16px 22px;border-bottom:1px solid var(--borde);display:flex;gap:12px;align-items:flex-start;min-width:0}
+.datos dl div.par{border-right:1px solid var(--borde)}
+.datos dl div.full{grid-column:1/-1;border-right:0}
+.datos dl div:last-child{border-bottom:0}
+.datos svg{color:var(--prim);flex:none;margin-top:2px}
+.datos dt{font-size:13px;color:var(--suave)}.datos dd{margin:0;font-weight:700;font-size:15.5px;line-height:1.4;overflow-wrap:anywhere}
+@media(max-width:900px){.nos{grid-template-columns:1fr}.nos .foto img{aspect-ratio:4/3.2}}
+@media(max-width:560px){.datos dl{grid-template-columns:1fr}.datos dl div.par{border-right:0}}
+
+/* Proceso */
+.proceso{background:var(--tinte)}
+.pasos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;counter-reset:p;position:relative}
+.paso{background:#fff;border-radius:var(--r-l);padding:30px 28px 34px;position:relative;box-shadow:0 1px 0 rgba(18,19,22,.04),0 20px 40px -30px rgba(18,19,22,.25)}
+.paso .n{display:flex;align-items:center;gap:14px;margin-bottom:46px}
+.paso .n b{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:var(--prim);color:#fff;font-family:"Bricolage Grotesque",sans-serif;font-size:18px}
+.paso .n span{flex:1;height:1.5px;background:repeating-linear-gradient(90deg,color-mix(in srgb,var(--prim) 45%,transparent) 0 6px,transparent 6px 12px)}
+.paso:last-child .n span{background:none}
+.paso h3{font-size:24px;margin-bottom:10px}.paso p{color:var(--suave)}
+@media(max-width:860px){.pasos{grid-template-columns:1fr}.paso .n{margin-bottom:26px}}
+
+/* Galería */
+.galeria{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:210px;gap:14px}
+.galeria figure{margin:0;border-radius:var(--r-m);overflow:hidden;background:#E9E6E0}
+.galeria img{width:100%;height:100%;object-fit:cover;transition:transform 1s var(--ease)}
+.galeria figure:hover img{transform:scale(1.06)}
+.galeria figure:nth-child(1){grid-column:span 2;grid-row:span 2}
+.galeria figure:nth-child(4),.galeria figure:nth-child(5),.galeria figure:nth-child(6){grid-column:span 2}
+@media(max-width:760px){
+  .galeria{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:12px;margin:0 calc(var(--gut) * -1);padding:0 var(--gut) 8px;scrollbar-width:none}
+  .galeria::-webkit-scrollbar{display:none}
+  .galeria figure{flex:0 0 78%;height:300px;scroll-snap-align:center}
+}
+
+/* Banda */
+.banda{position:relative;border-radius:var(--r-xl);overflow:hidden;color:#fff;isolation:isolate;padding:clamp(40px,7vw,96px) clamp(26px,6vw,80px);display:grid;grid-template-columns:minmax(0,1.3fr) auto;gap:32px;align-items:end}
+.banda img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
+.banda::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(100deg,rgba(8,9,11,.9) 0%,rgba(8,9,11,.6) 50%,color-mix(in srgb,var(--prim) 45%,rgba(8,9,11,.35)) 100%)}
+.banda h2{font-size:clamp(34px,4.4vw,58px);max-width:15ch}
+.banda p{margin-top:18px;color:#DDDEE2;font-size:18px;max-width:520px}
+@media(max-width:760px){.banda{grid-template-columns:1fr}}
+
+/* Preguntas */
+.faq{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.3fr);gap:clamp(32px,6vw,88px);align-items:start}
+.faq .izq{position:sticky;top:110px}
+.faq .izq p{margin-top:18px}
+.faq .izq .enlace{margin-top:22px}
+.acordeon details{border-bottom:1px solid var(--borde)}
+.acordeon details:first-child{border-top:1px solid var(--borde)}
+.acordeon summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:20px;padding:26px 0;font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:clamp(19px,1.8vw,23px);letter-spacing:-.015em}
+.acordeon summary::-webkit-details-marker{display:none}
+.acordeon .mas{flex:none;width:38px;height:38px;border-radius:50%;border:1px solid var(--borde);position:relative;transition:background .3s,border-color .3s,transform .4s var(--ease)}
+.acordeon .mas::before,.acordeon .mas::after{content:"";position:absolute;left:50%;top:50%;width:13px;height:1.8px;background:currentColor;transform:translate(-50%,-50%);border-radius:2px}
+.acordeon .mas::after{transform:translate(-50%,-50%) rotate(90deg);transition:transform .4s var(--ease)}
+.acordeon details[open] .mas{background:var(--prim);border-color:var(--prim);color:#fff}
+.acordeon details[open] .mas::after{transform:translate(-50%,-50%) rotate(0)}
+.acordeon summary:hover .mas{border-color:var(--prim)}
+.acordeon .resp{padding:0 56px 26px 0;color:var(--suave);font-size:16.5px}
+@media(max-width:860px){.faq{grid-template-columns:1fr}.faq .izq{position:static}.acordeon .resp{padding-right:0}}
+
+/* Contacto */
+.contacto{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:20px;align-items:stretch}
+.contacto .info{display:flex;flex-direction:column;gap:22px}
+.canal{display:flex;align-items:center;gap:16px;padding:18px 20px;border:1px solid var(--borde);border-radius:var(--r-m);background:#fff;text-decoration:none;transition:border-color .3s,transform .4s var(--ease);min-width:0}
+a.canal:hover{border-color:var(--prim);transform:translateY(-2px)}
+.canal i{display:grid;place-items:center;width:46px;height:46px;border-radius:14px;background:var(--tinte);color:var(--prim);flex:none}
+.canal small{display:block;color:var(--suave);font-size:13.5px}.canal b{display:block;font-size:16.5px;overflow-wrap:anywhere;line-height:1.35}
+.mapa{flex:1;min-height:260px;border-radius:var(--r-l);overflow:hidden;border:1px solid var(--borde);position:relative;
+  background:radial-gradient(circle at 50% 45%,var(--tinte) 0 22%,transparent 23%),repeating-linear-gradient(0deg,transparent 0 39px,rgba(18,19,22,.05) 39px 40px),repeating-linear-gradient(90deg,transparent 0 39px,rgba(18,19,22,.05) 39px 40px),#EFECE6}
+.mapa .respaldo{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--prim);font-weight:700;text-decoration:none;font-size:15px}
+.mapa iframe{position:relative;width:100%;height:100%;min-height:260px;border:0;display:block;filter:saturate(.85)}
+form.formulario{background:var(--noche);color:#fff;border-radius:var(--r-xl);padding:clamp(26px,4vw,44px);display:flex;flex-direction:column;gap:18px;position:relative;overflow:hidden;isolation:isolate}
+form.formulario::before{content:"";position:absolute;width:520px;height:520px;left:-200px;bottom:-300px;z-index:-1;background:radial-gradient(closest-side,color-mix(in srgb,var(--prim) 50%,transparent),transparent)}
+form.formulario h3{font-size:clamp(26px,2.6vw,34px)}
+form.formulario>p{color:#A9ABB2;margin-top:-6px}
+.fila{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:560px){.fila{grid-template-columns:1fr}}
+label{display:flex;flex-direction:column;gap:8px;font-size:14px;font-weight:500;color:#C9CBD0}
+input,textarea{font:inherit;font-size:16px;color:#fff;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:14px 16px;transition:border-color .25s,background .25s;width:100%}
+input::placeholder,textarea::placeholder{color:#6F727A}
+input:focus,textarea:focus{outline:none;border-color:var(--claro);background:rgba(255,255,255,.09)}
+textarea{resize:vertical;min-height:120px}
+form.formulario .btn{align-self:flex-start;margin-top:4px}
+form.formulario .nota{font-size:13px;color:#7D8088}
+@media(max-width:900px){.contacto{grid-template-columns:1fr}}
+
+/* Pie */
+footer{background:var(--noche);color:#A9ABB2;padding-top:clamp(64px,8vw,96px);overflow:hidden}
+.pie-arriba{display:grid;grid-template-columns:minmax(0,1.4fr) repeat(2,minmax(0,1fr));gap:40px;padding-bottom:56px}
+.pie-arriba .logo{color:#fff}.pie-arriba .logo b{max-width:none;white-space:normal}
+.pie-arriba p{margin-top:18px;max-width:380px;font-size:15.5px}
+.pie-arriba h4{margin:0 0 16px;color:#fff;font-size:14px;letter-spacing:.1em;text-transform:uppercase}
+.pie-arriba ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;font-size:15.5px}
+.pie-arriba a{text-decoration:none}.pie-arriba a:hover{color:#fff}
+.marca-gigante{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;letter-spacing:-.05em;line-height:.8;font-size:clamp(56px,13vw,200px);color:rgba(255,255,255,.06);white-space:nowrap;user-select:none;margin-bottom:-.14em;overflow:hidden}
+.marca-gigante span{display:inline-block}
+.pie-abajo{border-top:1px solid rgba(255,255,255,.08);position:relative;background:var(--noche);font-size:13.5px}
+.pie-abajo .env{padding-top:22px;padding-bottom:26px;display:flex;flex-wrap:wrap;gap:8px 24px;justify-content:space-between}
+.pie-abajo a{color:#5BE0A4;text-decoration:none}
+@media(max-width:760px){.pie-arriba{grid-template-columns:1fr 1fr}.pie-arriba>div:first-child{grid-column:1/-1}}
+@media(max-width:520px){.pie-arriba{grid-template-columns:1fr;gap:32px}.pie-abajo .env{padding-bottom:84px}}
+
+/* Botón flotante para el dueño */
+.flotante{position:fixed;right:20px;bottom:20px;z-index:70;display:inline-flex;align-items:center;gap:10px;padding:13px 20px 13px 16px;border-radius:999px;background:#0E1A15;color:#fff;text-decoration:none;font-weight:700;font-size:15px;box-shadow:0 20px 40px -12px rgba(0,0,0,.5),inset 0 0 0 1px rgba(91,224,164,.35);transform:translateY(120px);opacity:0;transition:transform .5s var(--ease),opacity .5s}
+.flotante.ver{transform:none;opacity:1}
+.flotante svg{color:#5BE0A4}
+.flotante small{display:block;font-weight:500;font-size:12px;color:#9FB5AA;line-height:1.2}
+.flotante span{line-height:1.25}
+@media(max-width:560px){.flotante{right:12px;bottom:12px;padding:11px 16px 11px 13px;font-size:14px}.flotante small{display:none}}
+
+/* Aparición al hacer scroll */
+.js .rv{opacity:0;transform:translateY(28px);transition:opacity .9s var(--ease),transform .9s var(--ease);transition-delay:var(--d,0s)}
+.js .rv.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .js .rv,.js .entra,.js .portada h1 .w{opacity:1!important;transform:none!important}
+  .cinta .pista{transform:none}
+}
+:focus-visible{outline:2px solid var(--claro);outline-offset:3px;border-radius:6px}
+.ig-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start}@media(max-width:900px){.ig-grid{grid-template-columns:1fr;max-width:480px;margin:0 auto}}.ig-grid .instagram-media{min-width:0!important;width:100%!important;margin:0!important}
+.rej4{grid-template-columns:repeat(4,minmax(0,1fr))}@media(max-width:960px){.rej4{grid-template-columns:1fr 1fr}.rej4 .tarjeta:first-child{grid-column:auto;aspect-ratio:auto}}@media(max-width:620px){.rej4{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="borrador">
+  <span>Borrador de página web hecho por <strong>Edison Monsalve</strong> para WorldPeak Travel Agency S.A.S</span>
+  <span>Diseño y publicación <strong>$700.000</strong> · dominio <strong>$150.000/año</strong> · hosting <strong>$150.000/año</strong></span>
+  <a href="https://wa.me/573332470715?text=Hola%20Edison%2C%20quiero%20publicar%20la%20p%C3%A1gina%20web%20de%20WORLDPEAK%20TRAVEL%20AGENCY%20S.A.S" data-clic="sitio_publicar">¿La publicamos?</a>
+</div>
+
+<header class="nav" id="nav">
+  <div class="env">
+    <a class="logo" href="#inicio" aria-label="WORLDPEAK TRAVEL AGENCY, inicio">
+      <span class="mono">W</span>
+      <b>WORLDPEAK <span style="font-weight:500;opacity:.75">TRAVEL AGENCY</span></b>
+    </a>
+    <button class="menu" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="links"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    <nav class="links" id="links" aria-label="Principal">
+      <a href="#servicios">Servicios</a>
+      <a href="#destinos">Destinos</a>
+      <a href="#nosotros">Nosotros</a>
+      <a href="#proceso">Cómo trabajamos</a>
+      <a href="#preguntas">Preguntas</a>
+      <a class="btn btn-prim" href="#contacto">Cotizar</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<section id="inicio" class="portada">
+  <div class="foto"><img src="https://images.unsplash.com/photo-1590523277543-a94d2e4eb00b?auto=format&amp;fit=crop&amp;w=1800&amp;q=70" alt="" fetchpriority="high"></div>
+  <div class="env">
+    <div>
+      <span class="pildora entra" style="--d:.05s"><i><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c.6 4.4 2.6 6.4 7 7-4.4.6-6.4 2.6-7 7-.6-4.4-2.6-6.4-7-7 4.4-.6 6.4-2.6 7-7z"/></svg></i>Agencia de viajes · Medellín · RNT 300617</span>
+      <h1><span class="w" style="--i:0">Viaja</span> <span class="w" style="--i:1">fácil,</span> <span class="w" style="--i:2">seguro</span> <span class="w" style="--i:3">y</span> <span class="w" style="--i:4">a</span> <span class="w" style="--i:5">tu</span> <span class="w" style="--i:6">medida</span></h1>
+      <p class="sub entra" style="--d:.55s">Vuelos, hoteles, paquetes y experiencias nacionales e internacionales, con asesoría de principio a fin.</p>
+      <div class="botones entra" style="--d:.7s">
+        <a class="btn btn-prim" href="#contacto">Cotizar mi viaje <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8.5 7H17v8.5"/></svg></a>
+        <a class="btn btn-vidrio" href="#destinos">Ver destinos</a>
+      </div>
+      <div class="sellos entra" style="--d:.85s">
+        <span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12.2 2.8 2.8L16 9.5"/></svg>RNT 300617</span>
+
+        <span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12.2 2.8 2.8L16 9.5"/></svg>Salidas garantizadas</span>
+
+        <span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12.2 2.8 2.8L16 9.5"/></svg>+13 mil seguidores en Instagram</span>
+</div>
+    </div>
+    <aside class="ficha entra" style="--d:.95s" aria-label="Próximas salidas">
+      <div class="cab"><span>Próximas salidas</span><span>3</span></div>
+      
+      <a class="item" href="https://wa.me/573234972854?text=Hola%20WorldPeak%2C%20quiero%20informaci%C3%B3n%20del%20plan%20a%20R%C3%ADo%20de%20Janeiro%20en%20Semana%20Santa" target="_blank" rel="noopener"><img src="https://images.unsplash.com/photo-1483729558449-99ef09a8c325?auto=format&amp;fit=crop&amp;w=800&amp;q=70" alt="Río de Janeiro · Semana Santa"><span><b>Río de Janeiro · Semana Santa</b><small>24 al 28 de marzo de 2027 · desde $5.749.000</small></span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8.5 7H17v8.5"/></svg></a>
+      
+      <a class="item" href="https://wa.me/573234972854?text=Hola%20WorldPeak%2C%20quiero%20informaci%C3%B3n%20del%20plan%20a%20Punta%20Cana" target="_blank" rel="noopener"><img src="https://images.unsplash.com/photo-1622396481328-9b1b78cdd9fd?auto=format&amp;fit=crop&amp;w=800&amp;q=70" alt="Punta Cana"><span><b>Punta Cana</b><small>5 días y 4 noches · desde $2.649.000</small></span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8.5 7H17v8.5"/></svg></a>
+      
+      <a class="item" href="https://wa.me/573234972854?text=Hola%20WorldPeak%2C%20quiero%20informaci%C3%B3n%20del%20plan%20a%20Isla%20Fuerte" target="_blank" rel="noopener"><img src="https://images.unsplash.com/photo-1559128010-7c1ad6e1b6a5?auto=format&amp;fit=crop&amp;w=800&amp;q=70" alt="Isla Fuerte"><span><b>Isla Fuerte</b><small>Noviembre, Navidad y Fin de Año · lancha, tours y guía nativo</small></span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8.5 7H17v8.5"/></svg></a>
+      
+      <div class="pie"><span class="punto"></span>Reserve por WhatsApp: 323 497 2854</div>
+    </aside>
+  </div>
+</section>
+
+<div class="cinta" aria-hidden="true">
+  <div class="pista">
+    
+    <div class="grupo">
+      
+      <span>Vuelos</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c.6 4.4 2.6 6.4 7 7-4.4.6-6.4 2.6-7 7-.6-4.4-2.6-6.4-7-7 4.4-.6 6.4-2.6 7-7z"/></svg><span>Hoteles · Paquetes</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c.6 4.4 2.6 6.4 7 7-4.4.6-6.4 2.6-7 7-.6-4.4-2.6-6.4-7-7 4.4-.6 6.4-2.6 7-7z"/></svg><span>Tours y experiencias</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c.6 4.4 2.6 6.4 7 7-4.4.6-6.4 2.6-7 7-.6-4.4-2.6-6.4-7-7 4.4-.6 6.4-2.6 7-7z"/></svg>
+      <span>WORLDPEAK TRAVEL AGENCY</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c.6 4.4 2.6 6.4 7 7-4.4.6-6.4 2.6-7 7-.6-4.4-2.6-6.4-7-7 4.4-.6 6.4-2.6 7-7z"/></svg>
+      
+      <span>Vuelos</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c.6 4.4 2.6 6.4 7 7-4.4.6-6.4 2.6-7 7-.6-4.4-2.6-6.4-7-7 4.4-.6 6.4-2.6 7-7z"/></svg><span>Hoteles · Paquetes</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c.6 4.4 2.6 6.4 7 7-4.4.6-6.4 2.6-7 7-.6-4.4-2.6-6.4-7-7 4.4-.6 6.4-2.6 7-7z"/></svg><span>Tours y experiencias</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c.6 4.4 2.6 6.4 7 7-4.4.6-6.4 2.6-7 7-.6-4.4-2.6-6.4-7-7 4.4-.6 6.4-2.6 7-7z"/></svg>
+      <span>WORLDPEAK TRAVEL AGENCY</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c.6 4.4 2.6 6.4 7 7-4.4.6-6.4 2.6-7 7-.6-4.4-2.6-6.4-7-7 4.4-.6 6.4-2.6 7-7z"/></svg>
+      
+    </div>
+    
+    <div class="grupo">
+      
+      <span>Vuelos</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c.6 4.4 2.6 6.4 7 7-4.4.6-6.4 2.6-7 7-.6-4.4-2.6-6.4-7-7 4.4-.6 6.4-2.6 7-7z"/></svg><span>Hoteles · Paquetes</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c.6 4.4 2.6 6.4 7 7-4.4.6-6.4 2.6-7 7-.6-4.4-2.6-6.4-7-7 4.4-.6 6.4-2.6 7-7z"/></svg><span>Tours y experiencias</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c.6 4.4 2.6 6.4 7 7-4.4.6-6.4 2.6-7 7-.6-4.4-2.6-6.4-7-7 4.4-.6 6.4-2.6 7-7z"/></svg>
+      <span>WORLDPEAK TRAVEL AGENCY</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c.6 4.4 2.6 6.4 7 7-4.4.6-6.4 2.6-7 7-.6-4.4-2.6-6.4-7-7 4.4-.6 6.4-2.6 7-7z"/></svg>
+      
+      <span>Vuelos</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c.6 4.4 2.6 6.4 7 7-4.4.6-6.4 2.6-7 7-.6-4.4-2.6-6.4-7-7 4.4-.6 6.4-2.6 7-7z"/></svg><span>Hoteles · Paquetes</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c.6 4.4 2.6 6.4 7 7-4.4.6-6.4 2.6-7 7-.6-4.4-2.6-6.4-7-7 4.4-.6 6.4-2.6 7-7z"/></svg><span>Tours y experiencias</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c.6 4.4 2.6 6.4 7 7-4.4.6-6.4 2.6-7 7-.6-4.4-2.6-6.4-7-7 4.4-.6 6.4-2.6 7-7z"/></svg>
+      <span>WORLDPEAK TRAVEL AGENCY</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c.6 4.4 2.6 6.4 7 7-4.4.6-6.4 2.6-7 7-.6-4.4-2.6-6.4-7-7 4.4-.6 6.4-2.6 7-7z"/></svg>
+      
+    </div>
+    
+  </div>
+</div>
+
+<section id="servicios" class="seccion">
+  <div class="env">
+    <div class="cabeza">
+      <div class="rv"><p class="ceja">Nuestros servicios</p><h2>Viaja fácil, seguro y a tu medida</h2></div>
+      <div class="der rv" style="--d:.1s">
+        <p class="lead">Le asesoramos desde la idea hasta el regreso: usted nos cuenta a dónde quiere ir y nosotros armamos el viaje.</p>
+        <a class="enlace" href="#contacto">Pedir una cotización <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8.5 7H17v8.5"/></svg></a>
+      </div>
+    </div>
+    <div class="rejilla rej4">
+      <a class="tarjeta rv" style="--d:0.00s" href="#contacto">
+        <img src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&amp;fit=crop&amp;w=800&amp;q=70" alt="Vuelos" loading="lazy">
+        <div class="arriba"><span class="num">01</span><span class="flecha"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8.5 7H17v8.5"/></svg></span></div>
+        <div><h3>Vuelos</h3><p>Tiquetes nacionales e internacionales, con la mejor ruta para su viaje.</p></div>
+      </a>
+      <a class="tarjeta rv" style="--d:0.08s" href="#contacto">
+        <img src="https://images.unsplash.com/photo-1596436889106-be35e843f974?auto=format&amp;fit=crop&amp;w=800&amp;q=70" alt="Hoteles" loading="lazy">
+        <div class="arriba"><span class="num">02</span><span class="flecha"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8.5 7H17v8.5"/></svg></span></div>
+        <div><h3>Hoteles</h3><p>Alojamiento escogido para cada destino y presupuesto.</p></div>
+      </a>
+      <a class="tarjeta rv" style="--d:0.16s" href="#contacto">
+        <img src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&amp;fit=crop&amp;w=800&amp;q=70" alt="Paquetes" loading="lazy">
+        <div class="arriba"><span class="num">03</span><span class="flecha"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8.5 7H17v8.5"/></svg></span></div>
+        <div><h3>Paquetes</h3><p>Planes completos con vuelos, hotel y traslados, y salidas garantizadas con fecha fija.</p></div>
+      </a>
+      <a class="tarjeta rv" style="--d:0.24s" href="#contacto">
+        <img src="https://images.unsplash.com/photo-1530789253388-582c481c54b0?auto=format&amp;fit=crop&amp;w=800&amp;q=70" alt="Tours y experiencias" loading="lazy">
+        <div class="arriba"><span class="num">04</span><span class="flecha"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8.5 7H17v8.5"/></svg></span></div>
+        <div><h3>Tours y experiencias</h3><p>Excursiones y planes de un día para vivir cada destino.</p></div>
+      </a>
+      
+      
+      
+      
+      
+      
+      
+    </div>
+  </div>
+</section>
+
+
+
+
+<section id="destinos" class="seccion" style="padding-top:0">
+  <div class="env">
+    <div class="cabeza">
+      <div class="rv"><p class="ceja">Destinos</p><h2>Nacionales e internacionales</h2></div>
+      <div class="der rv" style="--d:.1s">
+        <p class="lead">Algunos de los planes que tenemos ahora. Toque el destino y le respondemos por WhatsApp con fechas y precio.</p>
+        <a class="enlace" href="https://wa.me/573234972854?text=Hola%20WorldPeak%2C%20quiero%20cotizar%20un%20viaje" target="_blank" rel="noopener">Cotizar por WhatsApp <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8.5 7H17v8.5"/></svg></a>
+      </div>
+    </div>
+    <div class="rejilla">
+      <a class="tarjeta rv" style="--d:0.00s" href="https://wa.me/573234972854?text=Hola%20WorldPeak%2C%20quiero%20informaci%C3%B3n%20del%20plan%20a%20Dub%C3%A1i" target="_blank" rel="noopener">
+        <img src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&amp;fit=crop&amp;w=800&amp;q=70" alt="Dubái" loading="lazy">
+        <div class="arriba"><span class="num">01</span><span class="flecha"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8.5 7H17v8.5"/></svg></span></div>
+        <div><h3>Dubái</h3><p>Despida el año con 5 noches de lujo y paisajes increíbles.</p></div>
+      </a>
+      <a class="tarjeta rv" style="--d:0.08s" href="https://wa.me/573234972854?text=Hola%20WorldPeak%2C%20quiero%20informaci%C3%B3n%20del%20plan%20a%20Costa%20Rica" target="_blank" rel="noopener">
+        <img src="https://images.unsplash.com/photo-1517760444937-f6397edcbbcd?auto=format&amp;fit=crop&amp;w=800&amp;q=70" alt="Costa Rica" loading="lazy">
+        <div class="arriba"><span class="num">02</span><span class="flecha"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8.5 7H17v8.5"/></svg></span></div>
+        <div><h3>Costa Rica</h3><p>7 noches de aventura, playas y naturaleza, con tiquetes aéreos.</p></div>
+      </a>
+      <a class="tarjeta rv" style="--d:0.16s" href="https://wa.me/573234972854?text=Hola%20WorldPeak%2C%20quiero%20informaci%C3%B3n%20del%20plan%20a%20Medell%C3%ADn%20y%20Guatap%C3%A9" target="_blank" rel="noopener">
+        <img src="https://images.unsplash.com/photo-1570197820006-3e46f5ee01bb?auto=format&amp;fit=crop&amp;w=800&amp;q=70" alt="Medellín y Guatapé" loading="lazy">
+        <div class="arriba"><span class="num">03</span><span class="flecha"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8.5 7H17v8.5"/></svg></span></div>
+        <div><h3>Medellín y Guatapé</h3><p>Desde $969.000 por persona, con alojamiento y desayunos.</p></div>
+      </a>
+      <a class="tarjeta rv" style="--d:0.24s" href="https://wa.me/573234972854?text=Hola%20WorldPeak%2C%20quiero%20informaci%C3%B3n%20del%20plan%20a%20Necocl%C3%AD" target="_blank" rel="noopener">
+        <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&amp;fit=crop&amp;w=800&amp;q=70" alt="Necoclí" loading="lazy">
+        <div class="arriba"><span class="num">04</span><span class="flecha"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8.5 7H17v8.5"/></svg></span></div>
+        <div><h3>Necoclí</h3><p>Desde $479.000: playas, turismo y descanso.</p></div>
+      </a>
+      <a class="tarjeta rv" style="--d:0.32s" href="https://wa.me/573234972854?text=Hola%20WorldPeak%2C%20quiero%20informaci%C3%B3n%20del%20plan%20a%20Puerto%20Plata%2C%20Rep%C3%BAblica%20Dominicana" target="_blank" rel="noopener">
+        <img src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&amp;fit=crop&amp;w=800&amp;q=70" alt="Puerto Plata, República Dominicana" loading="lazy">
+        <div class="arriba"><span class="num">05</span><span class="flecha"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8.5 7H17v8.5"/></svg></span></div>
+        <div><h3>Puerto Plata, República Dominicana</h3><p>Puente festivo: 4 noches con vuelos, traslados y alimentación.</p></div>
+      </a>
+      <a class="tarjeta rv" style="--d:0.40s" href="https://wa.me/573234972854?text=Hola%20WorldPeak%2C%20quiero%20armar%20un%20viaje%20a%20la%20medida" target="_blank" rel="noopener">
+        <img src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&amp;fit=crop&amp;w=800&amp;q=70" alt="Su viaje a la medida" loading="lazy">
+        <div class="arriba"><span class="num">06</span><span class="flecha"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8.5 7H17v8.5"/></svg></span></div>
+        <div><h3>Su viaje a la medida</h3><p>¿Tiene otro destino en mente? Cuéntenos fechas y viajeros y se lo armamos.</p></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section id="por-que" class="seccion oscuro">
+  <div class="env">
+    <div class="cabeza">
+      <div class="rv"><p class="ceja">Por qué elegirnos</p><h2>Viaje tranquilo, con una agencia registrada</h2></div>
+      <div class="der rv" style="--d:.1s"><p class="lead">Lo que puede esperar al viajar con WorldPeak: asesoría personal, precios claros y acompañamiento en todo el viaje.</p></div>
+    </div>
+    <div class="razones">
+      
+      <article class="razon rv" style="--d:0.0s">
+        <div class="ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8.5 8.5 0 0 1-12.4 7.6L3.5 21l1.4-4.9A8.5 8.5 0 1 1 21 12z"/><path d="M8.5 11h7M8.5 14.5h4.5"/></svg></div>
+        <h3>Asesoría a su medida</h3><p>Le ayudamos a escoger destino, fechas y presupuesto antes de reservar.</p>
+      </article>
+      
+      <article class="razon rv" style="--d:0.08s">
+        <div class="ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg></div>
+        <h3>Precios claros</h3><p>Le decimos qué incluye cada plan y cuánto vale por persona.</p>
+      </article>
+      
+      <article class="razon rv" style="--d:0.16s">
+        <div class="ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12.2 2.8 2.8L16 9.5"/></svg></div>
+        <h3>Salidas garantizadas</h3><p>Excursiones y salidas grupales 2027 con fecha confirmada.</p>
+      </article>
+      
+      <article class="razon rv" style="--d:0.24s">
+        <div class="ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></div>
+        <h3>Registro Nacional de Turismo</h3><p>RNT 300617 y empresa legalmente constituida (NIT 902117833).</p>
+      </article>
+      
+    </div>
+  </div>
+</section>
+
+<section id="nosotros" class="seccion">
+  <div class="env nos">
+    <div class="foto rv">
+      <img src="https://images.unsplash.com/photo-1621293954908-907159247fc8?auto=format&amp;fit=crop&amp;w=1100&amp;q=70" alt="" loading="lazy">
+      <div class="sello"><i><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></i><span><b>Medellín, Antioquia</b><small>RNT 300617</small></span></div>
+    </div>
+    <div class="rv" style="--d:.1s">
+      <p class="ceja">Quiénes somos</p>
+      <h2>Una agencia de Medellín para viajar sin complicaciones</h2>
+      <p class="lead">Somos WorldPeak Travel Agency: vuelos, hoteles, paquetes y experiencias para que usted viaje fácil, seguro y a su medida. Más de 13 mil viajeros siguen nuestros planes en Instagram.</p>
+      <div class="datos">
+        <div class="titulo">Datos de la empresa</div>
+        <dl>
+          <div class="full"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7M3 12.5h18"/></svg><span><dt>Razón social</dt><dd>WORLDPEAK TRAVEL AGENCY S.A.S</dd></span></div>
+          <div class="par"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><circle cx="9" cy="11" r="2.2"/><path d="M5.8 16c.6-1.6 1.8-2.4 3.2-2.4s2.6.8 3.2 2.4M14.5 10h4M14.5 13.5h3"/></svg><span><dt>NIT</dt><dd>902117833</dd></span></div>
+          <div class=""><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span><dt>Ciudad</dt><dd>Medellín, Antioquia</dd></span></div>
+          <div class="par"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/></svg><span><dt>RNT</dt><dd>300617</dd></span></div>
+          <div class=""><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.5A8.4 8.4 0 1 1 21 11.5z"/></svg><span><dt>WhatsApp</dt><dd>323 497 2854 · 314 568 9177</dd></span></div>
+          <div class="full"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/></svg><span><dt>Instagram</dt><dd>@worldpeak_travel_agency</dd></span></div>
+          <div class="full"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/></svg><span><dt>Matrícula mercantil</dt><dd>16 de octubre de 2026</dd></span></div>
+          <div class="full"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg><span><dt>Actividad</dt><dd>Actividades de las agencias de viaje</dd></span></div>
+        </dl>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="proceso" class="seccion proceso">
+  <div class="env">
+    <div class="cabeza">
+      <div class="rv"><p class="ceja">Cómo trabajamos</p><h2>Así trabajamos</h2></div>
+      <div class="der rv" style="--d:.1s"><p class="lead">Tres pasos, sin enredos. Usted sabe en todo momento qué sigue.</p></div>
+    </div>
+    <div class="pasos">
+      
+      <article class="paso rv" style="--d:0.0s">
+        <div class="n"><b>01</b><span></span></div>
+        <h3>Cuéntenos su viaje</h3><p>Destino, fechas y número de viajeros, por WhatsApp o en el formulario.</p>
+      </article>
+      
+      <article class="paso rv" style="--d:0.1s">
+        <div class="n"><b>02</b><span></span></div>
+        <h3>Reciba su cotización</h3><p>Le enviamos el plan con lo que incluye y el valor por persona.</p>
+      </article>
+      
+      <article class="paso rv" style="--d:0.2s">
+        <div class="n"><b>03</b><span></span></div>
+        <h3>Separe su cupo y viaje</h3><p>Reserve con un abono y le acompañamos hasta el regreso.</p>
+      </article>
+      
+    </div>
+  </div>
+</section>
+
+<section id="galeria" class="seccion" style="padding-bottom:0">
+  <div class="env">
+    <div class="cabeza" style="margin-bottom:36px">
+      <div class="rv"><p class="ceja">Instagram</p><h2>Nuestros planes en Instagram</h2></div>
+      <div class="der rv" style="--d:.1s"><p class="lead">Los planes más recientes, tal como los publicamos en @worldpeak_travel_agency.</p><a class="enlace" href="https://www.instagram.com/worldpeak_travel_agency/" target="_blank" rel="noopener">Ver Instagram <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8.5 7H17v8.5"/></svg></a></div>
+    </div>
+    <div class="ig-grid"><blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/De8SODVRnO_/" data-instgrm-version="14"></blockquote><blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/De8RJILRfHJ/" data-instgrm-version="14"></blockquote><blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/De24E0FxsB5/" data-instgrm-version="14"></blockquote></div>
+  </div>
+</section>
+
+<section id="preguntas" class="seccion">
+  <div class="env faq">
+    <div class="izq rv">
+      <p class="ceja">Preguntas frecuentes</p>
+      <h2>Lo que más nos preguntan</h2>
+      <p class="lead">¿No encuentra su respuesta? Escríbanos y le contestamos el mismo día hábil.</p>
+      <a class="enlace" href="#contacto">Hacer una pregunta <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8.5 7H17v8.5"/></svg></a>
+    </div>
+    <div class="acordeon rv" style="--d:.1s">
+      
+      <details open><summary>¿Cómo reservo un plan?<span class="mas" aria-hidden="true"></span></summary><p class="resp">Escríbanos por WhatsApp al 323 497 2854 o por el formulario de esta página con el destino, las fechas y el número de viajeros. Le respondemos con la cotización.</p></details>
+      
+      <details><summary>¿Los precios son por persona?<span class="mas" aria-hidden="true"></span></summary><p class="resp">Sí. Por ejemplo, el plan a Río de Janeiro en Semana Santa va desde $5.749.000 por persona en acomodación doble. Cada cotización le dice qué incluye.</p></details>
+      
+      <details><summary>¿Cómo separo mi cupo?<span class="mas" aria-hidden="true"></span></summary><p class="resp">Con un abono. Por ejemplo, el cupo para Río de Janeiro se separa con $750.000.</p></details>
+      
+      <details><summary>¿Están registrados como agencia de viajes?<span class="mas" aria-hidden="true"></span></summary><p class="resp">Sí. Tenemos Registro Nacional de Turismo RNT 300617 y somos una empresa legalmente constituida (NIT 902117833).</p></details>
+      
+    </div>
+  </div>
+</section>
+
+<section class="seccion" style="padding-top:0">
+  <div class="env">
+    <div class="banda rv">
+      <img src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&amp;fit=crop&amp;w=1000&amp;q=70" alt="" loading="lazy">
+      <div><h2>¿Planea su próximo viaje?</h2><p>Cuéntenos destino, fechas y número de viajeros, y le enviamos la cotización.</p></div>
+      <div><a class="btn btn-blanco" href="#contacto">Pedir cotización <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8.5 7H17v8.5"/></svg></a></div>
+    </div>
+  </div>
+</section>
+
+<section id="contacto" class="seccion" style="padding-top:0">
+  <div class="env">
+    <div class="cabeza">
+      <div class="rv"><p class="ceja">Contacto</p><h2>Hablemos</h2></div>
+      <div class="der rv" style="--d:.1s"><p class="lead">Cuéntenos qué necesita. Le respondemos el mismo día hábil.</p></div>
+    </div>
+    <div class="contacto">
+      <div class="info rv">
+        <a class="canal" href="https://wa.me/573234972854?text=Hola%20WorldPeak%2C%20quiero%20cotizar%20un%20viaje" target="_blank" rel="noopener"><i><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.5A8.4 8.4 0 1 1 21 11.5z"/></svg></i><span><small>WhatsApp</small><b>323 497 2854 · 314 568 9177</b></span></a>
+        <a class="canal" href="https://www.instagram.com/worldpeak_travel_agency/" target="_blank" rel="noopener"><i><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/></svg></i><span><small>Instagram</small><b>@worldpeak_travel_agency</b></span></a>
+        <a class="canal" href="mailto:worldpeaktravelagency@gmail.com"><i><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m3.5 7 8.5 6 8.5-6"/></svg></i><span><small>Correo</small><b>worldpeaktravelagency@gmail.com</b></span></a>
+        <div class="canal"><i><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></i><span><small>Ubicación</small><b>Medellín, Antioquia, Colombia</b></span></div>
+        <div class="mapa"><a class="respaldo" href="https://www.google.com/maps?q=Medell%C3%ADn%2C%20Antioquia%2C%20Colombia" target="_blank" rel="noopener"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Ver Medellín en Google Maps</a><iframe src="https://www.google.com/maps?q=Medell%C3%ADn%2C%20Antioquia%2C%20Colombia&amp;output=embed" title="Mapa de Medellín" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
+      </div>
+      <form class="formulario rv" style="--d:.1s" id="formulario" data-para="worldpeaktravelagency@gmail.com" data-marca="WORLDPEAK TRAVEL AGENCY" novalidate>
+        <h3>Escríbanos</h3>
+        <p>Cuéntenos destino, fechas y número de viajeros.</p>
+        <div class="fila">
+          <label>Nombre<input type="text" name="nombre" placeholder="Su nombre" autocomplete="name"></label>
+          <label>Teléfono<input type="tel" name="telefono" placeholder="300 000 0000" autocomplete="tel"></label>
+        </div>
+        <label>Correo<input type="email" name="correo" placeholder="nombre@correo.com" autocomplete="email"></label>
+        <label>Mensaje<textarea name="mensaje" rows="4" placeholder="Destino, fechas y número de viajeros"></textarea></label>
+        <button class="btn btn-prim" type="submit">Enviar mensaje <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8.5 7H17v8.5"/></svg></button>
+        <p class="nota">Al enviar se abre su programa de correo con el mensaje listo para worldpeaktravelagency@gmail.com.</p>
+      </form>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="env">
+    <div class="pie-arriba">
+      <div>
+        <a class="logo" href="#inicio"><span class="mono">W</span><b>WORLDPEAK <span style="font-weight:500;opacity:.75">TRAVEL AGENCY</span></b></a>
+        <p>Vuelos, hoteles, paquetes y experiencias. Viaja fácil, seguro y a tu medida. RNT 300617.</p>
+      </div>
+      <div>
+        <h4>Navegación</h4>
+        <ul><li><a href="#servicios">Servicios</a></li><li><a href="#destinos">Destinos</a></li><li><a href="#nosotros">Nosotros</a></li><li><a href="#proceso">Cómo trabajamos</a></li><li><a href="#preguntas">Preguntas</a></li></ul>
+      </div>
+      <div>
+        <h4>Contacto</h4>
+        <ul><li><a href="mailto:worldpeaktravelagency@gmail.com" style="overflow-wrap:anywhere">worldpeaktravelagency@gmail.com</a></li><li><a href="https://wa.me/573234972854?text=Hola%20WorldPeak">WhatsApp 323 497 2854 · 314 568 9177</a></li><li><a href="https://www.instagram.com/worldpeak_travel_agency/">@worldpeak_travel_agency</a></li><li>Medellín, Antioquia</li></ul>
+      </div>
+    </div>
+    <div class="marca-gigante" aria-hidden="true"><span>WORLDPEAK TRAVEL AGENCY</span></div>
+  </div>
+  <div class="pie-abajo"><div class="env">
+    <span>© 2026 WorldPeak Travel Agency S.A.S · NIT 902117833 · RNT 300617 · En cumplimiento de la Ley 679 de 2001, rechazamos la explotación y el abuso sexual de niñas, niños y adolescentes.</span>
+    <span>Borrador hecho por <a href="https://wa.me/573332470715?text=Hola%20Edison%2C%20quiero%20publicar%20la%20p%C3%A1gina%20web%20de%20WORLDPEAK%20TRAVEL%20AGENCY%20S.A.S" data-clic="sitio_publicar">Edison Monsalve</a></span>
+  </div></div>
+</footer>
+
+<a class="flotante" id="flotante" href="https://wa.me/573332470715?text=Hola%20Edison%2C%20quiero%20publicar%20la%20p%C3%A1gina%20web%20de%20WORLDPEAK%20TRAVEL%20AGENCY%20S.A.S" data-clic="sitio_publicar" aria-label="¿La publicamos? Escribir a Tributando por WhatsApp">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 11.8a8.5 8.5 0 0 1-12.6 7.4L3.5 20.5l1.3-4.3a8.5 8.5 0 1 1 15.7-4.4z"/><path d="M9 8.3c.2-.4.5-.5.8-.5h.5c.2 0 .4.1.5.4l.7 1.7c.1.2 0 .5-.1.7l-.5.6c-.1.2-.1.4 0 .6.6 1 1.4 1.8 2.4 2.4.2.1.4.1.6 0l.6-.5c.2-.2.5-.2.7-.1l1.7.7c.3.1.4.3.4.5v.5c0 .3-.1.6-.5.8-.6.4-1.5.6-2.4.3-2.6-.8-4.6-2.8-5.4-5.4-.3-.9-.1-1.8.3-2.4z"/></svg><span>¿La publicamos?<small>$700.000 + dominio y hosting</small></span>
+</a>
+
+<script>
+(function(){
+  var nav = document.getElementById('nav'), flot = document.getElementById('flotante');
+  var portada = document.getElementById('inicio');
+  function alScroll(){
+    var y = window.scrollY || 0, h = portada ? portada.offsetHeight : 600;
+    nav.classList.toggle('solida', y > h - 90);
+    flot.classList.toggle('ver', y > Math.min(h * 0.6, 500));
+  }
+  window.addEventListener('scroll', alScroll, {passive:true}); alScroll();
+
+  // La marca grande del pie ocupa justo el ancho disponible.
+  var gig = document.querySelector('.marca-gigante');
+  function ajustar(){
+    if (!gig) return;
+    var t = gig.firstElementChild; gig.style.display = ''; gig.style.fontSize = '100px';
+    var r = gig.clientWidth / Math.max(t.offsetWidth, 1);
+    var px = Math.min(220, Math.floor(100 * r * 0.95));
+    gig.style.fontSize = px + 'px';
+    gig.style.display = px < 44 ? 'none' : '';   // nombres muy largos en celular: mejor sin ella
+  }
+  ajustar(); window.addEventListener('resize', ajustar);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(ajustar);
+  window.addEventListener('load', ajustar);
+
+  var btn = nav.querySelector('.menu');
+  btn.addEventListener('click', function(){
+    var a = nav.classList.toggle('abierto'); btn.setAttribute('aria-expanded', a ? 'true' : 'false');
+  });
+  nav.querySelectorAll('.links a').forEach(function(a){ a.addEventListener('click', function(){ nav.classList.remove('abierto'); btn.setAttribute('aria-expanded','false'); }); });
+
+  var els = document.querySelectorAll('.rv');
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function(ents){
+      ents.forEach(function(e){ if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, {rootMargin:'0px 0px -8% 0px', threshold:0.08});
+    els.forEach(function(el){ io.observe(el); });
+  } else { els.forEach(function(el){ el.classList.add('in'); }); }
+
+  var f = document.getElementById('formulario');
+  f.addEventListener('submit', function(ev){
+    ev.preventDefault();
+    var d = new FormData(f), nombre = (d.get('nombre') || '').trim();
+    var asunto = 'Mensaje desde la página web de ' + f.dataset.marca + (nombre ? ' — ' + nombre : '');
+    var cuerpo = (d.get('mensaje') || '') + '\n\n' +
+      'Nombre: ' + nombre + '\nTeléfono: ' + (d.get('telefono') || '') + '\nCorreo: ' + (d.get('correo') || '');
+    window.location.href = 'mailto:' + f.dataset.para + '?subject=' + encodeURIComponent(asunto) + '&body=' + encodeURIComponent(cuerpo);
+  });
+})();
+</script>
+<script>
+/* Conteo de clics en los botones (panel /admin/visitas). Un botón se identifica
+   por data-clic="..." o, si no lo tiene, por a dónde lleva. Nunca bloquea el clic. */
+(function(){
+  function tipo(el){
+    var d = el.getAttribute('data-clic'); if (d) return d;
+    var h = (el.getAttribute('href') || '').toLowerCase(), c = (el.className || '') + '';
+    if (c.indexOf('js-wa') >= 0 || h.indexOf('wa.me') >= 0 || h.indexOf('whatsapp') >= 0) return 'whatsapp';
+    if (h.indexOf('#asesoria') >= 0) return 'asesoria';
+    if (h.indexOf('/activar') >= 0) return 'prueba_app';
+    if (h.indexOf('pase-gratis') >= 0) return 'pase_gratis';
+    if (h.indexOf('descargador') >= 0) return 'descargador';
+    if (h.indexOf('lector') >= 0 || h.indexOf('/descargar') >= 0) return 'lector';
+    if (h.indexOf('/login') >= 0) return 'entrar';
+    if (h.indexOf('contabilidad') >= 0) return 'contabilidad';
+    if (h.indexOf('/contadores') >= 0) return 'contadores';
+    if (h.indexOf('calendario') >= 0) return 'calendario';
+    if (h.indexOf('vigilante') >= 0) return 'vigilante';
+    return null;
+  }
+  function enviar(b){
+    try{
+      var cuerpo = JSON.stringify({b: b, r: location.pathname});
+      if (navigator.sendBeacon) navigator.sendBeacon('/api/clic', new Blob([cuerpo], {type:'application/json'}));
+      else fetch('/api/clic', {method:'POST', headers:{'Content-Type':'application/json'}, body: cuerpo, keepalive:true});
+    }catch(e){}
+  }
+  document.addEventListener('click', function(ev){
+    var el = ev.target.closest ? ev.target.closest('a,button') : null;
+    if (!el) return;
+    var b = tipo(el); if (b) enviar(b);
+  }, true);
+  document.addEventListener('submit', function(ev){
+    var f = ev.target; if (f && f.closest && f.closest('#asesoria')) enviar('asesoria_enviada');
+  }, true);
+})();
+</script>
+<script async src="https://www.instagram.com/embed.js"></script>
+</body>
+</html>
