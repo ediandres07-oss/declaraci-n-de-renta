@@ -92,6 +92,25 @@ textarea{min-height:84px;resize:vertical}
 footer{border-top:1px solid var(--borde);padding:28px 0;font-size:13px;color:var(--suave)}
 footer .env{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
 .flotante{position:fixed;right:18px;bottom:18px;z-index:30;width:56px;height:56px;border-radius:50%;background:#25D366;display:grid;place-items:center;box-shadow:0 12px 26px -10px rgba(0,0,0,.4)}
+
+.planes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+@media(max-width:900px){.planes{grid-template-columns:1fr 1fr}}@media(max-width:560px){.planes{grid-template-columns:1fr}}
+.plan{display:flex;flex-direction:column;background:#fff;border:1px solid var(--borde);border-radius:20px;overflow:hidden;transition:border-color .25s,box-shadow .25s,transform .25s}
+.plan:hover{transform:translateY(-3px);box-shadow:0 20px 44px -28px rgba(30,58,110,.55)}
+.plan.sel{border-color:var(--azul);box-shadow:0 0 0 2px var(--azul)}
+.plan[hidden]{display:none}
+.pimg{position:relative;aspect-ratio:16/10;overflow:hidden;background:var(--gris)}
+.pimg img{width:100%;height:100%;object-fit:cover;transition:transform .8s}
+.plan:hover .pimg img{transform:scale(1.06)}
+.tipo{position:absolute;left:12px;top:12px;background:rgba(255,255,255,.92);color:var(--azul);font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px}
+.pcuerpo{padding:18px 20px 20px;display:flex;flex-direction:column;gap:6px;flex:1}
+.pcuerpo h3{font-size:20px}.pf{font-size:14px;color:var(--oro);font-weight:600}.pi{font-size:14.5px;color:var(--suave)}
+.ppie{margin-top:auto;padding-top:14px;display:flex;align-items:end;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.pp small{display:block;font-size:12px;color:var(--suave)}.pp b{display:block;font-size:19px;color:var(--azul)}
+.plan:not(:has(.pp small)) .pp b{font-size:14.5px;color:var(--suave);font-weight:600}
+.elegir{padding:10px 16px;font-size:14px}
+.plan.sel .elegir{background:#1F7A4D}
+.nota-planes{margin-top:18px;font-size:13px;color:var(--suave)}
 </style>
 </head>
 <body>
@@ -102,7 +121,7 @@ footer .env{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
     <svg width="36" height="36" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="19" fill="#1E3A6E"/><path d="M9 13l5 15 6-11 6 11 5-15" fill="none" stroke="#fff" stroke-width="2.6" stroke-linejoin="round"/><path d="M24 9c4 1 7 3 9 6" fill="none" stroke="#C9A04B" stroke-width="2" stroke-linecap="round"/></svg>
     <span><b>WORLDPEAK</b><small>Travel Agency</small></span>
   </a>
-  <nav aria-label="Principal"><a href="#servicios">Servicios</a><a href="#destinos">Destinos</a><a href="#cotizar">Cotizar</a><a href="#contacto">Contacto</a></nav>
+  <nav aria-label="Principal"><a href="#servicios">Servicios</a><a href="#destinos">Planes</a><a href="#cotizar">Cotizar</a><a href="#contacto">Contacto</a></nav>
   <a class="btn btn-azul" href="#cotizar">Cotizar viaje</a>
 </div></header>
 
@@ -139,30 +158,60 @@ footer .env{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
 </div></section>
 
 <section class="sec" id="destinos"><div class="env">
-  <div class="cab"><div><p class="ceja">Destinos</p><h2>¿A dónde quiere ir?</h2></div>
-    <div class="filtros" role="tablist" aria-label="Filtrar destinos"><button class="on" data-f="todos">Todos</button><button data-f="nac">Nacionales</button><button data-f="int">Internacionales</button></div></div>
-  <div class="destinos">
-    {% set destinos = [
-      ('int','Río de Janeiro','Semana Santa · 24 al 28 de marzo 2027','$5.749.000'),
-      ('int','Punta Cana','5 días y 4 noches','$2.649.000'),
-      ('int','Puerto Plata','Puente festivo · 4 noches',''),
-      ('int','Dubái','Fin de año · 5 noches',''),
-      ('int','Costa Rica','7 noches de aventura y playa',''),
-      ('nac','Isla Fuerte','Noviembre, Navidad y Fin de Año',''),
-      ('nac','Arboletes','Vuelos desde Medellín',''),
-      ('nac','Medellín y Guatapé','Alojamiento y desayunos','$969.000'),
-      ('nac','Necoclí','Playa, turismo y descanso','$479.000'),
-      ('nac','Betania y Jardín','Pueblos y paisajes de Antioquia',''),
-      ('nac','Llanos Orientales','Rafting y naturaleza',''),
-      ('nac','La Guajira, Valledupar y Santa Marta','Alojamiento, vuelos y alimentación',''),
-    ] %}
-    {% for tipo, n, d, p in destinos %}
-    <a class="dest" data-t="{{ tipo }}" href="https://wa.me/573234972854?text={{ ('Hola WorldPeak, quiero información del plan a ' ~ n)|urlencode }}" target="_blank" rel="noopener">
-      <span><h3>{{ n }}</h3><small>{{ d }}</small></span>
-      <span class="precio">{% if p %}desde<b>{{ p }}</b>{% else %}<b>Cotizar</b>{% endif %}</span>
-    </a>
-    {% endfor %}
+  <div class="cab"><div><p class="ceja">Planes</p><h2>Escoja su próximo viaje</h2><p style="margin-top:10px">Los planes que tenemos ahora. Toque «Quiero este plan» y le armamos la cotización.</p></div>
+    <div class="filtros" role="tablist" aria-label="Filtrar planes"><button class="on" data-f="todos">Todos</button><button data-f="nac">Nacionales</button><button data-f="int">Internacionales</button></div></div>
+  <div class="planes">
+    <article class="plan" data-t="int">
+      <div class="pimg"><img src="https://images.unsplash.com/photo-1483729558449-99ef09a8c325?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Río de Janeiro" loading="lazy"><span class="tipo">Internacional</span></div>
+      <div class="pcuerpo"><h3>Río de Janeiro</h3><p class="pf">Semana Santa · 24 al 28 de marzo de 2027</p><p class="pi">Hotel frente al mar · separe su cupo con $750.000</p>
+        <div class="ppie"><div class="pp"><small>desde</small><b>$5.749.000</b><small>por persona en acomodación doble</small></div><button type="button" class="btn btn-azul elegir" data-plan="Río de Janeiro">Quiero este plan</button></div></div>
+    </article><article class="plan" data-t="int">
+      <div class="pimg"><img src="https://images.unsplash.com/photo-1622396481328-9b1b78cdd9fd?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Punta Cana" loading="lazy"><span class="tipo">Internacional</span></div>
+      <div class="pcuerpo"><h3>Punta Cana</h3><p class="pf">5 días y 4 noches</p><p class="pi">Plan de playa en el Caribe</p>
+        <div class="ppie"><div class="pp"><small>desde</small><b>$2.649.000</b></div><button type="button" class="btn btn-azul elegir" data-plan="Punta Cana">Quiero este plan</button></div></div>
+    </article><article class="plan" data-t="nac">
+      <div class="pimg"><img src="https://images.unsplash.com/photo-1559128010-7c1ad6e1b6a5?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Isla Fuerte" loading="lazy"><span class="tipo">Nacional</span></div>
+      <div class="pcuerpo"><h3>Isla Fuerte</h3><p class="pf">Noviembre, Navidad y Fin de Año</p><p class="pi">Alojamiento, alimentación, lancha privada, tours y guía nativo</p>
+        <div class="ppie"><div class="pp"><b>Precio a consultar</b></div><button type="button" class="btn btn-azul elegir" data-plan="Isla Fuerte">Quiero este plan</button></div></div>
+    </article><article class="plan" data-t="nac">
+      <div class="pimg"><img src="https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Arboletes" loading="lazy"><span class="tipo">Nacional</span></div>
+      <div class="pcuerpo"><h3>Arboletes</h3><p class="pf">Diciembre</p><p class="pi">Vuelos desde Medellín, hoteles y tarifas especiales</p>
+        <div class="ppie"><div class="pp"><b>Precio a consultar</b></div><button type="button" class="btn btn-azul elegir" data-plan="Arboletes">Quiero este plan</button></div></div>
+    </article><article class="plan" data-t="int">
+      <div class="pimg"><img src="https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Puerto Plata" loading="lazy"><span class="tipo">Internacional</span></div>
+      <div class="pcuerpo"><h3>Puerto Plata</h3><p class="pf">Puente festivo · 4 noches</p><p class="pi">Vuelos, traslados y alimentación</p>
+        <div class="ppie"><div class="pp"><b>Precio a consultar</b></div><button type="button" class="btn btn-azul elegir" data-plan="Puerto Plata">Quiero este plan</button></div></div>
+    </article><article class="plan" data-t="int">
+      <div class="pimg"><img src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Dubái" loading="lazy"><span class="tipo">Internacional</span></div>
+      <div class="pcuerpo"><h3>Dubái</h3><p class="pf">Fin de año · 5 noches</p><p class="pi">Lujo y paisajes increíbles</p>
+        <div class="ppie"><div class="pp"><b>Precio a consultar</b></div><button type="button" class="btn btn-azul elegir" data-plan="Dubái">Quiero este plan</button></div></div>
+    </article><article class="plan" data-t="nac">
+      <div class="pimg"><img src="https://images.unsplash.com/photo-1570197820006-3e46f5ee01bb?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Medellín y Guatapé" loading="lazy"><span class="tipo">Nacional</span></div>
+      <div class="pcuerpo"><h3>Medellín y Guatapé</h3><p class="pf">También Año Nuevo: 30 de diciembre al 3 de enero</p><p class="pi">Alojamiento y desayunos</p>
+        <div class="ppie"><div class="pp"><small>desde</small><b>$969.000</b><small>por persona</small></div><button type="button" class="btn btn-azul elegir" data-plan="Medellín y Guatapé">Quiero este plan</button></div></div>
+    </article><article class="plan" data-t="nac">
+      <div class="pimg"><img src="https://images.unsplash.com/photo-1506953823976-52e1fdc0149a?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Necoclí" loading="lazy"><span class="tipo">Nacional</span></div>
+      <div class="pcuerpo"><h3>Necoclí</h3><p class="pf">Playa, turismo y descanso</p>
+        <div class="ppie"><div class="pp"><small>desde</small><b>$479.000</b></div><button type="button" class="btn btn-azul elegir" data-plan="Necoclí">Quiero este plan</button></div></div>
+    </article><article class="plan" data-t="nac">
+      <div class="pimg"><img src="https://images.unsplash.com/photo-1501854140801-50d01698950b?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Betania y Jardín" loading="lazy"><span class="tipo">Nacional</span></div>
+      <div class="pcuerpo"><h3>Betania y Jardín</h3><p class="pf">Dos pueblos de Antioquia</p><p class="pi">Paisajes, charcos y calles coloridas</p>
+        <div class="ppie"><div class="pp"><b>Precio a consultar</b></div><button type="button" class="btn btn-azul elegir" data-plan="Betania y Jardín">Quiero este plan</button></div></div>
+    </article><article class="plan" data-t="int">
+      <div class="pimg"><img src="https://images.unsplash.com/photo-1517760444937-f6397edcbbcd?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Costa Rica" loading="lazy"><span class="tipo">Internacional</span></div>
+      <div class="pcuerpo"><h3>Costa Rica</h3><p class="pf">7 noches</p><p class="pi">Aventura, playas y naturaleza, con tiquetes aéreos</p>
+        <div class="ppie"><div class="pp"><b>Precio a consultar</b></div><button type="button" class="btn btn-azul elegir" data-plan="Costa Rica">Quiero este plan</button></div></div>
+    </article><article class="plan" data-t="nac">
+      <div class="pimg"><img src="https://images.unsplash.com/photo-1530866495561-507c9faab2ed?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="Llanos Orientales" loading="lazy"><span class="tipo">Nacional</span></div>
+      <div class="pcuerpo"><h3>Llanos Orientales</h3><p class="pf">Aventura</p><p class="pi">Rafting, naturaleza y paisajes</p>
+        <div class="ppie"><div class="pp"><b>Precio a consultar</b></div><button type="button" class="btn btn-azul elegir" data-plan="Llanos Orientales">Quiero este plan</button></div></div>
+    </article><article class="plan" data-t="nac">
+      <div class="pimg"><img src="https://images.unsplash.com/photo-1509316785289-025f5b846b35?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="La Guajira, Valledupar y Santa Marta" loading="lazy"><span class="tipo">Nacional</span></div>
+      <div class="pcuerpo"><h3>La Guajira, Valledupar y Santa Marta</h3><p class="pf">Tres destinos en un viaje</p><p class="pi">Alojamiento, vuelos y alimentación</p>
+        <div class="ppie"><div class="pp"><b>Precio a consultar</b></div><button type="button" class="btn btn-azul elegir" data-plan="La Guajira, Valledupar y Santa Marta">Quiero este plan</button></div></div>
+    </article>
   </div>
+  <p class="nota-planes">Fotos de referencia. Precios y fechas según nuestras publicaciones; confírmelos al cotizar.</p>
 </div></section>
 
 <section class="sec gris" id="cotizar"><div class="env cotiza">
@@ -174,7 +223,7 @@ footer .env{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
   <form id="cotizador" novalidate>
     <div class="fila">
       <label>Nombre<input name="nombre" placeholder="Su nombre" autocomplete="name"></label>
-      <label>Destino<select name="destino">{% for tipo, n, d, p in destinos %}<option>{{ n }}</option>{% endfor %}<option>Otro destino</option></select></label>
+      <label>Destino<select name="destino"><option>Río de Janeiro</option><option>Punta Cana</option><option>Isla Fuerte</option><option>Arboletes</option><option>Puerto Plata</option><option>Dubái</option><option>Medellín y Guatapé</option><option>Necoclí</option><option>Betania y Jardín</option><option>Costa Rica</option><option>Llanos Orientales</option><option>La Guajira, Valledupar y Santa Marta</option><option>Otro destino</option></select></label>
     </div>
     <div class="fila"><label>Salida<input type="date" name="salida"></label><label>Regreso<input type="date" name="regreso"></label></div>
     <div class="fila">
@@ -207,7 +256,7 @@ footer .env{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
 
 <script>
 (function(){
-  var bs=document.querySelectorAll('.filtros button'), ds=document.querySelectorAll('.dest');
+  var bs=document.querySelectorAll('.filtros button'), ds=document.querySelectorAll('.plan');
   bs.forEach(function(b){ b.addEventListener('click',function(){ bs.forEach(function(x){x.classList.remove('on')}); b.classList.add('on');
     ds.forEach(function(d){ d.hidden = b.dataset.f!=='todos' && d.dataset.t!==b.dataset.f; }); }); });
   var f=document.getElementById('cotizador'), res=document.getElementById('resumen');
@@ -217,6 +266,10 @@ footer .env{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
     if(x.s&&x.r){ var dn=Math.round((new Date(x.r)-new Date(x.s))/864e5); if(dn>0) no=' · '+dn+(dn===1?' noche':' noches'); }
     var v=x.a+x.k; res.innerHTML='<b>'+x.dest+'</b>'+(x.s?' · '+fecha(x.s)+(x.r?' al '+fecha(x.r):''):'')+no+' · '+v+(v===1?' viajero':' viajeros'); }
   f.querySelectorAll('.cont button').forEach(function(b){ b.addEventListener('click',function(){ var i=b.parentNode.querySelector('input'); i.value=Math.max(+i.min||0, Math.min(+i.max||99,(+i.value||0)+(+b.dataset.p))); pintar(); }); });
+  document.querySelectorAll('.elegir').forEach(function(b){ b.addEventListener('click',function(){
+    document.querySelectorAll('.plan').forEach(function(p){ p.classList.remove('sel'); p.querySelector('.elegir').textContent='Quiero este plan'; });
+    var card=b.closest('.plan'); card.classList.add('sel'); b.textContent='✓ Elegido';
+    f.destino.value=b.dataset.plan; pintar(); document.getElementById('cotizar').scrollIntoView({behavior:'smooth'}); }); });
   f.addEventListener('input',pintar); f.addEventListener('change',pintar); pintar();
   f.addEventListener('submit',function(e){ e.preventDefault(); var x=leer();
     var t='Hola WorldPeak, quiero cotizar un viaje:\n• Destino: '+x.dest+(x.s?'\n• Salida: '+fecha(x.s):'')+(x.r?'\n• Regreso: '+fecha(x.r):'')+'\n• Viajeros: '+x.a+' adulto(s)'+(x.k?' y '+x.k+' niño(s)':'')+(x.m?'\n• Comentarios: '+x.m:'')+(x.n?'\nMi nombre es '+x.n+'.':'');
