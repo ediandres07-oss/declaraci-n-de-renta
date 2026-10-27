@@ -694,6 +694,21 @@ def api_chat():
 
     contexto = (cuerpo.get("contexto") or "").strip().lower()
 
+    # Agentes 24/7 de las páginas de muestra: solo con lo que publica el prospecto.
+    if contexto.startswith("muestra:"):
+        from src.agentes_muestra import AGENTES
+        prompt = AGENTES.get(contexto.split(":", 1)[1])
+        if not prompt:
+            return jsonify({"error": "Agente no disponible."}), 404
+        try:
+            respuesta = responder_ia(mensajes[-12:], IA_CFG, contexto="muestra", system_extra=prompt, max_tokens=400)
+        except ValueError as e:
+            return jsonify({"error": str(e)}), 400
+        except Exception as e:
+            app.logger.warning("Fallo del agente de muestra: %s", e)
+            return jsonify({"error": "No pude responder ahora mismo. Escríbenos al WhatsApp 323 497 2854."}), 502
+        return jsonify({"respuesta": respuesta})
+
     # Modo CONTADOR: atiende sobre el pase de cortesía y el Lector, con los
     # precios vigentes inyectados. No usa la liquidación del cliente.
     if contexto == "contador":

@@ -322,7 +322,9 @@ def responder(mensajes: list[dict], cfg: dict | None = None,
     from google import genai
     from google.genai import types
 
-    if contexto == "empresa":
+    if contexto == "muestra":
+        system_instruction = system_extra or ""
+    elif contexto == "empresa":
         from src.asesor_empresas import PROMPT as _P_EMP
         system_instruction = _P_EMP + (system_extra or "")
     elif contexto == "contador":
