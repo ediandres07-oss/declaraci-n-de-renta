@@ -710,8 +710,8 @@ footer{background:var(--noche);color:var(--gris-o);padding-top:clamp(64px,8vw,96
     </div>
     <div class="rv" style="--d:.1s">
       <p class="ceja">Crecemos con ustedes</p>
-      <h2>A medida que su empresa crece, <em>crecemos con ustedes</em></h2>
-      <p class="lead">Los $875.000 son para empresas que apenas comienzan; cuando aumentan las ventas, los documentos y los empleados, el honorario se ajusta a ese nuevo tamaño.</p>
+      <h2>A medida que {{ 'su negocio' if comerciante else 'su empresa' }} crece, <em>crecemos con ustedes</em></h2>
+      <p class="lead">Los $875.000 son para {{ 'comerciantes' if comerciante else 'empresas' }} que apenas comienzan; cuando aumentan las ventas, los documentos y los empleados, el honorario se ajusta a ese nuevo tamaño.</p>
       <div class="escalones" aria-hidden="true">
         <div class="escalon"><i>{{ icono('sube', 20) }}</i><b>Ventas</b></div>
         <div class="escalon"><i>{{ icono('doc', 20) }}</i><b>Documentos</b></div>
@@ -725,7 +725,7 @@ footer{background:var(--noche);color:var(--gris-o);padding-top:clamp(64px,8vw,96
 <section id="precios" class="seccion precio">
   <div class="env">
     <div class="cabeza">
-      <div class="rv"><p class="ceja">Precio para empresas que apenas comienzan</p><h2>{% if empresa %}El precio para {{ empresa }}, en un minuto{% else %}Calcule su precio en un minuto{% endif %}</h2></div>
+      <div class="rv"><p class="ceja">Precio para {{ 'comerciantes' if comerciante else 'empresas' }} que apenas comienzan</p><h2>{% if empresa %}El precio para {{ empresa }}, en un minuto{% else %}Calcule su precio en un minuto{% endif %}</h2></div>
       <div class="der rv" style="--d:.1s"><p class="lead">Elija cuántos empleados tiene y si quiere nuestra facturación electrónica. El total se actualiza al instante.</p></div>
     </div>
     <div class="calc">
@@ -758,12 +758,12 @@ footer{background:var(--noche);color:var(--gris-o);padding-top:clamp(64px,8vw,96
       </div>
       <div class="panel recibo rv" style="--d:.1s">
         <div class="r-cab"><span>Su plan mensual</span><span>{% if empresa %}{{ empresa }}{% else %}Tributando.co{% endif %}</span></div>
-        <div class="fila"><span>Honorarios contables<small>Empresa que apenas comienza</small></span><span>$875.000 / mes</span></div>
+        <div class="fila"><span>Honorarios contables<small>{{ 'Comerciante que apenas comienza' if comerciante else 'Empresa que apenas comienza' }}</small></span><span>$875.000 / mes</span></div>
         <div class="fila" id="filaNom" style="display:none"><span id="txtNom">Nómina electrónica</span><span id="valNom"></span></div>
         <div class="total"><span>Total al mes</span><b id="tot">$875.000</b></div>
         <div class="fila" id="filaFe" style="display:none;border-bottom:0"><span>Facturación electrónica</span><span>$230.000 / año</span></div>
         <p class="renta">Renta y exógena del año: el valor de una mensualidad de honorarios.</p>
-        <p class="crece-t"><b>A medida que su empresa crece, crecemos con ustedes:</b> los $875.000 son para empresas que apenas comienzan; cuando aumentan las ventas, los documentos y los empleados, el honorario se ajusta a ese nuevo tamaño.</p>
+        <p class="crece-t"><b>A medida que {{ 'su negocio' if comerciante else 'su empresa' }} crece, crecemos con ustedes:</b> los $875.000 son para {{ 'comerciantes' if comerciante else 'empresas' }} que apenas comienzan; cuando aumentan las ventas, los documentos y los empleados, el honorario se ajusta a ese nuevo tamaño.</p>
         <a class="btn btn-verde" id="btnContratar" href="#" data-clic="contratar">{{ icono('whats', 20) }}Contratar por WhatsApp</a>
         <p class="mismo">Le escribimos el mismo día hábil para arrancar.</p>
       </div>
@@ -783,7 +783,7 @@ footer{background:var(--noche);color:var(--gris-o);padding-top:clamp(64px,8vw,96
       <details open><summary>¿Qué software usan?<span class="mas" aria-hidden="true"></span></summary><p class="resp">Tributando, nuestro propio software contable en la nube. Va incluido en los honorarios: no tiene que comprar Siigo ni ningún otro programa. Sus facturas de la DIAN entran y se contabilizan solas, y usted ve sus balances desde el celular.</p></details>
       <details><summary>¿Tengo que usar la plataforma de Tributando?<span class="mas" aria-hidden="true"></span></summary><p class="resp">No. Si su empresa ya maneja otro software contable (Siigo, World Office, Alegra, Helisa u otro), llevamos su contabilidad en ese mismo programa. Tributando va incluido por si lo quiere usar, pero no es obligatorio.</p></details>
       <details><summary>¿Qué necesito para empezar?<span class="mas" aria-hidden="true"></span></summary><p class="resp">El RUT, el certificado de cámara de comercio y el acceso de la empresa a la DIAN. Con eso hacemos el montaje y dejamos lista la facturación.</p></details>
-      <details><summary>¿Los $875.000 son para siempre?<span class="mas" aria-hidden="true"></span></summary><p class="resp">Ese valor es para empresas que apenas comienzan. A medida que su empresa crece en ventas, documentos y empleados, crecemos con ustedes y el honorario se ajusta a ese tamaño.</p></details>
+      <details><summary>¿Los $875.000 son para siempre?<span class="mas" aria-hidden="true"></span></summary><p class="resp">Ese valor es para {{ 'comerciantes' if comerciante else 'empresas' }} que apenas comienzan. A medida que {{ 'su negocio' if comerciante else 'su empresa' }} crece en ventas, documentos y empleados, crecemos con ustedes y el honorario se ajusta a ese tamaño.</p></details>
       <details><summary>¿Qué pasa si contrato más empleados?<span class="mas" aria-hidden="true"></span></summary><p class="resp">La nómina se cobra a $25.000 por empleado al mes, con un mínimo de $150.000. Si la empresa también crece en ventas y documentos, los honorarios se ajustan a ese nuevo tamaño.</p></details>
       <details><summary>¿La renta y la exógena tienen costo aparte?<span class="mas" aria-hidden="true"></span></summary><p class="resp">Sí: cuestan el valor de una mensualidad de honorarios al año.</p></details>
       <details><summary>¿Venden la factura, la nómina y el POS electrónico?<span class="mas" aria-hidden="true"></span></summary><p class="resp">Sí. Le vendemos el sistema y lo dejamos funcionando: factura electrónica ($230.000 al año, hasta 120 documentos), nómina electrónica ($25.000 por empleado al mes, mínimo $150.000) y POS electrónico para ventas al detal, que se cotiza según el volumen. Nosotros hacemos la habilitación ante la DIAN, y le regalamos sus primeras 5 facturas electrónicas para que la pruebe sin compromiso.</p></details>

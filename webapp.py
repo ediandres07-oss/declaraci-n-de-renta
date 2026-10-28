@@ -1186,6 +1186,7 @@ def portafolio():
     from urllib.parse import quote
     import hmac as _hmac
     empresa = sitio = ""
+    comerciante = False
     if request.args.get("e"):
         try:
             # Las aperturas de Edison (o del personal autorizado) no cuentan como visita.
@@ -1197,13 +1198,16 @@ def portafolio():
             if _hmac.compare_digest(request.args.get("t") or "", prosp_mod.token_portafolio(em)):
                 p = prosp_mod.db.session.get(prosp_mod.Prospecto, em)
                 empresa = (p.razon_social or "") if p else ""
+                comerciante = bool(p and p.segmento == "comerciante")
                 if p and p.segmento != "contador":
                     from src.sitios import url_sitio
                     sitio = url_sitio(em)
         except Exception:  # noqa: BLE001 — una visita nunca tumba la página
             prosp_mod.db.session.rollback()
     return render_template("portafolio.html", whatsapp=wa, empresa=empresa, sitio=sitio,
-                           wa_texto=quote("Hola Edison, vi el portafolio de Tributando y quiero una propuesta para mi empresa."))
+                           comerciante=comerciante,
+                           wa_texto=quote("Hola Edison, vi el portafolio de Tributando y quiero una propuesta para mi "
+                                          + ("negocio." if comerciante else "empresa.")))
 
 
 @app.template_filter("hora_co")
@@ -1943,7 +1947,8 @@ def contadores():
 
 _MUESTRAS = {"central-san-ignacio": "muestras/central_san_ignacio.html",
              "worldpeak": "muestras/worldpeak.html",
-             "worldpeak-minimal": "muestras/worldpeak_minimal.html"}
+             "worldpeak-minimal": "muestras/worldpeak_minimal.html",
+             "fredy-gil": "muestras/fredy_gil.html"}
 
 
 @app.get("/muestra/<slug>")
