@@ -434,6 +434,33 @@ footer{background:var(--noche);color:var(--gris-o);padding-top:clamp(64px,8vw,96
   .cinta .pista{transform:none}
 }
 :focus-visible{outline:2px solid var(--verde);outline-offset:3px;border-radius:6px}
+
+/* ===== Antes y después ===== */
+.ad-cab{display:flex;justify-content:space-between;align-items:end;gap:28px;flex-wrap:wrap;margin-bottom:40px}
+.ad-cab .lead{max-width:560px}
+.ad-switch{position:relative;display:inline-flex;background:var(--blanco);border:1px solid var(--borde);border-radius:999px;padding:5px}
+.ad-switch button{position:relative;z-index:1;font:700 14.5px "Plus Jakarta Sans",sans-serif;border:0;background:none;padding:11px 20px;border-radius:999px;cursor:pointer;color:var(--suave);transition:color .3s}
+.ad-switch button.on{color:#062014}
+.ad-pill{position:absolute;top:5px;bottom:5px;left:5px;width:var(--w,80px);border-radius:999px;background:var(--verde);transform:translateX(var(--x,0));transition:transform .45s var(--ease),width .45s var(--ease)}
+.ad-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.ad-t{position:relative;min-height:230px;perspective:1200px;cursor:pointer;outline:none}
+.ad-cara{position:absolute;inset:0;border-radius:var(--r-l);padding:26px;display:flex;flex-direction:column;gap:10px;backface-visibility:hidden;-webkit-backface-visibility:hidden;transition:transform .7s var(--ease);border:1px solid var(--borde)}
+.ad-antes{background:var(--blanco)}
+.ad-despues{background:var(--noche2);color:#EAF5EF;border-color:var(--noche3);transform:rotateY(180deg)}
+.ad-t.vuelta .ad-antes{transform:rotateY(-180deg)}
+.ad-t.vuelta .ad-despues{transform:rotateY(0)}
+.ad-t:focus-visible .ad-cara{outline:3px solid var(--verde);outline-offset:3px}
+.ad-et{align-self:flex-start;font-size:11.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;padding:5px 10px;border-radius:999px;background:#F1F3EF;color:var(--suave)}
+.ad-despues .ad-et{background:rgba(55,211,143,.16);color:var(--verde)}
+.ad-cara i{display:grid;place-items:center;width:44px;height:44px;border-radius:13px;background:var(--menta);color:var(--verde-t);margin-top:4px}
+.ad-despues i{background:rgba(55,211,143,.14);color:var(--verde)}
+.ad-cara h3{font-size:20px}
+.ad-cara p{color:var(--suave);font-size:15.5px}
+.ad-despues p{color:#BFD3C8}
+.ad-antes p{text-decoration:line-through;text-decoration-color:rgba(81,96,90,.35)}
+@media(max-width:980px){.ad-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:620px){.ad-grid{grid-template-columns:1fr}.ad-t{min-height:200px}}
+@media(prefers-reduced-motion:reduce){.ad-cara{transition:none}}
 </style>
 </head>
 <body>
@@ -644,6 +671,37 @@ footer{background:var(--noche);color:var(--gris-o);padding-top:clamp(64px,8vw,96
   </div>
 </section>
 
+<section id="antes-despues" class="seccion">
+  <div class="env">
+    <div class="ad-cab rv">
+      <div><p class="ceja">Antes y después</p><h2>Así cambia <em>su contabilidad</em></h2>
+      <p class="lead" style="margin-top:16px">Toque cada tarjeta, o use el interruptor, para ver cómo trabaja su empresa hoy y cómo trabaja con nosotros.</p></div>
+      <div class="ad-switch" role="group" aria-label="Ver antes o después"><button type="button" class="on" data-v="antes">Antes</button><button type="button" data-v="despues">Con Tributando</button><span class="ad-pill" aria-hidden="true"></span></div>
+    </div>
+    <div class="ad-grid">
+      <article class="ad-t rv" style="--d:0.00s" tabindex="0" aria-label="Facturas de compra: antes y con Tributando">
+        <div class="ad-cara ad-antes"><span class="ad-et">Antes</span><i>{{ icono('doc', 20) }}</i><h3>Facturas de compra</h3><p>Se buscan en el correo y se digitan una por una.</p></div>
+        <div class="ad-cara ad-despues"><span class="ad-et">Con Tributando</span><i>{{ icono('check', 20) }}</i><h3>Facturas de compra</h3><p>Llegan solas desde la DIAN y quedan causadas con su IVA y su retención.</p></div>
+      </article><article class="ad-t rv" style="--d:0.06s" tabindex="0" aria-label="Bancos: antes y con Tributando">
+        <div class="ad-cara ad-antes"><span class="ad-et">Antes</span><i>{{ icono('libros', 20) }}</i><h3>Bancos</h3><p>La conciliación se hace a mano, cuando hay tiempo.</p></div>
+        <div class="ad-cara ad-despues"><span class="ad-et">Con Tributando</span><i>{{ icono('check', 20) }}</i><h3>Bancos</h3><p>Se sube el extracto y los movimientos se cruzan con los libros.</p></div>
+      </article><article class="ad-t rv" style="--d:0.12s" tabindex="0" aria-label="IVA y retención: antes y con Tributando">
+        <div class="ad-cara ad-antes"><span class="ad-et">Antes</span><i>{{ icono('pct', 20) }}</i><h3>IVA y retención</h3><p>La declaración se arma el último día, contra reloj.</p></div>
+        <div class="ad-cara ad-despues"><span class="ad-et">Con Tributando</span><i>{{ icono('check', 20) }}</i><h3>IVA y retención</h3><p>El borrador del 300 y del 350 sale de los libros y se cruza con la DIAN.</p></div>
+      </article><article class="ad-t rv" style="--d:0.18s" tabindex="0" aria-label="Nómina: antes y con Tributando">
+        <div class="ad-cara ad-antes"><span class="ad-et">Antes</span><i>{{ icono('users', 20) }}</i><h3>Nómina</h3><p>Excel por un lado y el reporte a la DIAN por otro.</p></div>
+        <div class="ad-cara ad-despues"><span class="ad-et">Con Tributando</span><i>{{ icono('check', 20) }}</i><h3>Nómina</h3><p>Nómina electrónica, provisiones y PILA en el mismo sistema.</p></div>
+      </article><article class="ad-t rv" style="--d:0.24s" tabindex="0" aria-label="Sus cifras: antes y con Tributando">
+        <div class="ad-cara ad-antes"><span class="ad-et">Antes</span><i>{{ icono('grafica', 20) }}</i><h3>Sus cifras</h3><p>Los estados financieros llegan meses después.</p></div>
+        <div class="ad-cara ad-despues"><span class="ad-et">Con Tributando</span><i>{{ icono('check', 20) }}</i><h3>Sus cifras</h3><p>Balance, cartera y resultados al día, desde el celular.</p></div>
+      </article><article class="ad-t rv" style="--d:0.30s" tabindex="0" aria-label="Vencimientos y cobros: antes y con Tributando">
+        <div class="ad-cara ad-antes"><span class="ad-et">Antes</span><i>{{ icono('cal', 20) }}</i><h3>Vencimientos y cobros</h3><p>Fechas en la memoria y clientes que pagan tarde.</p></div>
+        <div class="ad-cara ad-despues"><span class="ad-et">Con Tributando</span><i>{{ icono('check', 20) }}</i><h3>Vencimientos y cobros</h3><p>Alertas de vencimientos y recordatorios de cobro por WhatsApp.</p></div>
+      </article>
+    </div>
+  </div>
+</section>
+
 <section id="crecemos" class="seccion">
   <div class="env crece">
     <div class="foto rv">
@@ -840,6 +898,23 @@ calc();
 function resumen(){c.classList.add('resumen');setTimeout(function(){c.classList.remove('resumen');try{v.currentTime=0;var p=v.play();if(p&&p.catch)p.catch(function(){});}catch(e){}},7000);}
 v.addEventListener('ended',resumen);
 var p=v.play&&v.play();if(p&&p.catch)p.catch(function(){setInterval(function(){c.classList.toggle('resumen');},8000);});
+})();
+</script>
+
+<script>
+(function(){
+  var cards=[].slice.call(document.querySelectorAll('.ad-t')), sw=document.querySelector('.ad-switch'); if(!sw) return;
+  var bs=[].slice.call(sw.querySelectorAll('button')), pill=sw.querySelector('.ad-pill');
+  function pillA(b){ pill.style.setProperty('--w',b.offsetWidth+'px'); pill.style.setProperty('--x',(b.offsetLeft-5)+'px'); }
+  function todo(v){ bs.forEach(function(b){ b.classList.toggle('on',b.dataset.v===v); if(b.dataset.v===v) pillA(b); });
+    cards.forEach(function(c,i){ setTimeout(function(){ c.classList.toggle('vuelta',v==='despues'); }, i*90); }); }
+  bs.forEach(function(b){ b.addEventListener('click',function(){ todo(b.dataset.v); }); });
+  cards.forEach(function(c){ function t(){ c.classList.toggle('vuelta'); } c.addEventListener('click',t); c.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); t(); } }); });
+  requestAnimationFrame(function(){ pillA(bs[0]); }); addEventListener('resize',function(){ pillA(sw.querySelector('button.on')); });
+  // la primera vez que la sección aparece, las tarjetas se voltean solas para mostrar el efecto
+  if('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches){
+    var io=new IntersectionObserver(function(es){ if(es[0].isIntersecting){ io.disconnect(); setTimeout(function(){ todo('despues'); },900); } },{threshold:.45});
+    io.observe(document.querySelector('.ad-grid')); }
 })();
 </script>
 </body>
