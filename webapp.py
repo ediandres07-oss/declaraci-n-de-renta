@@ -1947,8 +1947,7 @@ def contadores():
 
 _MUESTRAS = {"central-san-ignacio": "muestras/central_san_ignacio.html",
              "worldpeak": "muestras/worldpeak.html",
-             "worldpeak-minimal": "muestras/worldpeak_minimal.html",
-             "fredy-gil": "muestras/fredy_gil.html"}
+             "worldpeak-minimal": "muestras/worldpeak_minimal.html"}
 
 
 @app.get("/muestra/<slug>")
