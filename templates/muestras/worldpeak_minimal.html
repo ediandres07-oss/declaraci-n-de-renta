@@ -164,6 +164,41 @@ footer .env{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
 @keyframes elegido{0%{box-shadow:0 0 0 0 rgba(30,58,110,.6)}100%{box-shadow:0 0 0 2px var(--azul),0 0 0 16px rgba(30,58,110,0)}}
 .dest-cont{font-variant-numeric:tabular-nums}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.js .rv{opacity:1;transform:none}}
+
+/* ===== Portada con efecto WOW: el viaje al bajar ===== */
+.viaje{position:relative;background:#0E1B33}
+.v-escena{position:relative;height:min(88vh,820px);overflow:hidden;color:#fff}
+.wow .viaje{height:520vh}
+.wow .v-escena{position:sticky;top:0;height:100vh;height:100svh}
+.v-foto{position:absolute;inset:0;opacity:0;will-change:opacity,transform}
+.v-foto[data-i="0"]{opacity:1}
+.v-foto img{width:100%;height:100%;object-fit:cover;display:block}
+.v-velo{position:absolute;inset:0;background:linear-gradient(90deg,rgba(14,27,51,.82) 0%,rgba(14,27,51,.45) 48%,rgba(14,27,51,.08) 100%),linear-gradient(0deg,rgba(14,27,51,.55),transparent 40%)}
+.v-textos{position:relative;height:100%}
+.v-cap{position:absolute;left:0;top:50%;transform:translateY(-50%);max-width:620px;opacity:0;pointer-events:none}
+.v-cap[data-i="0"]{opacity:1;pointer-events:auto}
+.v-cap h1,.v-cap h2{font-size:clamp(36px,6vw,68px);line-height:1.05;letter-spacing:-.02em;margin:14px 0 16px;color:#fff;text-shadow:0 8px 30px rgba(0,0,0,.35)}
+.v-cap h1 em{font-style:normal;color:var(--oro)}
+.v-cap p{font-size:clamp(17px,1.6vw,20px);color:#E4E9F3;max-width:520px}
+.v-eti{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;letter-spacing:.04em;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);backdrop-filter:blur(6px);padding:7px 13px;border-radius:999px}
+.v-eti i{width:8px;height:8px;border-radius:50%;background:#3DDC84}
+.v-num{font-size:13px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--oro)}
+.v-acc{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px}
+.btn-oro{background:var(--oro);color:#16181D}.btn-oro:hover{background:#D9B262}
+.btn-claro{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.45);backdrop-filter:blur(6px)}.btn-claro:hover{background:rgba(255,255,255,.22)}
+.v-cap .datos-r{margin-top:6px;animation:none}.v-cap .datos-r span{color:#C9D4EA}.v-cap .datos-r b{color:#fff}
+.v-ruta{position:absolute;left:4%;right:4%;bottom:7%;height:110px;display:none}
+.wow .v-ruta{display:block}
+.v-ruta svg{width:100%;height:100%;overflow:visible}
+.v-avion{position:absolute;left:0;top:0;width:30px;height:30px;margin:-15px 0 0 -15px;filter:drop-shadow(0 4px 10px rgba(0,0,0,.5))}
+.v-puntos{position:absolute;right:clamp(14px,3vw,34px);top:50%;transform:translateY(-50%);display:none;flex-direction:column;gap:10px}
+.wow .v-puntos{display:flex}
+.v-puntos i{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.35);transition:all .3s}
+.v-puntos i.on{background:var(--oro);height:24px;border-radius:6px}
+.v-baja{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);color:#fff;text-decoration:none;font-size:13px;letter-spacing:.14em;text-transform:uppercase;opacity:.85}
+.v-baja span{display:block;text-align:center;animation:vbaja 1.6s infinite}
+@keyframes vbaja{50%{transform:translateY(6px)}}
+@media(max-width:700px){.v-velo{background:linear-gradient(0deg,rgba(14,27,51,.88) 0%,rgba(14,27,51,.55) 55%,rgba(14,27,51,.25) 100%)}.v-cap{top:auto;bottom:max(150px,22%);transform:none;padding-right:26px}.v-ruta{bottom:3%;height:70px;left:2%;right:2%}.v-cap h1,.v-cap h2{font-size:clamp(32px,9vw,44px)}}
 </style>
 </head>
 <body>
@@ -179,16 +214,19 @@ footer .env{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
 </div></header>
 
 <main>
-<section class="portada" id="inicio"><div class="env">
-  <div>
-    <span class="etiqueta"><i></i>Agencia de viajes · Medellín · RNT 300617</span>
-    <h1>Viaja fácil, seguro y <em>a tu medida</em></h1>
-    <p class="sub">Vuelos, hoteles, paquetes y experiencias nacionales e internacionales, con asesoría de principio a fin.</p>
-    <div class="acc"><a class="btn btn-azul" href="#cotizar">Cotizar mi viaje</a><a class="btn btn-borde" href="#servicios">Ver servicios</a></div>
-    <div class="datos-r"><span><b data-hasta="14">14</b>planes</span><span><b data-hasta="132">132</b>salidas y opciones</span><span><b data-hasta="13" data-pre="+" data-suf=" mil">+13 mil</b>seguidores en Instagram</span></div>
+<section class="viaje" id="inicio" aria-label="Portada: su viaje paso a paso">
+  <div class="v-escena">
+    <div class="v-foto" data-i="0"><img src="https://images.unsplash.com/photo-1530521954074-e64f6810b32d?auto=format&amp;fit=crop&amp;w=1800&amp;q=72" alt="Viajero esperando su vuelo en el aeropuerto" fetchpriority=high></div><div class="v-foto" data-i="1"><img src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&amp;fit=crop&amp;w=1800&amp;q=72" alt="Ala de avión sobre las nubes al atardecer" loading=lazy></div><div class="v-foto" data-i="2"><img src="https://images.unsplash.com/photo-1592782985575-a96c6e647155?auto=format&amp;fit=crop&amp;w=1800&amp;q=72" alt="Isla con palmeras y mar turquesa" loading=lazy></div><div class="v-foto" data-i="3"><img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&amp;fit=crop&amp;w=1800&amp;q=72" alt="Hotel de playa con piscina y cabañas" loading=lazy></div><div class="v-foto" data-i="4"><img src="https://images.unsplash.com/photo-1576363399252-36302b835c28?auto=format&amp;fit=crop&amp;w=1800&amp;q=72" alt="Tortuga marina nadando sobre el arrecife" loading=lazy></div><div class="v-foto" data-i="5"><img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&amp;fit=crop&amp;w=1800&amp;q=72" alt="Playa del Caribe al atardecer" loading=lazy></div>
+    <div class="v-velo"></div>
+    <div class="env v-textos"><div class="v-cap" data-i="0"><span class="v-eti"><i></i>Agencia de viajes · Medellín · RNT 300617</span><h1>Viaja fácil, seguro y <em>a tu medida</em></h1><p>Vuelos, hoteles, paquetes y experiencias. Baje y acompáñenos en su próximo viaje.</p><div class="v-acc"><a class="btn btn-oro" href="#cotizar">Cotizar mi viaje</a><a class="btn btn-claro" href="#destinos">Ver planes</a></div></div><div class="v-cap" data-i="1"><span class="v-num">01 · Despegue</span><h2>Despegue tranquilo</h2><p>Tiquetes nacionales e internacionales con la mejor ruta. Nosotros nos encargamos de los detalles.</p></div><div class="v-cap" data-i="2"><span class="v-num">02 · Llegada</span><h2>Aterrice en el Caribe</h2><p>Isla Fuerte, Punta Cana, Puerto Plata, Arboletes, Necoclí… con traslados incluidos.</p></div><div class="v-cap" data-i="3"><span class="v-num">03 · Descanso</span><h2>El hotel que usted escogió</h2><p>Alojamiento según su presupuesto: cabañas en la isla, todo incluido o boutique.</p></div><div class="v-cap" data-i="4"><span class="v-num">04 · Experiencia</span><h2>Viva cada momento</h2><p>Snorkel, tours, pasadías y planes con guía. Recuerdos que sí valen la pena.</p></div><div class="v-cap" data-i="5"><span class="v-num">05 · Su turno</span><h2>¿A dónde vamos?</h2><div class="datos-r"><span><b data-hasta="14">14</b>planes</span><span><b data-hasta="132">132</b>salidas y opciones</span><span><b data-hasta="13" data-pre="+" data-suf=" mil">+13 mil</b>viajeros nos siguen</span></div><div class="v-acc"><a class="btn btn-oro" href="#destinos">Escoger mi plan</a><a class="btn btn-claro" href="#cotizar">Cotizar por WhatsApp</a></div></div></div>
+    <div class="v-ruta" aria-hidden="true">
+      <svg viewBox="0 0 1000 120" preserveAspectRatio="none"><path id="vRuta" d="M10 100 C 180 10, 320 110, 500 55 S 820 10, 990 70" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="2" stroke-dasharray="2 9" vector-effect="non-scaling-stroke"/><path id="vRutaOro" d="M10 100 C 180 10, 320 110, 500 55 S 820 10, 990 70" fill="none" stroke="#C9A04B" stroke-width="3" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>
+      <span class="v-avion"><svg width="30" height="30" viewBox="0 0 24 24" fill="#fff"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z" transform="rotate(90 12 12)"/></svg></span>
+    </div>
+    <div class="v-puntos" aria-hidden="true"><i data-i="0"></i><i data-i="1"></i><i data-i="2"></i><i data-i="3"></i><i data-i="4"></i><i data-i="5"></i></div>
+    <a class="v-baja" href="#servicios" aria-label="Bajar">Desliza <span>↓</span></a>
   </div>
-  <div class="foto"><img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&amp;fit=crop&amp;w=1100&amp;q=70" alt="Playa del Caribe al atardecer" fetchpriority="high"></div>
-</div></section>
+</section>
 
 <section class="sec gris" id="servicios"><div class="env">
   <div class="cab rv"><div><p class="ceja">Servicios</p><h2>Todo lo que hacemos</h2></div><p>Toque un servicio y le respondemos por WhatsApp.</p></div>
@@ -536,6 +574,35 @@ document.querySelectorAll('[data-opciones]').forEach(function(b){ var m=document
     c.addEventListener('mouseleave',function(){ clearInterval(id); }); });
   // filtro con transición
   document.querySelectorAll('.filtros button').forEach(function(b){ b.addEventListener('click',function(){ document.querySelectorAll('.plan').forEach(function(pl){ if(!pl.hidden){ pl.classList.remove('saliendo'); void pl.offsetWidth; } pl.classList.add('in'); }); }); });
+})();
+</script>
+
+<script>
+(function(){
+  var sec=document.querySelector('.viaje'); if(!sec) return;
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  document.documentElement.classList.add('wow');
+  var fotos=[].slice.call(sec.querySelectorAll('.v-foto')), caps=[].slice.call(sec.querySelectorAll('.v-cap')),
+      pts=[].slice.call(sec.querySelectorAll('.v-puntos i')), N=fotos.length,
+      ruta=document.getElementById('vRuta'), oro=document.getElementById('vRutaOro'), avion=sec.querySelector('.v-avion'),
+      caja=sec.querySelector('.v-ruta'), L=ruta.getTotalLength(), baja=sec.querySelector('.v-baja'), pend=false;
+  oro.style.strokeDasharray=L; 
+  function pinta(){ pend=false;
+    var r=sec.getBoundingClientRect(), tot=sec.offsetHeight-innerHeight, p=Math.min(1,Math.max(0,-r.top/tot)), s0=Math.min(N-1,p*(N-0.5)), f0=Math.floor(s0), t0=s0-f0, u=t0<.45?0:(t0-.45)/.55; u=u*u*(3-2*u); var seg=Math.min(N-1,f0+u);
+    fotos.forEach(function(f,i){ var d=seg-i, o=Math.max(0,Math.min(1,1-Math.abs(d))); if(i===N-1&&seg>=N-1) o=1;
+      f.style.opacity=o; var z=Math.max(0,Math.min(1,(s0-i+1)/2)); f.style.transform='scale('+(1.16-0.14*z)+')'; });
+    caps.forEach(function(c,i){ var d=seg-i, o=Math.max(0,1-Math.abs(d)*3);
+      c.style.opacity=o; c.style.pointerEvents=o>.5?'auto':'none';
+      c.style.transform=(innerWidth>700?'translateY(calc(-50% + ':'translateY(calc(0% + ')+(d*-60)+'px))'; });
+    pts.forEach(function(x,i){ x.classList.toggle('on',Math.round(seg)===i); });
+    oro.style.strokeDashoffset=L*(1-p);
+    var a=ruta.getPointAtLength(L*p), b=ruta.getPointAtLength(Math.min(L,L*p+2)), w=caja.clientWidth/1000, h=caja.clientHeight/120;
+    var ang=Math.atan2((b.y-a.y)*h,(b.x-a.x)*w)*180/Math.PI;
+    avion.style.transform='translate('+(a.x*w)+'px,'+(a.y*h)+'px) rotate('+(p>=1?0:ang)+'deg)';
+    baja.style.opacity=p>.02?0:.85; }
+  function pide(){ if(!pend){ pend=true; requestAnimationFrame(pinta); } }
+  addEventListener('scroll',pide,{passive:true}); addEventListener('resize',pide); pinta();
+  baja.addEventListener('click',function(e){ e.preventDefault(); scrollBy({top:innerHeight*0.9,behavior:'smooth'}); });
 })();
 </script>
 </body>
