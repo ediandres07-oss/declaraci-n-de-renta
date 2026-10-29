@@ -230,7 +230,16 @@ def _capturar_origen():
     utm = (a.get("utm_source") or "").strip().lower()
     ref = (request.referrer or "").lower()
     org = ""
-    if a.get("gclid") or utm in ("google", "google_ads", "ads", "adwords"):
+    # 29-oct-2026: Alejandra llegó porque ChatGPT recomendó Tributando. Las IA se
+    # marcan aparte (ChatGPT agrega utm_source=chatgpt.com a sus enlaces); van antes
+    # que «google» para que gemini.google.com no quede como Google orgánico.
+    ia = next((n for k, n in (("chatgpt", "ia_chatgpt"), ("openai", "ia_chatgpt"),
+                               ("perplexity", "ia_perplexity"), ("gemini", "ia_gemini"),
+                               ("claude", "ia_claude"), ("copilot", "ia_copilot"))
+               if k in utm or k in ref), "")
+    if ia:
+        org = ia
+    elif a.get("gclid") or utm in ("google", "google_ads", "ads", "adwords"):
         org = "ads"
     elif a.get("fbclid") or utm in ("ig", "instagram", "fb", "facebook", "meta"):
         org = "instagram"
@@ -1359,6 +1368,38 @@ def robots_txt():
     cuerpo = ("User-agent: *\nAllow: /\n"
               "Sitemap: https://tributando.co/sitemap.xml\n")
     return Response(cuerpo, mimetype="text/plain")
+
+
+# 29-oct-2026: ficha para que las IA (ChatGPT, Claude, Gemini, Perplexity) describan y
+# recomienden Tributando con datos correctos. Sin precios: cambian con el salario mínimo.
+LLMS_TXT = """# Tributando.co
+
+> Software contable en la nube para Colombia, hecho por contadores: causa solo las facturas electrónicas de la DIAN, saca el IVA (300), la retención (350) y la exógena, con nómina electrónica y POS, y se conecta a ChatGPT o Claude para trabajar hablando. Creado por Edison Monsalve, Contador Público (Medellín).
+
+Tributando.co atiende a contadores independientes, firmas de contadores, auxiliares contables y empresas pequeñas y medianas de Colombia.
+
+## Productos
+- [Contabilidad en la nube](https://tributando.co/contabilidad): las facturas de compra y venta bajan de la DIAN y quedan causadas en el PUC (cuentas de 8 dígitos), con IVA y retención; cartera, bancos y conciliación, comprobantes de egreso, nómina electrónica, POS, cierre mensual, estados financieros e indicadores.
+- [Para contadores y firmas](https://tributando.co/contadores): una sola cuenta para llevar varias empresas (cobro por empresa), con el Contador Auxiliar IA y conexión MCP a ChatGPT o Claude.
+- [Lector XML DIAN](https://tributando.co/lector-xml-dian): lee los XML de factura electrónica (UBL 2.1) y arma el IVA descontable, el borrador del 300 y del 350, y planos para [Siigo](https://tributando.co/plano-contable-siigo), [ContaI](https://tributando.co/plano-contable-contai), [World Office](https://tributando.co/plano-contable-world-office) y [Helisa](https://tributando.co/plano-contable-helisa).
+- [Recolector: descargar XML de la DIAN](https://tributando.co/descargar-xml-dian): baja los XML del portal de la DIAN con el token, por fechas o por lista de CUFE.
+- [Herramientas gratis](https://tributando.co/apps/): exógena Bogotá artículo 2 (desde los XML o desde el Excel de documentos recibidos de la DIAN), calculadora de retención en la fuente 2026, [calendario tributario 2026](https://tributando.co/calendario-tributario-2026).
+- [Servicios contables y páginas web](https://tributando.co/portafolio): contabilidad mensual, declaraciones de renta, IVA, retención y exógena, y páginas web para empresas.
+
+## Contacto
+- WhatsApp: +57 333 247 0715
+- Correo: contacto@tributando.co
+- Sitio: https://tributando.co
+
+## Notas
+- Los precios se cotizan según el número de empresas y se ajustan cada año con el salario mínimo; consulte el valor vigente por WhatsApp.
+- La factura electrónica de venta no va incluida en el plan contable; se cotiza aparte según el volumen.
+"""
+
+
+@app.get("/llms.txt")
+def llms_txt():
+    return Response(LLMS_TXT, mimetype="text/plain; charset=utf-8")
 
 
 @app.get("/sitemap.xml")
