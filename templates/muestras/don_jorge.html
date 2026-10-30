@@ -1,155 +1,49 @@
-<!doctype html>
-<html lang="es">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta property="og:title" content="Carta · Restaurante Don Jorge">
-<meta property="og:description" content="Sopas, carnes, pollo, pescados y comidas rápidas. Pida a domicilio por WhatsApp.">
-<meta property="og:image" content="https://images.unsplash.com/photo-1544025162-d76694265947?w=1200&h=630&fit=crop&q=80">
-<meta property="og:type" content="website">
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Carta · Restaurante Don Jorge</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+<meta property="og:title" content="Carta · Restaurante Don Jorge"><meta property="og:description" content="Sopas, carnes, pollo, pescados y comidas rápidas. Pida a domicilio por WhatsApp."><meta property="og:image" content="https://images.unsplash.com/photo-1600891964092-4316c288032e?w=1200&h=630&fit=crop&q=80"><meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--negro:#14100c;--carbon:#1e1813;--crema:#f6efe3;--papel:#fbf7f0;--oro:#c9a35c;--oro2:#e2c58c;--texto:#2b2219;--suave:#7a6a58;--linea:#e5dac8}
-*{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{font-family:Montserrat,system-ui,sans-serif;background:var(--papel);color:var(--texto);line-height:1.5}
-.hero{position:relative;min-height:78vh;display:flex;align-items:flex-end;color:var(--crema);
- background:linear-gradient(180deg,rgba(20,16,12,.35) 0%,rgba(20,16,12,.85) 70%,var(--negro) 100%),url('https://images.unsplash.com/photo-1544025162-d76694265947?w=1600&q=80') center/cover}
-.hero .in{max-width:980px;margin:0 auto;padding:0 22px 64px;width:100%}
-.marca{position:absolute;top:22px;left:0;right:0;max-width:980px;margin:0 auto;padding:0 22px;display:flex;justify-content:space-between;align-items:center}
-.marca b{font-family:'Cormorant Garamond',serif;font-size:24px;letter-spacing:.5px}
-.marca a{color:var(--negro);background:var(--oro);text-decoration:none;font-size:13px;font-weight:600;padding:9px 16px;border-radius:999px}
-.ceja{font-size:12px;letter-spacing:4px;text-transform:uppercase;color:var(--oro2)}
-h1{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:clamp(44px,9vw,86px);line-height:.98;margin:14px 0 18px}
-h1 em{font-style:italic;color:var(--oro2)}
-.hero p{max-width:520px;color:#e9dfcf;font-size:15px}
-.orn{display:flex;align-items:center;gap:12px;color:var(--oro);margin:26px 0 0;font-size:13px;letter-spacing:3px;text-transform:uppercase}
-.orn:before,.orn:after{content:"";height:1px;width:46px;background:var(--oro)}
-nav.cats{position:sticky;top:0;z-index:5;background:var(--negro);border-bottom:1px solid #2c241c}
-nav.cats .in{max-width:980px;margin:0 auto;display:flex;gap:6px;overflow-x:auto;padding:12px 16px;scrollbar-width:none}
-nav.cats a{flex:none;color:#d9cdb9;text-decoration:none;font-size:13px;padding:8px 15px;border:1px solid #3a2f24;border-radius:999px}
-nav.cats a:hover{border-color:var(--oro);color:var(--oro2)}
-main{max-width:980px;margin:0 auto;padding:10px 22px 120px}
-section{padding:46px 0 10px}
-.tit{display:flex;flex-wrap:wrap;align-items:baseline;column-gap:14px;margin-bottom:6px}
-.tit h2{font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:600;color:var(--negro)}
-.tit span{color:var(--oro);font-size:12px;letter-spacing:3px;text-transform:uppercase}
-.lema{color:var(--suave);font-style:italic;font-family:'Cormorant Garamond',serif;font-size:20px;margin-bottom:18px}
-.plato{display:flex;gap:14px;align-items:baseline;padding:16px 0;border-bottom:1px dashed var(--linea)}
-.plato .n{font-weight:600;font-size:16px;color:var(--negro)}
-.plato .d{color:var(--suave);font-size:13.5px;margin-top:2px}
-.plato .lin{flex:1;border-bottom:1px dotted #cdbfa8;transform:translateY(-4px);min-width:20px}
-.plato .p{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--negro);white-space:nowrap}
-.plato .izq{max-width:70%}
-.nota{margin:30px 0 0;background:var(--crema);border:1px solid var(--linea);border-radius:14px;padding:16px 18px;font-size:13.5px;color:var(--suave)}
-footer{background:var(--negro);color:#cbbfab;text-align:center;padding:46px 22px 120px}
-footer b{display:block;font-family:'Cormorant Garamond',serif;font-size:30px;color:var(--crema);margin-bottom:6px}
-.pedir{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:9;background:var(--oro);color:var(--negro);font-weight:600;text-decoration:none;padding:15px 26px;border-radius:999px;box-shadow:0 10px 30px rgba(0,0,0,.35);font-size:15px;white-space:nowrap}
-@media(min-width:760px){.cols{display:grid;grid-template-columns:1fr 1fr;column-gap:46px}}
-.plato{align-items:center}
-.plato .foto{width:76px;height:76px;object-fit:cover;border-radius:14px;flex:none;box-shadow:0 6px 16px rgba(20,16,12,.18);border:2px solid #fff}
-.plato .izq{max-width:55%}
-@media(min-width:760px){.plato .foto{width:88px;height:88px}}
-.aviso-fotos{font-size:12px;color:var(--suave);text-align:center;margin-top:22px}
-</style>
-</head>
-<body>
-<header class="hero">
- <div class="marca"><b>Don Jorge</b><a href="https://wa.me/573108226141?text=Hola%20Don%20Jorge,%20quiero%20hacer%20un%20pedido">Pedir a domicilio</a></div>
- <div class="in">
-  <div class="ceja">Restaurante · Comida de la casa</div>
-  <h1>Sazón de casa,<br><em>servida con orgullo.</em></h1>
-  <p>Sopas del día, carnes, pescados y comidas rápidas, preparados como en casa. Abrimos también domingos y festivos.</p>
-  <div class="orn">Nuestra carta</div>
- </div>
-</header>
-
-<nav class="cats"><div class="in">
- <a href="#sopas">Sopas</a><a href="#carnes">Carnes</a><a href="#pollo">Pollo</a><a href="#pescados">Pescados</a><a href="#rapidas">Comidas rápidas</a><a href="#bebidas">Bebidas</a>
-</div></nav>
-
-<main>
- <section id="sopas">
-  <div class="tit"><h2>Sopas</h2><span>Del día</span></div>
-  <p class="lema">El comienzo de toda buena comida.</p>
-  <div class="cols">
-   <div class="plato"><img class="foto" loading="lazy" src="https://images.unsplash.com/photo-1665593998976-d957f2827fe7?w=300&h=300&fit=crop&q=75" alt="Sopa de guineo"><div class="izq"><div class="n">Sopa de guineo</div></div><span class="lin"></span><span class="p">$ —</span></div>
-   <div class="plato"><img class="foto" loading="lazy" src="https://images.unsplash.com/photo-1612966948332-81d747414a8f?w=300&h=300&fit=crop&q=75" alt="Sopa de pollo"><div class="izq"><div class="n">Sopa de pollo</div></div><span class="lin"></span><span class="p">$ —</span></div>
-   <div class="plato"><img class="foto" loading="lazy" src="https://images.unsplash.com/photo-1682596044586-76c1d9ee1a97?w=300&h=300&fit=crop&q=75" alt="Sopa de pescado"><div class="izq"><div class="n">Sopa de pescado</div></div><span class="lin"></span><span class="p">$ —</span></div>
-   <div class="plato"><img class="foto" loading="lazy" src="https://images.unsplash.com/photo-1698917467449-08bcd1d9014b?w=300&h=300&fit=crop&q=75" alt="Fríjoles"><div class="izq"><div class="n">Fríjoles</div></div><span class="lin"></span><span class="p">$ —</span></div>
-   <div class="plato"><img class="foto" loading="lazy" src="https://images.unsplash.com/photo-1555126634-323283e090fa?w=300&h=300&fit=crop&q=75" alt="Sopa de pastas"><div class="izq"><div class="n">Sopa de pastas</div></div><span class="lin"></span><span class="p">$ —</span></div>
-   <div class="plato"><img class="foto" loading="lazy" src="https://images.unsplash.com/photo-1608500218987-0f2b3be34b47?w=300&h=300&fit=crop&q=75" alt="Caldo de costilla"><div class="izq"><div class="n">Caldo de costilla</div></div><span class="lin"></span><span class="p">$ —</span></div>
-  </div>
- </section>
-
- <section id="carnes">
-  <div class="tit"><h2>Carnes</h2><span>De la casa</span></div>
-  <p class="lema">Res y cerdo, en su punto.</p>
-  <div class="cols">
-   <div class="plato"><img class="foto" loading="lazy" src="https://images.unsplash.com/photo-1600891964092-4316c288032e?w=300&h=300&fit=crop&q=75" alt="Carne de res"><div class="izq"><div class="n">Carne de res</div></div><span class="lin"></span><span class="p">$ —</span></div>
-   <div class="plato"><img class="foto" loading="lazy" src="https://images.unsplash.com/photo-1432139555190-58524dae6a55?w=300&h=300&fit=crop&q=75" alt="Carne de cerdo"><div class="izq"><div class="n">Carne de cerdo</div></div><span class="lin"></span><span class="p">$ —</span></div>
-   <div class="plato"><img class="foto" loading="lazy" src="https://images.unsplash.com/photo-1625477811233-044633d10dd1?w=300&h=300&fit=crop&q=75" alt="Chicharrón"><div class="izq"><div class="n">Chicharrón</div></div><span class="lin"></span><span class="p">$ —</span></div>
-   <div class="plato"><img class="foto" loading="lazy" src="https://images.unsplash.com/photo-1610328469746-15a17caed851?w=300&h=300&fit=crop&q=75" alt="Carne molida"><div class="izq"><div class="n">Carne molida</div></div><span class="lin"></span><span class="p">$ —</span></div>
-   <div class="plato"><img class="foto" loading="lazy" src="https://images.unsplash.com/photo-1515516969-d4008cc6241a?w=300&h=300&fit=crop&q=75" alt="Albóndigas"><div class="izq"><div class="n">Albóndigas</div></div><span class="lin"></span><span class="p">$ —</span></div>
-  </div>
- </section>
-
- <section id="pollo">
-  <div class="tit"><h2>Pollo</h2><span>Clásicos</span></div>
-  <p class="lema">Como lo hacía la abuela.</p>
-  <div class="cols">
-   <div class="plato"><img class="foto" loading="lazy" src="https://images.unsplash.com/photo-1670398564097-0762e1b30b3a?w=300&h=300&fit=crop&q=75" alt="Pechuga"><div class="izq"><div class="n">Pechuga</div></div><span class="lin"></span><span class="p">$ —</span></div>
-   <div class="plato"><img class="foto" loading="lazy" src="https://images.unsplash.com/photo-1764018292116-003fd7d1a0ba?w=300&h=300&fit=crop&q=75" alt="Pollo frito"><div class="izq"><div class="n">Pollo frito</div></div><span class="lin"></span><span class="p">$ —</span></div>
-   <div class="plato"><img class="foto" loading="lazy" src="https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=300&h=300&fit=crop&q=75" alt="Pollo sudado"><div class="izq"><div class="n">Pollo sudado</div></div><span class="lin"></span><span class="p">$ —</span></div>
-  </div>
- </section>
-
- <section id="pescados">
-  <div class="tit"><h2>Pescados</h2><span>Frescos</span></div>
-  <p class="lema">Del río a su mesa.</p>
-  <div class="cols">
-   <div class="plato"><img class="foto" loading="lazy" src="https://images.unsplash.com/photo-1584300005420-38486f627b07?w=300&h=300&fit=crop&q=75" alt="Trucha"><div class="izq"><div class="n">Trucha</div></div><span class="lin"></span><span class="p">$ —</span></div>
-   <div class="plato"><img class="foto" loading="lazy" src="https://images.unsplash.com/photo-1725393325387-07f0d4951528?w=300&h=300&fit=crop&q=75" alt="Tilapia"><div class="izq"><div class="n">Tilapia</div></div><span class="lin"></span><span class="p">$ —</span></div>
-   <div class="plato"><img class="foto" loading="lazy" src="https://images.unsplash.com/photo-1765265432611-17d3f2da2d5d?w=300&h=300&fit=crop&q=75" alt="Posta de bagre"><div class="izq"><div class="n">Posta de bagre</div></div><span class="lin"></span><span class="p">$ —</span></div>
-  </div>
- </section>
-
- <section id="rapidas">
-  <div class="tit"><h2>Comidas rápidas</h2><span>Para antojarse</span></div>
-  <p class="lema">Para compartir o para darse gusto.</p>
-  <div class="cols">
-   <div class="plato"><img class="foto" loading="lazy" src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300&h=300&fit=crop&q=75" alt="Hamburguesa"><div class="izq"><div class="n">Hamburguesa</div></div><span class="lin"></span><span class="p">$ —</span></div>
-   <div class="plato"><img class="foto" loading="lazy" src="https://images.unsplash.com/photo-1638368593249-7cadb261e8b3?w=300&h=300&fit=crop&q=75" alt="Perro caliente"><div class="izq"><div class="n">Perro caliente</div></div><span class="lin"></span><span class="p">$ —</span></div>
-   <div class="plato"><img class="foto" loading="lazy" src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=300&h=300&fit=crop&q=75" alt="Picada"><div class="izq"><div class="n">Picada</div></div><span class="lin"></span><span class="p">$ —</span></div>
-   <div class="plato"><img class="foto" loading="lazy" src="https://images.unsplash.com/photo-1603360946369-dc9bb6258143?w=300&h=300&fit=crop&q=75" alt="Chuzo"><div class="izq"><div class="n">Chuzo</div></div><span class="lin"></span><span class="p">$ —</span></div>
-   <div class="plato"><img class="foto" loading="lazy" src="https://images.unsplash.com/photo-1624385019951-983e0de9e549?w=300&h=300&fit=crop&q=75" alt="Chorizo"><div class="izq"><div class="n">Chorizo</div></div><span class="lin"></span><span class="p">$ —</span></div>
-   <div class="plato"><img class="foto" loading="lazy" src="https://images.unsplash.com/photo-1762284513031-3d7ad15562bc?w=300&h=300&fit=crop&q=75" alt="Salchipapa"><div class="izq"><div class="n">Salchipapa</div></div><span class="lin"></span><span class="p">$ —</span></div>
-  </div>
- </section>
-
- <section id="bebidas">
-  <div class="tit"><h2>Bebidas</h2><span>Para acompañar</span></div>
-  <p class="lema">Frías, naturales y de siempre.</p>
-  <div class="cols">
-   <div class="plato"><img class="foto" loading="lazy" src="https://images.unsplash.com/photo-1523677011781-c91d1bbe2f9e?w=300&h=300&fit=crop&q=75" alt="Limonada"><div class="izq"><div class="n">Limonada</div></div><span class="lin"></span><span class="p">$ —</span></div>
-   <div class="plato"><img class="foto" loading="lazy" src="https://images.unsplash.com/photo-1583577612013-4fecf7bf8f13?w=300&h=300&fit=crop&q=75" alt="Jugos naturales"><div class="izq"><div class="n">Jugos naturales</div><div class="d">Guayaba, mora o mango</div></div><span class="lin"></span><span class="p">$ —</span></div>
-   <div class="plato"><img class="foto" loading="lazy" src="https://images.unsplash.com/photo-1714074617406-e17c546c36a9?w=300&h=300&fit=crop&q=75" alt="Claro y mazamorra"><div class="izq"><div class="n">Claro y mazamorra</div></div><span class="lin"></span><span class="p">$ —</span></div>
-   <div class="plato"><img class="foto" loading="lazy" src="https://images.unsplash.com/photo-1594971475674-6a97f8fe8c2b?w=300&h=300&fit=crop&q=75" alt="Gaseosas"><div class="izq"><div class="n">Gaseosas</div><div class="d">Coca-Cola y Postobón</div></div><span class="lin"></span><span class="p">$ —</span></div>
-   <div class="plato"><img class="foto" loading="lazy" src="https://images.unsplash.com/photo-1782292016930-74679437f72b?w=300&h=300&fit=crop&q=75" alt="Hit"><div class="izq"><div class="n">Hit</div><div class="d">Personal o litro</div></div><span class="lin"></span><span class="p">$ —</span></div>
-   <div class="plato"><img class="foto" loading="lazy" src="https://images.unsplash.com/photo-1552611052-dd922d8f9603?w=300&h=300&fit=crop&q=75" alt="Malta y Vive 100"><div class="izq"><div class="n">Malta y Vive 100</div></div><span class="lin"></span><span class="p">$ —</span></div>
-   <div class="plato"><img class="foto" loading="lazy" src="https://images.unsplash.com/photo-1571613316887-6f8d5cbf7ef7?w=300&h=300&fit=crop&q=75" alt="Cerveza bien fría"><div class="izq"><div class="n">Cerveza bien fría</div></div><span class="lin"></span><span class="p">$ —</span></div>
-  </div>
-  <p class="aviso-fotos">Fotos de referencia.</p>
-  <p class="nota">¿Tiene alguna alergia o restricción? Cuéntenos al hacer su pedido y con gusto lo preparamos a su medida.</p>
- </section>
-</main>
-
-<footer id="pedir">
- <b>Restaurante Don Jorge</b>
- Domicilios todos los días · también domingos y festivos<br>Pida con tiempo y se lo llevamos calientico.<br><br>WhatsApp 310 822 6141
-</footer>
-<a class="pedir" href="https://wa.me/573108226141?text=Hola%20Don%20Jorge,%20quiero%20hacer%20un%20pedido">Pedir por WhatsApp</a>
-</body>
-</html>
+:root{--negro:#15110d;--cafe:#231b14;--crema:#f4ede1;--papel:#faf6ef;--oro:#c9a35c;--oro2:#e6cb93;--vino:#7d2a1d;--texto:#2b2219;--suave:#776653}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{font-family:Montserrat,system-ui,sans-serif;background:var(--papel);color:var(--texto)}
+header.bar{position:sticky;top:0;z-index:20;background:var(--negro);display:flex;justify-content:space-between;align-items:center;padding:12px 18px}
+.logo{display:flex;align-items:center;gap:10px;color:var(--crema);text-decoration:none}.logo i{width:40px;height:40px;border-radius:50%;border:1.5px solid var(--oro);display:grid;place-items:center;font-family:'Cormorant Garamond',serif;font-style:normal;font-size:20px;color:var(--oro2)}.logo b{font-family:'Cormorant Garamond',serif;font-size:23px}
+.btn{background:var(--oro);color:var(--negro);text-decoration:none;font-weight:700;font-size:13px;padding:11px 16px;border-radius:10px}
+.hero{min-height:72vh;display:flex;align-items:flex-end;color:var(--crema);background:linear-gradient(180deg,rgba(21,17,13,.25),rgba(21,17,13,.9) 75%),url('https://images.unsplash.com/photo-1600891964092-4316c288032e?w=1600&h=1000&fit=crop&q=80') center/cover}
+.hero .in{max-width:1080px;margin:0 auto;padding:0 20px 56px;width:100%}
+.eye{display:inline-block;border:1px solid var(--oro);color:var(--oro2);font-size:11px;letter-spacing:3px;text-transform:uppercase;padding:7px 12px;border-radius:999px}
+.hero h1{font-family:'Cormorant Garamond',serif;font-size:clamp(44px,8.5vw,92px);line-height:.95;margin:16px 0}.hero h1 em{color:var(--oro2)}
+.hero p{max-width:540px;color:#e7dccb}.acc{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap}.btn2{border:1px solid var(--crema);color:var(--crema);text-decoration:none;font-weight:600;font-size:13px;padding:11px 16px;border-radius:10px}
+.alerg{background:#f3e4c4;color:#5b4627;font-size:13px;padding:13px 20px;text-align:center}
+main{max-width:1080px;margin:0 auto;padding:34px 18px 120px}
+.h{display:flex;justify-content:space-between;align-items:end;margin-bottom:14px}.h small{color:var(--oro);letter-spacing:3px;font-size:11px;text-transform:uppercase}.h h2{font-family:'Cormorant Garamond',serif;font-size:40px;color:var(--negro)}.h span{color:var(--suave);font-weight:600;font-size:14px}
+.exps{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;scroll-snap-type:x mandatory}
+.exp{position:relative;flex:none;width:200px;height:240px;border-radius:18px;overflow:hidden;scroll-snap-align:start;text-decoration:none}.exp img{width:100%;height:100%;object-fit:cover}
+.exp .ov{position:absolute;inset:auto 0 0 0;padding:14px;background:linear-gradient(transparent,rgba(0,0,0,.85));color:#fff}.exp b{display:block;font-size:15px;letter-spacing:.5px}.exp span{font-size:12px;color:#e8dcc8}
+.tools{position:sticky;top:64px;z-index:10;background:var(--papel);padding:16px 0 10px;margin-top:22px;border-top:1px solid #e6dccb}
+.buscar{width:100%;border:1px solid #dccfb9;background:#fff;border-radius:999px;padding:13px 18px;font:inherit;font-size:15px}
+.chips{display:flex;gap:8px;overflow-x:auto;margin-top:10px}.chip{flex:none;border:1px solid #dccfb9;background:#fff;color:var(--texto);border-radius:999px;padding:9px 16px;font:inherit;font-size:13.5px;cursor:pointer}.chip.on{background:var(--negro);color:var(--oro2);border-color:var(--negro)}
+.cat{margin-top:30px}.ct{display:flex;align-items:center;gap:12px;margin-bottom:14px}.ct>span{font-size:30px}.ct h2{font-family:'Cormorant Garamond',serif;font-size:36px;color:var(--negro);line-height:1}.ct p{color:var(--suave);font-style:italic;font-size:14px}
+.grid{display:grid;grid-template-columns:1fr;gap:14px}@media(min-width:760px){.grid{grid-template-columns:1fr 1fr}}
+.prod{display:flex;background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 4px 18px rgba(40,25,10,.08);min-height:150px}
+.prod img{width:38%;max-width:170px;object-fit:cover}.prod .tx{flex:1;padding:16px 16px 14px;display:flex;flex-direction:column}
+.top{display:flex;justify-content:space-between;gap:10px}.top h3{font-size:15.5px;letter-spacing:.3px;color:var(--negro)}.pr{color:var(--vino);font-weight:700;font-size:15px;white-space:nowrap}
+.prod p{color:var(--suave);font-size:13.5px;line-height:1.45;margin-top:8px;flex:1}.pedir1{align-self:flex-start;margin-top:10px;color:var(--negro);border:1px solid var(--oro);border-radius:8px;padding:6px 12px;font-size:12.5px;font-weight:600;text-decoration:none}
+footer{background:var(--negro);color:#cbbfab;text-align:center;padding:44px 20px 120px}footer b{display:block;font-family:'Cormorant Garamond',serif;font-size:30px;color:var(--crema)}
+.fijo{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;z-index:30;background:var(--oro);color:var(--negro);font-weight:700;text-decoration:none;padding:15px 26px;border-radius:999px;box-shadow:0 10px 28px rgba(0,0,0,.35);white-space:nowrap}
+</style></head><body>
+<header class="bar"><a class="logo" href="#"><i>DJ</i><b>Don Jorge</b></a><a class="btn" href="https://wa.me/573108226141?text=Hola%20Don%20Jorge,%20quiero%20hacer%20un%20pedido">Pedir a domicilio</a></header>
+<section class="hero"><div class="in"><span class="eye">Don Jorge · cocina de casa</span><h1>Sabor de casa,<br><em>servido con orgullo.</em></h1><p>Sopas del día, carnes, pollo, pescados y comidas rápidas. Abrimos también domingos y festivos.</p><div class="acc"><a class="btn" href="https://wa.me/573108226141?text=Hola%20Don%20Jorge,%20quiero%20hacer%20un%20pedido">Pedir por WhatsApp</a><a class="btn2" href="#carta">Ver la carta</a></div></div></section>
+<div class="alerg">⚠️ ¿Tiene alguna alergia o restricción? Cuéntenos al pedir y lo preparamos a su medida.</div>
+<main id="carta"><div class="h"><div><small>Nuestra carta</small><h2>Elija su antojo</h2></div><span>30 platos</span></div>
+<div class="exps"><a class="exp" href="#sopas" data-f="sopas"><img src="https://images.unsplash.com/photo-1665593998976-d957f2827fe7?w=500&h=640&fit=crop&q=80" alt=""><div class="ov"><b>🍲 SOPAS</b><span>El comienzo de toda buena comida · 6</span></div></a><a class="exp" href="#carnes" data-f="carnes"><img src="https://images.unsplash.com/photo-1600891964092-4316c288032e?w=500&h=640&fit=crop&q=80" alt=""><div class="ov"><b>🥩 CARNES</b><span>Res y cerdo, en su punto · 5</span></div></a><a class="exp" href="#pollo" data-f="pollo"><img src="https://images.unsplash.com/photo-1764018292116-003fd7d1a0ba?w=500&h=640&fit=crop&q=80" alt=""><div class="ov"><b>🍗 POLLO</b><span>Como lo hacía la abuela · 3</span></div></a><a class="exp" href="#pescados" data-f="pescados"><img src="https://images.unsplash.com/photo-1725393325387-07f0d4951528?w=500&h=640&fit=crop&q=80" alt=""><div class="ov"><b>🐟 PESCADOS</b><span>Del río a su mesa · 3</span></div></a><a class="exp" href="#rapidas" data-f="rapidas"><img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=500&h=640&fit=crop&q=80" alt=""><div class="ov"><b>🍔 COMIDAS RÁPIDAS</b><span>Para antojarse y compartir · 6</span></div></a><a class="exp" href="#bebidas" data-f="bebidas"><img src="https://images.unsplash.com/photo-1583577612013-4fecf7bf8f13?w=500&h=640&fit=crop&q=80" alt=""><div class="ov"><b>🥤 BEBIDAS</b><span>Frías, naturales y de siempre · 7</span></div></a></div>
+<div class="tools"><input class="buscar" placeholder="🔍  Buscar un plato o una bebida…"><div class="chips"><button class="chip on" data-f="todos">Todos</button><button class="chip" data-f="sopas">Sopas</button><button class="chip" data-f="carnes">Carnes</button><button class="chip" data-f="pollo">Pollo</button><button class="chip" data-f="pescados">Pescados</button><button class="chip" data-f="rapidas">Comidas rápidas</button><button class="chip" data-f="bebidas">Bebidas</button></div></div>
+<section class="cat" id="sopas" data-c="sopas"><div class="ct"><span>🍲</span><div><h2>Sopas</h2><p>El comienzo de toda buena comida</p></div></div><div class="grid"><article class="prod" data-c="sopas" data-n="sopa de guineo"><img loading="lazy" src="https://images.unsplash.com/photo-1665593998976-d957f2827fe7?w=520&h=520&fit=crop&q=80" alt="Sopa de guineo"><div class="tx"><div class="top"><h3>SOPA DE GUINEO</h3><span class="pr">$ —</span></div><p>Caldo casero de guineo verde con verduras y cilantro.</p><a class="pedir1" href="https://wa.me/573108226141?text=Hola%20Don%20Jorge,%20quiero%20pedir:%20Sopa%20de%20guineo">Pedir</a></div></article><article class="prod" data-c="sopas" data-n="sopa de pollo"><img loading="lazy" src="https://images.unsplash.com/photo-1612966948332-81d747414a8f?w=520&h=520&fit=crop&q=80" alt="Sopa de pollo"><div class="tx"><div class="top"><h3>SOPA DE POLLO</h3><span class="pr">$ —</span></div><p>Caldo de pollo con papa y verduras, el sabor de la casa.</p><a class="pedir1" href="https://wa.me/573108226141?text=Hola%20Don%20Jorge,%20quiero%20pedir:%20Sopa%20de%20pollo">Pedir</a></div></article><article class="prod" data-c="sopas" data-n="sopa de pescado"><img loading="lazy" src="https://images.unsplash.com/photo-1682596044586-76c1d9ee1a97?w=520&h=520&fit=crop&q=80" alt="Sopa de pescado"><div class="tx"><div class="top"><h3>SOPA DE PESCADO</h3><span class="pr">$ —</span></div><p>Sopa espesa de pescado, perfecta para reponer fuerzas.</p><a class="pedir1" href="https://wa.me/573108226141?text=Hola%20Don%20Jorge,%20quiero%20pedir:%20Sopa%20de%20pescado">Pedir</a></div></article><article class="prod" data-c="sopas" data-n="fríjoles"><img loading="lazy" src="https://images.unsplash.com/photo-1698917467449-08bcd1d9014b?w=520&h=520&fit=crop&q=80" alt="Fríjoles"><div class="tx"><div class="top"><h3>FRÍJOLES</h3><span class="pr">$ —</span></div><p>Fríjoles cocinados a fuego lento, como en la finca.</p><a class="pedir1" href="https://wa.me/573108226141?text=Hola%20Don%20Jorge,%20quiero%20pedir:%20Fríjoles">Pedir</a></div></article><article class="prod" data-c="sopas" data-n="sopa de pastas"><img loading="lazy" src="https://images.unsplash.com/photo-1555126634-323283e090fa?w=520&h=520&fit=crop&q=80" alt="Sopa de pastas"><div class="tx"><div class="top"><h3>SOPA DE PASTAS</h3><span class="pr">$ —</span></div><p>Sopa casera de pasta con verduras.</p><a class="pedir1" href="https://wa.me/573108226141?text=Hola%20Don%20Jorge,%20quiero%20pedir:%20Sopa%20de%20pastas">Pedir</a></div></article><article class="prod" data-c="sopas" data-n="caldo de costilla"><img loading="lazy" src="https://images.unsplash.com/photo-1608500218987-0f2b3be34b47?w=520&h=520&fit=crop&q=80" alt="Caldo de costilla"><div class="tx"><div class="top"><h3>CALDO DE COSTILLA</h3><span class="pr">$ —</span></div><p>Caldo de costilla de res con papa y cilantro.</p><a class="pedir1" href="https://wa.me/573108226141?text=Hola%20Don%20Jorge,%20quiero%20pedir:%20Caldo%20de%20costilla">Pedir</a></div></article></div></section><section class="cat" id="carnes" data-c="carnes"><div class="ct"><span>🥩</span><div><h2>Carnes</h2><p>Res y cerdo, en su punto</p></div></div><div class="grid"><article class="prod" data-c="carnes" data-n="carne de res"><img loading="lazy" src="https://images.unsplash.com/photo-1600891964092-4316c288032e?w=520&h=520&fit=crop&q=80" alt="Carne de res"><div class="tx"><div class="top"><h3>CARNE DE RES</h3><span class="pr">$ —</span></div><p>Carne de res asada en su punto, con sus acompañantes.</p><a class="pedir1" href="https://wa.me/573108226141?text=Hola%20Don%20Jorge,%20quiero%20pedir:%20Carne%20de%20res">Pedir</a></div></article><article class="prod" data-c="carnes" data-n="carne de cerdo"><img loading="lazy" src="https://images.unsplash.com/photo-1432139555190-58524dae6a55?w=520&h=520&fit=crop&q=80" alt="Carne de cerdo"><div class="tx"><div class="top"><h3>CARNE DE CERDO</h3><span class="pr">$ —</span></div><p>Cerdo jugoso a la plancha, bien sazonado.</p><a class="pedir1" href="https://wa.me/573108226141?text=Hola%20Don%20Jorge,%20quiero%20pedir:%20Carne%20de%20cerdo">Pedir</a></div></article><article class="prod" data-c="carnes" data-n="chicharrón"><img loading="lazy" src="https://images.unsplash.com/photo-1625477811233-044633d10dd1?w=520&h=520&fit=crop&q=80" alt="Chicharrón"><div class="tx"><div class="top"><h3>CHICHARRÓN</h3><span class="pr">$ —</span></div><p>Crocante y dorado, como debe ser.</p><a class="pedir1" href="https://wa.me/573108226141?text=Hola%20Don%20Jorge,%20quiero%20pedir:%20Chicharrón">Pedir</a></div></article><article class="prod" data-c="carnes" data-n="carne molida"><img loading="lazy" src="https://images.unsplash.com/photo-1610328469746-15a17caed851?w=520&h=520&fit=crop&q=80" alt="Carne molida"><div class="tx"><div class="top"><h3>CARNE MOLIDA</h3><span class="pr">$ —</span></div><p>Carne molida guisada al estilo casero.</p><a class="pedir1" href="https://wa.me/573108226141?text=Hola%20Don%20Jorge,%20quiero%20pedir:%20Carne%20molida">Pedir</a></div></article><article class="prod" data-c="carnes" data-n="albóndigas"><img loading="lazy" src="https://images.unsplash.com/photo-1515516969-d4008cc6241a?w=520&h=520&fit=crop&q=80" alt="Albóndigas"><div class="tx"><div class="top"><h3>ALBÓNDIGAS</h3><span class="pr">$ —</span></div><p>Albóndigas de la casa en salsa criolla.</p><a class="pedir1" href="https://wa.me/573108226141?text=Hola%20Don%20Jorge,%20quiero%20pedir:%20Albóndigas">Pedir</a></div></article></div></section><section class="cat" id="pollo" data-c="pollo"><div class="ct"><span>🍗</span><div><h2>Pollo</h2><p>Como lo hacía la abuela</p></div></div><div class="grid"><article class="prod" data-c="pollo" data-n="pechuga"><img loading="lazy" src="https://images.unsplash.com/photo-1670398564097-0762e1b30b3a?w=520&h=520&fit=crop&q=80" alt="Pechuga"><div class="tx"><div class="top"><h3>PECHUGA</h3><span class="pr">$ —</span></div><p>Pechuga a la plancha, tierna y bien sazonada.</p><a class="pedir1" href="https://wa.me/573108226141?text=Hola%20Don%20Jorge,%20quiero%20pedir:%20Pechuga">Pedir</a></div></article><article class="prod" data-c="pollo" data-n="pollo frito"><img loading="lazy" src="https://images.unsplash.com/photo-1764018292116-003fd7d1a0ba?w=520&h=520&fit=crop&q=80" alt="Pollo frito"><div class="tx"><div class="top"><h3>POLLO FRITO</h3><span class="pr">$ —</span></div><p>Crocante por fuera, jugoso por dentro.</p><a class="pedir1" href="https://wa.me/573108226141?text=Hola%20Don%20Jorge,%20quiero%20pedir:%20Pollo%20frito">Pedir</a></div></article><article class="prod" data-c="pollo" data-n="pollo sudado"><img loading="lazy" src="https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=520&h=520&fit=crop&q=80" alt="Pollo sudado"><div class="tx"><div class="top"><h3>POLLO SUDADO</h3><span class="pr">$ —</span></div><p>Pollo sudado en salsa criolla, sabor de casa.</p><a class="pedir1" href="https://wa.me/573108226141?text=Hola%20Don%20Jorge,%20quiero%20pedir:%20Pollo%20sudado">Pedir</a></div></article></div></section><section class="cat" id="pescados" data-c="pescados"><div class="ct"><span>🐟</span><div><h2>Pescados</h2><p>Del río a su mesa</p></div></div><div class="grid"><article class="prod" data-c="pescados" data-n="trucha"><img loading="lazy" src="https://images.unsplash.com/photo-1584300005420-38486f627b07?w=520&h=520&fit=crop&q=80" alt="Trucha"><div class="tx"><div class="top"><h3>TRUCHA</h3><span class="pr">$ —</span></div><p>Trucha frita entera, dorada y crocante.</p><a class="pedir1" href="https://wa.me/573108226141?text=Hola%20Don%20Jorge,%20quiero%20pedir:%20Trucha">Pedir</a></div></article><article class="prod" data-c="pescados" data-n="tilapia"><img loading="lazy" src="https://images.unsplash.com/photo-1725393325387-07f0d4951528?w=520&h=520&fit=crop&q=80" alt="Tilapia"><div class="tx"><div class="top"><h3>TILAPIA</h3><span class="pr">$ —</span></div><p>Tilapia frita entera, servida con limón.</p><a class="pedir1" href="https://wa.me/573108226141?text=Hola%20Don%20Jorge,%20quiero%20pedir:%20Tilapia">Pedir</a></div></article><article class="prod" data-c="pescados" data-n="posta de bagre"><img loading="lazy" src="https://images.unsplash.com/photo-1765265432611-17d3f2da2d5d?w=520&h=520&fit=crop&q=80" alt="Posta de bagre"><div class="tx"><div class="top"><h3>POSTA DE BAGRE</h3><span class="pr">$ —</span></div><p>Posta de bagre en su punto, sabor de río.</p><a class="pedir1" href="https://wa.me/573108226141?text=Hola%20Don%20Jorge,%20quiero%20pedir:%20Posta%20de%20bagre">Pedir</a></div></article></div></section><section class="cat" id="rapidas" data-c="rapidas"><div class="ct"><span>🍔</span><div><h2>Comidas rápidas</h2><p>Para antojarse y compartir</p></div></div><div class="grid"><article class="prod" data-c="rapidas" data-n="hamburguesa"><img loading="lazy" src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=520&h=520&fit=crop&q=80" alt="Hamburguesa"><div class="tx"><div class="top"><h3>HAMBURGUESA</h3><span class="pr">$ —</span></div><p>Carne jugosa, queso, vegetales y salsas de la casa.</p><a class="pedir1" href="https://wa.me/573108226141?text=Hola%20Don%20Jorge,%20quiero%20pedir:%20Hamburguesa">Pedir</a></div></article><article class="prod" data-c="rapidas" data-n="perro caliente"><img loading="lazy" src="https://images.unsplash.com/photo-1638368593249-7cadb261e8b3?w=520&h=520&fit=crop&q=80" alt="Perro caliente"><div class="tx"><div class="top"><h3>PERRO CALIENTE</h3><span class="pr">$ —</span></div><p>Pan suave, salchicha, salsas y papita.</p><a class="pedir1" href="https://wa.me/573108226141?text=Hola%20Don%20Jorge,%20quiero%20pedir:%20Perro%20caliente">Pedir</a></div></article><article class="prod" data-c="rapidas" data-n="picada"><img loading="lazy" src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=520&h=520&fit=crop&q=80" alt="Picada"><div class="tx"><div class="top"><h3>PICADA</h3><span class="pr">$ —</span></div><p>Para compartir: carnes, chorizo y acompañantes.</p><a class="pedir1" href="https://wa.me/573108226141?text=Hola%20Don%20Jorge,%20quiero%20pedir:%20Picada">Pedir</a></div></article><article class="prod" data-c="rapidas" data-n="chuzo"><img loading="lazy" src="https://images.unsplash.com/photo-1603360946369-dc9bb6258143?w=520&h=520&fit=crop&q=80" alt="Chuzo"><div class="tx"><div class="top"><h3>CHUZO</h3><span class="pr">$ —</span></div><p>Chuzo a la parrilla con su acompañante.</p><a class="pedir1" href="https://wa.me/573108226141?text=Hola%20Don%20Jorge,%20quiero%20pedir:%20Chuzo">Pedir</a></div></article><article class="prod" data-c="rapidas" data-n="chorizo"><img loading="lazy" src="https://images.unsplash.com/photo-1624385019951-983e0de9e549?w=520&h=520&fit=crop&q=80" alt="Chorizo"><div class="tx"><div class="top"><h3>CHORIZO</h3><span class="pr">$ —</span></div><p>Chorizo asado, ideal para picar.</p><a class="pedir1" href="https://wa.me/573108226141?text=Hola%20Don%20Jorge,%20quiero%20pedir:%20Chorizo">Pedir</a></div></article><article class="prod" data-c="rapidas" data-n="salchipapa"><img loading="lazy" src="https://images.unsplash.com/photo-1762284513031-3d7ad15562bc?w=520&h=520&fit=crop&q=80" alt="Salchipapa"><div class="tx"><div class="top"><h3>SALCHIPAPA</h3><span class="pr">$ —</span></div><p>Papas a la francesa con salchicha y salsas.</p><a class="pedir1" href="https://wa.me/573108226141?text=Hola%20Don%20Jorge,%20quiero%20pedir:%20Salchipapa">Pedir</a></div></article></div></section><section class="cat" id="bebidas" data-c="bebidas"><div class="ct"><span>🥤</span><div><h2>Bebidas</h2><p>Frías, naturales y de siempre</p></div></div><div class="grid"><article class="prod" data-c="bebidas" data-n="limonada"><img loading="lazy" src="https://images.unsplash.com/photo-1523677011781-c91d1bbe2f9e?w=520&h=520&fit=crop&q=80" alt="Limonada"><div class="tx"><div class="top"><h3>LIMONADA</h3><span class="pr">$ —</span></div><p>Natural y bien fría.</p><a class="pedir1" href="https://wa.me/573108226141?text=Hola%20Don%20Jorge,%20quiero%20pedir:%20Limonada">Pedir</a></div></article><article class="prod" data-c="bebidas" data-n="jugos naturales"><img loading="lazy" src="https://images.unsplash.com/photo-1583577612013-4fecf7bf8f13?w=520&h=520&fit=crop&q=80" alt="Jugos naturales"><div class="tx"><div class="top"><h3>JUGOS NATURALES</h3><span class="pr">$ —</span></div><p>Guayaba, mora o mango.</p><a class="pedir1" href="https://wa.me/573108226141?text=Hola%20Don%20Jorge,%20quiero%20pedir:%20Jugos%20naturales">Pedir</a></div></article><article class="prod" data-c="bebidas" data-n="claro y mazamorra"><img loading="lazy" src="https://images.unsplash.com/photo-1714074617406-e17c546c36a9?w=520&h=520&fit=crop&q=80" alt="Claro y mazamorra"><div class="tx"><div class="top"><h3>CLARO Y MAZAMORRA</h3><span class="pr">$ —</span></div><p>Tradición antioqueña.</p><a class="pedir1" href="https://wa.me/573108226141?text=Hola%20Don%20Jorge,%20quiero%20pedir:%20Claro%20y%20mazamorra">Pedir</a></div></article><article class="prod" data-c="bebidas" data-n="gaseosas"><img loading="lazy" src="https://images.unsplash.com/photo-1594971475674-6a97f8fe8c2b?w=520&h=520&fit=crop&q=80" alt="Gaseosas"><div class="tx"><div class="top"><h3>GASEOSAS</h3><span class="pr">$ —</span></div><p>Coca-Cola y Postobón.</p><a class="pedir1" href="https://wa.me/573108226141?text=Hola%20Don%20Jorge,%20quiero%20pedir:%20Gaseosas">Pedir</a></div></article><article class="prod" data-c="bebidas" data-n="hit"><img loading="lazy" src="https://images.unsplash.com/photo-1782292016930-74679437f72b?w=520&h=520&fit=crop&q=80" alt="Hit"><div class="tx"><div class="top"><h3>HIT</h3><span class="pr">$ —</span></div><p>Personal o litro.</p><a class="pedir1" href="https://wa.me/573108226141?text=Hola%20Don%20Jorge,%20quiero%20pedir:%20Hit">Pedir</a></div></article><article class="prod" data-c="bebidas" data-n="malta y vive 100"><img loading="lazy" src="https://images.unsplash.com/photo-1552611052-dd922d8f9603?w=520&h=520&fit=crop&q=80" alt="Malta y Vive 100"><div class="tx"><div class="top"><h3>MALTA Y VIVE 100</h3><span class="pr">$ —</span></div><p>Para recargar energía.</p><a class="pedir1" href="https://wa.me/573108226141?text=Hola%20Don%20Jorge,%20quiero%20pedir:%20Malta%20y%20Vive%20100">Pedir</a></div></article><article class="prod" data-c="bebidas" data-n="cerveza"><img loading="lazy" src="https://images.unsplash.com/photo-1571613316887-6f8d5cbf7ef7?w=520&h=520&fit=crop&q=80" alt="Cerveza"><div class="tx"><div class="top"><h3>CERVEZA</h3><span class="pr">$ —</span></div><p>Bien fría.</p><a class="pedir1" href="https://wa.me/573108226141?text=Hola%20Don%20Jorge,%20quiero%20pedir:%20Cerveza">Pedir</a></div></article></div></section><p style="text-align:center;color:#9a8a75;font-size:12px;margin-top:26px">Fotos de referencia.</p></main>
+<footer><b>Restaurante Don Jorge</b>Domicilios todos los días · también domingos y festivos<br><br>WhatsApp 310 822 6141</footer>
+<a class="fijo" href="https://wa.me/573108226141?text=Hola%20Don%20Jorge,%20quiero%20hacer%20un%20pedido">Pedir por WhatsApp</a>
+<script>
+const q=document.querySelector('.buscar'),chips=[...document.querySelectorAll('.chip')];let f='todos';
+function filtra(){const t=q.value.trim().toLowerCase();document.querySelectorAll('.cat').forEach(s=>{let v=0;s.querySelectorAll('.prod').forEach(p=>{const ok=(f==='todos'||p.dataset.c===f)&&(!t||p.dataset.n.includes(t));p.style.display=ok?'':'none';if(ok)v++});s.style.display=v?'':'none'})}
+q.addEventListener('input',filtra);chips.forEach(c=>c.onclick=()=>{chips.forEach(x=>x.classList.remove('on'));c.classList.add('on');f=c.dataset.f;filtra()});
+document.querySelectorAll('.exp').forEach(a=>a.addEventListener('click',()=>{f=a.dataset.f;chips.forEach(x=>x.classList.toggle('on',x.dataset.f===f));filtra()}));
+</script></body></html>
