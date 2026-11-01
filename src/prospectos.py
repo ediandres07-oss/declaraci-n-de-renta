@@ -265,8 +265,11 @@ def _fecha_larga(iso: str) -> str:
         return "estas semanas"
 
 
+PIE_RUES = "Te escribimos porque el correo de tu empresa o negocio figura en el Registro Mercantil (RUES), que es público."
+
+
 def _envolver(cuerpo: str, email: str, cta_txt: str, cta_url: str,
-              cta2_txt: str = "", cta2_url: str = "") -> str:
+              cta2_txt: str = "", cta2_url: str = "", pie: str = PIE_RUES) -> str:
     navy, dorado = "#1e2432", "#b8955f"
     cta2 = (f' <a href="{cta2_url}" style="display:inline-block;margin:6px 0;background:{navy};color:#fff;text-decoration:none;'
             f'padding:11px 18px;border-radius:8px;font-weight:700">{cta2_txt}</a>') if cta2_url else ""
@@ -276,7 +279,7 @@ def _envolver(cuerpo: str, email: str, cta_txt: str, cta_url: str,
 <div style="padding:22px 24px;font-size:15px;line-height:1.6">{cuerpo}
 <p style="margin:22px 0"><a href="{cta_url}" style="display:inline-block;margin:6px 0;background:{dorado};color:#fff;text-decoration:none;padding:11px 18px;border-radius:8px;font-weight:700">{cta_txt}</a>{cta2}</p>
 <p>Un saludo,<br><b>Edison Monsalve</b><br>Contador público · Tributando.co<br>WhatsApp: <a href="https://wa.me/573332470715" style="color:{dorado};font-weight:700">333 247 0715</a></p></div></div>
-<p style="font-size:11px;color:#8a94a6;line-height:1.5;padding:12px 8px">Te escribimos porque el correo de tu empresa o negocio figura en el Registro Mercantil (RUES), que es público.
+<p style="font-size:11px;color:#8a94a6;line-height:1.5;padding:12px 8px">{pie}
 Si no quieres recibir más mensajes, <a href="{url_baja(email)}" style="color:#8a94a6">haz clic aquí para darte de baja</a> y no te volveremos a escribir.</p>
 </div></body></html>"""
 
@@ -698,3 +701,70 @@ def enviar_propuesta_ventaneria(p: Prospecto, nombre_rl: str = "") -> bool:
             s and s.quit()
         except Exception:  # noqa: BLE001
             pass
+
+
+# ---------------------------------------------------------------- ventanerías (1-nov-2026)
+VENT_ORIGEN = "maps-ventaneria"
+PIE_WEB = "Le escribimos porque el correo de su negocio aparece publicado en su página web."
+
+
+def lista_ventanerias() -> list[dict]:
+    """Talleres de aluminio de Antioquia (Google Maps, con aluminio confirmado y correo de su web)."""
+    import json
+    ruta = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ventanerias_correo.json")
+    try:
+        return json.load(open(ruta, encoding="utf-8"))
+    except OSError:
+        return []
+
+
+def plantilla_ventaneria(nombre: str, municipio: str = "") -> tuple[str, str]:
+    from urllib.parse import quote
+    asunto = f"{nombre}: cotice ventanas de aluminio en un minuto, desde el celular"
+    donde = f" en {municipio}" if municipio else ""
+    cuerpo = f"""<p>Buenos días:</p>
+<p>Soy Edison Monsalve, de Tributando.co. Vimos a <b>{nombre}</b>{donde} en Google Maps y le escribo porque tenemos un programa hecho para talleres de aluminio y vidrio:</p>
+<ul style="padding-left:18px">
+<li><b>El precio sale solo:</b> escoge el diseño (corrediza, proyectante, puerta, cabina…), pone ancho y alto, y sale la cotización con perfiles, vidrio, accesorios y mano de obra, con sus propios precios.</li>
+<li><b>Su cliente la ve en 3D</b> antes de aprobar y, con una foto del vano, ve cómo queda la ventana instalada.</li>
+<li><b>Por WhatsApp:</b> la cotización le llega al cliente en PDF y la aprueba desde el celular.</li>
+<li><b>Para el taller:</b> lista de cortes barra por barra, retales en bodega, abonos y agenda de instalación.</li>
+</ul>
+<p>Le dejo un video de 40 segundos del programa funcionando. Si me manda las medidas de una ventana que esté cotizando, se la devuelvo cotizada para que vea cómo queda. Los primeros 15 días son gratis.</p>"""
+    wa = "https://wa.me/573332470715?text=" + quote(f"Hola, soy de {nombre}. Vi el correo del cotizador de ventanería.")
+    return asunto, cuerpo, wa
+
+
+def enviar_ventaneria(t: dict, smtp=None, cfg=None) -> str:
+    """Manda la propuesta a UN taller y lo deja en el CRM (etapa «propuesta»). Devuelve el estado."""
+    email = (t.get("email") or "").lower().strip()
+    if not email:
+        return "sin correo"
+    if esta_de_baja(email):
+        return "de baja"
+    p = db.session.get(Prospecto, email)
+    if p and p.origen == VENT_ORIGEN and p.estado == "enviado":
+        return "ya enviado"
+    if p and p.estado == "enviado":
+        return "ya estaba en prospectos"
+    cfg = cfg or _config_smtp()
+    if not cfg:
+        return "sin SMTP"
+    from src.correo import armar_mensaje
+    asunto, cuerpo, wa = plantilla_ventaneria(t.get("nombre") or "su taller", t.get("municipio") or "")
+    html = _envolver(cuerpo, email, "Ver el video y el programa", URL + "/ventaneria",
+                     "Escribir por WhatsApp", wa, pie=PIE_WEB)
+    if p is None:
+        p = Prospecto(email=email, segmento="empresa", origen=VENT_ORIGEN)
+        db.session.add(p)
+    p.razon_social, p.municipio = (t.get("nombre") or "")[:250], (t.get("municipio") or "")[:80]
+    p.actividad, p.origen = "Ventanería en aluminio y vidrio", VENT_ORIGEN
+    try:
+        s = smtp or _abrir_smtp(cfg)
+        s.send_message(armar_mensaje(email, asunto, html, cfg))
+        p.estado, p.enviado_en, p.error, p.etapa = "enviado", datetime.utcnow(), "", "propuesta"
+        db.session.commit()
+        return "enviado"
+    except Exception as exc:  # noqa: BLE001
+        db.session.rollback()
+        return f"error: {exc}"[:200]

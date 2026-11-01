@@ -1070,6 +1070,63 @@ def admin_prospectos_enviar_ahora():
             f"<h3>{msg}</h3><p><a href='/admin/prospectos'>Volver</a> · <a href='/admin/prospectos/crm'>CRM</a></p></div>")
 
 
+_ENVIO_VENT = {"corriendo": False, "hechos": 0}
+
+
+@app.get("/admin/prospectos/ventanerias")
+@autorizado_requerido
+def admin_ventanerias():
+    """Talleres de aluminio (Google Maps + correo de su web): estado de la propuesta y botón
+    para mandarla desde contacto@ (1-nov-2026). La lista vive en src/ventanerias_correo.json."""
+    from html import escape
+    filas = []
+    for t in prosp_mod.lista_ventanerias():
+        p = prosp_mod.db.session.get(prosp_mod.Prospecto, t["email"])
+        est = "de baja" if prosp_mod.esta_de_baja(t["email"]) else (
+            f"enviado {p.enviado_en:%d-%m %H:%M}" if p and p.estado == "enviado" and p.enviado_en else
+            (p.error or p.estado) if p else "pendiente")
+        filas.append(f"<tr><td>{escape(t['nombre'])}</td><td>{escape(t.get('municipio',''))}</td>"
+                     f"<td>{escape(t['email'])}</td><td>{escape(est)}</td></tr>")
+    pend = sum(1 for f in filas if "pendiente" in f)
+    corre = "<p><b>Enviando… recarga en un minuto.</b></p>" if _ENVIO_VENT["corriendo"] else ""
+    boton = (f'<form method="post" action="/admin/prospectos/ventanerias/enviar"><button style="padding:12px 18px;font-size:16px;font-weight:700;background:#b8955f;color:#fff;border:0;border-radius:8px">Enviar la propuesta a los {pend} pendientes</button></form>'
+             if pend and not _ENVIO_VENT["corriendo"] else "")
+    return (f"<div style='font-family:system-ui;max-width:900px;margin:30px auto;padding:0 16px'>"
+            f"<h2>Propuesta de ventanería por correo</h2><p>Sale desde contacto@ con el enlace a tributando.co/ventaneria. "
+            f"Quien ya estaba en prospectos o se dio de baja no recibe nada.</p>{corre}{boton}"
+            f"<table style='border-collapse:collapse;margin-top:16px;font-size:14px' border=1 cellpadding=6>"
+            f"<tr><th>Taller</th><th>Municipio</th><th>Correo</th><th>Estado</th></tr>{''.join(filas)}</table>"
+            f"<p><a href='/admin/prospectos/crm'>CRM</a></p></div>")
+
+
+@app.post("/admin/prospectos/ventanerias/enviar")
+@autorizado_requerido
+def admin_ventanerias_enviar():
+    """Manda la propuesta a los talleres pendientes en un hilo, por UNA conexión SMTP, con pausa."""
+    import threading
+    import time as _t
+    if not _ENVIO_VENT["corriendo"]:
+        def _correr():
+            _ENVIO_VENT["corriendo"] = True
+            try:
+                with app.app_context():
+                    cfg = prosp_mod._config_smtp()
+                    s = prosp_mod._abrir_smtp(cfg) if cfg else None
+                    for t in prosp_mod.lista_ventanerias():
+                        r = prosp_mod.enviar_ventaneria(t, smtp=s, cfg=cfg)
+                        if r == "enviado":
+                            _ENVIO_VENT["hechos"] += 1
+                            _t.sleep(6)
+                    if s:
+                        s.quit()
+            except Exception:  # noqa: BLE001
+                app.logger.exception("envío ventanerías")
+            finally:
+                _ENVIO_VENT["corriendo"] = False
+        threading.Thread(target=_correr, daemon=True).start()
+    return redirect("/admin/prospectos/ventanerias")
+
+
 @app.post("/admin/prospectos/propuesta-ventaneria")
 @autorizado_requerido
 def admin_propuesta_ventaneria():
