@@ -1,0 +1,124 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cotizador de ventanería · Tributando</title>
+<meta name="description" content="Cotiza ventanas, puertas y cabinas de aluminio en un minuto desde el celular: precio con APU, la ventana en 3D, lista de cortes y la cotización por WhatsApp.">
+<meta property="og:title" content="Cotiza ventanas de aluminio en un minuto, desde el celular">
+<meta property="og:description" content="Precio con APU, la ventana en 3D para tu cliente, lista de cortes barra por barra y la cotización por WhatsApp.">
+<meta property="og:image" content="https://tributando.co/static/ventaneria/3d.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f4ef;--card:#fff;--tx:#111827;--mut:#5b6170;--acc:#d4a24c;--acc2:#b9862f;--osc:#111827;--line:#e6e1d6;--ok:#1f9d55}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--tx);line-height:1.5}
+a{color:inherit}
+.bar{position:sticky;top:0;z-index:20;background:var(--osc);color:#fff;display:flex;justify-content:space-between;align-items:center;padding:12px 18px}
+.bar b{font-size:15px;letter-spacing:.3px}.bar b span{color:var(--acc)}
+.btn{display:inline-block;background:var(--acc);color:var(--osc);text-decoration:none;font-weight:700;font-size:15px;padding:14px 20px;border-radius:12px;border:0}
+.btn.sm{font-size:13px;padding:9px 14px}.btn.wa{background:#25d366;color:#05351b}
+.btn2{display:inline-block;border:1.5px solid currentColor;text-decoration:none;font-weight:600;font-size:15px;padding:13px 18px;border-radius:12px}
+.hero{background:linear-gradient(160deg,#111827,#1f2937 60%,#3b2f1a);color:#fff}
+.hero .in{max-width:1080px;margin:0 auto;padding:44px 20px 50px;display:grid;gap:34px;align-items:center}
+@media(min-width:860px){.hero .in{grid-template-columns:1.15fr .85fr;padding:70px 20px}}
+.eye{display:inline-block;color:var(--acc);font-size:12px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase}
+.hero h1{font-size:clamp(32px,6vw,54px);line-height:1.08;margin:12px 0 16px;font-weight:800}.hero h1 em{font-style:normal;color:var(--acc)}
+.hero p{color:#d6d9e0;font-size:17px;max-width:540px}
+.acc{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
+.tel{position:relative;width:min(300px,78vw);margin:0 auto;border-radius:34px;padding:10px;background:#0b0f19;box-shadow:0 30px 70px rgba(0,0,0,.5)}
+.tel video{width:100%;display:block;border-radius:26px;aspect-ratio:9/16;background:#000}
+.nota{font-size:12.5px;color:#aab0bd;text-align:center;margin-top:10px}
+section{max-width:1080px;margin:0 auto;padding:54px 20px}
+h2{font-size:clamp(26px,4.4vw,38px);line-height:1.15;font-weight:800;margin-bottom:10px}
+.sub{color:var(--mut);font-size:17px;max-width:680px}
+.dolor{display:grid;gap:12px;margin-top:22px}@media(min-width:760px){.dolor{grid-template-columns:repeat(4,1fr)}}
+.dolor div{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;font-size:15px}.dolor b{display:block;font-size:22px;margin-bottom:4px}
+.feat{display:grid;gap:18px;margin-top:26px}@media(min-width:760px){.feat{grid-template-columns:1fr 1fr}}
+.f{background:var(--card);border:1px solid var(--line);border-radius:20px;overflow:hidden;display:flex;flex-direction:column}
+.f img{width:100%;aspect-ratio:16/11;object-fit:cover;object-position:top;border-bottom:1px solid var(--line);background:#eee}
+.f.ancho img{aspect-ratio:auto;height:auto}
+.f .tx{padding:18px 18px 20px}.f h3{font-size:19px;margin-bottom:6px}.f p{color:var(--mut);font-size:15px}
+.mas{display:grid;gap:10px;margin-top:22px}@media(min-width:760px){.mas{grid-template-columns:1fr 1fr 1fr}}
+.mas div{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;font-size:15px}.mas b{display:block;margin-bottom:2px}
+.pasos{display:grid;gap:14px;margin-top:24px;counter-reset:p}@media(min-width:760px){.pasos{grid-template-columns:repeat(3,1fr)}}
+.pasos div{background:var(--osc);color:#fff;border-radius:18px;padding:20px;position:relative}
+.pasos div:before{counter-increment:p;content:counter(p);display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--acc);color:var(--osc);font-weight:800;margin-bottom:10px}
+.pasos b{display:block;font-size:17px;margin-bottom:4px}.pasos p{color:#c9ced8;font-size:14.5px}
+.oferta{background:var(--card);border:2px solid var(--acc);border-radius:22px;padding:26px;margin-top:10px;display:grid;gap:16px;align-items:center}
+@media(min-width:760px){.oferta{grid-template-columns:1.4fr 1fr}}
+.oferta h3{font-size:24px}.oferta p{color:var(--mut)}
+details{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-top:10px}
+summary{font-weight:700;cursor:pointer;font-size:15.5px}details p{color:var(--mut);margin-top:8px;font-size:15px}
+footer{background:var(--osc);color:#aab0bd;text-align:center;font-size:13px;padding:28px 20px 100px}
+.flota{position:fixed;right:16px;bottom:16px;z-index:30;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+</style></head><body>
+{% set wa_txt = "Hola, quiero probar el cotizador de ventanería de Tributando." %}
+{% set wa_med = "Hola, les mando las medidas de una ventana para que me la coticen con el programa:" %}
+<div class="bar"><b>Tributando <span>·</span> Ventanería</b><a class="btn sm" href="https://wa.me/{{ whatsapp }}?text={{ wa_txt|urlencode }}">Probar gratis</a></div>
+
+<div class="hero"><div class="in">
+ <div>
+  <span class="eye">Para talleres de aluminio y vidrio</span>
+  <h1>Cotiza ventanas en <em>un minuto</em>, desde el celular</h1>
+  <p>Escribes las medidas y el precio sale solo, con perfiles, vidrio, accesorios y mano de obra. Tu cliente ve la ventana en 3D, recibe la cotización por WhatsApp y la aprueba desde su celular.</p>
+  <div class="acc">
+   <a class="btn" href="https://wa.me/{{ whatsapp }}?text={{ wa_txt|urlencode }}">Quiero probarlo {{ dias }} días gratis</a>
+   <a class="btn2" href="https://wa.me/{{ whatsapp }}?text={{ wa_med|urlencode }}">Mándanos medidas y te la cotizamos</a>
+  </div>
+ </div>
+ <div><div class="tel"><video src="/static/ventaneria/demo.mp4" poster="/static/ventaneria/poster.jpg" controls playsinline preload="metadata"></video></div>
+  <p class="nota">Video real del programa con un taller de ejemplo.</p></div>
+</div></div>
+
+<section>
+ <h2>¿Te suena?</h2>
+ <p class="sub">Así se cotiza todavía en muchos talleres, y ahí se va la plata.</p>
+ <div class="dolor">
+  <div><b>📝</b>Medidas en un papel y la calculadora en la mano.</div>
+  <div><b>⏳</b>Una tarde para una cotización que el cliente quería ya.</div>
+  <div><b>🪚</b>Retales que se pierden y barras que se compran de más.</div>
+  <div><b>🤷</b>El cliente no se imagina cómo va a quedar la ventana.</div>
+ </div>
+</section>
+
+<section style="padding-top:10px">
+ <h2>Lo que hace el programa</h2>
+ <p class="sub">Con tus diseños, tus perfiles y tus precios.</p>
+ <div class="feat">
+  <div class="f"><img src="/static/ventaneria/precio.jpg" alt="Precio con APU" loading="lazy"><div class="tx"><h3>El precio sale solo</h3><p>Escoges el diseño (corrediza, proyectante, fija, puerta, cabina…), pones ancho y alto, y sale el precio con el despiece: perfiles, vidrio, accesorios, empaques y mano de obra.</p></div></div>
+  <div class="f"><img src="/static/ventaneria/3d.jpg" alt="Ventana en 3D" loading="lazy" style="object-position:center 70%"><div class="tx"><h3>Tu cliente la ve en 3D</h3><p>Antes de aprobar, el cliente gira la ventana en el celular: color del aluminio, vidrio y cómo abre.</p></div></div>
+  <div class="f ancho"><img src="/static/ventaneria/ventana-desde-foto.jpg" alt="Ventana desde una foto: antes y después" loading="lazy"><div class="tx"><h3>La ventana desde una foto</h3><p>Le tomas una foto al vano y el programa le muestra al cliente cómo queda la ventana instalada.</p></div></div>
+  <div class="f"><img src="/static/ventaneria/cortes.jpg" alt="Lista de cortes" loading="lazy"><div class="tx"><h3>Cortes barra por barra</h3><p>La lista de cortes optimizada para el taller, con lo que sobra de cada barra. Los retales quedan en bodega y se usan en el próximo trabajo.</p></div></div>
+ </div>
+ <div class="mas">
+  <div><b>📲 Cotización por WhatsApp</b>PDF con el nombre de tu taller y botón para que el cliente la apruebe.</div>
+  <div><b>🌐 Cotizador en tu página</b>Tus clientes cotizan solos y te llega el pedido.</div>
+  <div><b>💵 Abonos y saldos</b>Lo que te debe cada cliente, con recibo de cada abono.</div>
+  <div><b>📅 Agenda de instalación</b>Qué se instala, cuándo y quién va.</div>
+  <div><b>🏭 Producción y bodega</b>Órdenes para el taller y el material que hay y que falta.</div>
+  <div><b>🧾 Factura y contabilidad</b>La cotización aprobada pasa a factura y a la contabilidad. La factura electrónica se habilita aparte.</div>
+ </div>
+</section>
+
+<section style="padding-top:10px">
+ <h2>Así empiezas</h2>
+ <div class="pasos">
+  <div><b>Nos escribes</b><p>Por WhatsApp. Si quieres, mándanos las medidas de una ventana que estés cotizando y te la devolvemos cotizada.</p></div>
+  <div><b>Cargamos tus diseños y precios</b><p>Los sistemas que trabajas y tus precios de perfil, vidrio y accesorios. Te acompañamos.</p></div>
+  <div><b>{{ dias }} días gratis</b><p>Cotizas con tus clientes de verdad. Si te sirve, sigues; si no, no pagas nada.</p></div>
+ </div>
+ <div class="oferta">
+  <div><h3>Mira una cotización de ejemplo</h3><p>Así le llega a tu cliente: con el dibujo de cada ventana, medidas, vidrio, acabado, precio e IVA. Es de un taller de ejemplo, con precios de ejemplo.</p></div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn" href="/static/ventaneria/cotizacion-ejemplo.pdf" target="_blank">Ver el PDF</a>
+   <a class="btn2" style="color:var(--tx)" href="https://wa.me/{{ whatsapp }}?text={{ wa_txt|urlencode }}">Hablar por WhatsApp</a></div>
+ </div>
+</section>
+
+<section style="padding-top:10px">
+ <h2>Preguntas</h2>
+ <details><summary>¿Funciona con mis precios y mis sistemas?</summary><p>Sí. Cargas tus perfiles, vidrios y accesorios con tus precios, y tus diseños. Cuando sube el aluminio, actualizas el precio y todas las cotizaciones nuevas salen con el nuevo valor.</p></details>
+ <details><summary>¿Necesito computador?</summary><p>No. Funciona en el celular, en la tablet y en el computador, desde el navegador. No hay que instalar nada.</p></details>
+ <details><summary>¿Y si no sé de computadores?</summary><p>Te acompañamos al empezar: cargamos tus diseños contigo y te mostramos cómo cotizar. Hay videos cortos de cada paso.</p></details>
+ <details><summary>¿Cuánto vale?</summary><p>Escríbenos por WhatsApp y te damos el valor según el tamaño de tu taller. Los primeros {{ dias }} días son gratis.</p></details>
+</section>
+
+<footer>Tributando · Ventanería — software para talleres de aluminio y vidrio · <a href="https://tributando.co">tributando.co</a></footer>
+<a class="btn wa flota" href="https://wa.me/{{ whatsapp }}?text={{ wa_txt|urlencode }}">WhatsApp</a>
+</body></html>

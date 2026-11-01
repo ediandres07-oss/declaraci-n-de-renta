@@ -2013,6 +2013,14 @@ def contadores_herramientas():
     return render_template("contadores_herramientas.html", whatsapp=re.sub(r"\D", "", str(wa)))
 
 
+@app.get("/ventaneria")
+def ventaneria():
+    """Página de venta del cotizador de ventanería (1-nov-2026). Video, imágenes y PDF salen
+    del taller de EJEMPLO (contabilidad/scripts/demo_ventaneria.py), nunca de un cliente real."""
+    wa = IA_CFG.get("negocio", {}).get("whatsapp") or "573332470715"
+    return render_template("ventaneria.html", whatsapp=re.sub(r"\D", "", str(wa)), dias=15)
+
+
 @app.get("/contadores/demo")
 def contadores_demo():
     """Demo pública del tablero del liquidador (datos de ejemplo, sin login ni
