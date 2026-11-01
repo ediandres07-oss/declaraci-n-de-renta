@@ -1990,7 +1990,8 @@ _MUESTRAS = {"central-san-ignacio": "muestras/central_san_ignacio.html",
              "worldpeak": "muestras/worldpeak.html",
              "worldpeak-minimal": "muestras/worldpeak_minimal.html",
              "don-jorge": "muestras/don_jorge.html",
-             "muska-rooftop": "muestras/muska_rooftop.html"}
+             "muska-rooftop": "muestras/muska_rooftop.html",
+             "antojos-bello": "muestras/antojos_bello.html"}
 
 
 @app.get("/muestra/<slug>")
