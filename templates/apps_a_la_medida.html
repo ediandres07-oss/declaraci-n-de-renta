@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Convertimos el Excel de su empresa en una app a su medida, desde el celular y conectada a su contabilidad. Cotización gratis.">
+<meta property="og:title" content="¿Su empresa vive en un Excel? Se lo convertimos en app">
+<meta property="og:description" content="App a su medida, desde el celular y conectada a su contabilidad. Mándenos su Excel y le cotizamos gratis.">
+<meta property="og:url" content="https://tributando.co/apps-a-la-medida">
+<link rel="canonical" href="https://tributando.co/apps-a-la-medida">
+<title>Su Excel convertido en app · Tributando</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--ff:'Plus Jakarta Sans',system-ui,sans-serif;--verde:#37d38f;--verde-o:#1fa86c;--tinta:#0f1720;--sub:#5b6673;--fondo:#f6f8f7;--tarjeta:#fff;--borde:#e3e8e6;--excel:#1d6f42}
+*{box-sizing:border-box}body{margin:0;font-family:var(--ff);color:var(--tinta);background:var(--fondo);line-height:1.5}
+a{color:inherit}
+.wrap{max-width:1100px;margin:0 auto;padding:0 20px}
+header{padding:18px 0}header .wrap{display:flex;align-items:center;justify-content:space-between}
+.logo{font-weight:800;font-size:1.15rem}.logo span{color:var(--verde-o)}
+.borrador{background:#fff4d6;border:1px solid #f0d58a;color:#7a5b00;font-size:.78rem;padding:6px 12px;border-radius:999px;font-weight:600}
+.hero{padding:40px 0 30px;text-align:center}
+.chip{display:inline-block;background:#e6f9f0;color:var(--verde-o);font-weight:700;font-size:.8rem;padding:6px 14px;border-radius:999px;margin-bottom:14px}
+h1{font-size:clamp(2rem,5vw,3.3rem);line-height:1.1;margin:0 0 14px;letter-spacing:-.02em}
+h1 em{font-style:normal;color:var(--verde-o)}
+.hero p{font-size:1.15rem;color:var(--sub);max-width:680px;margin:0 auto 26px}
+.btn{display:inline-flex;align-items:center;gap:8px;background:var(--verde);color:#062a18;font-weight:800;padding:14px 26px;border-radius:12px;text-decoration:none;border:0;cursor:pointer;font-family:var(--ff);font-size:1rem}
+.btn:hover{background:#2fc482}.btn.lin{background:transparent;border:2px solid var(--tinta);color:var(--tinta)}
+/* demo */
+.demo{display:grid;grid-template-columns:1.25fr auto 1fr;gap:22px;align-items:center;margin:34px 0 10px}
+.xl{background:#fff;border:1px solid var(--borde);border-radius:12px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.06)}
+.xl .barra{background:var(--excel);color:#fff;font-size:.8rem;padding:8px 12px;font-weight:600}
+.xl table{border-collapse:collapse;width:100%;font-size:.78rem}
+.xl td,.xl th{border:1px solid #e6e6e6;padding:6px 8px;white-space:nowrap;text-align:left}
+.xl th{background:#f2f2f2;font-weight:600;color:#444}
+.xl td.mal{background:#ffecec;color:#b42318}
+.xl .nota{font-size:.75rem;color:#b42318;padding:8px 12px;background:#fff8f8}
+.flecha{display:flex;flex-direction:column;align-items:center;gap:10px}
+.flecha button{white-space:nowrap}
+.flecha small{color:var(--sub);font-size:.75rem}
+.tel{width:270px;margin:0 auto;background:#0f1720;border-radius:34px;padding:12px;box-shadow:0 18px 40px rgba(0,0,0,.18)}
+.pant{background:#fff;border-radius:24px;overflow:hidden;min-height:470px;position:relative}
+.pant .top{background:var(--verde);padding:16px 14px 12px;color:#062a18}
+.pant .top b{display:block;font-size:1rem}.pant .top span{font-size:.75rem;opacity:.8}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px}
+.kpi{background:#f3f7f5;border-radius:10px;padding:8px}.kpi b{display:block;font-size:1rem}.kpi span{font-size:.68rem;color:var(--sub)}
+.ped{margin:0 10px 8px;border:1px solid var(--borde);border-radius:10px;padding:8px 10px;font-size:.78rem;display:flex;justify-content:space-between;align-items:center;opacity:0;transform:translateY(8px);transition:.35s}
+.ped.ver{opacity:1;transform:none}
+.ped small{display:block;color:var(--sub);font-size:.7rem}
+.est{font-size:.66rem;font-weight:700;padding:3px 8px;border-radius:999px}
+.est.p{background:#fff4d6;color:#7a5b00}.est.e{background:#e6f9f0;color:var(--verde-o)}.est.c{background:#e8f0ff;color:#2453b3}
+.conta{margin:4px 10px 12px;background:#0f1720;color:#c9f5df;border-radius:10px;padding:8px 10px;font-size:.7rem;opacity:0;transition:.4s}
+.conta.ver{opacity:1}
+.vacia{position:absolute;inset:80px 20px auto;text-align:center;color:var(--sub);font-size:.85rem}
+/* secciones */
+section{padding:46px 0}
+h2{font-size:clamp(1.5rem,3.2vw,2.1rem);margin:0 0 8px;letter-spacing:-.01em;text-align:center}
+.lead{text-align:center;color:var(--sub);max-width:640px;margin:0 auto 28px}
+.pasos{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.paso{background:var(--tarjeta);border:1px solid var(--borde);border-radius:16px;padding:22px}
+.paso .n{width:36px;height:36px;border-radius:50%;background:var(--verde);display:grid;place-items:center;font-weight:800;margin-bottom:10px}
+.paso h3{margin:0 0 6px;font-size:1.05rem}.paso p{margin:0;color:var(--sub);font-size:.93rem}
+.ejemplos{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.ej{background:var(--tarjeta);border:1px solid var(--borde);border-radius:14px;padding:18px}
+.ej .ico{font-size:1.6rem}.ej h4{margin:8px 0 4px}.ej p{margin:0;font-size:.85rem;color:var(--sub)}
+.ej .antes{font-size:.75rem;color:#b42318;margin-top:8px}
+.comp{max-width:760px;margin:0 auto;border-collapse:collapse;width:100%;background:#fff;border-radius:14px;overflow:hidden;border:1px solid var(--borde)}
+.comp th,.comp td{padding:12px 14px;border-bottom:1px solid var(--borde);text-align:left;font-size:.93rem}
+.comp th{background:#f3f7f5}.comp td:nth-child(2),.comp td:nth-child(3),.comp th:nth-child(2),.comp th:nth-child(3){text-align:center}
+.si{color:var(--verde-o);font-weight:800}.no{color:#b9c0c7}
+.precio{max-width:760px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.pc{background:#fff;border:1px solid var(--borde);border-radius:16px;padding:24px;text-align:center}
+.pc .v{font-size:1.9rem;font-weight:800;margin:6px 0}.pc .v.pend{color:#b98900;font-size:1.3rem}
+.pc p{margin:0;color:var(--sub);font-size:.9rem}
+.cta{background:var(--tinta);color:#fff;border-radius:22px;padding:40px 24px;text-align:center}
+.cta h2{color:#fff}.cta p{color:#c7d0d8;margin:0 0 20px}
+footer{padding:26px 0 40px;text-align:center;color:var(--sub);font-size:.85rem}
+@media(max-width:860px){.demo{grid-template-columns:1fr}.flecha{flex-direction:row;justify-content:center}.pasos,.precio{grid-template-columns:1fr}.ejemplos{grid-template-columns:1fr 1fr}.xl{overflow-x:auto}}
+@media(max-width:520px){.ejemplos{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="wrap"><div class="logo">tributando<span>.co</span></div><a class="btn" style="padding:9px 16px;font-size:.85rem" href="https://wa.me/573332470715?text=Hola%2C%20quiero%20convertir%20mi%20Excel%20en%20app" target="_blank" rel="noopener">Cotizar gratis</a></div></header>
+
+<div class="wrap">
+ <div class="hero">
+  <div class="chip">Apps a la medida · conectadas a su contabilidad</div>
+  <h1>¿Su empresa vive en un Excel?<br><em>Se lo convertimos en app.</em></h1>
+  <p>Mándenos su hoja de cálculo. En pocos días su equipo trabaja desde el celular, sin fórmulas rotas ni versiones repetidas, y lo que se mueve en la app cae solo a la contabilidad.</p>
+  <a class="btn" href="https://wa.me/573332470715?text=Hola%2C%20quiero%20convertir%20mi%20Excel%20en%20app" target="_blank" rel="noopener">Cotizar gratis mi app →</a>
+ </div>
+
+ <div class="demo">
+  <div class="xl">
+   <div class="barra">📗 PEDIDOS_FINAL_v7 (2).xlsx</div>
+   <table>
+    <tr><th>Fecha</th><th>Cliente</th><th>Producto</th><th>Cant</th><th>Valor</th><th>Estado</th></tr>
+    <tr><td>28/10</td><td>Tienda La 70</td><td>Pan tajado</td><td>40</td><td>$184.000</td><td>entregado</td></tr>
+    <tr><td>29/10</td><td>Minimercado Sol</td><td>Pan tajado</td><td>25</td><td class="mal">#¡VALOR!</td><td>pendiente</td></tr>
+    <tr><td>29/10</td><td>tienda la 70</td><td>Pan tajado</td><td>40</td><td>$184.000</td><td>entregado</td></tr>
+    <tr><td>30/10</td><td>Cafetería Centro</td><td>Croissant</td><td>60</td><td>$210.000</td><td></td></tr>
+    <tr><td>31/10</td><td>Minimercado Sol</td><td>Galletas</td><td>12</td><td>$66.000</td><td>¿cobrado?</td></tr>
+   </table>
+   <div class="nota">Fórmula rota, un pedido repetido, estados que nadie actualiza… y el contador lo vuelve a digitar.</div>
+  </div>
+  <div class="flecha">
+   <button class="btn" id="convertir">Convertir ⚡</button>
+   <small>así queda</small>
+  </div>
+  <div class="tel"><div class="pant" id="pant">
+   <div class="top"><b>Panadería Demo · Pedidos</b><span>Hola, Carolina · ventas</span></div>
+   <div class="vacia" id="vacia">Toque «Convertir» para ver su Excel hecho app</div>
+   <div class="kpis" id="kpis" style="opacity:0;transition:.4s">
+    <div class="kpi"><b>$460.000</b><span>Vendido esta semana</span></div>
+    <div class="kpi"><b>$276.000</b><span>Por cobrar</span></div>
+   </div>
+   <div class="ped"><div>Tienda La 70<small>40 · Pan tajado · $184.000</small></div><span class="est e">Entregado</span></div>
+   <div class="ped"><div>Minimercado Sol<small>25 · Pan tajado · $115.000</small></div><span class="est p">Pendiente</span></div>
+   <div class="ped"><div>Cafetería Centro<small>60 · Croissant · $210.000</small></div><span class="est p">Pendiente</span></div>
+   <div class="ped"><div>Minimercado Sol<small>12 · Galletas · $66.000</small></div><span class="est c">Cobrado</span></div>
+   <div class="conta" id="conta">✓ Factura y recibo de caja registrados en la contabilidad · Tributando</div>
+  </div></div>
+ </div>
+</div>
+
+<section><div class="wrap">
+ <h2>Así de simple</h2>
+ <p class="lead">Usted no tiene que saber de programación. Solo contarnos cómo trabaja.</p>
+ <div class="pasos">
+  <div class="paso"><div class="n">1</div><h3>Nos manda su Excel</h3><p>O nos cuenta su proceso en una llamada de 20 minutos: pedidos, cotizaciones, inventario, cobros, rutas…</p></div>
+  <div class="paso"><div class="n">2</div><h3>Le entregamos su app</h3><p>En 3 a 5 días, con su logo. Funciona en el celular y en el computador, y cada persona entra con su usuario.</p></div>
+  <div class="paso"><div class="n">3</div><h3>Cae a la contabilidad</h3><p>Ventas, cobros y compras de la app quedan registrados en Tributando. Nadie vuelve a digitar.</p></div>
+ </div>
+</div></section>
+
+<section style="padding-top:0"><div class="wrap">
+ <h2>Apps que ya funcionan</h2>
+ <p class="lead">Todas nacieron de un Excel o de un cuaderno.</p>
+ <div class="ejemplos">
+  <div class="ej"><div class="ico">🪟</div><h4>Ventanería</h4><p>Cotiza una ventana en un minuto, la muestra en 3D y saca la lista de cortes.</p><div class="antes">Antes: calculadora y hoja de precios</div></div>
+  <div class="ej"><div class="ico">🪵</div><h4>Cotizador de melamina</h4><p>Cocinas y closets con despiece y optimización de láminas.</p><div class="antes">Antes: Excel con medidas a mano</div></div>
+  <div class="ej"><div class="ico">🧾</div><h4>Punto de venta</h4><p>Ventas de mostrador con inventario y cierre de caja.</p><div class="antes">Antes: cuaderno de ventas</div></div>
+  <div class="ej"><div class="ico">🧮</div><h4>Calculadora de retención</h4><p>Cuánto retener a cada proveedor según el concepto y la UVT.</p><div class="antes">Antes: tabla impresa</div></div>
+ </div>
+</div></section>
+
+<section style="padding-top:0"><div class="wrap">
+ <h2>¿Por qué con nosotros?</h2>
+ <p class="lead">Hay herramientas que hacen la app. Nosotros además somos su contador.</p>
+ <table class="comp">
+  <tr><th></th><th>App sola</th><th>Tributando</th></tr>
+  <tr><td>App a la medida desde su Excel</td><td class="si">✓</td><td class="si">✓</td></tr>
+  <tr><td>Hecha por personas que entienden su negocio</td><td class="no">—</td><td class="si">✓</td></tr>
+  <tr><td>Se conecta con su contabilidad</td><td class="no">—</td><td class="si">✓</td></tr>
+  <tr><td>Factura electrónica, cartera e impuestos</td><td class="no">—</td><td class="si">✓</td></tr>
+  <tr><td>Soporte por WhatsApp en español</td><td class="no">—</td><td class="si">✓</td></tr>
+ </table>
+</div></section>
+
+<section style="padding-top:0"><div class="wrap">
+ <h2>Cotización gratis</h2>
+ <p class="lead">Cada negocio es distinto, por eso no hay tarifa fija. Mándenos su Excel y le decimos cuánto cuesta su app, sin compromiso.</p>
+ <div class="precio">
+  <div class="pc"><p>1 · Usted nos manda</p><div class="v" style="font-size:1.3rem">Su Excel o su proceso</div><p>Por WhatsApp o en una llamada de 20 minutos.</p></div>
+  <div class="pc"><p>2 · Nosotros le enviamos</p><div class="v" style="font-size:1.3rem">Muestra + cotización</div><p>Cómo quedaría su app y cuánto cuesta, antes de que pague un peso.</p></div>
+ </div>
+</div></section>
+
+<div class="wrap"><div class="cta">
+ <h2>Mándenos su Excel hoy</h2>
+ <p>Le mostramos cómo quedaría su app antes de que pague un peso.</p>
+ <a class="btn" href="https://wa.me/573332470715?text=Hola%2C%20quiero%20convertir%20mi%20Excel%20en%20app" target="_blank" rel="noopener">Escribir por WhatsApp</a>
+</div></div>
+<footer>Tributando · Edison Monsalve · tributando.co</footer>
+
+<script>
+document.getElementById('convertir').addEventListener('click',()=>{
+  document.getElementById('vacia').style.display='none';
+  document.getElementById('kpis').style.opacity=1;
+  document.querySelectorAll('.ped').forEach((el,i)=>{el.classList.remove('ver');setTimeout(()=>el.classList.add('ver'),250+i*250)});
+  const c=document.getElementById('conta');c.classList.remove('ver');setTimeout(()=>c.classList.add('ver'),1400);
+});
+</script>
+</body>
+</html>

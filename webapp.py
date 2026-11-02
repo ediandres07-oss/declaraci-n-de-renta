@@ -1419,7 +1419,7 @@ _URLS_PUBLICAS = ["/", "/calendario-tributario-2026", "/contabilidad",
                   "/plano-contable-helisa", "/plano-contable-syscafe",
                   "/iva-descontable-xml-dian", "/descargar-xml-dian",
                   "/contadores/herramientas", "/contadores/lector", "/ventaneria",
-                  "/portafolio", "/apps/"]
+                  "/portafolio", "/apps/", "/apps-a-la-medida"]
 
 
 @app.get("/robots.txt")
@@ -2071,6 +2071,13 @@ def contadores_herramientas():
     Lector, Recolector (con videos), lo que pueden ofrecer y una guía rápida."""
     wa = IA_CFG.get("negocio", {}).get("whatsapp") or "573332470715"
     return render_template("contadores_herramientas.html", whatsapp=re.sub(r"\D", "", str(wa)))
+
+
+@app.get("/apps-a-la-medida")
+def apps_a_la_medida():
+    """Oferta «Su Excel convertido en app» (1-nov-2026): sin precios, cotización gratis.
+    Los datos del ejemplo son inventados, nunca de un cliente."""
+    return render_template("apps_a_la_medida.html")
 
 
 @app.get("/ventaneria")
