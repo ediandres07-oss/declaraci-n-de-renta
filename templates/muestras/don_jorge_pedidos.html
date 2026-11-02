@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pedidos · Restaurante Don Jorge</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--cafe:#231b14;--crema:#f4ede1;--negro:#15110d;--oro:#c9a35c;--oro2:#e6cb93;--papel:#faf6ef;--suave:#776653;--texto:#2b2219;--vino:#7d2a1d;--verde:#2f8f5b;--azul:#2f5f86}
+*{box-sizing:border-box}
+body{margin:0;font-family:Montserrat,system-ui,sans-serif;background:var(--papel);color:var(--texto)}
+header{background:var(--negro);color:var(--crema);padding:14px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+header h1{font-family:'Cormorant Garamond',serif;font-size:1.7rem;margin:0;color:var(--oro2);letter-spacing:.02em}
+header .sub{font-size:.8rem;color:#b9a98f}
+header .der{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.b{border:0;border-radius:10px;padding:9px 14px;font:600 .82rem Montserrat,sans-serif;cursor:pointer}
+.b.oro{background:var(--oro);color:var(--negro)}.b.lin{background:transparent;border:1px solid var(--oro);color:var(--oro2)}
+.b.vino{background:var(--vino);color:#fff}
+.muestra{background:#fff4d6;color:#7a5b00;font-size:.75rem;text-align:center;padding:6px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:14px 18px 4px}
+.kpi{background:#fff;border:1px solid #e8dcc8;border-radius:12px;padding:10px 12px}
+.kpi b{display:block;font-size:1.25rem;font-variant-numeric:tabular-nums}.kpi span{font-size:.72rem;color:var(--suave);text-transform:uppercase;letter-spacing:.04em;font-weight:600}
+.tabs{display:none;gap:6px;padding:10px 18px 0}
+.tabs button{flex:1;border:1px solid #e0d2bb;background:#fff;border-radius:999px;padding:8px;font:600 .8rem Montserrat;cursor:pointer;color:var(--texto)}
+.tabs button.on{background:var(--cafe);color:var(--oro2);border-color:var(--cafe)}
+.tablero{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding:14px 18px 30px;align-items:start}
+.col{background:var(--crema);border-radius:14px;padding:10px;min-height:300px}
+.col h2{margin:2px 4px 10px;font-size:.85rem;text-transform:uppercase;letter-spacing:.06em;display:flex;justify-content:space-between}
+.col h2 .n{background:#fff;border-radius:999px;padding:1px 9px;font-size:.78rem}
+.col[data-e=recibido] h2{color:var(--vino)}.col[data-e=preparando] h2{color:#9a6a00}.col[data-e=enviado] h2{color:var(--verde)}
+.ped{background:#fff;border-radius:12px;padding:11px 12px;margin-bottom:10px;border-left:5px solid var(--vino);box-shadow:0 2px 6px rgba(0,0,0,.05);animation:entra .45s}
+.ped.preparando{border-left-color:#d9a21b}.ped.enviado{border-left-color:var(--verde);opacity:.85}
+.ped.nuevo{box-shadow:0 0 0 3px var(--oro)}
+@keyframes entra{from{transform:translateY(-10px);opacity:0}to{transform:none;opacity:1}}
+.ped .cab{display:flex;justify-content:space-between;align-items:baseline;gap:6px}
+.ped .cab b{font-size:.95rem}.ped .cab small{color:var(--suave);font-size:.72rem;white-space:nowrap}
+.ped ul{margin:6px 0;padding-left:18px;font-size:.82rem}
+.ped .pie{display:flex;justify-content:space-between;align-items:center;gap:6px;font-size:.75rem;color:var(--suave)}
+.ped .tot{font-weight:700;color:var(--texto);font-size:.95rem}
+.ped .acc{margin-top:8px;display:flex;gap:6px}
+.ped .acc button{flex:1}
+.pago{display:inline-block;font-size:.66rem;font-weight:700;padding:2px 7px;border-radius:999px;background:#eef3ff;color:var(--azul)}
+.pago.ef{background:#eef8f2;color:var(--verde)}.pago.pend{background:#fde9e5;color:var(--vino)}
+.toast{position:fixed;left:50%;top:14px;transform:translate(-50%,-120%);background:var(--negro);color:var(--oro2);padding:12px 18px;border-radius:12px;font-weight:600;font-size:.9rem;transition:.35s;z-index:20;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.toast.ver{transform:translate(-50%,0)}
+.modal{position:fixed;inset:0;background:rgba(21,17,13,.6);display:none;align-items:center;justify-content:center;padding:16px;z-index:30}
+.modal.ver{display:flex}
+.caja{background:var(--papel);border-radius:18px;max-width:440px;width:100%;padding:22px;max-height:90vh;overflow:auto}
+.caja h3{font-family:'Cormorant Garamond',serif;font-size:1.6rem;margin:0 0 4px}
+.fila{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed #e0d2bb;font-size:.9rem}
+.fila b{font-variant-numeric:tabular-nums}
+.top3 li{margin:4px 0;font-size:.88rem}
+.ok{background:#eef8f2;color:var(--verde);border-radius:10px;padding:10px;font-size:.85rem;font-weight:600;margin-top:12px;display:none}
+@media(max-width:820px){.kpis{grid-template-columns:1fr 1fr}.tabs{display:flex}.tablero{grid-template-columns:1fr}.col{display:none}.col.on{display:block}}
+</style>
+</head>
+<body>
+<div class="muestra">MUESTRA · pedidos de ejemplo para ver cómo funcionaría</div>
+<header>
+ <div><h1>Don Jorge</h1><div class="sub">Pedidos de hoy · Calle 52 #47-13, Prado, Bello</div></div>
+ <div class="der">
+  <button class="b lin" id="simular">＋ Simular pedido nuevo</button>
+  <button class="b oro" id="cerrar">Cerrar el día</button>
+ </div>
+</header>
+<div class="kpis">
+ <div class="kpi"><span>Vendido hoy</span><b id="kVend">$ 0</b></div>
+ <div class="kpi"><span>Pedidos</span><b id="kPed">0</b></div>
+ <div class="kpi"><span>Por cobrar</span><b id="kCob">$ 0</b></div>
+ <div class="kpi"><span>Plato estrella</span><b id="kTop" style="font-size:1rem">—</b></div>
+</div>
+<div class="tabs" id="tabs">
+ <button data-t="recibido" class="on">Recibidos</button><button data-t="preparando">Preparando</button><button data-t="enviado">Enviados</button>
+</div>
+<div class="tablero">
+ <div class="col on" data-e="recibido"><h2>🔔 Recibidos <span class="n">0</span></h2><div class="lista"></div></div>
+ <div class="col" data-e="preparando"><h2>🔥 Preparando <span class="n">0</span></h2><div class="lista"></div></div>
+ <div class="col" data-e="enviado"><h2>🛵 Enviados <span class="n">0</span></h2><div class="lista"></div></div>
+</div>
+<div class="toast" id="toast"></div>
+<div class="modal" id="modal"><div class="caja">
+ <h3>Cierre del día</h3>
+ <div style="font-size:.8rem;color:var(--suave);margin-bottom:10px" id="mFecha"></div>
+ <div class="fila"><span>Total vendido</span><b id="mTot"></b></div>
+ <div class="fila"><span>Efectivo</span><b id="mEf"></b></div>
+ <div class="fila"><span>Nequi / transferencia</span><b id="mNe"></b></div>
+ <div class="fila"><span>Por cobrar</span><b id="mPc"></b></div>
+ <div class="fila"><span>Pedidos</span><b id="mN"></b></div>
+ <p style="margin:14px 0 4px;font-weight:700">Lo que más se vendió</p>
+ <ol class="top3" id="mTop"></ol>
+ <div style="display:flex;gap:8px;margin-top:14px">
+  <button class="b vino" id="facturar" style="flex:1">Facturar en el punto de venta</button>
+  <button class="b lin" id="mCerrar" style="color:var(--texto);border-color:#cdbb9c">Cerrar</button>
+ </div>
+ <div class="ok" id="ok"></div>
+</div></div>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
+const pesos=v=>'$ '+Math.round(v).toLocaleString('es-CO');
+// Platos de la carta real de Don Jorge (precios de la carta impresa).
+const CARTA=[["Perra + papas",24000],["Patacón con todo",26000],["Salchipapa mediana",16000],["Hamburguesa especial + papas",22000],["Picada de carne mediana",50000],["Arepa con todo",25000],["Combo chicharrón",28000],["Punta de anca",38000],["Perro especial",15000],["Papas con queso grande",12000],["Jugo en leche",12000],["Michelada",8000],["Consomé de pollo",7000],["Patacón con hogao y queso mediano",6000]];
+const NOMBRES=["Carolina","Andrés","Doña Gloria","Juan Pablo","Marcela","Don Fabio","Valentina","Sebastián","Luz Dary","Mateo","Paola","Jhon Fredy"];
+const DIRS=["Cra 49 #51-20, Prado","Cl 50 #46-11","Niquía, bloque 4","Cra 47 #53-08","Parque de Bello","Cl 54 #48-30"];
+const PAGOS=[["Efectivo","ef"],["Nequi",""],["Efectivo","ef"],["Transferencia",""],["Contraentrega","pend"]];
+let pedidos=[],num=40,tab='recibido';
+const rnd=a=>a[Math.floor(Math.random()*a.length)];
+function nuevo(estado='recibido',min=0){
+  const items=[];const k=1+Math.floor(Math.random()*3);
+  for(let i=0;i<k;i++){const p=rnd(CARTA);const c=Math.random()<.25?2:1;const ya=items.find(x=>x[0]===p[0]);ya?ya[2]+=c:items.push([p[0],p[1],c]);}
+  if(Math.random()<.2)items.push(["Michelada",8000,1]);
+  const d=new Date(Date.now()-min*60000);
+  const pg=rnd(PAGOS);
+  return {n:++num,nom:rnd(NOMBRES),dir:rnd(DIRS),items,pago:pg[0],cls:pg[1],estado,
+    hora:d.toLocaleTimeString('es-CO',{hour:'numeric',minute:'2-digit'}),
+    total:items.reduce((s,x)=>s+x[1]*x[2],0)};
+}
+const SIG={recibido:['preparando','Empezar a preparar 🔥'],preparando:['enviado','Ya salió 🛵'],enviado:[null,'']};
+function pintar(){
+  for(const e of ['recibido','preparando','enviado']){
+    const col=$(`.col[data-e=${e}]`);const l=col.querySelector('.lista');const ps=pedidos.filter(p=>p.estado===e);
+    col.querySelector('.n').textContent=ps.length;
+    l.innerHTML=ps.map(p=>`<div class="ped ${e}${p.nuevo?' nuevo':''}" data-n="${p.n}">
+      <div class="cab"><b>#${p.n} · ${p.nom}</b><small>${p.hora}</small></div>
+      <ul>${p.items.map(x=>`<li>${x[2]>1?x[2]+' × ':''}${x[0]}</li>`).join('')}</ul>
+      <div class="pie"><span>📍 ${p.dir}</span><span class="pago ${p.cls}">${p.pago}</span></div>
+      <div class="pie" style="margin-top:4px"><span>Total</span><span class="tot">${pesos(p.total)}</span></div>
+      ${SIG[e][0]?`<div class="acc"><button class="b ${e==='recibido'?'vino':'oro'}" data-a="${p.n}">${SIG[e][1]}</button></div>`:''}
+    </div>`).join('')||'<div style="text-align:center;color:var(--suave);font-size:.8rem;padding:20px">Nada por aquí</div>';
+  }
+  $$('[data-a]').forEach(b=>b.onclick=()=>{const p=pedidos.find(x=>x.n==b.dataset.a);p.estado=SIG[p.estado][0];p.nuevo=false;pintar();});
+  const tot=pedidos.reduce((s,p)=>s+p.total,0);
+  $('#kVend').textContent=pesos(tot);$('#kPed').textContent=pedidos.length;
+  $('#kCob').textContent=pesos(pedidos.filter(p=>p.cls==='pend').reduce((s,p)=>s+p.total,0));
+  const t=masVendidos();$('#kTop').textContent=t[0]?t[0][0]:'—';
+}
+function masVendidos(){const m={};pedidos.forEach(p=>p.items.forEach(x=>m[x[0]]=(m[x[0]]||0)+x[2]));return Object.entries(m).sort((a,b)=>b[1]-a[1]);}
+function ding(){try{const c=new (window.AudioContext||window.webkitAudioContext)();[880,1320].forEach((f,i)=>{const o=c.createOscillator(),g=c.createGain();o.frequency.value=f;o.connect(g);g.connect(c.destination);g.gain.setValueAtTime(.12,c.currentTime+i*.15);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+i*.15+.3);o.start(c.currentTime+i*.15);o.stop(c.currentTime+i*.15+.3)})}catch(e){}}
+function llega(){const p=nuevo();p.nuevo=true;pedidos.unshift(p);pintar();ding();
+  const t=$('#toast');t.textContent=`🔔 Pedido nuevo de ${p.nom} · ${pesos(p.total)}`;t.classList.add('ver');setTimeout(()=>t.classList.remove('ver'),2600);
+  setTimeout(()=>{p.nuevo=false;pintar()},4000);}
+// Arranque: el día ya lleva pedidos.
+for(let i=0;i<6;i++)pedidos.push(nuevo('enviado',300-i*35));
+for(let i=0;i<2;i++)pedidos.push(nuevo('preparando',25-i*8));
+pedidos.push(nuevo('recibido',4));
+pedidos.sort((a,b)=>b.n-a.n);pintar();
+setTimeout(llega,3500);setInterval(()=>{if(pedidos.filter(p=>p.estado==='recibido').length<4)llega()},20000);
+$('#simular').onclick=llega;
+$$('#tabs button').forEach(b=>b.onclick=()=>{$$('#tabs button').forEach(x=>x.classList.toggle('on',x===b));$$('.col').forEach(c=>c.classList.toggle('on',c.dataset.e===b.dataset.t));});
+$('#cerrar').onclick=()=>{
+  const s=k=>pedidos.filter(k).reduce((a,p)=>a+p.total,0);
+  $('#mFecha').textContent=new Date().toLocaleDateString('es-CO',{weekday:'long',day:'numeric',month:'long'});
+  $('#mTot').textContent=pesos(s(()=>1));$('#mEf').textContent=pesos(s(p=>p.cls==='ef'));
+  $('#mNe').textContent=pesos(s(p=>p.cls===''));$('#mPc').textContent=pesos(s(p=>p.cls==='pend'));
+  $('#mN').textContent=pedidos.length;
+  $("#mTop").innerHTML=masVendidos().slice(0,3).map(([n,c])=>`<li>${n} — <b>${c}</b></li>`).join('');
+  $('#ok').style.display='none';$('#modal').classList.add('ver');
+};
+$('#mCerrar').onclick=()=>$('#modal').classList.remove('ver');
+$('#facturar').onclick=()=>{const o=$('#ok');o.style.display='block';
+  o.textContent=`✓ ${pedidos.length} ventas facturadas en el punto de venta y registradas en la contabilidad de Tributando.`;};
+</script>
+</body>
+</html>

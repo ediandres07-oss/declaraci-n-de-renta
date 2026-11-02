@@ -2049,6 +2049,7 @@ _MUESTRAS = {"central-san-ignacio": "muestras/central_san_ignacio.html",
              "worldpeak": "muestras/worldpeak.html",
              "worldpeak-minimal": "muestras/worldpeak_minimal.html",
              "don-jorge": "muestras/don_jorge.html",
+             "don-jorge-pedidos": "muestras/don_jorge_pedidos.html",
              "muska-rooftop": "muestras/muska_rooftop.html",
              "antojos-bello": "muestras/antojos_bello.html"}
 
