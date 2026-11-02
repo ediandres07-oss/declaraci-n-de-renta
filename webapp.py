@@ -5887,6 +5887,33 @@ def firmar_formulario_pdf():
     )
 
 
+# Google Analytics 4 (1-nov-2026, propiedad «tributando.co», flujo «Tributando web»).
+# Se inyecta en TODAS las páginas HTML públicas para no depender de que cada plantilla
+# lo traiga (antes solo 14 de 35 tenían la etiqueta, y era la de anuncios AW-).
+GA4_ID = os.environ.get("GA4_ID", "G-WQGH57KX84")
+_GA4_SNIPPET = (
+    '<script async src="https://www.googletagmanager.com/gtag/js?id={id}"></script>'
+    "<script>window.dataLayer=window.dataLayer||[];function gtag(){{dataLayer.push(arguments);}}"
+    "gtag('js',new Date());gtag('config','{id}');</script>")
+
+
+@app.after_request
+def poner_analytics(resp):
+    try:
+        if (not GA4_ID or resp.status_code != 200 or resp.direct_passthrough
+                or not (resp.mimetype or "").startswith("text/html")
+                or request.path.startswith(("/admin", "/static/"))):
+            return resp
+        cuerpo = resp.get_data()
+        if GA4_ID.encode() in cuerpo or b"</head>" not in cuerpo:
+            return resp
+        snip = _GA4_SNIPPET.format(id=GA4_ID).encode()
+        resp.set_data(cuerpo.replace(b"</head>", snip + b"</head>", 1))
+    except Exception:                                   # noqa: BLE001
+        pass
+    return resp
+
+
 @app.after_request
 def politica_cache(resp):
     """Estáticos con caché larga (van versionados con ?v=); lo dinámico sin
