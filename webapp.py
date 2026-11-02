@@ -1416,8 +1416,10 @@ _URLS_PUBLICAS = ["/", "/calendario-tributario-2026", "/contabilidad",
                   "/contadores", "/links", "/descargar-lector", "/guia-dian",
                   "/lector-xml-dian", "/plano-contable-siigo",
                   "/plano-contable-contai", "/plano-contable-world-office",
-                  "/plano-contable-helisa", "/iva-descontable-xml-dian",
-                  "/descargar-xml-dian", "/contadores/herramientas"]
+                  "/plano-contable-helisa", "/plano-contable-syscafe",
+                  "/iva-descontable-xml-dian", "/descargar-xml-dian",
+                  "/contadores/herramientas", "/contadores/lector", "/ventaneria",
+                  "/portafolio", "/apps/"]
 
 
 @app.get("/robots.txt")
@@ -1438,7 +1440,7 @@ Tributando.co atiende a contadores independientes, firmas de contadores, auxilia
 ## Productos
 - [Contabilidad en la nube](https://tributando.co/contabilidad): las facturas de compra y venta bajan de la DIAN y quedan causadas en el PUC (cuentas de 8 dígitos), con IVA y retención; cartera, bancos y conciliación, comprobantes de egreso, nómina electrónica, POS, cierre mensual, estados financieros e indicadores.
 - [Para contadores y firmas](https://tributando.co/contadores): una sola cuenta para llevar varias empresas (cobro por empresa), con el Contador Auxiliar IA y conexión MCP a ChatGPT o Claude.
-- [Lector XML DIAN](https://tributando.co/lector-xml-dian): lee los XML de factura electrónica (UBL 2.1) y arma el IVA descontable, el borrador del 300 y del 350, y planos para [Siigo](https://tributando.co/plano-contable-siigo), [ContaI](https://tributando.co/plano-contable-contai), [World Office](https://tributando.co/plano-contable-world-office) y [Helisa](https://tributando.co/plano-contable-helisa).
+- [Lector XML DIAN](https://tributando.co/lector-xml-dian): lee los XML de factura electrónica (UBL 2.1) y arma el IVA descontable, el borrador del 300 y del 350, y planos para [Siigo](https://tributando.co/plano-contable-siigo), [ContaI](https://tributando.co/plano-contable-contai), [World Office](https://tributando.co/plano-contable-world-office), [Helisa](https://tributando.co/plano-contable-helisa) y [Syscafé](https://tributando.co/plano-contable-syscafe).
 - [Recolector: descargar XML de la DIAN](https://tributando.co/descargar-xml-dian): baja los XML del portal de la DIAN con el token, por fechas o por lista de CUFE.
 - [Herramientas gratis](https://tributando.co/apps/): exógena Bogotá artículo 2 (desde los XML o desde el Excel de documentos recibidos de la DIAN), calculadora de retención en la fuente 2026, [calendario tributario 2026](https://tributando.co/calendario-tributario-2026).
 - [Servicios contables y páginas web](https://tributando.co/portafolio): contabilidad mensual, declaraciones de renta, IVA, retención y exógena, y páginas web para empresas.
@@ -2259,13 +2261,13 @@ def descargar_lector():
 # Cada URL es una landing con contenido único + enlaces internos + CTA a
 # /contadores. Se renderizan con templates/seo.html (data-driven).
 # ---------------------------------------------------------------------------
-def _plano_seo(prog: str, slug: str) -> dict:
+def _plano_seo(prog: str, slug: str, title: str = "", meta: str = "") -> dict:
     return {
         "url": f"/{slug}",
-        "title": f"Plano contable para {prog} desde los XML de la DIAN | Tributando.co",
-        "meta": (f"Convierte los XML de la factura electrónica de la DIAN en el archivo plano "
-                 f"listo para importar en {prog}, con el IVA discriminado. Sin digitar factura "
-                 f"por factura. Prueba gratis para contadores."),
+        "title": title or f"Plano contable para {prog} desde los XML de la DIAN | Tributando.co",
+        "meta": meta or (f"Convierte los XML de la factura electrónica de la DIAN en el archivo plano "
+                         f"listo para importar en {prog}, con el IVA discriminado. Sin digitar factura "
+                         f"por factura. Prueba gratis para contadores."),
         "kick": "Plano contable",
         "h1": f"Genera el <span class='g'>plano contable para {prog}</span> desde los XML de la DIAN",
         "intro": (f"Con el Lector de Tributando descargas las facturas de la DIAN y obtienes el "
@@ -2306,7 +2308,7 @@ _SEO_PAGES = {
         "url": "/lector-xml-dian",
         "title": "Lector de XML de la DIAN: tus facturas al plano contable en minutos | Tributando.co",
         "meta": ("Lee los XML de la factura electrónica de la DIAN y genera el plano contable con el "
-                 "IVA discriminado, listo para Siigo, Contai, World Office o Helisa. Prueba gratis para contadores."),
+                 "IVA discriminado, listo para Siigo, ContaI, World Office, Helisa o Syscafé. Prueba gratis para contadores."),
         "kick": "Para contadores",
         "h1": "Lector de <span class='g'>XML de la DIAN</span> → tu plano contable en minutos",
         "intro": ("El Lector de Tributando descarga las facturas electrónicas de la DIAN, lee cada XML y "
@@ -2318,7 +2320,7 @@ _SEO_PAGES = {
                 "<li>Se conecta a la DIAN y descarga tus facturas (recibidas y emitidas) por fecha o por CUFE.</li>"
                 "<li>Lee el XML de cada factura y extrae proveedor, NIT, valores, IVA y retención.</li>"
                 "<li>Discrimina el IVA descontable, incluso con varias tarifas en una misma factura.</li>"
-                "<li>Genera el archivo plano listo para importar en Siigo, Contai, World Office o Helisa.</li>"
+                "<li>Genera el archivo plano listo para importar en Siigo, ContaI, World Office, Helisa o Syscafé.</li>"
                 "</ul>")},
             {"h2": "Cómo funciona, paso a paso", "html": (
                 "<ul class='chk'>"
@@ -2339,16 +2341,31 @@ _SEO_PAGES = {
             ["¿Sirve para la información exógena?",
              "Sí. Al tener las compras y ventas con el IVA discriminado y el tercero identificado, facilita preparar los formatos de exógena."],
             ["¿Con qué programas contables funciona?",
-             "Genera el plano para Siigo, Contai, World Office y Helisa. Si usas otro, escríbenos y lo agregamos."],
+             "Genera el plano para Siigo, ContaI, World Office, Helisa y Syscafé. Si usas otro, escríbenos y lo agregamos."],
             ["¿Cuánto cuesta?",
              "La primera prueba es gratis. Después, el pase de temporada da uso ilimitado por un solo pago."],
         ],
         "cta_titulo": "Deja de digitar factura por factura",
     },
     "plano-contable-siigo": _plano_seo("Siigo", "plano-contable-siigo"),
-    "plano-contable-contai": _plano_seo("Contai", "plano-contable-contai"),
-    "plano-contable-world-office": _plano_seo("World Office", "plano-contable-world-office"),
+    # 1-nov-2026: World Office y ContaI salían mucho en Google y casi nadie entraba → títulos
+    # que dicen lo que buscan («importar facturas electrónicas a …»).
+    "plano-contable-contai": _plano_seo(
+        "ContaI", "plano-contable-contai",
+        title="Importar facturas electrónicas a ContaI desde el XML de la DIAN | Tributando.co",
+        meta=("Arma en minutos el plano de ContaI con las compras y ventas de la DIAN: tercero, IVA "
+              "por tarifa y retención tomados del XML. Sin digitar factura por factura. Prueba gratis.")),
+    "plano-contable-world-office": _plano_seo(
+        "World Office", "plano-contable-world-office",
+        title="Importar facturas electrónicas a World Office desde el XML de la DIAN | Tributando.co",
+        meta=("Arma en minutos el plano de World Office con las compras y ventas de la DIAN: tercero, "
+              "IVA por tarifa y retención tomados del XML. Sin digitar factura por factura. Prueba gratis.")),
     "plano-contable-helisa": _plano_seo("Helisa", "plano-contable-helisa"),
+    "plano-contable-syscafe": _plano_seo(
+        "Syscafé", "plano-contable-syscafe",
+        title="Plano contable para Syscafé desde los XML de la DIAN | Tributando.co",
+        meta=("Convierte los XML de la factura electrónica de la DIAN en el plano de Syscafé (movimiento "
+              "y plantilla de terceros) con el IVA discriminado. Sin digitar factura por factura. Prueba gratis.")),
     "iva-descontable-xml-dian": {
         "url": "/iva-descontable-xml-dian",
         "title": "IVA descontable desde los XML de la DIAN: cómo extraerlo | Tributando.co",
