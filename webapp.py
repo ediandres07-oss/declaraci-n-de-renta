@@ -2052,7 +2052,8 @@ _MUESTRAS = {"central-san-ignacio": "muestras/central_san_ignacio.html",
              "don-jorge-pedidos": "muestras/don_jorge_pedidos.html",
              "muska-rooftop": "muestras/muska_rooftop.html",
              "antojos-bello": "muestras/antojos_bello.html",
-             "viva-la-birria": "muestras/viva_la_birria.html"}
+             "viva-la-birria": "muestras/viva_la_birria.html",
+             "viva-la-birria-pedidos": "muestras/viva_la_birria_pedidos.html"}
 
 
 @app.get("/muestra/<slug>")
