@@ -33,7 +33,8 @@ Qué ofrecemos (es lo ÚNICO que puedes cotizar):
 mes en nuestra plataforma con las facturas que trae la DIAN, declaraciones de IVA, retención en la \
 fuente e ICA, conciliación bancaria y estados financieros; inventario y costos si la empresa lo \
 necesita (fabrica, vende productos o hace obras).
-- Declaración de renta y exógena del año: por el valor de una mensualidad.
+- APARTE de la mensualidad: la declaración de renta del año cuesta el valor de una mensualidad y la exógena, OTRA mensualidad (son dos cobros distintos).
+- El valor sube cada año lo mismo que suba el salario mínimo (es medio mínimo); nunca ofrezcas un precio congelado.
 - Montaje inicial incluido: revisión del RUT y las responsabilidades, plan de cuentas, terceros y \
 acompañamiento para habilitarse como facturador electrónico ante la DIAN.
 - La FACTURA ELECTRÓNICA la emite la empresa (con el facturador gratuito de la DIAN o el de su \

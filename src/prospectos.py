@@ -631,7 +631,7 @@ def enviar_propuesta_correo(p: Prospecto) -> bool:
     cuerpo = f"""<p>Hola,</p>
 <p>Gracias por escribirnos por WhatsApp. Aquí está la propuesta para <b>{nombre}</b>:</p>
 <p><a href="{url}" style="display:inline-block;background:#37D38F;color:#0F2A22;font-weight:800;text-decoration:none;padding:12px 20px;border-radius:10px">Ver la propuesta</a></p>
-<p>En resumen: <b>Plan Empresa Nueva por $875.000 al mes</b> (medio salario mínimo), con la renta y la exógena del año por una mensualidad, el montaje incluido y nómina electrónica a $25.000 por empleado si la necesitan. Y a medida que su empresa crece, nosotros crecemos con ella.</p>
+<p>En resumen: <b>Plan Empresa Nueva por $875.000 al mes</b> (medio salario mínimo; cada año sube lo mismo que el mínimo), con el montaje incluido y nómina electrónica a $25.000 por empleado si la necesitan. La renta (una mensualidad) y la exógena (otra mensualidad) se cobran aparte. Y a medida que su empresa crece, nosotros crecemos con ella.</p>
 <p>Edison Monsalve<br>Contador Público · Tributando.co · WhatsApp 333 247 0715</p>"""
     s = None
     try:
