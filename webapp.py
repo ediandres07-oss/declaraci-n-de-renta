@@ -2266,6 +2266,18 @@ def descargar_lector():
     return redirect(DESCARGA_LECTOR_URL, code=302)
 
 
+# 3-nov-2026: versión para Mac (Apple M1 en adelante). Sin firma de Apple todavía:
+# la primera vez se abre desde Configuración → Privacidad y seguridad → «Abrir de todos modos».
+DESCARGA_LECTOR_MAC_URL = os.environ.get(
+    "DESCARGA_LECTOR_MAC",
+    "https://raw.githubusercontent.com/ediandres07-oss/tributando-descargas/main/tributando.co-mac.zip")
+
+
+@app.get("/descargar-lector-mac")
+def descargar_lector_mac():
+    return redirect(DESCARGA_LECTOR_MAC_URL, code=302)
+
+
 # ---------------------------------------------------------------------------
 # Páginas SEO — para que un contador encuentre el Lector en Google.
 # Cada URL es una landing con contenido único + enlaces internos + CTA a

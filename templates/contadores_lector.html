@@ -184,11 +184,13 @@
       <div class="hero-cta">
         {% if descarga_url %}
         <a class="btn-dorado" href="{{ descarga_url }}">⬇ Descargar para Windows</a>
+        <a class="btn-dorado" href="/descargar-lector-mac">⬇ Descargar para Mac</a>
         {% endif %}
         <a class="btn-linea" href="#demo">📅 Agenda tu demostración</a>
         <a class="btn-linea" href="#planes">Ver planes</a>
       </div>
-      <div class="hero-nota">Requiere Windows + Google Chrome ·
+      <div class="hero-nota">Requiere Google Chrome · Mac con chip Apple (M1 o más nuevo) —
+        <a href="#mac" style="color:var(--dorado)">cómo abrirlo en Mac</a> ·
         <b style="color:var(--dorado)">1 mes GRATIS con 1 cliente</b> · sin tarjeta</div>
     </div>
     <div class="hero-img">
@@ -216,6 +218,21 @@
       </form>
       <div id="pruebaMsg" style="margin-top:12px;font-size:.92rem;line-height:1.5"></div>
       <div style="margin-top:6px;font-size:.76rem;color:var(--tenue)">1 empresa · 30 días · sin tarjeta · sin compromiso</div>
+    </div>
+  </div>
+</section>
+
+<section id="mac" style="padding-top:10px;scroll-margin-top:70px">
+  <div class="wrap" style="max-width:640px">
+    <div style="background:var(--vidrio);border:1px solid rgba(230,196,131,.35);border-radius:20px;padding:22px">
+      <h2 style="font-size:1.25rem;margin:0 0 8px">🍎 Cómo abrir el Lector en Mac</h2>
+      <ol style="color:var(--suave);line-height:1.6;padding-left:20px;margin:0">
+        <li><a href="/descargar-lector-mac" style="color:var(--dorado);font-weight:700">Descárgalo</a> y dale doble clic al ZIP: aparece <b>tributando.co</b>. Arrástralo a <b>Aplicaciones</b>.</li>
+        <li>Ábrelo. La primera vez el Mac avisa que no puede comprobar la app: dale <b>Listo</b>.</li>
+        <li>Ve a <b>Configuración del Sistema → Privacidad y seguridad</b>, baja hasta el final y dale <b>Abrir de todos modos</b>.</li>
+        <li>Desde ahí abre normal, con doble clic. Necesitas <b>Google Chrome</b> instalado.</li>
+      </ol>
+      <p style="color:var(--tenue);font-size:.85rem;margin:10px 0 0">Funciona en Mac con chip Apple (M1, M2, M3, M4…). Los Mac con procesador Intel todavía no.</p>
     </div>
   </div>
 </section>
@@ -531,7 +548,7 @@
         headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email})});
       var j=await r.json();
       if(r.ok&&j.ok){ msg.style.color='#37d38f';
-        msg.innerHTML='✓ '+j.mensaje+'<br><a href="{{ descarga_url }}" style="color:#e6c483;font-weight:800">⬇ Descargar el Lector para Windows</a>'; }
+        msg.innerHTML='✓ '+j.mensaje+'<br><a href="{{ descarga_url }}" style="color:#e6c483;font-weight:800">⬇ Descargar el Lector para Windows</a> · <a href="/descargar-lector-mac" style="color:#e6c483;font-weight:800">⬇ para Mac</a>'; }
       else { msg.style.color='#ff9a9a'; msg.textContent=(j&&j.error)||'No se pudo. Intenta de nuevo.'; }
     }catch(_){ msg.style.color='#ff9a9a'; msg.textContent='Problema de conexión. Intenta de nuevo.'; }
     btn.disabled=false; return false;
