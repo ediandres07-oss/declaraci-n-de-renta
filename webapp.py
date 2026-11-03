@@ -1443,7 +1443,7 @@ Tributando.co atiende a contadores independientes, firmas de contadores, auxilia
 - [Lector XML DIAN](https://tributando.co/lector-xml-dian): lee los XML de factura electrónica (UBL 2.1) y arma el IVA descontable, el borrador del 300 y del 350, y planos para [Siigo](https://tributando.co/plano-contable-siigo), [ContaI](https://tributando.co/plano-contable-contai), [World Office](https://tributando.co/plano-contable-world-office), [Helisa](https://tributando.co/plano-contable-helisa) y [Syscafé](https://tributando.co/plano-contable-syscafe).
 - [Recolector: descargar XML de la DIAN](https://tributando.co/descargar-xml-dian): baja los XML del portal de la DIAN con el token, por fechas o por lista de CUFE.
 - [Herramientas gratis](https://tributando.co/apps/): exógena Bogotá artículo 2 (desde los XML o desde el Excel de documentos recibidos de la DIAN), calculadora de retención en la fuente 2026, [calendario tributario 2026](https://tributando.co/calendario-tributario-2026).
-- [Servicios contables y páginas web](https://tributando.co/portafolio): contabilidad mensual, declaraciones de renta, IVA, retención y exógena, y páginas web para empresas.
+- [Servicios contables](https://tributando.co/portafolio): contabilidad mensual, declaraciones de renta, IVA, retención y exógena.
 
 ## Contacto
 - WhatsApp: +57 333 247 0715

@@ -337,9 +337,8 @@ def plantilla(p: Prospecto) -> tuple[str, str]:
 </ul>
 <p>En <b>Tributando</b> te llevamos la <b>contabilidad en la nube</b>, alimentada sola con tus facturas de la DIAN, la <b>nómina electrónica</b> y los impuestos, con un contador que lo revisa. Responde este correo y te cuento cuánto cuesta para {nombre.rstrip(".")}.</p>
 <p>🧾 <b>Prueba la factura electrónica gratis:</b> te habilitamos ante la DIAN y te regalamos tus <b>primeras 5 facturas electrónicas</b>, sin compromiso.</p>
-<p>🎁 <b>Además te armamos un borrador de la página web de {nombre.rstrip(".")}</b>. Mírala con el botón de abajo.</p>"""
-    return asunto, _envolver(cuerpo, p.email, "Ver nuestro portafolio", url_portafolio(p.email),
-                             "Ver mi página web", _url_sitio(p.email))
+"""
+    return asunto, _envolver(cuerpo, p.email, "Ver nuestro portafolio", url_portafolio(p.email))
 
 
 # ---------------------------------------------------------------- envío
@@ -649,7 +648,7 @@ def enviar_propuesta_correo(p: Prospecto) -> bool:
 
 def enviar_propuesta_ventaneria(p: Prospecto, nombre_rl: str = "") -> bool:
     """Propuesta para empresas de vidrio y aluminio: cotizador de ventanería
-    (módulo aparte) + contabilidad, con botones a SU página web y al portafolio
+    (módulo aparte) + contabilidad, con botón al portafolio
     firmados, y de adjuntos la ventana desde foto y una cotización de ejemplo.
     Marca el prospecto como enviado y en etapa «propuesta» (el lote ya no le
     manda el correo general)."""
@@ -669,10 +668,8 @@ def enviar_propuesta_ventaneria(p: Prospecto, nombre_rl: str = "") -> bool:
 <li><b>Por WhatsApp:</b> la cotización, la remisión o la factura le llegan al cliente en PDF por WhatsApp o por correo.</li>
 <li><b>Contabilidad completa:</b> lo que cotiza y factura pasa a la contabilidad, con IVA, retención, nómina electrónica y declaraciones con la DIAN, con un contador detrás.</li>
 </ul>
-<p>El cotizador de ventanería es un módulo aparte de la contabilidad; con gusto le doy el valor en una videollamada de 15 minutos, donde se lo muestro con un diseño de su empresa.</p>
-<p>Además le armamos un borrador de página web para {razon}: véalo con el botón de abajo.</p>"""
-    html = _envolver(cuerpo, p.email, "Ver mi página web", _url_sitio(p.email),
-                     "Ver el portafolio y mi precio", url_portafolio(p.email))
+<p>El cotizador de ventanería es un módulo aparte de la contabilidad; con gusto le doy el valor en una videollamada de 15 minutos, donde se lo muestro con un diseño de su empresa.</p>"""
+    html = _envolver(cuerpo, p.email, "Ver el portafolio y mi precio", url_portafolio(p.email))
     base = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "static", "propuestas")
     adjuntos = []
     # OJO: nunca adjuntar documentos de un cliente real (11-oct se fue una cotización
