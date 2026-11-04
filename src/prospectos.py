@@ -289,7 +289,35 @@ def _url_sitio(email: str) -> str:
     return url_sitio(email)
 
 
+_RE_RESTAURANTE = re.compile(r"expendio a la mesa|expendio por autoservicio de comidas|comidas preparadas|"
+                             r"restaurante|cafeter[ií]a|asadero|comidas r[aá]pidas", re.I)
+
+
+def es_restaurante(p: "Prospecto") -> bool:
+    return p.segmento != "contador" and bool(_RE_RESTAURANTE.search(p.actividad or ""))
+
+
+def plantilla_restaurante(p: "Prospecto") -> tuple[str, str]:
+    """3-nov-2026 (Edison): a los restaurantes, la contabilidad con impuesto al consumo + la carta
+    digital con pedidos + el CRM de pedidos, con los ejemplos de Don Jorge."""
+    negocio = (p.razon_social or "tu restaurante").strip()
+    negocio = negocio.title() if negocio.isupper() else negocio
+    asunto = f"{negocio}: impuesto al consumo, carta digital y pedidos por WhatsApp"
+    cuerpo = f"""<p>Hola,</p>
+<p>Vi que <b>{negocio}</b> se inscribió en la Cámara de Comercio el {_fecha_larga(p.fecha_matricula)}. ¡Felicitaciones! Trabajamos con restaurantes y les ofrecemos:</p>
+<ul style="padding-left:18px">
+<li>📒 <b>La contabilidad completa del restaurante</b>: el <b>impuesto al consumo</b> (formulario 310 cada dos meses), la <b>nómina electrónica</b>, la renta y los gastos del negocio separados de los personales, con un contador que lo revisa.</li>
+<li>📱 <b>Su carta digital con pedidos por WhatsApp</b>: el cliente escoge, arma el pedido y le llega a su WhatsApp. <a href="{URL}/muestra/don-jorge" style="color:#b8955f;font-weight:700">Mire un ejemplo</a>.</li>
+<li>📊 <b>Un CRM de pedidos y clientes</b>: ve cada pedido (recibido, en preparación, listo), quién le compra y las ventas del día, desde el celular. <a href="{URL}/muestra/don-jorge-pedidos" style="color:#b8955f;font-weight:700">Mire cómo se ve</a>.</li>
+</ul>
+<p>Responda este correo y le cuento cómo funciona y cuánto cuesta para {negocio.rstrip(".")}.</p>"""
+    return asunto, _envolver(cuerpo, p.email, "Ver la carta de ejemplo", f"{URL}/muestra/don-jorge",
+                             "Ver el CRM de pedidos", f"{URL}/muestra/don-jorge-pedidos")
+
+
 def plantilla(p: Prospecto) -> tuple[str, str]:
+    if es_restaurante(p):
+        return plantilla_restaurante(p)
     if p.segmento == "contador":
         n = p.n_empresas or 1
         asunto = "Lector XML DIAN: de la DIAN a tu programa contable, sin digitar facturas"
