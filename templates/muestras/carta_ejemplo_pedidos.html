@@ -81,6 +81,19 @@ header .der{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
 </div>
 <section style="padding:6px 18px 0"><div class="col" style="display:flex;gap:14px;align-items:center;min-height:0"><img src="/static/muestras/carta-ejemplo/qr_mesa5.png" alt="QR de la mesa 5" width="96" height="96" style="background:#fff;padding:6px;border-radius:10px;image-rendering:pixelated"><div><h2 style="margin:0 0 4px">🍽 Pedidos desde la mesa</h2><div style="font-size:.8rem;color:var(--suave)">Cada mesa tiene su QR. El cliente lo escanea, pide en la carta y aquí le llega «Mesa 5» con el pedido. Pruébelo con la cámara del celular.</div></div></div></section>
 <section style="padding:6px 18px 18px"><div class="col" style="display:block;min-height:0"><h2>📅 Reservas <span class="n" id="nRes">0</span></h2><div class="lista" id="lRes"></div></div></section>
+<section style="padding:0 18px 18px;display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">
+ <div class="col" style="display:block;min-height:0"><h2>🙋 Avisos de las mesas <span class="n" id="nAv">0</span></h2><div class="lista" id="lAv"></div>
+  <div style="font-size:.72rem;color:var(--suave);margin-top:6px">Llegan cuando el cliente toca «Llamar al mesero», «Pedir la cuenta» o «Dividir» en la carta.</div></div>
+ <div class="col" style="display:block;min-height:0"><h2>🍛 Carta de hoy</h2>
+  <label style="font-size:.75rem;font-weight:600">Menú del día</label><textarea id="mdTxt" rows="2" style="width:100%;border:1px solid #e8dcc8;border-radius:8px;padding:8px;font:inherit;font-size:.8rem"></textarea>
+  <label style="font-size:.75rem;font-weight:600">Precio</label><input id="mdPr" type="number" step="500" style="width:100%;border:1px solid #e8dcc8;border-radius:8px;padding:8px;font:inherit;font-size:.8rem">
+  <div style="font-size:.75rem;font-weight:600;margin-top:8px">Marcar agotado</div><div id="agot" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px"></div>
+  <button class="b oro" id="mdGuardar" style="margin-top:10px;width:100%">Guardar · se ve al instante en la carta</button></div>
+ <div class="col" style="display:block;min-height:0"><h2>🎟 Clientes frecuentes</h2><div class="lista" id="lFrec"></div>
+  <div style="font-size:.72rem;color:var(--suave);margin-top:6px">Tarjeta de sellos por celular: 10 almuerzos y el siguiente gratis.</div></div>
+ <div class="col" style="display:block;min-height:0"><h2>💰 Costo y margen por plato</h2><div id="lCosto"></div>
+  <div style="font-size:.72rem;color:var(--suave);margin-top:6px">Con la receta sale el costo de cada plato. Las ventas, el impuesto al consumo (310) y las propinas pasan a la contabilidad de Tributando.</div></div>
+</section>
 <div class="toast" id="toast"></div>
 <div class="modal" id="modal"><div class="caja">
  <h3>Cierre del día</h3>
@@ -91,6 +104,7 @@ header .der{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
  <div class="fila"><span>Por cobrar</span><b id="mPc"></b></div>
  <div class="fila"><span>Pedidos</span><b id="mN"></b></div>
  <div class="fila"><span>Reservas confirmadas hoy</span><b id="mRes"></b></div>
+ <div class="fila"><span>Impuesto al consumo 8 % (incluido, va al 310)</span><b id="mInc"></b></div>
  <p style="margin:14px 0 4px;font-weight:700">Propinas del día (para el equipo, no son venta)</p>
  <div class="fila"><span>Total propinas</span><b id="mPr"></b></div>
  <div class="fila"><span>En efectivo</span><b id="mPrE"></b></div>
@@ -160,6 +174,33 @@ function pintaRes(){$('#nRes').textContent=RES.length;$('#kRes').textContent=RES
   `<div class="pie" style="margin-top:6px"><span>${r.ok?'✅ Confirmada':'⏳ Pendiente'}</span>${r.ok?'':`<button class="b vino" data-r="${i}">Confirmar por WhatsApp</button>`}</div></div>`).join('');
  $$('[data-r]').forEach(b=>b.onclick=()=>{const r=RES[b.dataset.r];r.ok=true;pintaRes();const t=$('#toast');t.textContent=`✅ Reserva confirmada: le llegó el mensaje a ${r.nom}`;t.classList.add('ver');setTimeout(()=>t.classList.remove('ver'),2600)});}
 pintaRes();
+// Avisos de las mesas: ejemplos + los que manda la carta desde este mismo navegador.
+const AV0=[{mesa:3,tipo:'mesero',txt:'🙋 Mesa 3: por favor un mesero.',h:'12:41 p. m.'},{mesa:7,tipo:'dividir',txt:'➗ Mesa 7 pide la cuenta dividida entre 4 personas ($ 31.000 cada una).',h:'12:38 p. m.'}];
+let atendidos=new Set();function pintaAv(){let A=[];try{A=JSON.parse(localStorage.getItem('ce_avisos')||'[]')}catch(e){}A=A.concat(AV0);
+ const v=A.map((a,i)=>({...a,i,ok:atendidos.has(a.txt+a.h)}));$('#nAv').textContent=v.filter(a=>!a.ok).length;
+ $('#lAv').innerHTML=v.map(a=>`<div class="ped ${a.ok?'enviado':'recibido'}"><div class="cab"><b>Mesa ${a.mesa||'?'}</b><small>${a.h}</small></div><div style="font-size:.8rem;margin:4px 0">${a.txt}</div>`+
+  `${a.ok?'<div class="pie"><span>✅ Atendido</span></div>':`<div class="acc"><button class="b vino" data-av="${a.txt+a.h}">Atendido</button></div>`}</div>`).join('');
+ $$('[data-av]').forEach(b=>b.onclick=()=>{atendidos.add(b.dataset.av);pintaAv()})}
+pintaAv();window.addEventListener('storage',e=>{if(e.key==='ce_avisos'){pintaAv();ding()}});
+// Carta de hoy: menú del día y agotados (la carta lo lee de este navegador).
+const PLATOS=[[1,'Picada de carne'],[7,'Patacón con todo'],[8,'Arepa con todo'],[11,'Hamburguesa'],[16,'Consomé'],[17,'Trucha'],[21,'Michelada']];
+let MD={txt:'Sopa del día, arroz, fríjoles, carne a elegir, ensalada y jugo.',precio:18000,agotados:[]};try{MD={...MD,...JSON.parse(localStorage.getItem('ce_menu')||'{}')}}catch(e){}
+$('#mdTxt').value=MD.txt;$('#mdPr').value=MD.precio;
+function pintaAg(){$('#agot').innerHTML=PLATOS.map(([id,n])=>`<button class="b ${MD.agotados.includes(id)?'vino':'lin'}" data-ag="${id}" style="padding:5px 9px;font-size:.72rem${MD.agotados.includes(id)?'':';color:var(--texto)'}">${MD.agotados.includes(id)?'🚫 ':''}${n}</button>`).join('');
+ $$('[data-ag]').forEach(b=>b.onclick=()=>{const id=+b.dataset.ag;MD.agotados=MD.agotados.includes(id)?MD.agotados.filter(x=>x!==id):MD.agotados.concat(id);pintaAg()})}
+pintaAg();$('#mdGuardar').onclick=()=>{MD.txt=$('#mdTxt').value.trim();MD.precio=+$('#mdPr').value||0;try{localStorage.setItem('ce_menu',JSON.stringify(MD))}catch(e){}const t=$('#toast');t.textContent='✓ Carta actualizada: ábrala y verá el menú del día y los agotados';t.classList.add('ver');setTimeout(()=>t.classList.remove('ver'),2800)};
+// Clientes frecuentes (tarjeta de sellos).
+const FREC=[['Doña Gloria','315 880 1236',9],['Carolina','300 512 8841',7],['Andrés','311 274 9902',4],['Mateo','304 219 5518',10]];
+$('#lFrec').innerHTML=FREC.map(([n,c,k])=>`<div class="ped ${k>=10?'enviado':'preparando'}"><div class="cab"><b>${n}</b><small>📱 ${c}</small></div><div style="font-size:.85rem;letter-spacing:2px">${'●'.repeat(Math.min(k,10))}${'○'.repeat(Math.max(0,10-k))}</div>`+
+ `<div class="pie"><span>${k>=10?'🎉 Ganó un almuerzo gratis':k+' de 10 sellos'}</span></div></div>`).join('');
+// Costo y margen por plato (receta).
+const COSTO=[['Picada de carne mediana',50000,[['Carne de res 400 g',9600],['Cerdo 300 g',6300],['Chorizo y morcilla',4200],['Papa criolla y yuca',2400],['Arepas y patacón',2100],['Salsas y gas',1400]]],
+ ['Patacón con todo',26000,[['Plátano verde',1300],['Carne desmechada 150 g',4800],['Pollo 120 g',2600],['Queso y salsas',2300],['Gas y aceite',700]]],
+ ['Hamburguesa especial + papas',22000,[['Pan',900],['Carne 150 g',4200],['Queso, tocineta, verduras',2900],['Papas 200 g',1500],['Salsas y empaque',900]]],
+ ['Menú del día',18000,[['Sopa',1400],['Arroz y fríjoles',1600],['Carne 120 g',3600],['Ensalada y plátano',1100],['Jugo',900]]],
+ ['Michelada',8000,[['Cerveza',3400],['Limón, sal y salsas',500]]]];
+$('#lCosto').innerHTML=COSTO.map(([n,pr,R])=>{const c=R.reduce((a,x)=>a+x[1],0),mg=Math.round((pr-c)/pr*100);return `<details style="background:#fff;border:1px solid #e8dcc8;border-radius:10px;padding:8px 10px;margin-bottom:6px"><summary style="cursor:pointer;display:flex;justify-content:space-between;gap:8px;font-size:.8rem"><b>${n}</b><span>${pesos(pr)} · costo ${pesos(c)} · <b style="color:${mg>=55?'#1d7a46':'#b7791f'}">margen ${mg} %</b></span></summary>`+
+ `<ul style="margin:6px 0 0;padding-left:16px;font-size:.75rem">${R.map(x=>`<li>${x[0]} — ${pesos(x[1])}</li>`).join('')}</ul></details>`}).join('');
 // Arranque: el día ya lleva pedidos.
 for(let i=0;i<6;i++)pedidos.push(nuevo('enviado',300-i*35));
 for(let i=0;i<2;i++)pedidos.push(nuevo('preparando',25-i*8));
@@ -173,7 +214,7 @@ $('#cerrar').onclick=()=>{
   $('#mFecha').textContent=new Date().toLocaleDateString('es-CO',{weekday:'long',day:'numeric',month:'long'});
   $('#mTot').textContent=pesos(s(()=>1));$('#mEf').textContent=pesos(s(p=>p.cls==='ef'));
   $('#mNe').textContent=pesos(s(p=>p.cls===''));$('#mPc').textContent=pesos(s(p=>p.cls==='pend'));
-  $('#mN').textContent=pedidos.length;$('#mRes').textContent=RES.filter(r=>r.ok&&r.dia==='Hoy').length;
+  $('#mN').textContent=pedidos.length;$('#mInc').textContent=pesos(s(()=>1)*8/108);$('#mRes').textContent=RES.filter(r=>r.ok&&r.dia==='Hoy').length;
   const pr=k=>pedidos.filter(k).reduce((a,p)=>a+p.prop,0);
   $('#mPr').textContent=pesos(pr(()=>1));$('#mPrE').textContent=pesos(pr(p=>p.cls!==''));$('#mPrN').textContent=pesos(pr(p=>p.cls===''));$('#mPrC').textContent=pedidos.filter(p=>p.prop).length;
   $("#mTop").innerHTML=masVendidos().slice(0,3).map(([n,c])=>`<li>${n} — <b>${c}</b></li>`).join('');
