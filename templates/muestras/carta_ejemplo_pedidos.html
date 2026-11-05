@@ -117,7 +117,7 @@ function nuevo(estado='recibido',min=0){
   for(let i=0;i<k;i++){const p=rnd(CARTA);const c=Math.random()<.25?2:1;const ya=items.find(x=>x[0]===p[0]);ya?ya[2]+=c:items.push([p[0],p[1],c]);}
   if(Math.random()<.2)items.push(["Michelada",8000,1]);
   const d=new Date(Date.now()-min*60000);
-  const pg=rnd(PAGOS);const sub=items.reduce((s,x)=>s+x[1]*x[2],0);const pp=rnd([0,0,5,10,10]);
+  const pg=rnd(PAGOS);const sub=items.reduce((s,x)=>s+x[1]*x[2],0);const pp=rnd([0,0,10,10,10]);
   return {n:++num,nom:rnd(NOMBRES),cel:rnd(CELS),dir:rnd(DIRS),items,pago:pg[0],cls:pg[1],estado,prop:Math.round(sub*pp/100/100)*100,
     hora:d.toLocaleTimeString('es-CO',{hour:'numeric',minute:'2-digit'}),
     total:items.reduce((s,x)=>s+x[1]*x[2],0)};
