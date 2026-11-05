@@ -307,12 +307,12 @@ def plantilla_restaurante(p: "Prospecto") -> tuple[str, str]:
 <p>Vi que <b>{negocio}</b> se inscribió en la Cámara de Comercio el {_fecha_larga(p.fecha_matricula)}. ¡Felicitaciones! Trabajamos con restaurantes y les ofrecemos:</p>
 <ul style="padding-left:18px">
 <li>📒 <b>La contabilidad completa del restaurante</b>: el <b>impuesto al consumo</b> (formulario 310 cada dos meses), la <b>nómina electrónica</b>, la renta y los gastos del negocio separados de los personales, con un contador que lo revisa.</li>
-<li>📱 <b>Su carta digital con pedidos por WhatsApp</b>: el cliente escoge, arma el pedido y le llega a su WhatsApp. <a href="{URL}/muestra/don-jorge" style="color:#b8955f;font-weight:700">Mire un ejemplo</a>.</li>
-<li>📊 <b>Un CRM de pedidos y clientes</b>: ve cada pedido (recibido, en preparación, listo), quién le compra y las ventas del día, desde el celular. <a href="{URL}/muestra/don-jorge-pedidos" style="color:#b8955f;font-weight:700">Mire cómo se ve</a>.</li>
+<li>📱 <b>Su carta digital con pedidos por WhatsApp</b>: el cliente escoge, arma el pedido y le llega a su WhatsApp. <a href="{URL}/muestra/carta-ejemplo" style="color:#b8955f;font-weight:700">Mire un ejemplo</a>.</li>
+<li>📊 <b>Un CRM de pedidos y clientes</b>: ve cada pedido (recibido, en preparación, listo), quién le compra y las ventas del día, desde el celular. <a href="{URL}/muestra/carta-ejemplo-pedidos" style="color:#b8955f;font-weight:700">Mire cómo se ve</a>.</li>
 </ul>
 <p>Responda este correo y le cuento cómo funciona y cuánto cuesta para {negocio.rstrip(".")}.</p>"""
-    return asunto, _envolver(cuerpo, p.email, "Ver la carta de ejemplo", f"{URL}/muestra/don-jorge",
-                             "Ver el CRM de pedidos", f"{URL}/muestra/don-jorge-pedidos")
+    return asunto, _envolver(cuerpo, p.email, "Ver la carta de ejemplo", f"{URL}/muestra/carta-ejemplo",
+                             "Ver el CRM de pedidos", f"{URL}/muestra/carta-ejemplo-pedidos")
 
 
 def plantilla(p: Prospecto) -> tuple[str, str]:
