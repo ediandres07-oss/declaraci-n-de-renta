@@ -2056,7 +2056,9 @@ _MUESTRAS = {"central-san-ignacio": "muestras/central_san_ignacio.html",
              "viva-la-birria-pedidos": "muestras/viva_la_birria_pedidos.html",
              # Ejemplo SIN nombre de cliente para la campaña de restaurantes (4-nov-2026)
              "carta-ejemplo": "muestras/carta_ejemplo.html",
-             "carta-ejemplo-pedidos": "muestras/carta_ejemplo_pedidos.html"}
+             "carta-ejemplo-pedidos": "muestras/carta_ejemplo_pedidos.html",
+             # Cotización de todos los servicios para Alumital, con su video (5-nov-2026)
+             "cotizacion-alumital": "muestras/cotizacion_alumital.html"}
 
 
 @app.get("/muestra/<slug>")
