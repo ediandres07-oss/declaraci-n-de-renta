@@ -17,7 +17,7 @@ header .der{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
 .b.oro{background:var(--oro);color:var(--negro)}.b.lin{background:transparent;border:1px solid var(--oro);color:var(--oro2)}
 .b.vino{background:var(--vino);color:#fff}
 .muestra{background:#fff4d6;color:#7a5b00;font-size:.75rem;text-align:center;padding:6px}
-.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:14px 18px 4px}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding:14px 18px 4px}
 .kpi{background:#fff;border:1px solid #e8dcc8;border-radius:12px;padding:10px 12px}
 .kpi b{display:block;font-size:1.25rem;font-variant-numeric:tabular-nums}.kpi span{font-size:.72rem;color:var(--suave);text-transform:uppercase;letter-spacing:.04em;font-weight:600}
 .tabs{display:none;gap:6px;padding:10px 18px 0}
@@ -67,6 +67,7 @@ header .der{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
  <div class="kpi"><span>Vendido hoy</span><b id="kVend">$ 0</b></div>
  <div class="kpi"><span>Pedidos</span><b id="kPed">0</b></div>
  <div class="kpi"><span>Por cobrar</span><b id="kCob">$ 0</b></div>
+ <div class="kpi"><span>Propinas hoy</span><b id="kProp">$ 0</b></div>
  <div class="kpi"><span>Plato estrella</span><b id="kTop" style="font-size:1rem">—</b></div>
 </div>
 <div class="tabs" id="tabs">
@@ -86,6 +87,11 @@ header .der{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
  <div class="fila"><span>Nequi / transferencia</span><b id="mNe"></b></div>
  <div class="fila"><span>Por cobrar</span><b id="mPc"></b></div>
  <div class="fila"><span>Pedidos</span><b id="mN"></b></div>
+ <p style="margin:14px 0 4px;font-weight:700">Propinas del día (para el equipo, no son venta)</p>
+ <div class="fila"><span>Total propinas</span><b id="mPr"></b></div>
+ <div class="fila"><span>En efectivo</span><b id="mPrE"></b></div>
+ <div class="fila"><span>Por Nequi / transferencia</span><b id="mPrN"></b></div>
+ <div class="fila"><span>Pedidos con propina</span><b id="mPrC"></b></div>
  <p style="margin:14px 0 4px;font-weight:700">Lo que más se vendió</p>
  <ol class="top3" id="mTop"></ol>
  <div style="display:flex;gap:8px;margin-top:14px">
@@ -100,6 +106,7 @@ const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
 const pesos=v=>'$ '+Math.round(v).toLocaleString('es-CO');
 // Platos de la carta de ejemplo.
 const CARTA=[["Perra + papas",24000],["Patacón con todo",26000],["Salchipapa mediana",16000],["Hamburguesa especial + papas",22000],["Picada de carne mediana",50000],["Arepa con todo",25000],["Combo chicharrón",28000],["Punta de anca",38000],["Perro especial",15000],["Papas con queso grande",12000],["Jugo en leche",12000],["Michelada",8000],["Consomé de pollo",7000],["Patacón con hogao y queso mediano",6000]];
+const CELS=["300 512 8841","311 274 9902","315 880 1236","320 641 7735","304 219 5518","317 903 4462"];
 const NOMBRES=["Carolina","Andrés","Doña Gloria","Juan Pablo","Marcela","Don Fabio","Valentina","Sebastián","Luz Dary","Mateo","Paola","Jhon Fredy"];
 const DIRS=["Cra 49 #51-20, Centro","Cl 50 #46-11","Conjunto Los Pinos, bloque 4","Cra 47 #53-08","Parque principal","Cl 54 #48-30"];
 const PAGOS=[["Efectivo","ef"],["Nequi",""],["Efectivo","ef"],["Transferencia",""],["Contraentrega","pend"]];
@@ -110,8 +117,8 @@ function nuevo(estado='recibido',min=0){
   for(let i=0;i<k;i++){const p=rnd(CARTA);const c=Math.random()<.25?2:1;const ya=items.find(x=>x[0]===p[0]);ya?ya[2]+=c:items.push([p[0],p[1],c]);}
   if(Math.random()<.2)items.push(["Michelada",8000,1]);
   const d=new Date(Date.now()-min*60000);
-  const pg=rnd(PAGOS);
-  return {n:++num,nom:rnd(NOMBRES),dir:rnd(DIRS),items,pago:pg[0],cls:pg[1],estado,
+  const pg=rnd(PAGOS);const sub=items.reduce((s,x)=>s+x[1]*x[2],0);const pp=rnd([0,0,5,10,10]);
+  return {n:++num,nom:rnd(NOMBRES),cel:rnd(CELS),dir:rnd(DIRS),items,pago:pg[0],cls:pg[1],estado,prop:Math.round(sub*pp/100/100)*100,
     hora:d.toLocaleTimeString('es-CO',{hour:'numeric',minute:'2-digit'}),
     total:items.reduce((s,x)=>s+x[1]*x[2],0)};
 }
@@ -124,7 +131,8 @@ function pintar(){
       <div class="cab"><b>#${p.n} · ${p.nom}</b><small>${p.hora}</small></div>
       <ul>${p.items.map(x=>`<li>${x[2]>1?x[2]+' × ':''}${x[0]}</li>`).join('')}</ul>
       <div class="pie"><span>📍 ${p.dir}</span><span class="pago ${p.cls}">${p.pago}</span></div>
-      <div class="pie" style="margin-top:4px"><span>Total</span><span class="tot">${pesos(p.total)}</span></div>
+      <div class="pie" style="margin-top:4px"><span>📱 ${p.cel}</span><span>${p.prop?'Propina '+pesos(p.prop):'Sin propina'}</span></div>
+      <div class="pie" style="margin-top:4px"><span>Total</span><span class="tot">${pesos(p.total+p.prop)}</span></div>
       ${SIG[e][0]?`<div class="acc"><button class="b ${e==='recibido'?'vino':'oro'}" data-a="${p.n}">${SIG[e][1]}</button></div>`:''}
     </div>`).join('')||'<div style="text-align:center;color:var(--suave);font-size:.8rem;padding:20px">Nada por aquí</div>';
   }
@@ -132,6 +140,7 @@ function pintar(){
   const tot=pedidos.reduce((s,p)=>s+p.total,0);
   $('#kVend').textContent=pesos(tot);$('#kPed').textContent=pedidos.length;
   $('#kCob').textContent=pesos(pedidos.filter(p=>p.cls==='pend').reduce((s,p)=>s+p.total,0));
+  $('#kProp').textContent=pesos(pedidos.reduce((s,p)=>s+p.prop,0));
   const t=masVendidos();$('#kTop').textContent=t[0]?t[0][0]:'—';
 }
 function masVendidos(){const m={};pedidos.forEach(p=>p.items.forEach(x=>m[x[0]]=(m[x[0]]||0)+x[2]));return Object.entries(m).sort((a,b)=>b[1]-a[1]);}
@@ -153,6 +162,8 @@ $('#cerrar').onclick=()=>{
   $('#mTot').textContent=pesos(s(()=>1));$('#mEf').textContent=pesos(s(p=>p.cls==='ef'));
   $('#mNe').textContent=pesos(s(p=>p.cls===''));$('#mPc').textContent=pesos(s(p=>p.cls==='pend'));
   $('#mN').textContent=pedidos.length;
+  const pr=k=>pedidos.filter(k).reduce((a,p)=>a+p.prop,0);
+  $('#mPr').textContent=pesos(pr(()=>1));$('#mPrE').textContent=pesos(pr(p=>p.cls!==''));$('#mPrN').textContent=pesos(pr(p=>p.cls===''));$('#mPrC').textContent=pedidos.filter(p=>p.prop).length;
   $("#mTop").innerHTML=masVendidos().slice(0,3).map(([n,c])=>`<li>${n} — <b>${c}</b></li>`).join('');
   $('#ok').style.display='none';$('#modal').classList.add('ver');
 };

@@ -67,15 +67,15 @@ footer{background:var(--negro);color:#cbbfab;text-align:center;padding:44px 20px
 <polygon points="12,82 52,52 268,52 308,82 308,128 160,162 12,128" fill="#120e0b" stroke="#c94a63" stroke-width="5" stroke-linejoin="round"/>
 <ellipse cx="160" cy="50" rx="38" ry="26" fill="url(#pl)" stroke="#c94a63" stroke-width="4"/>
 <text x="160" y="122" text-anchor="middle" font-family="Rye,Georgia,serif" font-size="30" fill="#f2c84b" letter-spacing="1">SU RESTAURANTE</text>
-<text x="160" y="148" text-anchor="middle" font-family="'Great Vibes',cursive" font-size="20" fill="#efe4d2">• Restaurante •</text></svg></div>Aquí va la dirección de su restaurante<br>Pedidos: su WhatsApp<h4>Medios de pago</h4>Nequi 311 735 8497<br>Bancolombia ahorros 311 463 870 31 · 311 463 921 41<br>o en efectivo al recibir</footer>
+<text x="160" y="148" text-anchor="middle" font-family="'Great Vibes',cursive" font-size="20" fill="#efe4d2">• Restaurante •</text></svg></div>Aquí va la dirección de su restaurante<br>Pedidos: su WhatsApp<h4>Medios de pago</h4>Nequi: su número<br>Bancolombia: su cuenta<br>o en efectivo al recibir</footer>
 <button class="fijo" id="fijo">🛒 Ver mi pedido</button>
 <div class="velo" id="velo"></div>
 <div class="carro" id="carro"><h3>Mi pedido <button class="x" id="cerrar">×</button></h3><div id="lineas"></div>
 <div class="tot"><span>Total</span><span id="total">$ 0</span></div><div class="nota" id="nota"></div>
-<label>Su nombre</label><input id="nom" autocomplete="name">
-<label>Dirección de entrega</label><input id="dir" placeholder="Calle, número, barrio" autocomplete="street-address">
+<label>¿Domicilio o recoge?</label><div class="pago" id="entrega"><button class="on">Domicilio</button><button>Recojo en el local</button></div><label>Su nombre</label><input id="nom" autocomplete="name"><label>Celular / WhatsApp</label><input id="cel" type="tel" inputmode="tel" autocomplete="tel" placeholder="300 123 4567"><label>Teléfono fijo (opcional)</label><input id="fijoT" type="tel" inputmode="tel" placeholder="604 123 4567"><label>Correo electrónico (opcional)</label><input id="mail" type="email" inputmode="email" autocomplete="email" placeholder="para enviarle la factura">
+<label id="lDir">Dirección de entrega</label><input id="dir" placeholder="Calle, número, barrio" autocomplete="street-address">
 <label>¿Cómo paga?</label><div class="pago" id="pago"><button class="on">Efectivo</button><button>Nequi</button><button>Bancolombia</button></div>
-<label>Algo más (sin cebolla, alergias…)</label><textarea id="obs" rows="2"></textarea>
+<label>Propina para el equipo (voluntaria)</label><div class="pago" id="prop"><button class="on" data-v="0">Sin propina</button><button data-v="5">5 %</button><button data-v="10">10 %</button><button data-v="o">Otro valor</button></div><input id="propO" type="number" inputmode="numeric" min="0" step="500" placeholder="Valor de la propina" style="display:none"><div class="tot" style="font-size:15px;margin-top:10px"><span>Propina</span><span id="propV">$ 0</span></div><div class="tot"><span>Total a pagar</span><span id="totP">$ 0</span></div><label style="display:flex;gap:8px;align-items:center;font-weight:600"><input id="fe" type="checkbox" style="width:auto;margin:0"> Necesito factura electrónica</label><input id="doc" placeholder="Cédula o NIT para la factura" style="display:none"><label>Algo más (sin cebolla, alergias…)</label><textarea id="obs" rows="2"></textarea>
 <button class="enviar" id="enviar">Enviar pedido por WhatsApp</button></div>
 <script>
 const WA='573332470715',$=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
@@ -92,15 +92,20 @@ $$('.add').forEach(b=>b.onclick=()=>{const p=b.closest('.prod'),k=p.dataset.id+'
 function pinta(){const n=carro.reduce((a,l)=>a+l.c,0),t=carro.reduce((a,l)=>a+l.c*l.p,0),sin=carro.some(l=>!l.p);
  $('#fijo').classList.toggle('ver',n>0);$('#fijo').textContent='🛒 Ver mi pedido ('+n+')'+(t?' · '+m(t):'');
  $('#lineas').innerHTML=carro.length?carro.map((l,i)=>`<div class="lin"><div class="nm">${l.n}${l.o?'<small>'+l.o+'</small>':''}</div><div class="qt"><button data-i="${i}" data-d="-1">−</button><b>${l.c}</b><button data-i="${i}" data-d="1">+</button></div><div class="vl">${m(l.c*l.p)}</div></div>`).join(''):'<div class="vacio">Su pedido está vacío.</div>';
- $('#total').textContent=t?m(t):'$ 0';$('#nota').textContent=sin?'Algunos platos tienen precio al pedir: el restaurante le confirma el total.':'El valor del domicilio se lo confirma el restaurante.';
+ $('#total').textContent=t?m(t):'$ 0';if(window.extra)setTimeout(window.extra);$('#nota').textContent=sin?'Algunos platos tienen precio al pedir: el restaurante le confirma el total.':'El valor del domicilio se lo confirma el restaurante.';
  $$('#lineas .qt button').forEach(b=>b.onclick=()=>{const l=carro[+b.dataset.i];l.c+=+b.dataset.d;if(l.c<1)carro.splice(+b.dataset.i,1);guarda();pinta();if(!carro.length)abre(false)})}
 function abre(v){$('#carro').classList.toggle('ver',v);$('#velo').classList.toggle('ver',v)}
 $('#fijo').onclick=()=>abre(true);$('#cerrar').onclick=()=>abre(false);$('#velo').onclick=()=>abre(false);
-$$('#pago button').forEach(b=>b.onclick=()=>{$$('#pago button').forEach(x=>x.classList.remove('on'));b.classList.add('on')});
+['#pago','#entrega','#prop'].forEach(g=>$$(g+' button').forEach(b=>b.onclick=()=>{$$(g+' button').forEach(x=>x.classList.remove('on'));b.classList.add('on');extra()}));
+const subtotal=()=>carro.reduce((a,l)=>a+l.c*l.p,0);
+function propina(){const b=$('#prop .on'),v=b?b.dataset.v:'0';if(v==='o')return Math.max(0,Math.round(+$('#propO').value||0));return Math.round(subtotal()*(+v)/100/100)*100}
+function extra(){const o=$('#prop .on')&&$('#prop .on').dataset.v==='o';$('#propO').style.display=o?'block':'none';const rec=$('#entrega .on').textContent.startsWith('Recojo');$('#dir').style.display=$('#lDir').style.display=rec?'none':'';$('#doc').style.display=$('#fe').checked?'block':'none';const pr=propina(),t=subtotal();$('#propV').textContent='$ '+pr.toLocaleString('es-CO');$('#totP').textContent=t?m(t+pr):'$ 0'}
+window.extra=extra;$('#propO').oninput=extra;$('#fe').onchange=extra;extra();
 $('#enviar').onclick=()=>{if(!carro.length)return;const t=carro.reduce((a,l)=>a+l.c*l.p,0);
  let s='Hola, quiero hacer este pedido:\n\n'+carro.map(l=>'• '+l.c+' x '+l.n+(l.o?' ('+l.o+')':'')+' — '+m(l.c*l.p)).join('\n')+'\n\n*Total: '+m(t)+'*';
- const nm=$('#nom').value.trim(),d=$('#dir').value.trim(),o=$('#obs').value.trim();
- if(nm)s+='\nNombre: '+nm;if(d)s+='\nDirección: '+d;s+='\nPago: '+$('#pago .on').textContent;if(o)s+='\nNota: '+o;
+ const nm=$('#nom').value.trim(),d=$('#dir').value.trim(),o=$('#obs').value.trim(),cel=$('#cel').value.trim(),fj=$('#fijoT').value.trim(),ml=$('#mail').value.trim(),rec=$('#entrega .on').textContent.startsWith('Recojo'),pr=propina();
+ if(pr)s+='\nPropina: '+m(pr)+'\n*Total a pagar: '+m(t+pr)+'*';
+ s+='\n\nEntrega: '+(rec?'Recojo en el local':'Domicilio');if(nm)s+='\nNombre: '+nm;if(cel)s+='\nCelular/WhatsApp: '+cel;if(fj)s+='\nFijo: '+fj;if(ml)s+='\nCorreo: '+ml;if(d&&!rec)s+='\nDirección: '+d;s+='\nPago: '+$('#pago .on').textContent;if($('#fe').checked)s+='\nFactura electrónica: sí'+($('#doc').value.trim()?' · '+$('#doc').value.trim():'');if(o)s+='\nNota: '+o;
  window.open('https://wa.me/'+WA+'?text='+encodeURIComponent(s),'_blank')};
 pinta();
 </script></body></html>
