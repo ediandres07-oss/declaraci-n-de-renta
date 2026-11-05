@@ -25,6 +25,10 @@ from src.auth import db
 
 URL = os.environ.get("URL_PUBLICA", "https://tributando.co").rstrip("/")
 _RE_CONTADOR = re.compile(r"contab|contad|asesor|tribut|auditor|impuest|finanz|revisor", re.I)
+# 5-nov-2026: CONTA ELITE SAS (contaelite26@, actividad «contabilidad, teneduría de libros…») cayó como
+# «empresa» y le llegó la oferta de llevarle la contabilidad. Una firma cuya ACTIVIDAD es contable va
+# por el correo de contadores aunque su correo no lo diga.
+_RE_FIRMA_CONTABLE = re.compile(r"contab|tenedur|auditor|revisor[ií]a fiscal|asesor[ií]a tributaria|6920", re.I)
 _MESES = ["", "enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto",
           "septiembre", "octubre", "noviembre", "diciembre"]
 
@@ -237,7 +241,8 @@ def cargar_csv(datos: bytes, origen: str = "rues") -> dict:
             continue
         f = max(fs, key=lambda x: x.get("fecha_matricula", ""))
         natural = "natural" in (f.get("org_juridica") or "").lower()
-        contador = not natural and (usos[email] >= 2 or bool(_RE_CONTADOR.search(email)))
+        contador = not natural and (usos[email] >= 2 or bool(_RE_CONTADOR.search(email))
+                                    or bool(_RE_FIRMA_CONTABLE.search(f.get("actividad_economica") or "")))
         segmento = "comerciante" if natural else ("contador" if contador else "empresa")
         p = Prospecto(
             email=email, segmento=segmento,
@@ -321,8 +326,15 @@ def plantilla(p: Prospecto) -> tuple[str, str]:
     if p.segmento == "contador":
         n = p.n_empresas or 1
         asunto = "Lector XML DIAN: de la DIAN a tu programa contable, sin digitar facturas"
+        if n <= 1 and _RE_FIRMA_CONTABLE.search(p.actividad or ""):
+            firma = (p.razon_social or "tu firma").strip().rstrip(".")
+            saludo = (f"Vi que <b>{firma}</b> se inscribió en la Cámara de Comercio como firma de contabilidad. "
+                      "¡Felicitaciones! Soy contador y armé el <b>Lector XML DIAN</b> para que los contadores dejemos de digitar facturas:")
+        else:
+            saludo = (f"Vi que {'registraste ' + str(n) + ' empresas nuevas' if n > 1 else 'acompañaste el registro de una empresa nueva'} "
+                      "en la Cámara de Comercio estas semanas. Soy contador y armé el <b>Lector XML DIAN</b> para dejar de digitar facturas:")
         cuerpo = f"""<p>Hola,</p>
-<p>Vi que {'registraste ' + str(n) + ' empresas nuevas' if n > 1 else 'acompañaste el registro de una empresa nueva'} en la Cámara de Comercio estas semanas. Soy contador y armé el <b>Lector XML DIAN</b> para dejar de digitar facturas:</p>
+<p>{saludo}</p>
 <ul style="padding-left:18px">
 <li><b>Descarga las facturas electrónicas</b> de tus clientes desde la DIAN por rango de fechas, con el <b>IVA discriminado</b>.</li>
 <li>Aprende las cuentas de cada cliente y arma el <b>plano listo</b> para Siigo, World Office, Helisa o Contai en un clic.</li>
