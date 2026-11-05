@@ -680,6 +680,8 @@ def enviar_propuesta_ventaneria(p: Prospecto, nombre_rl: str = "") -> bool:
     firmados, y de adjuntos la ventana desde foto y una cotización de ejemplo.
     Marca el prospecto como enviado y en etapa «propuesta» (el lote ya no le
     manda el correo general)."""
+    if VENTANERIA_PAUSADA:
+        return False
     cfg = _config_smtp()
     if not cfg or not p or not p.email or esta_de_baja(p.email):
         return False
@@ -730,6 +732,9 @@ def enviar_propuesta_ventaneria(p: Prospecto, nombre_rl: str = "") -> bool:
 
 # ---------------------------------------------------------------- ventanerías (1-nov-2026)
 VENT_ORIGEN = "maps-ventaneria"
+# 5-nov-2026 Edison: «bloquea el anuncio del cotizador». Mientras esté en True no sale
+# ningún correo de ventanería a talleres (el cotizador está cerrado, ver bloqueos.py).
+VENTANERIA_PAUSADA = True
 PIE_WEB = "Le escribimos porque el correo de su negocio aparece publicado en su página web."
 
 
@@ -762,6 +767,8 @@ def plantilla_ventaneria(nombre: str, municipio: str = "") -> tuple[str, str]:
 
 def enviar_ventaneria(t: dict, smtp=None, cfg=None) -> str:
     """Manda la propuesta a UN taller y lo deja en el CRM (etapa «propuesta»). Devuelve el estado."""
+    if VENTANERIA_PAUSADA:
+        return "pausado"
     email = (t.get("email") or "").lower().strip()
     if not email:
         return "sin correo"

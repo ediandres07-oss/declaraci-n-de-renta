@@ -1418,7 +1418,7 @@ _URLS_PUBLICAS = ["/", "/calendario-tributario-2026", "/contabilidad",
                   "/plano-contable-contai", "/plano-contable-world-office",
                   "/plano-contable-helisa", "/plano-contable-syscafe",
                   "/iva-descontable-xml-dian", "/descargar-xml-dian",
-                  "/contadores/herramientas", "/contadores/lector", "/ventaneria",
+                  "/contadores/herramientas", "/contadores/lector",
                   "/portafolio", "/apps/", "/apps-a-la-medida"]
 
 
@@ -2089,6 +2089,13 @@ def apps_a_la_medida():
 def ventaneria():
     """Página de venta del cotizador de ventanería (1-nov-2026). Video, imágenes y PDF salen
     del taller de EJEMPLO (contabilidad/scripts/demo_ventaneria.py), nunca de un cliente real."""
+    # 5-nov-2026 Edison: «bloquea el anuncio del cotizador». Página cerrada al público.
+    from src.prospectos import VENTANERIA_PAUSADA
+    if VENTANERIA_PAUSADA:
+        return Response("<!doctype html><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'>"
+                        "<title>No disponible</title><body style='font-family:system-ui;max-width:520px;margin:15vh auto;padding:0 20px;color:#222'>"
+                        "<h2>Esta página no está disponible</h2><p>Visite <a href='https://tributando.co'>tributando.co</a>.</p>",
+                        status=404, mimetype="text/html")
     wa = IA_CFG.get("negocio", {}).get("whatsapp") or "573332470715"
     return render_template("ventaneria.html", whatsapp=re.sub(r"\D", "", str(wa)), dias=15)
 
