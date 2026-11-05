@@ -77,7 +77,7 @@ header .der{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
 <div class="tablero">
  <div class="col on" data-e="recibido"><h2>🔔 Recibidos <span class="n">0</span></h2><div class="lista"></div></div>
  <div class="col" data-e="preparando"><h2>🔥 Preparando <span class="n">0</span></h2><div class="lista"></div></div>
- <div class="col" data-e="enviado"><h2>🛵 Enviados <span class="n">0</span></h2><div class="lista"></div></div>
+ <div class="col" data-e="enviado"><h2>🛵 Enviados · 🍽 Servidos <span class="n">0</span></h2><div class="lista"></div></div>
 </div>
 <section style="padding:6px 18px 0"><div class="col" style="display:flex;gap:14px;align-items:center;min-height:0"><img src="/static/muestras/carta-ejemplo/qr_mesa5.png" alt="QR de la mesa 5" width="96" height="96" style="background:#fff;padding:6px;border-radius:10px;image-rendering:pixelated"><div><h2 style="margin:0 0 4px">🍽 Pedidos desde la mesa</h2><div style="font-size:.8rem;color:var(--suave)">Cada mesa tiene su QR. El cliente lo escanea, pide en la carta y aquí le llega «Mesa 5» con el pedido. Pruébelo con la cámara del celular.</div></div></div></section>
 <section style="padding:6px 18px 18px"><div class="col" style="display:block;min-height:0"><h2>📅 Reservas <span class="n" id="nRes">0</span></h2><div class="lista" id="lRes"></div></div></section>
@@ -137,10 +137,10 @@ function pintar(){
       <div class="pie"><span>${p.mesa?'🍽 <b>Mesa '+p.mesa+'</b>':'📍 '+p.dir}</span><span class="pago ${p.cls}">${p.pago}</span></div>
       <div class="pie" style="margin-top:4px"><span>📱 ${p.cel}</span><span>${p.prop?'Propina '+pesos(p.prop):'Sin propina'}</span></div>
       <div class="pie" style="margin-top:4px"><span>Total</span><span class="tot">${pesos(p.total+p.prop)}</span></div>
-      ${SIG[e][0]?`<div class="acc"><button class="b ${e==='recibido'?'vino':'oro'}" data-a="${p.n}">${SIG[e][1]}</button></div>`:''}
+      ${SIG[e][0]?`<div class="acc"><button class="b ${e==='recibido'?'vino':'oro'}" data-a="${p.n}">${e==='preparando'&&p.mesa?'Listo, a la mesa 🍽':SIG[e][1]}</button></div>`:''}
     </div>`).join('')||'<div style="text-align:center;color:var(--suave);font-size:.8rem;padding:20px">Nada por aquí</div>';
   }
-  $$('[data-a]').forEach(b=>b.onclick=()=>{const p=pedidos.find(x=>x.n==b.dataset.a);p.estado=SIG[p.estado][0];p.nuevo=false;pintar();});
+  $$('[data-a]').forEach(b=>b.onclick=()=>{const p=pedidos.find(x=>x.n==b.dataset.a);p.estado=SIG[p.estado][0];p.nuevo=false;pintar();const av=p.estado==='preparando'?'Su pedido está en preparación 🔥':(p.mesa?'¡Listo! Ya se lo llevamos a la mesa '+p.mesa+' 🍽':'¡Listo! Su pedido va en camino 🛵');const t=$('#toast');t.textContent='📲 A '+p.nom+' le llegó: «'+av+'»';t.classList.add('ver');setTimeout(()=>t.classList.remove('ver'),2800);});
   const tot=pedidos.reduce((s,p)=>s+p.total,0);
   $('#kVend').textContent=pesos(tot);$('#kPed').textContent=pedidos.length;
   $('#kCob').textContent=pesos(pedidos.filter(p=>p.cls==='pend').reduce((s,p)=>s+p.total,0));
