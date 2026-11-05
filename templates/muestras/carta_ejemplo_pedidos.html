@@ -79,6 +79,7 @@ header .der{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
  <div class="col" data-e="preparando"><h2>🔥 Preparando <span class="n">0</span></h2><div class="lista"></div></div>
  <div class="col" data-e="enviado"><h2>🛵 Enviados <span class="n">0</span></h2><div class="lista"></div></div>
 </div>
+<section style="padding:6px 18px 0"><div class="col" style="display:flex;gap:14px;align-items:center;min-height:0"><img src="/static/muestras/carta-ejemplo/qr_mesa5.png" alt="QR de la mesa 5" width="96" height="96" style="background:#fff;padding:6px;border-radius:10px;image-rendering:pixelated"><div><h2 style="margin:0 0 4px">🍽 Pedidos desde la mesa</h2><div style="font-size:.8rem;color:var(--suave)">Cada mesa tiene su QR. El cliente lo escanea, pide en la carta y aquí le llega «Mesa 5» con el pedido. Pruébelo con la cámara del celular.</div></div></div></section>
 <section style="padding:6px 18px 18px"><div class="col" style="display:block;min-height:0"><h2>📅 Reservas <span class="n" id="nRes">0</span></h2><div class="lista" id="lRes"></div></div></section>
 <div class="toast" id="toast"></div>
 <div class="modal" id="modal"><div class="caja">
@@ -121,7 +122,7 @@ function nuevo(estado='recibido',min=0){
   if(Math.random()<.2)items.push(["Michelada",8000,1]);
   const d=new Date(Date.now()-min*60000);
   const pg=rnd(PAGOS);const sub=items.reduce((s,x)=>s+x[1]*x[2],0);const pp=rnd([0,0,10,10,10]);
-  return {n:++num,nom:rnd(NOMBRES),cel:rnd(CELS),dir:rnd(DIRS),items,pago:pg[0],cls:pg[1],estado,prop:Math.round(sub*pp/100/100)*100,
+  return {n:++num,nom:rnd(NOMBRES),cel:rnd(CELS),dir:rnd(DIRS),items,pago:pg[0],cls:pg[1],estado,prop:Math.round(sub*pp/100/100)*100,mesa:Math.random()<.35?1+Math.floor(Math.random()*12):0,
     hora:d.toLocaleTimeString('es-CO',{hour:'numeric',minute:'2-digit'}),
     total:items.reduce((s,x)=>s+x[1]*x[2],0)};
 }
@@ -133,7 +134,7 @@ function pintar(){
     l.innerHTML=ps.map(p=>`<div class="ped ${e}${p.nuevo?' nuevo':''}" data-n="${p.n}">
       <div class="cab"><b>#${p.n} · ${p.nom}</b><small>${p.hora}</small></div>
       <ul>${p.items.map(x=>`<li>${x[2]>1?x[2]+' × ':''}${x[0]}</li>`).join('')}</ul>
-      <div class="pie"><span>📍 ${p.dir}</span><span class="pago ${p.cls}">${p.pago}</span></div>
+      <div class="pie"><span>${p.mesa?'🍽 <b>Mesa '+p.mesa+'</b>':'📍 '+p.dir}</span><span class="pago ${p.cls}">${p.pago}</span></div>
       <div class="pie" style="margin-top:4px"><span>📱 ${p.cel}</span><span>${p.prop?'Propina '+pesos(p.prop):'Sin propina'}</span></div>
       <div class="pie" style="margin-top:4px"><span>Total</span><span class="tot">${pesos(p.total+p.prop)}</span></div>
       ${SIG[e][0]?`<div class="acc"><button class="b ${e==='recibido'?'vino':'oro'}" data-a="${p.n}">${SIG[e][1]}</button></div>`:''}
