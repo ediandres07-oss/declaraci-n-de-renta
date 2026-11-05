@@ -67,6 +67,8 @@ header .der{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
  <div class="kpi"><span>Vendido hoy</span><b id="kVend">$ 0</b></div>
  <div class="kpi"><span>Pedidos</span><b id="kPed">0</b></div>
  <div class="kpi"><span>Por cobrar</span><b id="kCob">$ 0</b></div>
+ <div class="kpi"><span>Propinas hoy</span><b id="kProp">$ 0</b></div>
+ <div class="kpi"><span>Reservas hoy</span><b id="kRes">0</b></div>
  <div class="kpi"><span>Plato estrella</span><b id="kTop" style="font-size:1rem">—</b></div>
 </div>
 <div class="tabs" id="tabs">
@@ -75,8 +77,23 @@ header .der{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
 <div class="tablero">
  <div class="col on" data-e="recibido"><h2>🔔 Recibidos <span class="n">0</span></h2><div class="lista"></div></div>
  <div class="col" data-e="preparando"><h2>🔥 Preparando <span class="n">0</span></h2><div class="lista"></div></div>
- <div class="col" data-e="enviado"><h2>🛵 Enviados <span class="n">0</span></h2><div class="lista"></div></div>
+ <div class="col" data-e="enviado"><h2>🛵 Enviados · 🍽 Servidos <span class="n">0</span></h2><div class="lista"></div></div>
 </div>
+<section style="padding:6px 18px 0"><div class="col" style="display:flex;gap:14px;align-items:center;min-height:0"><img src="/static/muestras/viva-la-birria/qr_mesa5.png" alt="QR de la mesa 5" width="96" height="96" style="background:#fff;padding:6px;border-radius:10px;image-rendering:pixelated"><div><h2 style="margin:0 0 4px">🍽 Pedidos desde la mesa</h2><div style="font-size:.8rem;color:var(--suave)">Cada mesa tiene su QR. El cliente lo escanea, pide en la carta y aquí le llega «Mesa 5» con el pedido. Pruébelo con la cámara del celular.</div></div></div></section>
+<section style="padding:6px 18px 18px"><div class="col" style="display:block;min-height:0"><h2>📅 Reservas <span class="n" id="nRes">0</span></h2><div class="lista" id="lRes"></div></div></section>
+<section style="padding:0 18px 18px;display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">
+ <div class="col" style="display:block;min-height:0"><h2>🙋 Avisos de las mesas <span class="n" id="nAv">0</span></h2><div class="lista" id="lAv"></div>
+  <div style="font-size:.72rem;color:var(--suave);margin-top:6px">Llegan cuando el cliente toca «Llamar al mesero», «Pedir la cuenta» o «Dividir» en la carta.</div></div>
+ <div class="col" style="display:block;min-height:0"><h2>🍛 Carta de hoy</h2>
+  <label style="font-size:.75rem;font-weight:600">Combo del día</label><textarea id="mdTxt" rows="2" style="width:100%;border:1px solid #e8dcc8;border-radius:8px;padding:8px;font:inherit;font-size:.8rem"></textarea>
+  <label style="font-size:.75rem;font-weight:600">Precio</label><input id="mdPr" type="number" step="500" style="width:100%;border:1px solid #e8dcc8;border-radius:8px;padding:8px;font:inherit;font-size:.8rem">
+  <div style="font-size:.75rem;font-weight:600;margin-top:8px">Marcar agotado</div><div id="agot" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px"></div>
+  <button class="b oro" id="mdGuardar" style="margin-top:10px;width:100%">Guardar · se ve al instante en la carta</button></div>
+ <div class="col" style="display:block;min-height:0"><h2>🎟 Clientes frecuentes</h2><div class="lista" id="lFrec"></div>
+  <div style="font-size:.72rem;color:var(--suave);margin-top:6px">Tarjeta de sellos por celular: 10 órdenes y la siguiente gratis.</div></div>
+ <div class="col" style="display:block;min-height:0"><h2>💰 Costo y margen por plato</h2><div id="lCosto"></div>
+  <div style="font-size:.72rem;color:var(--suave);margin-top:6px">Con la receta sale el costo de cada plato. Las ventas, el impuesto al consumo (310) y las propinas pasan a la contabilidad de Tributando. Costos de ejemplo: se ajustan con sus recetas.</div></div>
+</section>
 <div class="toast" id="toast"></div>
 <div class="modal" id="modal"><div class="caja">
  <h3>Cierre del día</h3>
@@ -86,6 +103,13 @@ header .der{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
  <div class="fila"><span>Nequi / transferencia</span><b id="mNe"></b></div>
  <div class="fila"><span>Por cobrar</span><b id="mPc"></b></div>
  <div class="fila"><span>Pedidos</span><b id="mN"></b></div>
+ <div class="fila"><span>Reservas confirmadas hoy</span><b id="mRes"></b></div>
+ <div class="fila"><span>Impuesto al consumo 8 % (incluido, va al 310)</span><b id="mInc"></b></div>
+ <p style="margin:14px 0 4px;font-weight:700">Propinas del día (para el equipo, no son venta)</p>
+ <div class="fila"><span>Total propinas</span><b id="mPr"></b></div>
+ <div class="fila"><span>En efectivo</span><b id="mPrE"></b></div>
+ <div class="fila"><span>Por Nequi / transferencia</span><b id="mPrN"></b></div>
+ <div class="fila"><span>Pedidos con propina</span><b id="mPrC"></b></div>
  <p style="margin:14px 0 4px;font-weight:700">Lo que más se vendió</p>
  <ol class="top3" id="mTop"></ol>
  <div style="display:flex;gap:8px;margin-top:14px">
@@ -98,8 +122,9 @@ header .der{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
 <script>
 const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
 const pesos=v=>'$ '+Math.round(v).toLocaleString('es-CO');
-// Platos de la carta real de Viva la Birria (precios de su menú publicado).
+// Platos de la carta de ejemplo.
 const CARTA=[["Tacos de Birria",37000],["Quesabirria",39000],["Birriamen",36000],["Taquiza x12",99000],["Papas Viva la Birria",39000],["Papas Mixtas",38000],["Tacos Pulled Pork",35000],["Burrito de birria",38000],["Costillas San Louis",44000],["Empanadas de birria",20000],["Nachos",26000],["Elotes",22000],["Tacos Kids",28000],["Horchata",14000],["Limonada de Coco",14000],["Soda de Tamarindo",14000],["Margarita Clasica",24000],["Club Colombia Dorada",10000]];
+const CELS=["300 512 8841","311 274 9902","315 880 1236","320 641 7735","304 219 5518","317 903 4462"];
 const NOMBRES=["Carolina","Andrés","Doña Gloria","Juan Pablo","Marcela","Don Fabio","Valentina","Sebastián","Luz Dary","Mateo","Paola","Jhon Fredy"];
 const DIRS=["Mesa 3","Mesa 7","Recoge en el local","Cl 32 #51-14, Barrio Obrero","Cra 50 #35-20, Bello","Niquía, bloque 4","Mesa 5","Cl 36 #49-08, Bello"];
 const PAGOS=[["Efectivo","ef"],["Nequi",""],["Efectivo","ef"],["Transferencia",""],["Contraentrega","pend"]];
@@ -107,11 +132,11 @@ let pedidos=[],num=40,tab='recibido';
 const rnd=a=>a[Math.floor(Math.random()*a.length)];
 function nuevo(estado='recibido',min=0){
   const items=[];const k=1+Math.floor(Math.random()*3);
-  for(let i=0;i<k;i++){const p=(i===0&&Math.random()<.8)?CARTA[0]:rnd(CARTA);const c=Math.random()<.25?2:1;const ya=items.find(x=>x[0]===p[0]);ya?ya[2]+=c:items.push([p[0],p[1],c]);}
+  for(let i=0;i<k;i++){const p=rnd(CARTA);const c=Math.random()<.25?2:1;const ya=items.find(x=>x[0]===p[0]);ya?ya[2]+=c:items.push([p[0],p[1],c]);}
   if(Math.random()<.2)items.push(["Soda Michelada",10000,1]);
   const d=new Date(Date.now()-min*60000);
-  const pg=rnd(PAGOS);
-  return {n:++num,nom:rnd(NOMBRES),dir:rnd(DIRS),items,pago:pg[0],cls:pg[1],estado,
+  const pg=rnd(PAGOS);const sub=items.reduce((s,x)=>s+x[1]*x[2],0);const pp=rnd([0,0,10,10,10]);
+  return {n:++num,nom:rnd(NOMBRES),cel:rnd(CELS),dir:rnd(DIRS),items,pago:pg[0],cls:pg[1],estado,prop:Math.round(sub*pp/100/100)*100,mesa:Math.random()<.35?1+Math.floor(Math.random()*12):0,
     hora:d.toLocaleTimeString('es-CO',{hour:'numeric',minute:'2-digit'}),
     total:items.reduce((s,x)=>s+x[1]*x[2],0)};
 }
@@ -123,23 +148,59 @@ function pintar(){
     l.innerHTML=ps.map(p=>`<div class="ped ${e}${p.nuevo?' nuevo':''}" data-n="${p.n}">
       <div class="cab"><b>#${p.n} · ${p.nom}</b><small>${p.hora}</small></div>
       <ul>${p.items.map(x=>`<li>${x[2]>1?x[2]+' × ':''}${x[0]}</li>`).join('')}</ul>
-      <div class="pie"><span>📍 ${p.dir}</span><span class="pago ${p.cls}">${p.pago}</span></div>
-      <div class="pie" style="margin-top:4px"><span>Total</span><span class="tot">${pesos(p.total)}</span></div>
-      ${SIG[e][0]?`<div class="acc"><button class="b ${e==='recibido'?'vino':'oro'}" data-a="${p.n}">${SIG[e][1]}</button></div>`:''}
+      <div class="pie"><span>${p.mesa?'🍽 <b>Mesa '+p.mesa+'</b>':'📍 '+p.dir}</span><span class="pago ${p.cls}">${p.pago}</span></div>
+      <div class="pie" style="margin-top:4px"><span>📱 ${p.cel}</span><span>${p.prop?'Propina '+pesos(p.prop):'Sin propina'}</span></div>
+      <div class="pie" style="margin-top:4px"><span>Total</span><span class="tot">${pesos(p.total+p.prop)}</span></div>
+      ${SIG[e][0]?`<div class="acc"><button class="b ${e==='recibido'?'vino':'oro'}" data-a="${p.n}">${e==='preparando'&&p.mesa?'Listo, a la mesa 🍽':SIG[e][1]}</button></div>`:''}
     </div>`).join('')||'<div style="text-align:center;color:var(--suave);font-size:.8rem;padding:20px">Nada por aquí</div>';
   }
-  $$('[data-a]').forEach(b=>b.onclick=()=>{const p=pedidos.find(x=>x.n==b.dataset.a);p.estado=SIG[p.estado][0];p.nuevo=false;pintar();});
+  $$('[data-a]').forEach(b=>b.onclick=()=>{const p=pedidos.find(x=>x.n==b.dataset.a);p.estado=SIG[p.estado][0];p.nuevo=false;pintar();const av=p.estado==='preparando'?'Su pedido está en preparación 🔥':(p.mesa?'¡Listo! Ya se lo llevamos a la mesa '+p.mesa+' 🍽':'¡Listo! Su pedido va en camino 🛵');const t=$('#toast');t.textContent='📲 A '+p.nom+' le llegó: «'+av+'»';t.classList.add('ver');setTimeout(()=>t.classList.remove('ver'),2800);});
   const tot=pedidos.reduce((s,p)=>s+p.total,0);
   $('#kVend').textContent=pesos(tot);$('#kPed').textContent=pedidos.length;
   $('#kCob').textContent=pesos(pedidos.filter(p=>p.cls==='pend').reduce((s,p)=>s+p.total,0));
+  $('#kProp').textContent=pesos(pedidos.reduce((s,p)=>s+p.prop,0));
   const t=masVendidos();$('#kTop').textContent=t[0]?t[0][0]:'—';
 }
-const BEB=new Set(["Horchata","Limonada de Coco","Soda de Tamarindo","Margarita Clasica","Club Colombia Dorada","Soda Michelada"]);
-function masVendidos(){const m={};pedidos.forEach(p=>p.items.forEach(x=>{if(!BEB.has(x[0]))m[x[0]]=(m[x[0]]||0)+x[2]}));return Object.entries(m).sort((a,b)=>b[1]-a[1]);}
+function masVendidos(){const m={};pedidos.forEach(p=>p.items.forEach(x=>m[x[0]]=(m[x[0]]||0)+x[2]));return Object.entries(m).sort((a,b)=>b[1]-a[1]);}
 function ding(){try{const c=new (window.AudioContext||window.webkitAudioContext)();[880,1320].forEach((f,i)=>{const o=c.createOscillator(),g=c.createGain();o.frequency.value=f;o.connect(g);g.connect(c.destination);g.gain.setValueAtTime(.12,c.currentTime+i*.15);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+i*.15+.3);o.start(c.currentTime+i*.15);o.stop(c.currentTime+i*.15+.3)})}catch(e){}}
 function llega(){const p=nuevo();p.nuevo=true;pedidos.unshift(p);pintar();ding();
   const t=$('#toast');t.textContent=`🔔 Pedido nuevo de ${p.nom} · ${pesos(p.total)}`;t.classList.add('ver');setTimeout(()=>t.classList.remove('ver'),2600);
   setTimeout(()=>{p.nuevo=false;pintar()},4000);}
+// Reservas de ejemplo (llegan desde el botón «Reservar mesa» de la carta).
+const RES=[{nom:'Marcela Gómez',cel:'300 512 8841',per:6,dia:'Hoy',hora:'7:30 p. m.',mot:'Cumpleaños',nota:'Llevan torta',ok:true},{nom:'Andrés Ruiz',cel:'311 274 9902',per:12,dia:'Hoy',hora:'1:00 p. m.',mot:'Reunión laboral',nota:'Mesa larga, factura a la empresa',ok:false},{nom:'Doña Gloria',cel:'315 880 1236',per:4,dia:'Mañana',hora:'12:30 p. m.',mot:'Familiar',nota:'Silla para bebé',ok:false},{nom:'Juan Pablo',cel:'320 641 7735',per:8,dia:'Sábado',hora:'8:00 p. m.',mot:'Cumpleaños',nota:'',ok:false}];
+function pintaRes(){$('#nRes').textContent=RES.length;$('#kRes').textContent=RES.filter(r=>r.dia==='Hoy').length;
+ $('#lRes').innerHTML=RES.map((r,i)=>`<div class="ped ${r.ok?'enviado':'recibido'}"><div class="cab"><b>${r.nom} · ${r.per} personas</b><small>${r.dia} · ${r.hora}</small></div>`+
+  `<div class="pie" style="margin-top:4px"><span>🎉 ${r.mot}${r.nota?' · '+r.nota:''}</span><span>📱 ${r.cel}</span></div>`+
+  `<div class="pie" style="margin-top:6px"><span>${r.ok?'✅ Confirmada':'⏳ Pendiente'}</span>${r.ok?'':`<button class="b vino" data-r="${i}">Confirmar por WhatsApp</button>`}</div></div>`).join('');
+ $$('[data-r]').forEach(b=>b.onclick=()=>{const r=RES[b.dataset.r];r.ok=true;pintaRes();const t=$('#toast');t.textContent=`✅ Reserva confirmada: le llegó el mensaje a ${r.nom}`;t.classList.add('ver');setTimeout(()=>t.classList.remove('ver'),2600)});}
+pintaRes();
+// Avisos de las mesas: ejemplos + los que manda la carta desde este mismo navegador.
+const AV0=[{mesa:3,tipo:'mesero',txt:'🙋 Mesa 3: por favor un mesero.',h:'12:41 p. m.'},{mesa:7,tipo:'dividir',txt:'➗ Mesa 7 pide la cuenta dividida entre 4 personas ($ 31.000 cada una).',h:'12:38 p. m.'}];
+let atendidos=new Set();function pintaAv(){let A=[];try{A=JSON.parse(localStorage.getItem('vlb_avisos')||'[]')}catch(e){}A=A.concat(AV0);
+ const v=A.map((a,i)=>({...a,i,ok:atendidos.has(a.txt+a.h)}));$('#nAv').textContent=v.filter(a=>!a.ok).length;
+ $('#lAv').innerHTML=v.map(a=>`<div class="ped ${a.ok?'enviado':'recibido'}"><div class="cab"><b>Mesa ${a.mesa||'?'}</b><small>${a.h}</small></div><div style="font-size:.8rem;margin:4px 0">${a.txt}</div>`+
+  `${a.ok?'<div class="pie"><span>✅ Atendido</span></div>':`<div class="acc"><button class="b vino" data-av="${a.txt+a.h}">Atendido</button></div>`}</div>`).join('');
+ $$('[data-av]').forEach(b=>b.onclick=()=>{atendidos.add(b.dataset.av);pintaAv()})}
+pintaAv();window.addEventListener('storage',e=>{if(e.key==='vlb_avisos'){pintaAv();ding()}});
+// Carta de hoy: menú del día y agotados (la carta lo lee de este navegador).
+const PLATOS=[[9,'Tacos de Birria'],[15,'Quesabirria'],[12,'Birriamen'],[11,'Taquiza x12'],[14,'Burrito'],[13,'Costillas San Louis'],[2,'Nachos']];
+let MD={txt:'3 tacos de birria con su consomé y una bebida.',precio:35000,agotados:[]};try{MD={...MD,...JSON.parse(localStorage.getItem('vlb_menu')||'{}')}}catch(e){}
+$('#mdTxt').value=MD.txt;$('#mdPr').value=MD.precio;
+function pintaAg(){$('#agot').innerHTML=PLATOS.map(([id,n])=>`<button class="b ${MD.agotados.includes(id)?'vino':'lin'}" data-ag="${id}" style="padding:5px 9px;font-size:.72rem${MD.agotados.includes(id)?'':';color:var(--texto)'}">${MD.agotados.includes(id)?'🚫 ':''}${n}</button>`).join('');
+ $$('[data-ag]').forEach(b=>b.onclick=()=>{const id=+b.dataset.ag;MD.agotados=MD.agotados.includes(id)?MD.agotados.filter(x=>x!==id):MD.agotados.concat(id);pintaAg()})}
+pintaAg();$('#mdGuardar').onclick=()=>{MD.txt=$('#mdTxt').value.trim();MD.precio=+$('#mdPr').value||0;try{localStorage.setItem('vlb_menu',JSON.stringify(MD))}catch(e){}const t=$('#toast');t.textContent='✓ Carta actualizada: ábrala y verá el menú del día y los agotados';t.classList.add('ver');setTimeout(()=>t.classList.remove('ver'),2800)};
+// Clientes frecuentes (tarjeta de sellos).
+const FREC=[['Doña Gloria','315 880 1236',9],['Carolina','300 512 8841',7],['Andrés','311 274 9902',4],['Mateo','304 219 5518',10]];
+$('#lFrec').innerHTML=FREC.map(([n,c,k])=>`<div class="ped ${k>=10?'enviado':'preparando'}"><div class="cab"><b>${n}</b><small>📱 ${c}</small></div><div style="font-size:.85rem;letter-spacing:2px">${'●'.repeat(Math.min(k,10))}${'○'.repeat(Math.max(0,10-k))}</div>`+
+ `<div class="pie"><span>${k>=10?'🎉 Ganó un almuerzo gratis':k+' de 10 sellos'}</span></div></div>`).join('');
+// Costo y margen por plato (receta).
+const COSTO=[['Tacos de Birria (3)',37000,[['Birria de res 200 g',8400],['Tortillas de maíz',900],['Queso mozzarella',2100],['Consomé',1300],['Cebolla, cilantro y limón',600],['Salsas y gas',900]]],
+ ['Quesabirria',39000,[['Birria de res 200 g',8400],['Tortillas',900],['Queso doble',3600],['Consomé',1300],['Salsas y gas',900]]],
+ ['Birriamen',36000,[['Ramen',2200],['Birria de res 150 g',6300],['Consomé',1800],['Queso, cebolla y cilantro',1600],['Gas',500]]],
+ ['Combo del día',35000,[['3 tacos de birria',11800],['Consomé',1300],['Bebida',1800]]],
+ ['Margarita clásica',24000,[['Tequila',6200],['Triple sec',1500],['Limón y sal',600]]]];
+$('#lCosto').innerHTML=COSTO.map(([n,pr,R])=>{const c=R.reduce((a,x)=>a+x[1],0),mg=Math.round((pr-c)/pr*100);return `<details style="background:#fff;border:1px solid #e8dcc8;border-radius:10px;padding:8px 10px;margin-bottom:6px"><summary style="cursor:pointer;display:flex;justify-content:space-between;gap:8px;font-size:.8rem"><b>${n}</b><span>${pesos(pr)} · costo ${pesos(c)} · <b style="color:${mg>=55?'#1d7a46':'#b7791f'}">margen ${mg} %</b></span></summary>`+
+ `<ul style="margin:6px 0 0;padding-left:16px;font-size:.75rem">${R.map(x=>`<li>${x[0]} — ${pesos(x[1])}</li>`).join('')}</ul></details>`}).join('');
 // Arranque: el día ya lleva pedidos.
 for(let i=0;i<6;i++)pedidos.push(nuevo('enviado',300-i*35));
 for(let i=0;i<2;i++)pedidos.push(nuevo('preparando',25-i*8));
@@ -153,7 +214,9 @@ $('#cerrar').onclick=()=>{
   $('#mFecha').textContent=new Date().toLocaleDateString('es-CO',{weekday:'long',day:'numeric',month:'long'});
   $('#mTot').textContent=pesos(s(()=>1));$('#mEf').textContent=pesos(s(p=>p.cls==='ef'));
   $('#mNe').textContent=pesos(s(p=>p.cls===''));$('#mPc').textContent=pesos(s(p=>p.cls==='pend'));
-  $('#mN').textContent=pedidos.length;
+  $('#mN').textContent=pedidos.length;$('#mInc').textContent=pesos(s(()=>1)*8/108);$('#mRes').textContent=RES.filter(r=>r.ok&&r.dia==='Hoy').length;
+  const pr=k=>pedidos.filter(k).reduce((a,p)=>a+p.prop,0);
+  $('#mPr').textContent=pesos(pr(()=>1));$('#mPrE').textContent=pesos(pr(p=>p.cls!==''));$('#mPrN').textContent=pesos(pr(p=>p.cls===''));$('#mPrC').textContent=pedidos.filter(p=>p.prop).length;
   $("#mTop").innerHTML=masVendidos().slice(0,3).map(([n,c])=>`<li>${n} — <b>${c}</b></li>`).join('');
   $('#ok').style.display='none';$('#modal').classList.add('ver');
 };
