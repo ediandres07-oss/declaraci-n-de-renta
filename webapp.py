@@ -2085,6 +2085,16 @@ def apps_a_la_medida():
     return render_template("apps_a_la_medida.html")
 
 
+@app.before_request
+def _ventaneria_pausada_estaticos():
+    """5-nov-2026 Edison: «y el pdf también». Mientras VENTANERIA_PAUSADA, no se sirven el PDF,
+    el video ni las imágenes del anuncio del cotizador (/static/ventaneria/...)."""
+    if request.path.startswith("/static/ventaneria/"):
+        from src.prospectos import VENTANERIA_PAUSADA
+        if VENTANERIA_PAUSADA:
+            abort(404)
+
+
 @app.get("/ventaneria")
 def ventaneria():
     """Página de venta del cotizador de ventanería (1-nov-2026). Video, imágenes y PDF salen
