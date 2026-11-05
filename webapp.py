@@ -2053,7 +2053,10 @@ _MUESTRAS = {"central-san-ignacio": "muestras/central_san_ignacio.html",
              "muska-rooftop": "muestras/muska_rooftop.html",
              "antojos-bello": "muestras/antojos_bello.html",
              "viva-la-birria": "muestras/viva_la_birria.html",
-             "viva-la-birria-pedidos": "muestras/viva_la_birria_pedidos.html"}
+             "viva-la-birria-pedidos": "muestras/viva_la_birria_pedidos.html",
+             # Ejemplo SIN nombre de cliente para la campaña de restaurantes (4-nov-2026)
+             "carta-ejemplo": "muestras/carta_ejemplo.html",
+             "carta-ejemplo-pedidos": "muestras/carta_ejemplo_pedidos.html"}
 
 
 @app.get("/muestra/<slug>")
