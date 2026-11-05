@@ -298,18 +298,18 @@ def es_restaurante(p: "Prospecto") -> bool:
 
 
 def plantilla_restaurante(p: "Prospecto") -> tuple[str, str]:
-    """3-nov-2026 (Edison): a los restaurantes, la contabilidad con impuesto al consumo + la carta
-    digital con pedidos + el CRM de pedidos, con los ejemplos de Don Jorge."""
+    """3-nov-2026 (Edison): a los restaurantes, la carta digital con pedidos + el CRM de pedidos y,
+    de último (4-nov: «primero la carta y el CRM»), la contabilidad con impuesto al consumo."""
     negocio = (p.razon_social or "tu restaurante").strip()
     negocio = negocio.title() if negocio.isupper() else negocio
-    asunto = f"{negocio}: impuesto al consumo, carta digital y pedidos por WhatsApp"
+    asunto = f"{negocio}: su carta digital con pedidos por WhatsApp"
     cuerpo = f"""<p>Hola,</p>
-<p>Vi que <b>{negocio}</b> se inscribió en la Cámara de Comercio el {_fecha_larga(p.fecha_matricula)}. ¡Felicitaciones! Trabajamos con restaurantes y les ofrecemos:</p>
+<p>Vi que <b>{negocio}</b> se inscribió en la Cámara de Comercio el {_fecha_larga(p.fecha_matricula)}. ¡Felicitaciones! Le hacemos a su restaurante:</p>
 <ul style="padding-left:18px">
-<li>📒 <b>La contabilidad completa del restaurante</b>: el <b>impuesto al consumo</b> (formulario 310 cada dos meses), la <b>nómina electrónica</b>, la renta y los gastos del negocio separados de los personales, con un contador que lo revisa.</li>
 <li>📱 <b>Su carta digital con pedidos por WhatsApp</b>: el cliente escoge, arma el pedido y le llega a su WhatsApp. <a href="{URL}/muestra/carta-ejemplo" style="color:#b8955f;font-weight:700">Mire un ejemplo</a>.</li>
 <li>📊 <b>Un CRM de pedidos y clientes</b>: ve cada pedido (recibido, en preparación, listo), quién le compra y las ventas del día, desde el celular. <a href="{URL}/muestra/carta-ejemplo-pedidos" style="color:#b8955f;font-weight:700">Mire cómo se ve</a>.</li>
 </ul>
+<p>Y si le sirve, también le llevamos <b>la contabilidad del restaurante</b>: el <b>impuesto al consumo</b> (formulario 310 cada dos meses), la <b>nómina electrónica</b> y la renta, con un contador que lo revisa.</p>
 <p>Responda este correo y le cuento cómo funciona y cuánto cuesta para {negocio.rstrip(".")}.</p>"""
     return asunto, _envolver(cuerpo, p.email, "Ver la carta de ejemplo", f"{URL}/muestra/carta-ejemplo",
                              "Ver el CRM de pedidos", f"{URL}/muestra/carta-ejemplo-pedidos")
