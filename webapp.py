@@ -399,6 +399,11 @@ def precio_por_empresas(tramos, n: int) -> int:
     return total
 
 
+# Mínimo de empresas a pagar por correo (decisión de Edison). 5-nov-2026: Rodolfo
+# (elcontador1034@) pagó 3 teniendo 5 empresas activas → «para el próximo pago no puede pagar menos de 4».
+MIN_EMPRESAS_POR_CORREO = {"elcontador1034@gmail.com": 4}
+
+
 def _empresas_validas(valor):
     """Número de empresas pedido (1..EMPRESAS_MAX) o None si no es válido."""
     try:
@@ -2178,6 +2183,9 @@ def crear_orden_contabilidad():
         n_empresas = _empresas_validas(cuerpo.get("empresas"))
         if not n_empresas:
             return jsonify({"error": f"Escribe cuántas empresas llevas (de 1 a {EMPRESAS_MAX})."}), 400
+        minimo = MIN_EMPRESAS_POR_CORREO.get(email, 1)
+        if n_empresas < minimo:
+            return jsonify({"error": f"Tu cuenta lleva más empresas: el plan mínimo para ti es de {minimo} empresas."}), 400
         mensual = precio_por_empresas(TRAMOS_CONTABILIDAD, n_empresas)
         p = {"nombre": f"{n_empresas} empresa{'s' if n_empresas != 1 else ''}",
              "mensual": mensual, "anual": mensual * 10, "tope": n_empresas}
