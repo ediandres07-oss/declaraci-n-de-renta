@@ -17,7 +17,7 @@ header .der{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
 .b.oro{background:var(--oro);color:var(--negro)}.b.lin{background:transparent;border:1px solid var(--oro);color:var(--oro2)}
 .b.vino{background:var(--vino);color:#fff}
 .muestra{background:#fff4d6;color:#7a5b00;font-size:.75rem;text-align:center;padding:6px}
-.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding:14px 18px 4px}
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;padding:14px 18px 4px}
 .kpi{background:#fff;border:1px solid #e8dcc8;border-radius:12px;padding:10px 12px}
 .kpi b{display:block;font-size:1.25rem;font-variant-numeric:tabular-nums}.kpi span{font-size:.72rem;color:var(--suave);text-transform:uppercase;letter-spacing:.04em;font-weight:600}
 .tabs{display:none;gap:6px;padding:10px 18px 0}
@@ -68,6 +68,7 @@ header .der{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
  <div class="kpi"><span>Pedidos</span><b id="kPed">0</b></div>
  <div class="kpi"><span>Por cobrar</span><b id="kCob">$ 0</b></div>
  <div class="kpi"><span>Propinas hoy</span><b id="kProp">$ 0</b></div>
+ <div class="kpi"><span>Reservas hoy</span><b id="kRes">0</b></div>
  <div class="kpi"><span>Plato estrella</span><b id="kTop" style="font-size:1rem">—</b></div>
 </div>
 <div class="tabs" id="tabs">
@@ -78,6 +79,7 @@ header .der{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
  <div class="col" data-e="preparando"><h2>🔥 Preparando <span class="n">0</span></h2><div class="lista"></div></div>
  <div class="col" data-e="enviado"><h2>🛵 Enviados <span class="n">0</span></h2><div class="lista"></div></div>
 </div>
+<section style="padding:6px 18px 18px"><div class="col" style="display:block;min-height:0"><h2>📅 Reservas <span class="n" id="nRes">0</span></h2><div class="lista" id="lRes"></div></div></section>
 <div class="toast" id="toast"></div>
 <div class="modal" id="modal"><div class="caja">
  <h3>Cierre del día</h3>
@@ -87,6 +89,7 @@ header .der{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
  <div class="fila"><span>Nequi / transferencia</span><b id="mNe"></b></div>
  <div class="fila"><span>Por cobrar</span><b id="mPc"></b></div>
  <div class="fila"><span>Pedidos</span><b id="mN"></b></div>
+ <div class="fila"><span>Reservas confirmadas hoy</span><b id="mRes"></b></div>
  <p style="margin:14px 0 4px;font-weight:700">Propinas del día (para el equipo, no son venta)</p>
  <div class="fila"><span>Total propinas</span><b id="mPr"></b></div>
  <div class="fila"><span>En efectivo</span><b id="mPrE"></b></div>
@@ -148,6 +151,14 @@ function ding(){try{const c=new (window.AudioContext||window.webkitAudioContext)
 function llega(){const p=nuevo();p.nuevo=true;pedidos.unshift(p);pintar();ding();
   const t=$('#toast');t.textContent=`🔔 Pedido nuevo de ${p.nom} · ${pesos(p.total)}`;t.classList.add('ver');setTimeout(()=>t.classList.remove('ver'),2600);
   setTimeout(()=>{p.nuevo=false;pintar()},4000);}
+// Reservas de ejemplo (llegan desde el botón «Reservar mesa» de la carta).
+const RES=[{nom:'Marcela Gómez',cel:'300 512 8841',per:6,dia:'Hoy',hora:'7:30 p. m.',mot:'Cumpleaños',nota:'Llevan torta',ok:true},{nom:'Andrés Ruiz',cel:'311 274 9902',per:12,dia:'Hoy',hora:'1:00 p. m.',mot:'Reunión laboral',nota:'Mesa larga, factura a la empresa',ok:false},{nom:'Doña Gloria',cel:'315 880 1236',per:4,dia:'Mañana',hora:'12:30 p. m.',mot:'Familiar',nota:'Silla para bebé',ok:false},{nom:'Juan Pablo',cel:'320 641 7735',per:8,dia:'Sábado',hora:'8:00 p. m.',mot:'Cumpleaños',nota:'',ok:false}];
+function pintaRes(){$('#nRes').textContent=RES.length;$('#kRes').textContent=RES.filter(r=>r.dia==='Hoy').length;
+ $('#lRes').innerHTML=RES.map((r,i)=>`<div class="ped ${r.ok?'enviado':'recibido'}"><div class="cab"><b>${r.nom} · ${r.per} personas</b><small>${r.dia} · ${r.hora}</small></div>`+
+  `<div class="pie" style="margin-top:4px"><span>🎉 ${r.mot}${r.nota?' · '+r.nota:''}</span><span>📱 ${r.cel}</span></div>`+
+  `<div class="pie" style="margin-top:6px"><span>${r.ok?'✅ Confirmada':'⏳ Pendiente'}</span>${r.ok?'':`<button class="b vino" data-r="${i}">Confirmar por WhatsApp</button>`}</div></div>`).join('');
+ $$('[data-r]').forEach(b=>b.onclick=()=>{const r=RES[b.dataset.r];r.ok=true;pintaRes();const t=$('#toast');t.textContent=`✅ Reserva confirmada: le llegó el mensaje a ${r.nom}`;t.classList.add('ver');setTimeout(()=>t.classList.remove('ver'),2600)});}
+pintaRes();
 // Arranque: el día ya lleva pedidos.
 for(let i=0;i<6;i++)pedidos.push(nuevo('enviado',300-i*35));
 for(let i=0;i<2;i++)pedidos.push(nuevo('preparando',25-i*8));
@@ -161,7 +172,7 @@ $('#cerrar').onclick=()=>{
   $('#mFecha').textContent=new Date().toLocaleDateString('es-CO',{weekday:'long',day:'numeric',month:'long'});
   $('#mTot').textContent=pesos(s(()=>1));$('#mEf').textContent=pesos(s(p=>p.cls==='ef'));
   $('#mNe').textContent=pesos(s(p=>p.cls===''));$('#mPc').textContent=pesos(s(p=>p.cls==='pend'));
-  $('#mN').textContent=pedidos.length;
+  $('#mN').textContent=pedidos.length;$('#mRes').textContent=RES.filter(r=>r.ok&&r.dia==='Hoy').length;
   const pr=k=>pedidos.filter(k).reduce((a,p)=>a+p.prop,0);
   $('#mPr').textContent=pesos(pr(()=>1));$('#mPrE').textContent=pesos(pr(p=>p.cls!==''));$('#mPrN').textContent=pesos(pr(p=>p.cls===''));$('#mPrC').textContent=pedidos.filter(p=>p.prop).length;
   $("#mTop").innerHTML=masVendidos().slice(0,3).map(([n,c])=>`<li>${n} — <b>${c}</b></li>`).join('');
