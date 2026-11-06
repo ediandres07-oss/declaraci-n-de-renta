@@ -46,6 +46,28 @@ nav .links a{text-decoration:none}nav .links a:hover{color:var(--oro2)}
 .hero .datos{display:flex;gap:28px;margin-top:38px;flex-wrap:wrap}
 .hero .datos div b{display:block;font-family:'Bebas Neue';font-size:2.1rem;color:var(--oro2);font-weight:400;letter-spacing:.03em}
 .hero .datos div span{font-size:.75rem;color:var(--gris);text-transform:uppercase;letter-spacing:.08em}
+/* PORTADA CINEMATOGRÁFICA: el video avanza con el scroll */
+.cine{position:relative;height:330vh;background:var(--negro)}
+.cine-st{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block}
+.cine-velo{position:absolute;inset:0;background:linear-gradient(180deg,rgba(11,11,13,.55) 0%,rgba(11,11,13,.1) 35%,rgba(11,11,13,.25) 60%,rgba(11,11,13,.92) 100%),linear-gradient(90deg,rgba(11,11,13,.75) 0%,transparent 60%)}
+.beat{position:absolute;left:max(20px,calc((100vw - 1100px)/2));right:20px;bottom:12vh;max-width:640px;opacity:0;transform:translateY(30px);transition:opacity .5s,transform .6s;pointer-events:none}
+.beat.on{opacity:1;transform:none;pointer-events:auto}
+.beat h1,.beat h2{font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:clamp(3.2rem,10vw,7rem);line-height:.88;margin:16px 0 14px;letter-spacing:.01em;text-shadow:0 6px 30px rgba(0,0,0,.6)}
+.beat h1 span,.beat h2 span{background:linear-gradient(120deg,var(--oro2),var(--oro) 60%,#a8772a);-webkit-background-clip:text;background-clip:text;color:transparent}
+.beat p{font-size:1.08rem;color:#e6e0d6;max-width:520px;line-height:1.55;margin:0 0 24px;text-shadow:0 2px 12px rgba(0,0,0,.7)}
+.kick{font-size:.78rem;letter-spacing:.32em;color:var(--oro2);font-weight:700}
+.beat .acc{display:flex;gap:12px;flex-wrap:wrap}
+.beat .datos{display:flex;gap:28px;margin-top:30px;flex-wrap:wrap}
+.beat .datos div b{display:block;font-family:'Bebas Neue';font-size:2.1rem;color:var(--oro2);font-weight:400}
+.beat .datos div span{font-size:.75rem;color:var(--gris);text-transform:uppercase;letter-spacing:.08em}
+.cine-bar{position:absolute;left:0;right:0;bottom:0;height:3px;background:rgba(255,255,255,.08)}
+.cine-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--oro),var(--oro2))}
+.desliza{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:#cfc8bd;display:flex;flex-direction:column;align-items:center;gap:4px;transition:opacity .4s}
+.desliza span{font-size:1.2rem;animation:baja 1.4s infinite}
+@keyframes baja{50%{transform:translateY(6px)}}
+@media(max-width:820px){.cine{height:300vh}.beat{bottom:calc(20vh + 30px)}.cine-velo{background:linear-gradient(180deg,rgba(11,11,13,.5) 0%,rgba(11,11,13,.05) 30%,rgba(11,11,13,.35) 55%,rgba(11,11,13,.95) 100%)}.desliza{bottom:90px}}
+@media(prefers-reduced-motion:reduce){.cine{height:auto}.cine-st{position:relative}.beat{position:relative;opacity:1;transform:none;left:auto;bottom:auto;padding:30px 20px}.b1,.b2{display:none}}
 /* SECCIONES */
 section{padding:80px 20px}
 .cont{max-width:1100px;margin:0 auto}
@@ -268,21 +290,35 @@ label{display:block;font-size:.75rem;color:var(--gris);margin:12px 0 6px;font-we
  <button class="btn oro sm" onclick="abrir()">Reservar</button>
 </nav>
 
-<header class="hero">
- <div class="bg"></div>
- <div class="in">
-  <span class="chip"><span class="pt"></span><span id="abierto">Abierto ahora · hasta las 8:00 p. m.</span></span>
-  <h1>Su corte,<br><span>sin hacer fila.</span></h1>
-  <p>Escoja el servicio, su barbero y la hora en 30 segundos. Le llega la confirmación por WhatsApp y un recordatorio el día antes. ¿No puede venir? Vamos a su casa.</p>
-  <div class="acc">
-   <button class="btn oro" onclick="abrir()">✂ Reservar mi cita</button>
-   <a class="btn lin" href="#cortes">¿Qué corte me queda?</a>
+<header class="cine" id="cine">
+ <div class="cine-st">
+  <canvas id="cv" aria-hidden="true"></canvas>
+  <div class="cine-velo"></div>
+  <div class="beat b1">
+   <span class="chip"><span class="pt"></span><span id="abierto">Abierto ahora · hasta las 8:00 p. m.</span></span>
+   <h1>Su corte,<br><span>sin hacer fila.</span></h1>
+   <p>Reserve en 30 segundos. Sin llamadas, sin esperar.</p>
   </div>
-  <div class="datos">
-   <div><b>4,9 ★</b><span>612 reseñas en Google</span></div>
-   <div><b>5</b><span>barberos</span></div>
-   <div><b id="libres">7</b><span>turnos libres hoy</span></div>
+  <div class="beat b2">
+   <div class="kick">PRECISIÓN EN CADA PASADA</div>
+   <h2>Escoja su barbero,<br><span>su día y su hora.</span></h2>
+   <p>Le llega la confirmación por WhatsApp y un recordatorio el día antes.</p>
   </div>
+  <div class="beat b3">
+   <div class="kick">¿NO PUEDE VENIR?</div>
+   <h2>La barbería<br><span>va a su casa.</span></h2>
+   <div class="acc">
+    <button class="btn oro" onclick="abrir()">✂ Reservar mi cita</button>
+    <a class="btn lin" href="#cortes">¿Qué corte me queda?</a>
+   </div>
+   <div class="datos">
+    <div><b>4,9 ★</b><span>612 reseñas en Google</span></div>
+    <div><b>5</b><span>barberos</span></div>
+    <div><b id="libres">7</b><span>turnos libres hoy</span></div>
+   </div>
+  </div>
+  <div class="cine-bar"><i id="cineBar"></i></div>
+  <div class="desliza" id="desliza">Deslice hacia abajo<span>↓</span></div>
  </div>
 </header>
 
@@ -678,6 +714,46 @@ let tt; function avisar(t){ const el = $("#toast"); el.textContent = t; el.class
 const car = [];
 function agregar(i){ car.push(PROD[i]); const el = $("#carrito"); el.classList.add("ver"); $("#carN").textContent = car.length; $("#carTx").textContent = "Pedir · " + pesos(car.reduce((a,p) => a + p.p, 0)); avisar("🛍 " + PROD[i].n + " agregado"); }
 function pedirProductos(){ avisar("En su página esto manda el pedido al WhatsApp de la barbería con la dirección del cliente"); }
+
+
+/* ---------- portada cinematográfica (cuadros del video según el scroll) ---------- */
+(function(){
+ const cv = $("#cv"), cx = cv.getContext("2d"), sec = $("#cine");
+ const movil = matchMedia("(max-width:820px)").matches;
+ const N = 96, base = F + "cine/" + (movil ? "m/" : "d/");
+ const img = new Array(N); let listo = 0, actual = -1, objetivo = 0, mostrado = 0;
+ function cargar(i){ return new Promise(r => { const im = new Image(); im.decoding = "async"; im.onload = () => { img[i] = im; listo++; r(); }; im.onerror = r; im.src = base + String(i+1).padStart(3,"0") + ".webp"; }); }
+ function tam(){ const d = Math.min(devicePixelRatio || 1, 2); cv.width = cv.clientWidth * d; cv.height = cv.clientHeight * d; actual = -1; }
+ function pintar(i){
+  let k = i; while (k > 0 && !img[k]) k--; const im = img[k]; if (!im) return;
+  const W = cv.width, H = cv.height, r = Math.max(W / im.width, H / im.height);
+  const w = im.width * r, h = im.height * r; cx.drawImage(im, (W - w) / 2, (H - h) / 2, w, h); actual = i;
+ }
+ function progreso(){ const r = sec.getBoundingClientRect(); return Math.min(1, Math.max(0, -r.top / (r.height - innerHeight))); }
+ const beats = [...document.querySelectorAll(".beat")];
+ function textos(p){
+  beats[0].classList.toggle("on", p < .28);
+  beats[1].classList.toggle("on", p >= .32 && p < .62);
+  beats[2].classList.toggle("on", p >= .68);
+  $("#desliza").style.opacity = p > .05 ? 0 : 1;
+  $("#cineBar").style.width = (p * 100) + "%";
+ }
+ function bucle(){
+  mostrado += (objetivo - mostrado) * .18;
+  const i = Math.round(mostrado);
+  if (i !== actual) pintar(i);
+  requestAnimationFrame(bucle);
+ }
+ function onScroll(){ const p = progreso(); objetivo = p * (N - 1); textos(p); }
+ addEventListener("scroll", onScroll, {passive:true});
+ addEventListener("resize", () => { tam(); pintar(Math.round(mostrado)); });
+ tam();
+ cargar(0).then(() => { pintar(0); onScroll(); requestAnimationFrame(bucle);
+  /* el resto: primero uno de cada 8, luego los demás, para que se mueva desde el principio */
+  const orden = []; for (let paso of [8,4,2,1]) for (let i = 0; i < N; i += paso) if (!orden.includes(i)) orden.push(i);
+  (async () => { for (let k = 0; k < orden.length; k += 6) await Promise.all(orden.slice(k, k+6).map(i => img[i] ? 0 : cargar(i))); })();
+ });
+})();
 
 /* ---------- detalles vivos ---------- */
 (function(){
