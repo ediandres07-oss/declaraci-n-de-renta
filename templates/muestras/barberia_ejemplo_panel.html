@@ -163,6 +163,19 @@ tr.f:hover{background:var(--carbon2)}
 .toast.ver{transform:none}
 .toast .ic{font-size:1.5rem}
 .toast small{display:block;color:#666;font-weight:500;font-size:.75rem;margin-top:2px}
+.planes-bar{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:45;display:flex;gap:12px;align-items:center;background:linear-gradient(135deg,#2a1f0d,#16110a);border:1px solid rgba(240,207,138,.45);border-radius:999px;padding:8px 8px 8px 20px;box-shadow:0 18px 50px rgba(0,0,0,.6);font-size:.86rem;white-space:nowrap}
+.planes-bar b{color:var(--oro2)}
+.pl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0}
+.pl{background:var(--carbon2);border:1px solid var(--borde);border-radius:18px;padding:18px 16px;position:relative}
+.pl.dest{border-color:var(--oro);background:linear-gradient(160deg,rgba(240,207,138,.12),var(--carbon2) 60%)}
+.pl .et{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--oro);color:#1a1206;font-size:.64rem;font-weight:800;padding:3px 10px;border-radius:999px;letter-spacing:.05em}
+.pl h4{margin:0;font-size:.95rem}.pl small{color:var(--gris);font-size:.74rem}
+.pl .pr{font-family:'Bebas Neue';font-size:2.2rem;color:var(--oro2);margin:8px 0 0;letter-spacing:.02em}
+.pl .pr span{font-family:Inter;font-size:.72rem;color:var(--gris)}
+.incl{columns:2;font-size:.8rem;color:#d6d1c8;padding:0;margin:0 0 14px;list-style:none}
+.incl li{margin:0 0 7px;break-inside:avoid}
+.combo{background:rgba(60,207,142,.08);border:1px solid rgba(60,207,142,.3);border-radius:14px;padding:12px 14px;font-size:.84rem;line-height:1.5;margin-bottom:12px}
+@media(max-width:820px){.planes-bar{bottom:84px;font-size:.76rem;padding:6px 6px 6px 14px}.pl-grid{grid-template-columns:1fr}.incl{columns:1}}
 .mov{display:none}
 @media(max-width:1100px){.kpis{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:1250px){ #v-caja .dos{grid-template-columns:1fr !important}}
@@ -240,6 +253,7 @@ tr.f:hover{background:var(--carbon2)}
 </main>
 </div>
 
+<div class="planes-bar"><span>¿Lo quiere para <b>su barbería</b>?</span><button class="btn oro sm" onclick="planes()">Ver planes</button></div>
 <div class="velo" id="velo"><div class="modal" id="modal"></div></div>
 <div class="toast" id="toast"></div>
 
@@ -483,6 +497,24 @@ document.querySelectorAll(".nv").forEach(b => b.addEventListener("click", () => 
  scrollTo({top:0, behavior:"smooth"});
 }));
 let ttt; function toast(ic, t, s){ const el = $("#toast"); el.innerHTML = `<span class="ic">${ic}</span><div>${t}${s ? `<small>${s}</small>` : ""}</div>`; el.classList.add("ver"); clearTimeout(ttt); ttt = setTimeout(() => el.classList.remove("ver"), 3800); }
+
+
+/* ---------- planes (lo que ofrece Tributando) ---------- */
+const WA_TRIB = "573332470715";
+function planes(){
+ const P = [["1 a 3 barberos","Barbero o barbería pequeña",52500,""],["4 a 10 barberos","La más pedida",122500,"MÁS PEDIDO"],["Más de 10 o varias sedes","Cadena o barbería grande",262500,""]];
+ const txt = encodeURIComponent("Hola, vi la muestra de la app para barberías y quiero una para mi barbería.");
+ abrirModal(`<div class="m-cab"><div class="av" style="background:linear-gradient(135deg,var(--oro2),var(--oro));color:#1a1206">✂</div><div><h3>Planes para su barbería</h3><small>Todo lo que vio en esta muestra, con su nombre</small></div><button class="x" onclick="cerrarModal()">✕</button></div>
+ <div class="m-cue">
+  <div class="pl-grid">${P.map(p => `<div class="pl ${p[3] ? "dest" : ""}">${p[3] ? `<span class="et">${p[3]}</span>` : ""}<h4>${p[0]}</h4><small>${p[1]}</small><div class="pr">${pesos(p[2])} <span>/ mes</span></div></div>`).join("")}</div>
+  <ul class="incl"><li>✓ Página de reservas con su nombre</li><li>✓ Reservas 24/7 sin llamadas</li><li>✓ Barbero a domicilio</li><li>✓ Recomendador de cortes</li><li>✓ Agenda de cada barbero</li><li>✓ Clientes con su ficha</li><li>✓ Recordatorios por WhatsApp</li><li>✓ «Ya le toca» y cumpleaños</li><li>✓ Club de sellos</li><li>✓ Caja y comisiones</li></ul>
+  <div class="nota"><b>Montaje: ${pesos(262500)}</b> una sola vez. Lo dejamos listo: servicios, precios, fotos, barberos y horarios, sus clientes cargados y el QR para el local.</div>
+  <div class="combo"><b style="color:var(--verde)">💡 Con su contabilidad en Tributando, la app queda a mitad de precio</b> y el montaje no se cobra. Cada servicio cobrado pasa solo a sus libros.</div>
+  <a class="btn wa" style="width:100%;justify-content:center;padding:14px" target="_blank" rel="noopener" href="https://wa.me/${WA_TRIB}?text=${txt}">💬 La quiero para mi barbería</a>
+  <p style="font-size:.72rem;color:var(--gris);margin:12px 0 0;text-align:center">Valores 2026. Suben cada año lo que sube el salario mínimo.</p>
+ </div>`);
+}
+if (location.hash === "#planes") setTimeout(planes, 600);
 
 /* ---------- arranque ---------- */
 $("#fecha").textContent = hoy.toLocaleDateString("es-CO",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
