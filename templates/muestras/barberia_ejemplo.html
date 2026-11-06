@@ -587,7 +587,7 @@ const FORMA = {
  triangular:'<svg viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M8 10 Q50 0 92 10 L70 80 Q50 100 30 80 Z"/></svg>'
 };
 const PREG = [
- {k:"cara", t:"¿Qué forma tiene su cara?", ay:"Mírese al espejo y toque la que más se parezca. La línea punteada le muestra la forma.", ops:[
+ {k:"cara", t:"¿Qué forma tiene su cara?", ay:"Mírese al espejo y toque la que más se parezca.", ops:[
   ["ovalada","Ovalada","Un poco más larga que ancha, sin ángulos marcados"],
   ["redonda","Redonda","Casi igual de ancha que de larga, mejillas llenas"],
   ["cuadrada","Cuadrada","Mandíbula fuerte y recta, frente ancha"],
@@ -617,14 +617,14 @@ const CORTES = [
  {n:"Rapado + barba completa", f:"c_rapado.jpg", s:"cb", d:"Cabeza al ras y barba larga bien perfilada. La mejor salida cuando hay entradas.", m:"Barba cada 2 semanas", cara:["ovalada","redonda","cuadrada","alargada","corazon"], pelo:["poco"], estilo:["practico","urbano","moderno","ejecutivo"]}
 ];
 const elec = {}; let pq = 0;
-const fotoOp = k => F + "r_" + k + ".jpg";
+const fotoOp = k => F + "r_" + k + ".jpg?v=2";
 function wiz(){
  const w = $("#wiz");
  const cab = `<div class="wiz-cab"><div class="pasos3">${PREG.map((_,i) => `<i class="${i <= pq ? "on" : ""}"></i>`).join("")}</div><small>${pq < 3 ? "Pregunta " + (pq+1) + " de 3" : "Su resultado"}</small>${pq > 0 ? `<button onclick="${pq < 3 ? "pq--;wiz()" : "reiniciarReco()"}">${pq < 3 ? "← Atrás" : "↺ Volver a empezar"}</button>` : ""}</div>`;
  if (pq < 3) {
   const P = PREG[pq];
   w.innerHTML = cab + `<h3>${P.t}</h3><p class="ay">${P.ay}</p><div class="opsf">` + P.ops.map(([k,t,d]) => `
-   <button class="opf ${elec[P.k]===k?"on":""}" onclick="elegir('${P.k}','${k}')"><div class="ft" style="background-image:url(${fotoOp(k)})">${P.k==="cara" ? FORMA[k] : ""}<span class="ok">✓</span></div><div class="tx"><b>${t}</b><small>${d}</small></div></button>`).join("") + `</div>`;
+   <button class="opf ${elec[P.k]===k?"on":""}" onclick="elegir('${P.k}','${k}')"><div class="ft" style="background-image:url(${fotoOp(k)})"><span class="ok">✓</span></div><div class="tx"><b>${t}</b><small>${d}</small></div></button>`).join("") + `</div>`;
   return;
  }
  const nombre = (p,k) => PREG.find(x => x.k === p).ops.find(o => o[0] === k)[1];
