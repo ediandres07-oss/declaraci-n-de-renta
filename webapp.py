@@ -1031,6 +1031,7 @@ def admin_prospectos():
     return (f"<!doctype html><title>Prospectos</title><div style='font-family:sans-serif;max-width:760px;margin:24px auto;padding:0 16px'>"
             f"<h2>Prospección de empresas nuevas</h2>"
             f"<p><a href='/admin/prospectos/crm' style='font-weight:700'>Abrir el CRM de prospectos →</a> · "
+            f"<a href='/admin/prospectos/restaurantes' style='font-weight:700'>Restaurantes: 2.º correo →</a> · "
             f"<a href='/portafolio' target=_blank>Ver el portafolio</a></p>"
             f"<form method=post action='/admin/prospectos/revisar'><button>Revisar el buzón de contacto@ ahora</button> "
             f"<small>(enviados reales, respuestas y rebotes)</small></form>"
@@ -1045,6 +1046,51 @@ def admin_prospectos():
             f"<h3>Bienvenida al abrir el portafolio · {_h.escape(ab)} "
             f"<small>({'ENCENDIDA' if r.get('bienvenida_encendida') else 'apagada: PROSP_BIENVENIDA_ON=1 en Render para activarla'})</small></h3>"
             f"<iframe style='width:100%;height:560px;border:1px solid #ddd' srcdoc='{_h.escape(hb)}'></iframe></div>")
+
+
+@app.get("/admin/prospectos/restaurantes")
+@autorizado_requerido
+def admin_prospectos_restaurantes():
+    """Segundo correo a restaurantes (carta + CRM) para los que recibieron el general (5-nov-2026).
+    Muestra cuántos son, a quiénes y el correo. Solo se envía con el botón."""
+    import html as _h
+    cands = prosp_mod.candidatos_restaurante_2()
+    ya = prosp_mod.Prospecto.query.filter(prosp_mod.Prospecto.segundo_en.isnot(None)).count()
+    ej = cands[0] if cands else prosp_mod.Prospecto(email="ejemplo@restaurante.co",
+                                                   razon_social="ASADERO EJEMPLO", fecha_matricula="2026-10-10")
+    asunto, html = prosp_mod.plantilla_restaurante_2(ej)
+    filas = "".join(f"<tr><td>{_h.escape(p.razon_social or '')}</td><td>{_h.escape(p.municipio or '')}</td>"
+                    f"<td>{_h.escape(p.fecha_matricula or '')}</td><td>{_h.escape(p.email)}</td>"
+                    f"<td>{_h.escape((p.actividad or '')[:50])}</td></tr>" for p in cands)
+    return (f"<!doctype html><title>Restaurantes · 2.º correo</title><div style='font-family:sans-serif;max-width:1000px;margin:24px auto;padding:0 16px'>"
+            f"<h2>Restaurantes · segundo correo (carta + CRM)</h2><p><a href='/admin/prospectos'>← Prospección</a></p>"
+            f"<p><b>{len(cands)}</b> por enviar · {ya} ya enviados. Sin bajas, rebotados ni los que ya respondieron.</p>"
+            f"<form method=post action='/admin/prospectos/restaurantes/enviar' onsubmit=\"return confirm('¿Enviar el 2.º correo a los restaurantes?')\">"
+            f"<button>Enviar ahora</button> hasta <input name=n value=150 size=4> <small>(en segundo plano, ~4 s por correo; tope 150)</small></form>"
+            f"<h3>{_h.escape(asunto)}</h3><iframe style='width:100%;height:700px;border:1px solid #ddd' srcdoc='{_h.escape(html)}'></iframe>"
+            f"<h3>A quiénes</h3><table border=1 cellpadding=4 style='border-collapse:collapse;font-size:13px'>"
+            f"<tr><th>Negocio</th><th>Municipio</th><th>Matrícula</th><th>Correo</th><th>Actividad</th></tr>{filas}</table></div>")
+
+
+@app.post("/admin/prospectos/restaurantes/enviar")
+@autorizado_requerido
+def admin_prospectos_restaurantes_enviar():
+    import threading
+    n = max(1, min(int(request.form.get("n") or 150), 150))
+    if _ENVIO_AHORA["corriendo"]:
+        return "Ya hay un envío corriendo; espera a que termine.", 409
+
+    def _correr():
+        _ENVIO_AHORA["corriendo"] = True
+        try:
+            with app.app_context():
+                prosp_mod.enviar_restaurantes_2(n)
+        except Exception:  # noqa: BLE001
+            app.logger.exception("2.º correo restaurantes")
+        finally:
+            _ENVIO_AHORA["corriendo"] = False
+    threading.Thread(target=_correr, daemon=True).start()
+    return redirect("/admin/prospectos/restaurantes")
 
 
 _ENVIO_AHORA = {"corriendo": False}

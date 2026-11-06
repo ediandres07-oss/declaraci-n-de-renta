@@ -58,6 +58,7 @@ class Prospecto(db.Model):
     visitas = db.Column(db.Integer, default=0)
     bienvenida_en = db.Column(db.DateTime)      # saludo al abrir el portafolio (una sola vez)
     logo_url = db.Column(db.String(300), default="")  # logo propio en su página /sitio
+    segundo_en = db.Column(db.DateTime)         # 2.º correo (restaurantes: carta + CRM), 5-nov-2026
 
 
 class AppVisita(db.Model):
@@ -318,6 +319,92 @@ def plantilla_restaurante(p: "Prospecto") -> tuple[str, str]:
 <p>Responda este correo y le cuento cómo funciona y cuánto cuesta para {negocio.rstrip(".")}.</p>"""
     return asunto, _envolver(cuerpo, p.email, "Ver la carta de ejemplo", f"{URL}/muestra/carta-ejemplo",
                              "Ver el CRM de pedidos", f"{URL}/muestra/carta-ejemplo-pedidos")
+
+
+# El correo de restaurantes (carta + CRM) salió desde el 3-nov-2026 21:37 (hora Colombia).
+# Los restaurantes que recibieron antes el correo general reciben UNA segunda vez el de restaurantes.
+_INICIO_PLANTILLA_REST = datetime(2026, 11, 4, 2, 38)     # UTC
+_ETAPAS_NO_SEGUNDO = ("rebotado", "descartado", "cliente", "propuesta", "respondio")
+
+
+def plantilla_restaurante_2(p: "Prospecto") -> tuple[str, str]:
+    """Segundo correo a restaurantes (5-nov-2026, Edison): ya recibieron el general de contabilidad;
+    ahora la carta digital con pedidos y el CRM, como en la campaña de WhatsApp."""
+    negocio = (p.razon_social or "su restaurante").strip()
+    negocio = negocio.title() if negocio.isupper() else negocio
+    asunto = f"{negocio}: su carta digital con pedidos por WhatsApp"
+    cuerpo = f"""<p>Hola,</p>
+<p>Hace unas semanas le escribimos cuando <b>{negocio}</b> se inscribió en la Cámara de Comercio. Hoy le cuento lo que le estamos haciendo a los restaurantes:</p>
+<ul style="padding-left:18px">
+<li>📱 <b>Su carta digital con pedidos por WhatsApp</b>: el cliente escoge, arma el pedido (domicilio, para recoger o desde la mesa con un QR) y le llega a su WhatsApp. <a href="{URL}/muestra/carta-ejemplo" style="color:#b8955f;font-weight:700">Mire un ejemplo</a>.</li>
+<li>📊 <b>Un CRM de pedidos, reservas y clientes</b>: ve cada pedido (recibido, en preparación, listo), las reservas, las propinas y las ventas del día, desde el celular. <a href="{URL}/muestra/carta-ejemplo-pedidos" style="color:#b8955f;font-weight:700">Mire cómo se ve</a>.</li>
+</ul>
+<p>Y si le sirve, también le llevamos <b>la contabilidad del restaurante</b>: el <b>impuesto al consumo</b> (formulario 310), la <b>nómina electrónica</b> y la renta, con un contador que lo revisa.</p>
+<p>Responda este correo o escríbame al WhatsApp y le cuento cuánto cuesta para {negocio.rstrip(".")}.</p>"""
+    return asunto, _envolver(cuerpo, p.email, "Ver la carta de ejemplo", f"{URL}/muestra/carta-ejemplo",
+                             "Ver el CRM de pedidos", f"{URL}/muestra/carta-ejemplo-pedidos")
+
+
+def candidatos_restaurante_2(limite: int = 2000) -> list:
+    """Restaurantes que recibieron el correo GENERAL (antes del de restaurantes) y aún no el segundo.
+    Fuera: bajas, rebotados y los que ya están en conversación (respondió, propuesta, cliente, descartado)."""
+    qry = (Prospecto.query.filter(Prospecto.estado == "enviado", Prospecto.segundo_en.is_(None),
+                                  Prospecto.enviado_en < _INICIO_PLANTILLA_REST,
+                                  Prospecto.segmento != "contador")
+           .order_by(Prospecto.fecha_matricula.desc()))
+    return [p for p in qry.limit(limite * 4).all()
+            if es_restaurante(p) and (p.etapa or "") not in _ETAPAS_NO_SEGUNDO
+            and not esta_de_baja(p.email)
+            and not _RE_FIRMA_CONTABLE.search(p.actividad or "")][:limite]
+
+
+def enviar_restaurantes_2(limite: int = 150) -> int:
+    """Manda el segundo correo (restaurantes) a hasta `limite` candidatos, una sola conexión SMTP,
+    con pausa. Marca segundo_en para no repetir. Solo con PROSPECTOS_ON=1."""
+    import smtplib
+    import time
+    if os.environ.get("PROSPECTOS_ON", "").strip() != "1":
+        return 0
+    cfg = _config_smtp()
+    if not cfg:
+        return 0
+    from src.correo import armar_mensaje
+    pausa = float(os.environ.get("PROSPECTOS_PAUSA", "4") or 4)
+    enviados, smtp = 0, None
+    try:
+        for p in candidatos_restaurante_2(limite):
+            asunto, html = plantilla_restaurante_2(p)
+            msg = armar_mensaje(p.email, asunto, html, cfg)
+            cortar = False
+            for intento in (1, 2):
+                try:
+                    if smtp is None:
+                        smtp = _abrir_smtp(cfg)
+                    smtp.send_message(msg)
+                    p.segundo_en = datetime.utcnow()
+                    enviados += 1
+                    break
+                except smtplib.SMTPRecipientsRefused as exc:
+                    p.segundo_en, p.error = datetime.utcnow(), ("2.º rechazado: " + str(exc))[:300]
+                    break
+                except (smtplib.SMTPException, OSError):
+                    try:
+                        smtp and smtp.close()
+                    except Exception:  # noqa: BLE001
+                        pass
+                    smtp = None
+                    if intento == 2:
+                        cortar = True
+            db.session.commit()
+            if cortar:
+                break
+            time.sleep(pausa)
+    finally:
+        try:
+            smtp and smtp.quit()
+        except Exception:  # noqa: BLE001
+            pass
+    return enviados
 
 
 def plantilla(p: Prospecto) -> tuple[str, str]:
