@@ -51,6 +51,24 @@ main{padding:22px 26px 60px;min-width:0}
 .card h2{margin:0 0 4px;font-size:1rem}
 .card .ay{color:var(--gris);font-size:.8rem;margin:0 0 14px}
 /* AGENDA */
+.ag .col{cursor:copy}
+.cita.novino{opacity:.75;border-style:dashed !important;background:rgba(224,83,61,.14) !important;border-color:var(--rojo) !important}
+.cita.novino b,.cita.novino small{text-decoration:line-through}
+.bloq{position:absolute;left:4px;right:4px;border-radius:10px;padding:6px 8px;font-size:.72rem;color:var(--gris);border:1px dashed #555;background:repeating-linear-gradient(45deg,rgba(255,255,255,.04) 0 8px,rgba(255,255,255,.08) 8px 16px);z-index:1;cursor:pointer;overflow:hidden}
+.bloq b{display:block;color:var(--crema);font-size:.74rem}.bloq small{display:block;font-size:.66rem}
+.mes .d.cerr{background:repeating-linear-gradient(45deg,var(--carbon) 0 8px,#1a1a1f 8px 16px)}
+.frm label{display:block;font-size:.72rem;color:var(--gris);text-transform:uppercase;letter-spacing:.08em;margin:12px 0 5px}
+.frm input,.frm select{width:100%;background:var(--carbon2);border:1px solid var(--borde);border-radius:12px;padding:11px 12px;color:var(--crema);font:500 .9rem Inter,sans-serif}
+.frm input:focus,.frm select:focus{outline:none;border-color:var(--oro)}
+.frm .dos2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.frm .chk{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:.88rem;color:var(--crema);text-transform:none;letter-spacing:0}
+.frm .chk input{width:auto}
+.frm .err{color:#ffb4a6;font-size:.82rem;margin-top:10px;min-height:1em}
+.m-acc{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.btn.rojo{background:rgba(224,83,61,.14);border:1px solid rgba(224,83,61,.5);color:#ffb4a6}
+.bl-it{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px dashed var(--borde);font-size:.85rem}
+.bl-it small{display:block;color:var(--gris)}
+.bl-it button{margin-left:auto}
 .agnav{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
 .agnav .sw{display:flex;background:var(--carbon2);border:1px solid var(--borde);border-radius:999px;padding:3px}
 .agnav .sw button{border:0;background:transparent;color:var(--gris);font:700 .8rem Inter;padding:7px 16px;border-radius:999px;cursor:pointer}
@@ -231,7 +249,7 @@ tr.f:hover{background:var(--carbon2)}
 <main>
  <div class="top">
   <div><h1 id="titulo">Agenda de hoy</h1><div class="fecha" id="fecha"></div></div>
-  <div class="der"><button class="btn lin sm" id="sonBtn" onclick="activarSonido()">🔔 Activar sonido</button><span class="vivo"><i></i>En vivo</span><a class="btn oro sm" href="/muestra/barberia-ejemplo">+ Nueva cita</a></div>
+  <div class="der"><button class="btn lin sm" id="sonBtn" onclick="activarSonido()">🔔 Activar sonido</button><span class="vivo"><i></i>En vivo</span><button class="btn oro sm" onclick="nuevaCita()">+ Nueva cita</button></div>
  </div>
  <div class="kpis" id="kpis"></div>
 
@@ -241,7 +259,11 @@ tr.f:hover{background:var(--carbon2)}
    <div class="sw"><button id="vDia" class="on" onclick="vista('dia')">Día</button><button id="vMes" onclick="vista('mes')">Mes</button></div>
    <button class="fl" onclick="mover(-1)" aria-label="Anterior">‹</button><span id="agTit"></span><button class="fl" onclick="mover(1)" aria-label="Siguiente">›</button>
    <button class="hoyb" onclick="irHoy()">Hoy</button>
+   <span style="flex:1"></span>
+   <button class="hoyb" onclick="verBloqueos()">🚫 Bloquear horario</button>
+   <button class="hoyb" onclick="nuevaCita()" style="color:var(--verde)">+ Agendar</button>
   </div>
+  <p class="ay" style="margin:-4px 0 10px;font-size:.78rem;color:var(--gris)">Toque un espacio libre de un barbero para agendar ahí, o una cita para cobrar, moverla, cancelarla o marcar que no vino.</p>
   <div class="agenda" id="agWrap"><div class="ag" id="ag"></div></div>
   <div class="mes" id="mes" hidden></div>
   <div class="ley"><span><i style="background:var(--oro)"></i>Corte</span><span><i style="background:var(--azul)"></i>Barba / afeitado</span><span><i style="background:var(--morado)"></i>VIP</span><span><i style="background:var(--verde)"></i>A domicilio</span><span><i style="background:var(--rojo)"></i>Ahora</span></div>
@@ -322,7 +344,7 @@ const colAv = n => `hsl(${(n.charCodeAt(0)*37 + n.length*13) % 360} 45% 32%)`;
 
 /* ---------- citas del día ---------- */
 const H0 = 9, H1 = 20, PX = 44; /* 44 px por media hora */
-const CITAS = [];
+const CITAS_BASE = [], CITAS = [];   /* BASE = ejemplo generado; CITAS = lo de hoy ya con cambios, bloqueos y reservas */
 BARB.forEach((b, bi) => {
  let t = H0 * 60 + Math.floor(rnd()*3)*30;
  while (t < H1 * 60 - 30) {
@@ -330,7 +352,7 @@ BARB.forEach((b, bi) => {
   const sv = SERV[Math.floor(rnd() * (bi === 2 ? 6 : SERV.length))];
   const dom = b.dom && rnd() < .28;
   const c = pick(CL);
-  CITAS.push({b:b.n, ini:t, min:sv.m, sv, dom, cli:c, pago:pick(["Efectivo","Nequi","Nequi","Daviplata","Tarjeta","Transferencia"]), prop: rnd() < .4 ? pick([2000,5000,5000,10000]) : 0});
+  CITAS_BASE.push({b:b.n, ini:t, min:sv.m, sv, dom, cli:c, pago:pick(["Efectivo","Nequi","Nequi","Daviplata","Tarjeta","Transferencia"]), prop: rnd() < .4 ? pick([2000,5000,5000,10000]) : 0});
   t += Math.ceil((sv.m + (dom ? 30 : 0)) / 30) * 30;
  }
 });
@@ -339,19 +361,17 @@ function ahoraMin(){ const d = new Date(); const m = d.getHours()*60 + d.getMinu
 /* La cita que el cliente acaba de reservar en la página de muestra (mismo navegador) */
 const iso = d => d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
 const HOY_ISO = iso(hoy);
-let RESERVAS = [];   /* todas las reservas hechas en la página (cualquier día), las más nuevas al final */
-try { RESERVAS = JSON.parse(localStorage.getItem("sb_demo_citas") || "[]").filter(g => g && g.fecha >= HOY_ISO); } catch(e) {}
-let citaDemo = null;
-try {
- const g = JSON.parse(localStorage.getItem("sb_demo_cita") || "null");
- if (g && (g.fecha ? g.fecha === HOY_ISO : (Date.now() - g.cuando < 864e5 * 2 && g.dia === 0))) {
-  const bn = BARB.find(b => b.n === g.barbero) ? g.barbero : "Andrés";
-  citaDemo = {b:bn, ini:g.h*60 + g.m, min:g.min || 45, sv:{n:g.serv, p:g.total, t:"corte"}, dom:g.lugar === "casa", demo:true,
-   cli:{n:g.nombre, id:-1, vis:1, dias:0, ult:g.serv, b:bn, gas:g.total, nota:g.nota || "Cliente nuevo: reservó por la página.", sellos:1, nuevo:true, cel:"", cum:hoy}, pago:"Por cobrar", prop:0};
-  for (let i = CITAS.length - 1; i >= 0; i--) { const c = CITAS[i]; if (c.b === bn && c.ini < citaDemo.ini + citaDemo.min && citaDemo.ini < c.ini + c.min) CITAS.splice(i, 1); }
-  CITAS.push(citaDemo);
- }
-} catch(e) {}
+/* Lo que se guarda (en este navegador, es una muestra): reservas de la página y del panel, cambios a las citas
+   de ejemplo (cancelada / no vino) y bloqueos de horario. */
+const LS = {
+ get(k, d){ try { return JSON.parse(localStorage.getItem(k) || "null") ?? d; } catch(e) { return d; } },
+ set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e) {} }
+};
+const reservas = () => LS.get("sb_demo_citas", []).filter(g => g && g.fecha);
+const cambios = () => LS.get("sb_demo_cambios", {});
+const bloqueos = () => LS.get("sb_demo_bloqueos", []);
+function nuevoCod(){ return "SB-" + Math.floor(1000 + Math.random()*9000); }
+let citaDemo = null;   /* la reserva que el cliente acaba de hacer en la página (para el aviso al abrir) */
 
 /* ---------- agenda de cualquier día y vista del mes ---------- */
 let DIA = 0, VISTA = "dia", MESOFF = 0, LISTA = CITAS;
@@ -361,8 +381,32 @@ function offDe(isoTxt){ const [y,m,d] = isoTxt.split("-").map(Number); return Ma
 function semilla(str){ let h = 2166136261; for (const ch of str) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return () => { h ^= h << 13; h ^= h >>> 17; h ^= h << 5; return ((h >>> 0) % 1000) / 1000; }; }
 function reservaACita(g){
  const bn = BARB.find(b => b.n === g.barbero) ? g.barbero : "Andrés";
- return {b:bn, ini:g.h*60 + g.m, min:g.min || 45, sv:{n:g.serv, p:g.total, t:"corte"}, dom:g.lugar === "casa", demo:true,
-  cli:{n:g.nombre, id:-1, vis:1, dias:0, ult:g.serv, b:bn, gas:g.total, nota:g.nota || "Cliente nuevo: reservó por la página.", sellos:1, nuevo:true, cel:"", cum:hoy}, pago:"Por cobrar", prop:0};
+ const sv = SERV.find(s => s.n === g.serv) || {n:g.serv, p:g.total, t:"corte"};
+ const conocido = CL.find(c => c.n === g.nombre);
+ return {b:bn, ini:g.h*60 + g.m, min:g.min || sv.m || 45, sv:{...sv, n:g.serv, p:g.total || sv.p}, dom:g.lugar === "casa", demo:g.origen !== "panel", panel:g.origen === "panel", cod:g.cod, novino:g.estado === "novino",
+  cli: conocido || {n:g.nombre, id:-1, vis:1, dias:0, ult:g.serv, b:bn, gas:g.total, nota:g.nota || (g.origen === "panel" ? "Agendado por el dueño." : "Cliente nuevo: reservó por la página."), sellos:1, nuevo:true, cel:g.cel || "", cum:hoy},
+  pago:"Por cobrar", prop:0};
+}
+/* Bloqueos que tocan un día: los de esa fecha y los que se repiten todos los días */
+function bloqDe(fechaIso){ const dw = new Date(fechaIso + "T12:00").getDay(); return bloqueos().filter(x => x.rep ? dw !== 0 : x.fecha === fechaIso); }
+const cruza = (a0, a1, b0, b1) => a0 < b1 && b0 < a1;
+function bloqueada(bl, b, ini, min){ return bl.some(x => (x.b === "Todos" || x.b === b) && cruza(ini, ini + min, x.desde, x.hasta)); }
+/* Arma el día: ejemplo generado − canceladas − lo que cae en bloqueos + reservas guardadas */
+function armarDia(base, fechaIso){
+ const cm = cambios(), bl = bloqDe(fechaIso);
+ let l = base.filter(c => { const k = fechaIso + "|" + c.b + "|" + c.ini; c.k = k; return !(cm[k] && cm[k].accion === "cancel") && !bloqueada(bl, c.b, c.ini, c.min); })
+  .map(c => ({...c, novino: !!(cm[c.k] && cm[c.k].accion === "novino")}));
+ reservas().filter(g => g.fecha === fechaIso).forEach(g => {
+  const c = reservaACita(g);
+  l = l.filter(x => x.cod || !(x.b === c.b && cruza(x.ini, x.ini + x.min, c.ini, c.ini + c.min)));
+  l.push(c);
+ });
+ return l;
+}
+function refrescar(){
+ for (const k in _cache) delete _cache[k];
+ CITAS.length = 0; armarDia(CITAS_BASE, HOY_ISO).forEach(c => CITAS.push(c));
+ pintarAgenda(); pintarKpis(); try { pintarDomicilios(); pintarCaja(); } catch(e) {}
 }
 function citasDe(off){
  if (off === 0) return CITAS;
@@ -380,12 +424,7 @@ function citasDe(off){
    t += Math.ceil((sv.m + (dom ? 30 : 0)) / 30) * 30;
   }
  });
- RESERVAS.filter(g => g.fecha === iso(d)).forEach(g => {
-  const c = reservaACita(g);
-  for (let i = l.length - 1; i >= 0; i--) { const x = l[i]; if (x.b === c.b && x.ini < c.ini + c.min && c.ini < x.ini + x.min) l.splice(i, 1); }
-  l.push(c);
- });
- return (_cache[off] = l);
+ return (_cache[off] = armarDia(l, iso(d)));
 }
 function tituloDia(off){
  const d = fechaOff(off);
@@ -406,8 +445,10 @@ function pintarMes(){
  for (let dd = 1; dd <= ult; dd++) {
   const off = offDe(iso(new Date(base.getFullYear(), base.getMonth(), dd, 12)));
   const l = citasDe(off), oc = Math.min(100, Math.round(l.reduce((a,c) => a + c.min, 0) / cap * 100));
-  const st = l.filter(c => c.demo).length;
-  h += `<button class="d ${off === 0 ? "hoy" : ""} ${off < 0 ? "pas" : ""}" onclick="abrirDia(${off})"><b>${dd}</b><small>${l.length} citas</small>${st ? `<span class="st">⭐ ${st} por la página</span>` : ""}<div class="bar"><i style="width:${oc}%"></i></div></button>`;
+  const st = l.filter(c => c.demo).length, fIso = iso(new Date(base.getFullYear(), base.getMonth(), dd, 12));
+  const cerrado = bloqDe(fIso).some(x => x.b === "Todos" && x.desde <= H0*60 && x.hasta >= H1*60);
+  const bq = bloqDe(fIso).filter(x => !(x.b === "Todos" && x.desde <= H0*60 && x.hasta >= H1*60)).length;
+  h += `<button class="d ${off === 0 ? "hoy" : ""} ${off < 0 ? "pas" : ""} ${cerrado ? "cerr" : ""}" onclick="abrirDia(${off})"><b>${dd}</b>${cerrado ? `<small>🚫 Cerrado</small>` : `<small>${l.length} citas</small>`}${st ? `<span class="st">⭐ ${st} por la página</span>` : ""}${bq && !cerrado ? `<span class="st" style="color:var(--gris)">🚫 ${bq} bloqueo${bq > 1 ? "s" : ""}</span>` : ""}<div class="bar"><i style="width:${oc}%"></i></div></button>`;
  }
  $("#mes").innerHTML = h;
 }
@@ -426,13 +467,17 @@ function pintarAgenda(){
  h += `<div>` + Array.from({length:filas}, (_,i) => `<div class="hr" style="height:${PX}px">${i%2===0 ? hCorta(H0 + i/2) : ""}</div>`).join("") + `</div>`;
  const now = DIA === 0 ? ahoraMin() : DIA < 0 ? 99999 : -1;
  BARB.forEach(b => {
-  h += `<div class="col">` + Array.from({length:filas}, () => `<div class="lin"></div>`).join("");
+  h += `<div class="col" onclick="clicHueco(event,'${b.n}')" title="Toque un espacio libre para agendar">` + Array.from({length:filas}, () => `<div class="lin"></div>`).join("");
   CITAS.filter(c => c.b === b.n).forEach(c => {
    const top = (c.ini - H0*60) / 30 * PX, alto = Math.max(PX - 4, c.min / 30 * PX - 4);
    const tipo = c.dom ? "dom" : c.sv.t;
    const idx = CITAS.indexOf(c);
-   h += `<div class="cita t-${tipo} ${c.ini + c.min < now ? "hecha" : ""} ${c.demo || c.nueva ? "nueva" : ""}" style="top:${top+2}px;height:${alto}px" onclick="verCita(${idx})">
-    <b>${c.demo ? "⭐ " : ""}${c.dom ? "🛵 " : ""}${c.cli.n}</b><small>${c.sv.n} · ${hTx(Math.floor(c.ini/60), c.ini%60)}</small></div>`;
+   h += `<div class="cita t-${tipo} ${c.ini + c.min < now ? "hecha" : ""} ${c.demo || c.nueva ? "nueva" : ""} ${c.novino ? "novino" : ""}" style="top:${top+2}px;height:${alto}px" onclick="event.stopPropagation();verCita(${idx})">
+    <b>${c.novino ? "🚷 " : c.demo ? "⭐ " : c.panel ? "📞 " : ""}${c.dom ? "🛵 " : ""}${c.cli.n}</b><small>${c.novino ? "No vino · " : ""}${c.sv.n} · ${hTx(Math.floor(c.ini/60), c.ini%60)}</small></div>`;
+  });
+  bloqDe(iso(fechaOff(DIA))).filter(x => x.b === "Todos" || x.b === b.n).forEach(x => {
+   const d0 = Math.max(x.desde, H0*60), d1 = Math.min(x.hasta, H1*60); if (d1 <= d0) return;
+   h += `<div class="bloq" style="top:${(d0 - H0*60)/30*PX + 2}px;height:${(d1 - d0)/30*PX - 4}px" onclick="event.stopPropagation();verBloqueos()"><b>🚫 ${x.motivo}</b>${x.b === "Todos" ? "<small>Toda la barbería</small>" : ""}</div>`;
   });
   h += `</div>`;
  });
@@ -525,10 +570,123 @@ function verCita(i){
    ${c.demo ? `<div class="nota" style="border-color:var(--verde);background:rgba(60,207,142,.08)"><b style="color:var(--verde)">⭐ Esta es la cita que usted acaba de hacer en la página.</b> Le llegó así al dueño, al instante.</div>` : ""}
    <div class="mini3"><div><b>${pesos(c.sv.p + (c.dom && !c.demo ? 15000 : 0))}</b><span>Valor</span></div><div><b>${c.dom ? "🛵" : "💈"}</b><span>${c.dom ? "Domicilio" : "En la barbería"}</span></div><div><b>${c.pago}</b><span>Pago</span></div></div>
    <div class="nota"><b>✂ Cómo le gusta:</b> ${c.cli.nota}</div>
-   <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn oro" onclick="cobrar(${i})">💰 Cobrar</button>${c.cli.id !== -1 ? `<button class="btn lin" onclick="ficha(${c.cli.id})">Ver ficha</button>` : ""}<button class="btn lin" onclick="cerrarModal();toast('🔁','Cita movida','Al cliente le llega el aviso por WhatsApp.')">Mover</button></div>
+   <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn oro" onclick="cobrar(${i})">💰 Cobrar</button>${c.cli.id !== -1 ? `<button class="btn lin" onclick="ficha(${c.cli.id})">Ver ficha</button>` : ""}<button class="btn lin" onclick="moverCita(${i})">🔁 Mover</button></div>
+   <div class="m-acc">${c.novino ? `<button class="btn lin sm" onclick="noVino(${i}, false)">↩ Sí vino (deshacer)</button>` : `<button class="btn lin sm" onclick="noVino(${i}, true)">🚷 No vino</button>`}<button class="btn rojo sm" onclick="cancelarCitaP(${i})">✕ Cancelar cita</button></div>
   </div>`);
 }
 function cobrar(i){ const c = LISTA[i]; cerrarModal(); toast("💰", "Cobrado " + pesos(c.sv.p) + " · " + (c.pago === "Por cobrar" ? "Nequi" : c.pago), "Ya quedó en la caja y en la contabilidad."); evento("💰", `Pago de <b>${c.cli.n}</b> · ${pesos(c.sv.p)}`, c.pago === "Por cobrar" ? "Nequi" : c.pago); }
+/* ---------- acciones del dueño: agendar, mover, cancelar, no vino, bloquear ---------- */
+const HORAS = Array.from({length:(H1 - H0) * 2}, (_, i) => H0*60 + i*30);
+const optHoras = sel => HORAS.map(m => `<option value="${m}" ${m === sel ? "selected" : ""}>${hTx(Math.floor(m/60), m%60)}</option>`).join("");
+const optBarb = (sel, todos) => (todos ? `<option ${sel === "Todos" ? "selected" : ""}>Todos</option>` : "") + BARB.map(b => `<option ${b.n === sel ? "selected" : ""}>${b.n}</option>`).join("");
+const offIso = f => offDe(f);
+function choque(fechaIso, b, ini, min, ignorar){
+ const l = offIso(fechaIso) === 0 ? CITAS : citasDe(offIso(fechaIso));
+ const c = l.find(x => x !== ignorar && !x.novino && x.b === b && cruza(x.ini, x.ini + x.min, ini, ini + min));
+ if (c) return `${b} ya tiene a ${c.cli.n} a las ${hTx(Math.floor(c.ini/60), c.ini%60)}`;
+ const bl = bloqDe(fechaIso).find(x => (x.b === "Todos" || x.b === b) && cruza(ini, ini + min, x.desde, x.hasta));
+ if (bl) return `Ese horario está bloqueado (${bl.motivo}).`;
+ if (ini + min > H1*60) return "Se pasa de la hora de cierre.";
+ return "";
+}
+function guardarReserva(g){ const l = LS.get("sb_demo_citas", []); l.push(g); LS.set("sb_demo_citas", l.slice(-60)); }
+function quitarReserva(cod){ LS.set("sb_demo_citas", LS.get("sb_demo_citas", []).filter(x => x.cod !== cod)); }
+function marcarCambio(c, accion){ const cm = cambios(); if (accion) cm[c.k] = {accion}; else delete cm[c.k]; LS.set("sb_demo_cambios", cm); }
+function fechaTx(fIso, m){ return new Date(fIso + "T12:00").toLocaleDateString("es-CO", {weekday:"long", day:"numeric", month:"short"}) + " " + hTx(Math.floor(m/60), m%60); }
+function clicHueco(ev, b){
+ if (VISTA !== "dia" || DIA < 0) return;
+ const col = ev.currentTarget, y = ev.clientY - col.getBoundingClientRect().top;
+ const m = H0*60 + Math.max(0, Math.floor(y / PX)) * 30;
+ nuevaCita(b, m);
+}
+function nuevaCita(b, m){
+ const f = iso(fechaOff(Math.max(DIA, 0)));
+ if (m == null) { const now = DIA <= 0 ? ahoraMin() : H0*60; m = Math.min(H1*60 - 60, Math.ceil(now / 30) * 30); }
+ abrirModal(`<div class="m-cab"><div class="av" style="background:linear-gradient(135deg,var(--verde),#1f7a52)">+</div><div><h3>Agendar cita</h3><small>Para el cliente que llama, escribe o llega sin cita</small></div><button class="x" onclick="cerrarModal()">✕</button></div>
+  <div class="m-cue frm">
+   <label>Cliente</label><input id="fCli" list="lCli" placeholder="Nombre (escriba y escoja si ya es cliente)" oninput="autoCel()"><datalist id="lCli">${CL.map(c => `<option value="${c.n}">`).join("")}</datalist>
+   <label>Celular (le llega la confirmación por WhatsApp)</label><input id="fCel" inputmode="numeric" placeholder="300 000 0000">
+   <label>Servicio</label><select id="fSv">${SERV.map((s, i) => `<option value="${i}">${s.n} · ${pesos(s.p)} · ${s.m} min</option>`).join("")}</select>
+   <div class="dos2"><div><label>Día</label><input id="fFe" type="date" min="${HOY_ISO}" value="${f}"></div><div><label>Hora</label><select id="fHo">${optHoras(m)}</select></div></div>
+   <label>Barbero</label><select id="fBa">${optBarb(b || BARB[0].n)}</select>
+   <label class="chk"><input type="checkbox" id="fDom"> 🛵 A domicilio (+ $15.000)</label>
+   <div class="err" id="fErr"></div>
+   <div class="m-acc"><button class="btn oro" onclick="guardarNueva()">Agendar</button><button class="btn lin" onclick="cerrarModal()">Cancelar</button></div>
+  </div>`);
+ setTimeout(() => $("#fCli").focus(), 50);
+}
+function autoCel(){ const c = CL.find(x => x.n === $("#fCli").value); if (c) $("#fCel").value = c.cel.replace(/(\d{3})(\d{3})(\d{4})/, "$1 $2 $3"); }
+function guardarNueva(){
+ const nom = $("#fCli").value.trim(), cel = $("#fCel").value, sv = SERV[+$("#fSv").value], fe = $("#fFe").value, ho = +$("#fHo").value, ba = $("#fBa").value, dom = $("#fDom").checked;
+ if (nom.length < 2) return $("#fErr").textContent = "Escriba el nombre del cliente.";
+ if (!fe || fe < HOY_ISO) return $("#fErr").textContent = "Escoja un día de hoy en adelante.";
+ const ch = choque(fe, ba, ho, sv.m); if (ch) return $("#fErr").textContent = ch;
+ const g = {cod:nuevoCod(), nombre:nom, cel, serv:sv.n, total:sv.p + (dom ? 15000 : 0), min:sv.m, barbero:ba, fecha:fe, h:Math.floor(ho/60), m:ho%60, lugar:dom ? "casa" : "local", nota:"", origen:"panel", cuando:Date.now()};
+ guardarReserva(g); cerrarModal(); refrescar(); abrirDia(offDe(fe));
+ toast("📞", "Cita agendada: " + nom, fechaTx(fe, ho) + " con " + ba + (cel.replace(/\D/g,"").length >= 10 ? " · le llegó la confirmación por WhatsApp" : ""));
+ evento("📞", `Usted agendó a <b>${nom}</b> · ${sv.n}`, fechaTx(fe, ho) + " con " + ba);
+}
+function moverCita(i){
+ const c = LISTA[i], f = iso(fechaOff(Math.max(DIA, 0)));
+ abrirModal(`<div class="m-cab"><div class="av" style="background:${colAv(c.cli.n)}">${ini(c.cli.n)}</div><div><h3>Mover la cita de ${c.cli.n}</h3><small>Ahora: ${c.sv.n} · ${fechaTx(iso(fechaOff(DIA)), c.ini)} con ${c.b}</small></div><button class="x" onclick="cerrarModal()">✕</button></div>
+  <div class="m-cue frm">
+   <div class="dos2"><div><label>Nuevo día</label><input id="mFe" type="date" min="${HOY_ISO}" value="${f}"></div><div><label>Nueva hora</label><select id="mHo">${optHoras(c.ini)}</select></div></div>
+   <label>Barbero</label><select id="mBa">${optBarb(c.b)}</select>
+   <div class="err" id="mErr"></div>
+   <div class="m-acc"><button class="btn oro" onclick="guardarMover(${i})">Mover y avisarle</button><button class="btn lin" onclick="verCita(${i})">Volver</button></div>
+  </div>`);
+}
+function guardarMover(i){
+ const c = LISTA[i], fe = $("#mFe").value, ho = +$("#mHo").value, ba = $("#mBa").value;
+ if (!fe || fe < HOY_ISO) return $("#mErr").textContent = "Escoja un día de hoy en adelante.";
+ const ch = choque(fe, ba, ho, c.min, c); if (ch) return $("#mErr").textContent = ch;
+ if (c.cod) quitarReserva(c.cod); else marcarCambio(c, "cancel");
+ guardarReserva({cod:c.cod || nuevoCod(), nombre:c.cli.n, cel:c.cli.cel || "", serv:c.sv.n, total:c.sv.p, min:c.min, barbero:ba, fecha:fe, h:Math.floor(ho/60), m:ho%60, lugar:c.dom ? "casa" : "local", nota:"", origen:c.demo ? "pagina" : "panel", cuando:Date.now()});
+ cerrarModal(); refrescar(); abrirDia(offDe(fe));
+ toast("🔁", "Cita movida: " + c.cli.n, "Nueva: " + fechaTx(fe, ho) + " con " + ba + " · le llegó el aviso por WhatsApp");
+ evento("🔁", `Movió la cita de <b>${c.cli.n}</b>`, "Ahora: " + fechaTx(fe, ho) + " con " + ba);
+}
+function cancelarCitaP(i, ok){
+ const c = LISTA[i];
+ if (!ok) { abrirModal(`<div class="m-cab"><div class="av" style="background:${colAv(c.cli.n)}">${ini(c.cli.n)}</div><div><h3>¿Cancelar la cita de ${c.cli.n}?</h3><small>${c.sv.n} · ${fechaTx(iso(fechaOff(DIA)), c.ini)} con ${c.b}</small></div><button class="x" onclick="cerrarModal()">✕</button></div>
+  <div class="m-cue"><p class="ay">Se le avisa al cliente por WhatsApp y el espacio queda libre para otra reserva.</p><div class="m-acc"><button class="btn rojo" onclick="cancelarCitaP(${i}, true)">Sí, cancelar</button><button class="btn lin" onclick="verCita(${i})">No, volver</button></div></div>`); return; }
+ if (c.cod) quitarReserva(c.cod); else marcarCambio(c, "cancel");
+ cerrarModal(); const d = DIA; refrescar(); DIA = d; pintarAgenda();
+ toast("❌", "Cita cancelada: " + c.cli.n, "Se le avisó por WhatsApp · el espacio quedó libre");
+ evento("❌", `Usted canceló la cita de <b>${c.cli.n}</b>`, fechaTx(iso(fechaOff(DIA)), c.ini));
+}
+function noVino(i, si){
+ const c = LISTA[i];
+ if (c.cod) { const l = LS.get("sb_demo_citas", []); const g = l.find(x => x.cod === c.cod); if (g) { g.estado = si ? "novino" : ""; LS.set("sb_demo_citas", l); } }
+ else marcarCambio(c, si ? "novino" : null);
+ cerrarModal(); const d = DIA; refrescar(); DIA = d; pintarAgenda();
+ toast(si ? "🚷" : "↩", si ? c.cli.n + " no vino" : "Listo, " + c.cli.n + " sí vino", si ? "Queda anotado en su ficha. Si falta 2 veces, la página le pide confirmar antes de reservar." : "");
+}
+function verBloqueos(){
+ const f = iso(fechaOff(Math.max(DIA, 0))), l = bloqueos();
+ abrirModal(`<div class="m-cab"><div class="av" style="background:#333">🚫</div><div><h3>Bloquear horario</h3><small>Almuerzo, día libre de un barbero, festivo o vacaciones. Esas horas no se pueden reservar.</small></div><button class="x" onclick="cerrarModal()">✕</button></div>
+  <div class="m-cue frm">
+   <div class="dos2"><div><label>Quién</label><select id="bBa">${optBarb("Todos", true)}</select></div><div><label>Motivo</label><select id="bMo"><option>Almuerzo</option><option>Día libre</option><option>Festivo</option><option>Vacaciones</option><option>Cita médica</option><option>Otro</option></select></div></div>
+   <label>Día</label><input id="bFe" type="date" min="${HOY_ISO}" value="${f}">
+   <label class="chk"><input type="checkbox" id="bRep"> Repetir todos los días (lunes a sábado)</label>
+   <label class="chk"><input type="checkbox" id="bTodo" onchange="$('#bHoras').style.display=this.checked?'none':''"> Todo el día</label>
+   <div class="dos2" id="bHoras"><div><label>Desde</label><select id="bDe">${optHoras(13*60)}</select></div><div><label>Hasta</label><select id="bHa">${optHoras(14*60)}<option value="${H1*60}">${hTx(H1, 0)} (cierre)</option></select></div></div>
+   <div class="err" id="bErr"></div>
+   <div class="m-acc"><button class="btn oro" onclick="guardarBloqueo()">Bloquear</button><button class="btn lin" onclick="cerrarModal()">Cerrar</button></div>
+   ${l.length ? `<h3 style="margin:22px 0 4px;font-size:.95rem">Bloqueos activos</h3>` + l.map(x => `<div class="bl-it"><div><b>${x.motivo}</b> · ${x.b === "Todos" ? "Toda la barbería" : x.b}<small>${x.rep ? "Todos los días" : new Date(x.fecha + "T12:00").toLocaleDateString("es-CO", {weekday:"long", day:"numeric", month:"short"})} · ${x.desde <= H0*60 && x.hasta >= H1*60 ? "todo el día" : hTx(Math.floor(x.desde/60), x.desde%60) + " a " + hTx(Math.floor(x.hasta/60), x.hasta%60)}</small></div><button class="btn lin sm" onclick="quitarBloqueo('${x.id}')">Quitar</button></div>`).join("") : ""}
+  </div>`);
+ $("#bMo").onchange = e => { const v = e.target.value; if (["Día libre","Festivo","Vacaciones"].includes(v)) { $("#bTodo").checked = true; $("#bHoras").style.display = "none"; } };
+}
+function guardarBloqueo(){
+ const todo = $("#bTodo").checked, de = todo ? H0*60 : +$("#bDe").value, ha = todo ? H1*60 : +$("#bHa").value;
+ if (ha <= de) return $("#bErr").textContent = "La hora final tiene que ser después de la inicial.";
+ const x = {id:"B" + Date.now(), b:$("#bBa").value, motivo:$("#bMo").value, fecha:$("#bFe").value, rep:$("#bRep").checked, desde:de, hasta:ha};
+ const afect = reservas().filter(g => (x.rep || g.fecha === x.fecha) && (x.b === "Todos" || g.barbero === x.b) && cruza(g.h*60 + g.m, g.h*60 + g.m + (g.min || 45), de, ha));
+ LS.set("sb_demo_bloqueos", [...bloqueos(), x]);
+ cerrarModal(); const d = DIA; refrescar(); DIA = d; pintarAgenda();
+ toast("🚫", "Horario bloqueado: " + x.motivo, (x.b === "Todos" ? "Toda la barbería" : x.b) + (afect.length ? ` · ojo: ${afect.length} cita(s) reservada(s) quedan en ese horario, muévalas` : " · ya no se puede reservar ahí"));
+}
+function quitarBloqueo(id){ LS.set("sb_demo_bloqueos", bloqueos().filter(x => x.id !== id)); const d = DIA; refrescar(); DIA = d; pintarAgenda(); verBloqueos(); toast("✅", "Bloqueo quitado", "Ese horario vuelve a estar disponible"); }
 function abrirModal(h){ $("#modal").innerHTML = h; $("#velo").classList.add("ver"); }
 function cerrarModal(){ $("#velo").classList.remove("ver"); }
 $("#velo").addEventListener("click", e => { if (e.target.id === "velo") cerrarModal(); });
@@ -614,6 +772,8 @@ if (location.hash === "#planes") setTimeout(planes, 600);
 
 /* ---------- arranque ---------- */
 $("#fecha").textContent = hoy.toLocaleDateString("es-CO",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+{ const u = LS.get("sb_demo_cita", null); if (u && u.fecha === HOY_ISO && Date.now() - u.cuando < 36e5) citaDemo = reservaACita(u); }
+CITAS.length = 0; armarDia(CITAS_BASE, HOY_ISO).forEach(c => CITAS.push(c));
 pintarKpis(); pintarAgenda(); pintarTocaVolver(); pintarClientes(); pintarCamps();
 evento("✅", "<b>Simón Ospina</b> confirmó su cita de las 4:00 p. m.", "Respondió 1 al recordatorio");
 evento("💰", "Pago de <b>Felipe Henao</b> · $55.000", "Nequi");
@@ -647,27 +807,30 @@ window.addEventListener("storage", e => {
  if (e.key === "sb_demo_cancel" && e.newValue) {
   try {
    const g = JSON.parse(e.newValue);
-   RESERVAS = RESERVAS.filter(x => x.cod !== g.cod); for (const k in _cache) delete _cache[k];
-   for (let i = CITAS.length - 1; i >= 0; i--) if (CITAS[i].demo && CITAS[i].cli.n === g.nombre && CITAS[i].ini === g.h*60 + g.m) CITAS.splice(i, 1);
    campana(1);
    const cuando = new Date(g.fecha + "T12:00").toLocaleDateString("es-CO", {weekday:"long", day:"numeric", month:"short"}) + " " + hTx(g.h, g.m);
    toast(g.cambio ? "🔁" : "❌", (g.cambio ? "Cambió su cita: " : "Canceló: ") + g.nombre, cuando + " con " + (g.barbero || "el primero disponible") + " · el espacio quedó libre");
    evento(g.cambio ? "🔁" : "❌", `<b>${g.nombre}</b> ${g.cambio ? "cambió" : "canceló"} la del ${cuando}`, g.cambio ? "Está escogiendo otra hora" : "Se avisó a la lista de espera");
-   pintarAgenda(); pintarKpis();
+   refrescar();
   } catch(x) {}
   return;
  }
  if (e.key !== "sb_demo_cita" || !e.newValue) return;
- try { const g = JSON.parse(e.newValue); campana(3); toast("🔔", "Nueva reserva de " + g.nombre, g.serv + " · desde la página"); setTimeout(() => location.reload(), 2600); } catch(x) {}
+ try {
+  const g = JSON.parse(e.newValue); campana(3); refrescar();
+  const cuando = new Date(g.fecha + "T12:00").toLocaleDateString("es-CO", {weekday:"long", day:"numeric", month:"short"}) + " " + hTx(g.h, g.m);
+  toast("🔔", "Nueva reserva de " + g.nombre, g.serv + " · " + cuando + " · desde la página");
+  evento("⭐", `<b>${g.nombre}</b> reservó ${g.serv} para el ${cuando}`, "Desde la página");
+ } catch(x) {}
 });
 let simCli = 3;
 function reservaNueva(){
  const b = BARB[simCli % BARB.length], now = ahoraMin(); let t = Math.ceil((now + 60 + (simCli - 3) * 30) / 30) * 30;
  if (t > H1*60 - 60) t = H1*60 - 60;
- for (let i = CITAS.length - 1; i >= 0; i--) { const c = CITAS[i]; if (c.b === b.n && c.ini < t + 50 && t < c.ini + c.min) CITAS.splice(i, 1); }
+ for (let i = CITAS_BASE.length - 1; i >= 0; i--) { const c = CITAS_BASE[i]; if (c.b === b.n && c.ini < t + 50 && t < c.ini + c.min) CITAS_BASE.splice(i, 1); }
  const cli = CL[simCli % CL.length]; simCli++;
- CITAS.push({b:b.n, ini:t, min:50, sv:SERV[1], dom:false, cli, pago:"Nequi", prop:0, nueva:true});
- pintarAgenda(); pintarKpis();
+ CITAS_BASE.push({b:b.n, ini:t, min:50, sv:SERV[1], dom:false, cli, pago:"Nequi", prop:0, nueva:true});
+ refrescar();
  campana(3);
  toast("🔔", "Nueva reserva: " + cli.n, SERV[1].n + " con " + b.n + " · " + hTx(Math.floor(t/60), t%60) + " · desde la página");
  evento("📅", `<b>${cli.n}</b> reservó ${SERV[1].n} con ${b.n} a las ${hTx(Math.floor(t/60), t%60)}`, "Desde la página");
@@ -676,10 +839,10 @@ function reservaNueva(){
 setTimeout(() => {
  const b = BARB[1], now = ahoraMin(); let t = Math.ceil((now + 60) / 30) * 30;
  if (t > H1*60 - 60) t = H1*60 - 60;
- for (let i = CITAS.length - 1; i >= 0; i--) { const c = CITAS[i]; if (c.b === b.n && c.ini < t + 50 && t < c.ini + c.min) CITAS.splice(i, 1); }
+ for (let i = CITAS_BASE.length - 1; i >= 0; i--) { const c = CITAS_BASE[i]; if (c.b === b.n && c.ini < t + 50 && t < c.ini + c.min) CITAS_BASE.splice(i, 1); }
  const cli = CL[3];
- CITAS.push({b:b.n, ini:t, min:50, sv:SERV[1], dom:false, cli, pago:"Nequi", prop:0, nueva:true});
- pintarAgenda(); pintarKpis(); campana(3);
+ CITAS_BASE.push({b:b.n, ini:t, min:50, sv:SERV[1], dom:false, cli, pago:"Nequi", prop:0, nueva:true});
+ refrescar(); campana(3);
  toast("🔔", "Nueva reserva: " + cli.n, "Fade con Kevin · " + hTx(Math.floor(t/60), t%60) + " · desde la página");
  evento("📅", `<b>${cli.n}</b> reservó Fade con Kevin a las ${hTx(Math.floor(t/60), t%60)}`, "Desde la página");
 }, citaDemo ? 6500 : 4500);

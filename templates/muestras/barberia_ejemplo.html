@@ -773,9 +773,20 @@ function horas(i){
  for (let h = ab; h < ci; h++) for (const m of [0,30]) {
   let ocup = rnd() < (dw >= 5 ? .55 : .4);
   if (i === 0) { const ya = new Date(); if (h < ya.getHours() + 1) ocup = true; }
+  /* Lo que el dueño bloqueó o ya agendó en el panel (mismo navegador, es una muestra) */
+  const ini = h*60 + m, fin = ini + Math.max(30, minutos());
+  if (!ocup && ocupadoPanel(d, ini, fin)) ocup = true;
   out.push({h, m, ocup});
  }
  return out;
+}
+function ocupadoPanel(d, ini, fin){
+ let bl = [], rs = [];
+ try { bl = JSON.parse(localStorage.getItem("sb_demo_bloqueos") || "[]"); rs = JSON.parse(localStorage.getItem("sb_demo_citas") || "[]"); } catch(e) {}
+ const f = isoF(d), dw = d.getDay(), b = R.barbero && R.barbero !== "Cualquiera" ? R.barbero : null;
+ const cruzaB = (a0, a1, b0, b1) => a0 < b1 && b0 < a1;
+ if (bl.some(x => (x.rep ? dw !== 0 : x.fecha === f) && (x.b === "Todos" || (b && x.b === b)) && cruzaB(ini, fin, x.desde, x.hasta))) return true;
+ return !!b && rs.some(g => g.fecha === f && g.barbero === b && g.estado !== "novino" && cruzaB(ini, fin, g.h*60 + g.m, g.h*60 + g.m + (g.min || 45)));
 }
 function hTx(h,m){ const ap = h < 12 ? "a. m." : "p. m."; const hh = h > 12 ? h - 12 : h; return `${hh}:${String(m).padStart(2,"0")} ${ap}`; }
 const PASOS = ["¿Qué se va a hacer?","¿Dónde?","¿Con quién?","¿Cuándo?","Sus datos","¡Listo!","Mis citas"];
