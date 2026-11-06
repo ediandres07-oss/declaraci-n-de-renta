@@ -71,8 +71,9 @@ main{padding:22px 26px 60px;min-width:0}
 .cita.hecha{opacity:.55;filter:saturate(.6)}
 .cita.nueva{animation:brilla 1.6s 3}
 @keyframes brilla{50%{box-shadow:0 0 0 4px var(--oro2),0 0 30px rgba(240,207,138,.6)}}
-.ahora{position:absolute;left:0;right:0;height:2px;background:var(--rojo);z-index:2;pointer-events:none}
-.ahora::before{content:"";position:absolute;left:-5px;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--rojo)}
+.ahora{position:absolute;left:0;right:0;height:3px;background:var(--verde);z-index:2;pointer-events:none;box-shadow:0 0 10px var(--verde),0 0 22px rgba(60,207,142,.7);animation:ahoraLuz 1.1s ease-in-out infinite}
+.ahora::before{content:"";position:absolute;left:-6px;top:-5px;width:13px;height:13px;border-radius:50%;background:var(--verde);box-shadow:0 0 12px var(--verde)}
+@keyframes ahoraLuz{0%,100%{opacity:1;box-shadow:0 0 10px var(--verde),0 0 26px rgba(60,207,142,.8)}50%{opacity:.18;box-shadow:none}}
 .ley{display:flex;gap:14px;flex-wrap:wrap;font-size:.72rem;color:var(--gris);margin:10px 2px 0}
 .ley i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
 .dos{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-top:14px}
@@ -209,7 +210,7 @@ tr.f:hover{background:var(--carbon2)}
 <main>
  <div class="top">
   <div><h1 id="titulo">Agenda de hoy</h1><div class="fecha" id="fecha"></div></div>
-  <div class="der"><span class="vivo"><i></i>En vivo</span><a class="btn oro sm" href="/muestra/barberia-ejemplo">+ Nueva cita</a></div>
+  <div class="der"><button class="btn lin sm" id="sonBtn" onclick="activarSonido()">🔔 Activar sonido</button><span class="vivo"><i></i>En vivo</span><a class="btn oro sm" href="/muestra/barberia-ejemplo">+ Nueva cita</a></div>
  </div>
  <div class="kpis" id="kpis"></div>
 
@@ -523,6 +524,46 @@ evento("✅", "<b>Simón Ospina</b> confirmó su cita de las 4:00 p. m.", "Respo
 evento("💰", "Pago de <b>Felipe Henao</b> · $55.000", "Nequi");
 evento("📅", "<b>Julián Vélez</b> reservó para mañana 10:00 a. m.", "Desde la página");
 if (citaDemo) { evento("⭐", `<b>${citaDemo.cli.n}</b> reservó ${citaDemo.sv.n} a las ${hTx(Math.floor(citaDemo.ini/60), citaDemo.ini%60)}`, "Desde la página · recién"); setTimeout(() => toast("🔔", "Nueva reserva de " + citaDemo.cli.n, citaDemo.sv.n + " con " + citaDemo.b + " · " + hTx(Math.floor(citaDemo.ini/60), citaDemo.ini%60)), 900); }
+/* ---------- campanita (Edison 6-nov: «que suene durita») ---------- */
+let _ac = null;
+function _audio(){ try { _ac = _ac || new (window.AudioContext || window.webkitAudioContext)(); if (_ac.state === "suspended") _ac.resume(); } catch(e) {} return _ac; }
+["pointerdown","keydown","touchstart"].forEach(ev => window.addEventListener(ev, _audio, {passive:true}));
+function campana(veces){
+ const ac = _audio(); if (!ac) return;
+ const comp = ac.createDynamicsCompressor(); comp.threshold.value = -6; comp.ratio.value = 4; comp.connect(ac.destination);
+ const master = ac.createGain(); master.gain.value = 1.0; master.connect(comp);
+ const golpe = (t0, f0) => [[1,1],[2.76,.55],[5.4,.32],[8.93,.18]].forEach(([r, a]) => {
+  const o = ac.createOscillator(), g = ac.createGain(); o.type = "sine"; o.frequency.value = f0 * r;
+  g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(a, t0 + .004); g.gain.exponentialRampToValueAtTime(.0008, t0 + 1.6 / Math.sqrt(r));
+  o.connect(g); g.connect(master); o.start(t0); o.stop(t0 + 1.8);
+ });
+ const t = ac.currentTime + .02;
+ for (let i = 0; i < (veces || 2); i++) golpe(t + i * .22, i % 2 ? 1568 : 1319);
+}
+let sonido = false;
+function activarSonido(){
+ _audio(); sonido = true; campana(2);
+ const b = $("#sonBtn"); b.textContent = "🔔 Sonido activado"; b.style.borderColor = "var(--oro)"; b.style.color = "var(--oro2)";
+ toast("🔔", "Sonido activado", "Cada reserva nueva suena con la campanita");
+ setTimeout(reservaNueva, 5000);   // para oírla de una
+}
+/* Reserva hecha en la página del cliente en OTRA pestaña del mismo navegador */
+window.addEventListener("storage", e => {
+ if (e.key !== "sb_demo_cita" || !e.newValue) return;
+ try { const g = JSON.parse(e.newValue); campana(3); toast("🔔", "Nueva reserva de " + g.nombre, g.serv + " · desde la página"); setTimeout(() => location.reload(), 2600); } catch(x) {}
+});
+let simCli = 3;
+function reservaNueva(){
+ const b = BARB[simCli % BARB.length], now = ahoraMin(); let t = Math.ceil((now + 60 + (simCli - 3) * 30) / 30) * 30;
+ if (t > H1*60 - 60) t = H1*60 - 60;
+ for (let i = CITAS.length - 1; i >= 0; i--) { const c = CITAS[i]; if (c.b === b.n && c.ini < t + 50 && t < c.ini + c.min) CITAS.splice(i, 1); }
+ const cli = CL[simCli % CL.length]; simCli++;
+ CITAS.push({b:b.n, ini:t, min:50, sv:SERV[1], dom:false, cli, pago:"Nequi", prop:0, nueva:true});
+ pintarAgenda(); pintarKpis();
+ campana(3);
+ toast("🔔", "Nueva reserva: " + cli.n, SERV[1].n + " con " + b.n + " · " + hTx(Math.floor(t/60), t%60) + " · desde la página");
+ evento("📅", `<b>${cli.n}</b> reservó ${SERV[1].n} con ${b.n} a las ${hTx(Math.floor(t/60), t%60)}`, "Desde la página");
+}
 /* Una reserva nueva que "entra" a los pocos segundos, para ver cómo avisa */
 setTimeout(() => {
  const b = BARB[1], now = ahoraMin(); let t = Math.ceil((now + 60) / 30) * 30;
@@ -530,7 +571,7 @@ setTimeout(() => {
  for (let i = CITAS.length - 1; i >= 0; i--) { const c = CITAS[i]; if (c.b === b.n && c.ini < t + 50 && t < c.ini + c.min) CITAS.splice(i, 1); }
  const cli = CL[3];
  CITAS.push({b:b.n, ini:t, min:50, sv:SERV[1], dom:false, cli, pago:"Nequi", prop:0, nueva:true});
- pintarAgenda(); pintarKpis();
+ pintarAgenda(); pintarKpis(); campana(3);
  toast("🔔", "Nueva reserva: " + cli.n, "Fade con Kevin · " + hTx(Math.floor(t/60), t%60) + " · desde la página");
  evento("📅", `<b>${cli.n}</b> reservó Fade con Kevin a las ${hTx(Math.floor(t/60), t%60)}`, "Desde la página");
 }, citaDemo ? 6500 : 4500);

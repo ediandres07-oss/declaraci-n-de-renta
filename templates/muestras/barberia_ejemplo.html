@@ -119,6 +119,56 @@ section{padding:80px 20px}
 .opf{border:2px solid var(--borde);border-radius:18px;overflow:hidden;background:var(--carbon2);cursor:pointer;text-align:left;padding:0;color:inherit;font:inherit;transition:transform .2s,border-color .2s}
 .opf:hover{transform:translateY(-3px);border-color:rgba(212,162,76,.6)}
 .opf.on{border-color:var(--oro);box-shadow:0 0 0 3px rgba(212,162,76,.25)}
+.prob{background:linear-gradient(160deg,var(--carbon2),var(--carbon));border:1px solid var(--borde);border-radius:24px;padding:28px;margin:26px 0 8px;position:relative;overflow:hidden}
+.prob::before{content:"";position:absolute;inset:-40% -10% auto auto;width:60%;height:120%;background:radial-gradient(circle,rgba(212,162,76,.16),transparent 60%);pointer-events:none}
+.prob-ini{display:grid;grid-template-columns:1.2fr 1fr;gap:28px;align-items:center;position:relative}
+.prob-tx h3{font-family:'Bebas Neue';font-weight:400;font-size:2.4rem;letter-spacing:.02em;margin:14px 0 8px;line-height:1}
+.prob-tx h3 em{font-style:normal;color:var(--oro2)}
+.prob-tx p{color:var(--gris);margin:0 0 18px;line-height:1.55}
+.prob-bt{display:flex;gap:10px;flex-wrap:wrap}
+.prob-ej{background:none;border:0;color:var(--oro2);font:600 .85rem Inter,sans-serif;margin-top:14px;cursor:pointer;padding:0;display:block}
+.prob-priv{display:block;color:var(--gris);font-size:.75rem;margin-top:12px}
+.prob-demo{position:relative;aspect-ratio:1;border-radius:18px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.5)}
+.prob-demo div{position:absolute;inset:0;background-size:cover;background-position:center 20%}
+.prob-demo .a{background-image:url({{ url_for('static', filename='muestras/barberia-ejemplo/prob_antes.jpg') }})}
+.prob-demo .b{background-image:url({{ url_for('static', filename='muestras/barberia-ejemplo/prob_despues.jpg') }});animation:probBarr 5s ease-in-out infinite}
+@keyframes probBarr{0%,15%{clip-path:inset(0 0 0 100%)}45%,70%{clip-path:inset(0 0 0 0)}100%{clip-path:inset(0 0 0 100%)}}
+.prob-demo span{position:absolute;bottom:10px;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:rgba(0,0,0,.6);padding:5px 10px;border-radius:99px}
+.prob-demo span:first-of-type{left:10px}.prob-demo span:last-of-type{right:10px;color:var(--oro2)}
+.prob-res{position:relative}
+.prob-top{display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap}
+.prob-foto{position:relative;width:min(340px,100%);aspect-ratio:3/4;border-radius:18px;overflow:hidden;background:#000;flex:none;touch-action:none;user-select:none}
+.prob-foto img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.prob-foto .desp{clip-path:inset(0 0 0 var(--x,50%))}
+.prob-foto .linea{position:absolute;top:0;bottom:0;left:var(--x,50%);width:3px;margin-left:-1.5px;background:var(--oro2);box-shadow:0 0 12px rgba(0,0,0,.7)}
+.prob-foto .linea::after{content:"⇆";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:38px;height:38px;border-radius:50%;background:var(--oro2);color:#1a1206;display:grid;place-items:center;font-weight:800}
+.prob-foto .et{position:absolute;bottom:10px;font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:rgba(0,0,0,.65);padding:5px 10px;border-radius:99px;z-index:2}
+.prob-foto .et.i{left:10px}.prob-foto .et.d{right:10px;color:var(--oro2)}
+.prob-foto .scan{position:absolute;inset:0;background:linear-gradient(180deg,transparent,rgba(240,207,138,.35),transparent);height:30%;animation:probScan 1.6s linear infinite;z-index:3}
+@keyframes probScan{from{transform:translateY(-100%)}to{transform:translateY(340%)}}
+.prob-foto .msg{position:absolute;inset:auto 0 0 0;padding:40px 14px 16px;background:linear-gradient(transparent,rgba(0,0,0,.85));font-weight:700;font-size:.9rem;z-index:4;text-align:center}
+.prob-foto svg{position:absolute;z-index:2;overflow:visible;pointer-events:none}
+.prob-foto svg *{fill:none;stroke:var(--oro2);stroke-width:2.2;stroke-dasharray:6 5;filter:drop-shadow(0 0 4px rgba(0,0,0,.8))}
+.prob-info{flex:1;min-width:240px}
+.prob-info h3{font-family:'Bebas Neue';font-weight:400;font-size:2.2rem;margin:0 0 6px;letter-spacing:.02em}
+.prob-info h3 em{font-style:normal;color:var(--oro2)}
+.prob-info p{color:var(--gris);margin:0 0 14px;line-height:1.5}
+.prob-tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.prob-tags span{background:rgba(212,162,76,.12);border:1px solid rgba(212,162,76,.35);color:var(--oro2);padding:6px 12px;border-radius:99px;font-size:.78rem;font-weight:600}
+.prob-cortes{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:22px}
+.prob-c{background:var(--negro);border:1px solid var(--borde);border-radius:16px;overflow:hidden;cursor:pointer;text-align:left;color:inherit;font:inherit;padding:0;transition:transform .15s,border-color .2s}
+.prob-c:hover{transform:translateY(-3px);border-color:var(--oro)}
+.prob-c.on{border-color:var(--oro2);box-shadow:0 0 0 2px rgba(240,207,138,.35)}
+.prob-c .ft{aspect-ratio:1;background-size:cover;background-position:center 15%;position:relative}
+.prob-c .ft i{position:absolute;top:8px;left:8px;font-style:normal;background:rgba(0,0,0,.7);color:var(--oro2);font-size:.66rem;font-weight:700;padding:4px 8px;border-radius:99px}
+.prob-c .tx{padding:10px 12px 12px}
+.prob-c b{display:block;font-size:.85rem;margin-bottom:6px}
+.prob-c small{color:var(--oro2);font-weight:700;font-size:.75rem}
+.prob-acc{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+.prob-err{background:rgba(224,83,61,.12);border:1px solid rgba(224,83,61,.4);color:#ffb4a6;padding:10px 14px;border-radius:12px;font-size:.85rem;margin-bottom:12px}
+.o-sep{display:flex;align-items:center;gap:14px;color:var(--gris);font-size:.8rem;text-transform:uppercase;letter-spacing:.12em;margin:26px 0 18px}
+.o-sep::before,.o-sep::after{content:"";flex:1;height:1px;background:var(--borde)}
+@media(max-width:760px){.prob{padding:20px}.prob-ini{grid-template-columns:1fr}.prob-demo{max-width:320px}.prob-foto{width:100%}}
 .opf .ft{aspect-ratio:1;background-size:cover;background-position:center;position:relative}
 .opf .ft::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(0,0,0,.55))}
 .opf svg{position:absolute;left:22%;top:6%;width:56%;height:80%;z-index:1;overflow:visible}
@@ -333,7 +383,25 @@ label{display:block;font-size:.75rem;color:var(--gris);margin:12px 0 6px;font-we
 <section id="cortes" class="reco">
  <div class="cont">
   <h2 class="tit rv">¿Qué corte <em>me queda?</em></h2>
-  <p class="sub rv">Responda 3 preguntas tocando la foto que más se parezca a usted. Al final le mostramos los cortes que mejor le quedan, y lo reserva con un toque.</p>
+  <p class="sub rv">Pruébese el corte con su propia foto antes de sentarse en la silla. O responda 3 preguntas tocando la foto que más se parezca a usted.</p>
+  <div class="prob rv" id="prob">
+   <div class="prob-ini" id="probIni">
+    <div class="prob-tx">
+     <span class="chip">✨ NUEVO · con inteligencia artificial</span>
+     <h3>Póngase el corte <em>en su foto</em></h3>
+     <p>Tómese una selfie de frente. Le decimos qué forma de cara tiene, qué cortes le quedan y se los ponemos en su propia foto.</p>
+     <div class="prob-bt">
+      <label class="btn oro">📸 Tomarme una selfie<input type="file" accept="image/*" capture="user" hidden onchange="probFoto(this)"></label>
+      <label class="btn lin">🖼 Subir una foto<input type="file" accept="image/*" hidden onchange="probFoto(this)"></label>
+     </div>
+     <button class="prob-ej" onclick="probEjemplo()">o pruébelo con una foto de ejemplo →</button>
+     <small class="prob-priv">🔒 Su foto no se guarda: solo se usa para mostrarle el corte.</small>
+    </div>
+    <div class="prob-demo"><div class="a"></div><div class="b"></div><span>Antes</span><span>Después</span></div>
+   </div>
+   <div class="prob-res" id="probRes" hidden></div>
+  </div>
+  <div class="o-sep rv"><span>o responda 3 preguntas</span></div>
   <div class="wiz rv" id="wiz"></div>
  </div>
 </section>
@@ -513,9 +581,9 @@ document.querySelectorAll(".rv").forEach((el,i) => { el.style.transitionDelay = 
 /* ---------- recomendador de cortes (con fotos, una pregunta a la vez) ---------- */
 const FORMA = {
  ovalada:'<svg viewBox="0 0 100 100" preserveAspectRatio="none"><ellipse cx="50" cy="50" rx="34" ry="47"/></svg>',
- redonda:'<svg viewBox="0 0 100 100" preserveAspectRatio="none"><ellipse cx="50" cy="52" rx="44" ry="44"/></svg>',
+ redonda:'<svg style="left:37%;top:26%;width:50%;height:60%" viewBox="0 0 100 100" preserveAspectRatio="none"><ellipse cx="50" cy="50" rx="47" ry="47"/></svg>',
  cuadrada:'<svg viewBox="0 0 100 100" preserveAspectRatio="none"><rect x="10" y="6" width="80" height="88" rx="14"/></svg>',
- alargada:'<svg style="left:34%;top:10%" viewBox="0 0 100 100" preserveAspectRatio="none"><rect x="22" y="2" width="56" height="96" rx="28"/></svg>',
+ alargada:'<svg viewBox="0 0 100 100" preserveAspectRatio="none"><rect x="22" y="2" width="56" height="96" rx="28"/></svg>',
  triangular:'<svg viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M8 10 Q50 0 92 10 L70 80 Q50 100 30 80 Z"/></svg>'
 };
 const PREG = [
@@ -573,6 +641,100 @@ function wiz(){
 function elegir(p, k){ elec[p] = k; wiz(); setTimeout(() => { pq++; wiz(); const w = $("#wiz"); if (w.getBoundingClientRect().top < 0) w.scrollIntoView({behavior:"smooth"}); }, 320); }
 function reiniciarReco(){ for (const k in elec) delete elec[k]; pq = 0; wiz(); }
 wiz();
+
+/* ---------- campanita (Edison 6-nov: «que suene durita») ---------- */
+let _ac = null;
+function _audio(){ try { _ac = _ac || new (window.AudioContext || window.webkitAudioContext)(); if (_ac.state === "suspended") _ac.resume(); } catch(e) {} return _ac; }
+["pointerdown","keydown","touchstart"].forEach(ev => window.addEventListener(ev, _audio, {passive:true}));
+function campana(veces){
+ const ac = _audio(); if (!ac) return;
+ const comp = ac.createDynamicsCompressor(); comp.threshold.value = -6; comp.ratio.value = 4; comp.connect(ac.destination);
+ const master = ac.createGain(); master.gain.value = 1.0; master.connect(comp);
+ const golpe = (t0, f0) => [[1,1],[2.76,.55],[5.4,.32],[8.93,.18]].forEach(([r, a]) => {
+  const o = ac.createOscillator(), g = ac.createGain(); o.type = "sine"; o.frequency.value = f0 * r;
+  g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(a, t0 + .004); g.gain.exponentialRampToValueAtTime(.0008, t0 + 1.6 / Math.sqrt(r));
+  o.connect(g); g.connect(master); o.start(t0); o.stop(t0 + 1.8);
+ });
+ const t = ac.currentTime + .02;
+ for (let i = 0; i < (veces || 2); i++) golpe(t + i * .22, i % 2 ? 1568 : 1319);
+}
+/* ---------- probador con foto (IA) ---------- */
+const PB = {foto:null, cara:null, pelo:null, porque:"", res:{}, sel:null, cargando:false};
+const CARA_TX = {ovalada:"ovalada",redonda:"redonda",cuadrada:"cuadrada",alargada:"alargada",triangular:"triangular"};
+const PELO_TX = {liso:"Pelo liso",ondulado:"Pelo ondulado",crespo:"Pelo crespo",poco:"Entradas o poco pelo"};
+function probAchicar(src){
+ return new Promise((ok, mal) => {
+  const im = new Image();
+  im.onload = () => {
+   const L = 900, k = Math.min(1, L / Math.max(im.width, im.height));
+   const c = document.createElement("canvas"); c.width = Math.round(im.width*k); c.height = Math.round(im.height*k);
+   c.getContext("2d").drawImage(im, 0, 0, c.width, c.height); ok(c.toDataURL("image/jpeg", .86));
+  };
+  im.onerror = mal; im.src = src;
+ });
+}
+function probFoto(inp){
+ const f = inp.files && inp.files[0]; inp.value = ""; if (!f) return;
+ const rd = new FileReader(); rd.onload = () => probAchicar(rd.result).then(probAnalizar).catch(() => probError("No pudimos abrir esa foto. Pruebe con otra.")); rd.readAsDataURL(f);
+}
+function probEjemplo(){ fetch(F + "r_cuadrada.jpg").then(r => r.blob()).then(b => { const rd = new FileReader(); rd.onload = () => probAchicar(rd.result).then(probAnalizar); rd.readAsDataURL(b); }); }
+async function probPost(cuerpo){
+ const r = await fetch("https://contabilidad-tributando.onrender.com/api/barberia/probador", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(cuerpo)});
+ const j = await r.json().catch(() => ({error:"El probador está ocupado. Intente en un momento."}));
+ if (!r.ok || j.error) throw new Error(j.error || "Error");
+ return j;
+}
+function probFotoHTML(msg){
+ const r = PB.sel && PB.res[PB.sel];
+ return `<div class="prob-foto" id="pbF"><img src="${PB.foto}" alt="Su foto">${r ? `<img class="desp" src="${r}" alt="Con el corte"><div class="linea"></div><span class="et i">Antes</span><span class="et d">${PB.sel}</span>` : ""}${msg ? `<div class="scan"></div><div class="msg">${msg}</div>` : ""}</div>`;
+}
+function probPintar(msg, err){
+ $("#probIni").hidden = true; const R = $("#probRes"); R.hidden = false;
+ let info = "";
+ if (!PB.cara) {
+  info = `<div class="prob-info">${err ? `<div class="prob-err">${err}</div>` : ""}<h3>Mirando <em>su cara…</em></h3><p>Estamos midiendo la forma de su cara y su tipo de pelo.</p>${err ? `<div class="prob-acc">${probBotonesFoto()}</div>` : ""}</div>`;
+ } else {
+  const recs = CORTES.map(c => ({c, s:(c.cara.includes(PB.cara === "triangular" ? "corazon" : PB.cara)?50:0)+(c.pelo.includes(PB.pelo)?40:0)+10}))
+   .sort((a,b) => b.s - a.s).slice(0, 4);
+  const sel = PB.sel && CORTES.find(c => c.n === PB.sel);
+  info = `<div class="prob-info">${err ? `<div class="prob-err">${err}</div>` : ""}
+   <h3>Su cara es <em>${CARA_TX[PB.cara]}</em></h3><p>${PB.porque || ""}</p>
+   <div class="prob-tags"><span>${PELO_TX[PB.pelo] || ""}</span><span>Toque un corte y se lo ponemos</span></div>
+   ${sel && PB.res[sel.n] ? `<div class="prob-acc"><button class="btn oro" onclick="abrir('${sel.s}',null,null,'${sel.n}')">Reservar este corte</button><a class="btn lin sm" download="mi-corte.png" href="${PB.res[sel.n]}">⬇ Guardar la foto</a></div>` : ""}
+   <div class="prob-cortes">${recs.map((x,i) => `<button class="prob-c ${PB.sel === x.c.n ? "on" : ""}" onclick="probCorte('${x.c.n}')"><div class="ft" style="background-image:url(${F + x.c.f})">${i === 0 ? "<i>EL MEJOR PARA USTED</i>" : ""}</div><div class="tx"><b>${x.c.n}</b><small>${PB.res[x.c.n] ? "✓ Verlo en mí" : "✨ Ponérmelo"}</small></div></button>`).join("")}</div>
+   <div class="prob-acc" style="margin-top:16px">${probBotonesFoto(true)}</div></div>`;
+ }
+ R.innerHTML = `<div class="prob-top">${probFotoHTML(msg)}${info}</div>`;
+ probBarra();
+}
+function probBotonesFoto(chico){ return `<label class="btn lin ${chico ? "sm" : ""}">📸 Otra foto<input type="file" accept="image/*" capture="user" hidden onchange="probFoto(this)"></label>`; }
+function probBarra(){
+ const el = $("#pbF"); if (!el || !el.querySelector(".desp")) return;
+ const mover = e => { const r = el.getBoundingClientRect(); const x = ((e.touches ? e.touches[0].clientX : e.clientX) - r.left) / r.width; el.style.setProperty("--x", Math.max(0, Math.min(100, x*100)) + "%"); };
+ let on = false;
+ el.addEventListener("pointerdown", e => { on = true; mover(e); });
+ window.addEventListener("pointerup", () => on = false);
+ el.addEventListener("pointermove", e => { if (on) mover(e); });
+ el.style.setProperty("--x", "100%");
+ let x = 100; const t = setInterval(() => { x -= 2; el.style.setProperty("--x", x + "%"); if (x <= 50) clearInterval(t); }, 16);
+}
+function probError(m){ probPintar("", m); }
+async function probAnalizar(dataUrl){
+ Object.assign(PB, {foto:dataUrl, cara:null, pelo:null, porque:"", res:{}, sel:null});
+ probPintar("Analizando su cara…");
+ $("#prob").scrollIntoView({behavior:"smooth", block:"start"});
+ try { const j = await probPost({accion:"analizar", foto:dataUrl}); Object.assign(PB, j); probPintar(""); }
+ catch (e) { PB.foto = dataUrl; probPintar("", e.message); }
+}
+async function probCorte(n){
+ if (PB.cargando) return;
+ PB.sel = n;
+ if (PB.res[n]) { probPintar(""); return; }
+ PB.cargando = true; probPintar("Poniéndole el corte… (unos 10 segundos)");
+ try { const j = await probPost({accion:"corte", corte:n, foto:PB.foto}); PB.res[n] = j.img; probPintar(""); campana(2); }
+ catch (e) { PB.sel = null; probPintar("", e.message); }
+ PB.cargando = false;
+}
 
 /* ---------- reserva ---------- */
 const R = {serv:new Set(), lugar:"local", dir:"", barbero:null, dia:0, hora:null, nombre:"", cel:"", nota:"", corte:""};
@@ -694,6 +856,7 @@ function siguiente(){
  paso++; pintar();
 }
 function guardarParaPanel(){
+ campana(3);
  /* Solo en este navegador: para que el panel de muestra enseñe la cita recién hecha. No se envía a ningún lado. */
  try {
   const [hh, mm] = R.hora.split(":").map(Number);
