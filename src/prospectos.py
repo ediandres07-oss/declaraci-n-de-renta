@@ -254,7 +254,8 @@ def cargar_csv(datos: bytes, origen: str = "rues") -> dict:
             n_empresas=len(fs), nit=(f.get("numero_identificacion") or "").lstrip("0")[:20],
             municipio=(f.get("municipio") or "").title()[:80],
             actividad=(f.get("actividad_economica") or "")[:250],
-            fecha_matricula=(f.get("fecha_matricula") or "")[:10], origen=origen,
+            fecha_matricula=(f.get("fecha_matricula") or "")[:10],
+            origen=((f.get("origen") or "").strip() or origen)[:60],   # google_web: sacado de su página
             estado="baja" if esta_de_baja(email) else "pendiente")
         db.session.add(p)
         nuevos[segmento] += 1
@@ -309,8 +310,12 @@ def plantilla_restaurante(p: "Prospecto") -> tuple[str, str]:
     negocio = (p.razon_social or "tu restaurante").strip()
     negocio = negocio.title() if negocio.isupper() else negocio
     asunto = f"{negocio}: su carta digital con pedidos por WhatsApp"
+    de_google = (p.origen or "").startswith("google")
+    saludo = (f"Vi <b>{negocio}</b> en Google Maps y le escribo porque le hacemos a su restaurante:"
+              if de_google else
+              f"Vi que <b>{negocio}</b> se inscribió en la Cámara de Comercio el {_fecha_larga(p.fecha_matricula)}. ¡Felicitaciones! Le hacemos a su restaurante:")
     cuerpo = f"""<p>Hola,</p>
-<p>Vi que <b>{negocio}</b> se inscribió en la Cámara de Comercio el {_fecha_larga(p.fecha_matricula)}. ¡Felicitaciones! Le hacemos a su restaurante:</p>
+<p>{saludo}</p>
 <ul style="padding-left:18px">
 <li>📱 <b>Su carta digital con pedidos por WhatsApp</b>: el cliente escoge, arma el pedido y le llega a su WhatsApp. <a href="{URL}/muestra/carta-ejemplo" style="color:#b8955f;font-weight:700">Mire un ejemplo</a>.</li>
 <li>📊 <b>Un CRM de pedidos y clientes</b>: ve cada pedido (recibido, en preparación, listo), quién le compra y las ventas del día, desde el celular. <a href="{URL}/muestra/carta-ejemplo-pedidos" style="color:#b8955f;font-weight:700">Mire cómo se ve</a>.</li>
@@ -318,7 +323,11 @@ def plantilla_restaurante(p: "Prospecto") -> tuple[str, str]:
 <p>Y si le sirve, también le llevamos <b>la contabilidad del restaurante</b>: el <b>impuesto al consumo</b> (formulario 310 cada dos meses), la <b>nómina electrónica</b> y la renta, con un contador que lo revisa.</p>
 <p>Responda este correo y le cuento cómo funciona y cuánto cuesta para {negocio.rstrip(".")}.</p>"""
     return asunto, _envolver(cuerpo, p.email, "Ver la carta de ejemplo", f"{URL}/muestra/carta-ejemplo",
-                             "Ver el CRM de pedidos", f"{URL}/muestra/carta-ejemplo-pedidos")
+                             "Ver el CRM de pedidos", f"{URL}/muestra/carta-ejemplo-pedidos",
+                             pie=(PIE_WEB if de_google else PIE_RUES))
+
+
+PIE_WEB = "Le escribimos porque el correo de su restaurante aparece publicado en su página web."
 
 
 # El correo de restaurantes (carta + CRM) salió desde el 3-nov-2026 21:37 (hora Colombia).
