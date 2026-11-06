@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>App para barberías · Tributando</title>
+<meta name="description" content="Reservas en línea, barbero a domicilio, recomendador de cortes, clientes, caja y contabilidad para su barbería.">
+<meta property="og:title" content="App para su barbería · Tributando">
+<meta property="og:description" content="Reservas 24/7, domicilios, recomendador de cortes, clientes y caja. Vea el video.">
+<meta property="og:image" content="https://tributando.co/static/muestras/barberia-ejemplo/video_poster.jpg">
+<meta name="theme-color" content="#0b0b0d">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--negro:#0b0b0d;--carbon:#141418;--borde:#2a2a33;--oro:#d4a24c;--oro2:#f0cf8a;--crema:#f5efe6;--gris:#9b9aa3}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,sans-serif;color:var(--crema);background:radial-gradient(900px 600px at 50% -10%,rgba(212,162,76,.22),transparent 60%),var(--negro);min-height:100vh}
+.cont{max-width:1000px;margin:0 auto;padding:34px 16px 60px;display:grid;grid-template-columns:minmax(0,400px) 1fr;gap:40px;align-items:center}
+.logo{display:flex;align-items:center;gap:10px;font-family:'Bebas Neue';font-size:1.5rem;letter-spacing:.06em;margin-bottom:18px}
+.logo i{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--oro),#8a6420,var(--oro2),var(--oro));color:var(--negro);font-style:normal}
+video{width:100%;aspect-ratio:9/16;border-radius:26px;border:1px solid var(--borde);background:#000;box-shadow:0 30px 70px rgba(0,0,0,.6)}
+h1{font-family:'Bebas Neue';font-weight:400;font-size:clamp(2.8rem,7vw,4.4rem);line-height:.92;margin:0 0 14px}
+h1 span{color:var(--oro)}
+p{color:#d6d1c8;line-height:1.6;margin:0 0 22px}
+ul{list-style:none;padding:0;margin:0 0 26px;display:grid;gap:9px}
+li{font-size:.95rem}li b{color:var(--oro2)}
+.bts{display:grid;gap:10px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;padding:14px 20px;font:700 .95rem Inter;text-decoration:none;transition:transform .15s}
+.btn:active{transform:scale(.98)}
+.oro{background:linear-gradient(135deg,var(--oro2),var(--oro));color:#1a1206}
+.lin{border:1px solid rgba(255,255,255,.2);color:var(--crema)}
+.wa{background:#25d366;color:#05301a}
+.pie{text-align:center;color:var(--gris);font-size:.78rem;padding:0 16px 30px}
+.pie a{color:var(--oro2)}
+@media(max-width:820px){.cont{grid-template-columns:1fr;gap:24px;padding-top:20px}.izq{order:2}}
+</style>
+</head>
+<body>
+<div class="cont">
+ <div><video src="/static/video/barberia_demo.mp4" poster="/static/muestras/barberia-ejemplo/video_poster.jpg" controls playsinline preload="metadata"></video></div>
+ <div class="izq">
+  <div class="logo"><i>✂</i>TRIBUTANDO · BARBERÍAS</div>
+  <h1>Su barbería,<br><span>sin agenda de papel.</span></h1>
+  <p>Vea en el video cómo sus clientes reservan solos y cómo usted controla todo desde el celular.</p>
+  <ul>
+   <li>✂ <b>Página de reservas</b> con su nombre, servicios y barberos</li>
+   <li>🛵 <b>Barbero a domicilio</b>, con el valor sumado solo</li>
+   <li>📸 <b>¿Qué corte me queda?</b> El cliente toca fotos y le sugerimos el corte</li>
+   <li>👥 <b>Clientes con su ficha</b> y aviso de a quién ya le toca volver</li>
+   <li>💬 <b>WhatsApp automático</b>: recordatorio, cumpleaños, «ya le toca»</li>
+   <li>💰 <b>Caja y comisiones</b> por barbero, y todo a su contabilidad</li>
+  </ul>
+  <div class="bts">
+   <a class="btn oro" href="/muestra/barberia-ejemplo">✂ Probar la página del cliente</a>
+   <a class="btn lin" href="/muestra/barberia-ejemplo-panel">📊 Ver el panel del dueño</a>
+   <a class="btn lin" href="/muestra/barberia-ejemplo-panel#planes">🏷 Ver planes · desde $52.500 al mes</a>
+   <a class="btn wa" target="_blank" rel="noopener" href="https://wa.me/573332470715?text=Hola%2C%20vi%20el%20video%20de%20la%20app%20para%20barber%C3%ADas%20y%20quiero%20una%20para%20mi%20barber%C3%ADa.">💬 La quiero para mi barbería</a>
+  </div>
+ </div>
+</div>
+<div class="pie">Muestra con datos de ejemplo · Hecho por <a href="https://tributando.co">Tributando</a></div>
+</body>
+</html>
