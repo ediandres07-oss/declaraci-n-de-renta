@@ -86,6 +86,30 @@ section{padding:80px 20px}
 .corte p{margin:0 0 10px;font-size:.82rem;color:var(--gris);line-height:1.45}
 .corte .mant{font-size:.74rem;color:var(--oro2);margin-bottom:12px}
 .vacio{color:var(--gris);font-size:.9rem;padding:20px;border:1px dashed var(--borde);border-radius:16px;text-align:center}
+.wiz{background:var(--negro);border:1px solid var(--borde);border-radius:24px;padding:22px}
+.wiz-cab{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.pasos3{display:flex;gap:6px}.pasos3 i{width:38px;height:5px;border-radius:5px;background:var(--borde);transition:.3s}.pasos3 i.on{background:linear-gradient(90deg,var(--oro),var(--oro2))}
+.wiz-cab small{color:var(--gris);font-size:.78rem;font-weight:600}
+.wiz-cab button{margin-left:auto;background:none;border:0;color:var(--oro2);font:600 .82rem Inter;cursor:pointer}
+.wiz h3{font-family:'Bebas Neue';font-weight:400;font-size:clamp(1.8rem,5vw,2.4rem);margin:14px 0 2px;letter-spacing:.02em}
+.wiz .ay{color:var(--gris);font-size:.88rem;margin:0 0 18px}
+.opsf{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;animation:aparece .4s}
+.opf{border:2px solid var(--borde);border-radius:18px;overflow:hidden;background:var(--carbon2);cursor:pointer;text-align:left;padding:0;color:inherit;font:inherit;transition:transform .2s,border-color .2s}
+.opf:hover{transform:translateY(-3px);border-color:rgba(212,162,76,.6)}
+.opf.on{border-color:var(--oro);box-shadow:0 0 0 3px rgba(212,162,76,.25)}
+.opf .ft{aspect-ratio:1;background-size:cover;background-position:center;position:relative}
+.opf .ft::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(0,0,0,.55))}
+.opf svg{position:absolute;left:22%;top:6%;width:56%;height:80%;z-index:1;overflow:visible}
+.opf svg *{fill:none;stroke:var(--oro2);stroke-width:2.2;stroke-dasharray:6 5;filter:drop-shadow(0 0 4px rgba(0,0,0,.8))}
+.opf .ok{position:absolute;top:10px;right:10px;z-index:2;width:30px;height:30px;border-radius:50%;background:var(--oro);color:#1a1206;display:none;place-items:center;font-weight:800}
+.opf.on .ok{display:grid}
+.opf .tx{padding:11px 13px 13px}
+.opf .tx b{display:block;font-size:.98rem}
+.opf .tx small{display:block;color:var(--gris);font-size:.76rem;line-height:1.35;margin-top:3px}
+.resp{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 16px}
+.resp span{display:flex;align-items:center;gap:8px;background:var(--carbon2);border:1px solid var(--borde);border-radius:999px;padding:4px 12px 4px 4px;font-size:.8rem}
+.resp span i{width:28px;height:28px;border-radius:50%;background-size:cover;background-position:center}
+@media(max-width:820px){.opsf{grid-template-columns:1fr 1fr;gap:10px}.wiz{padding:16px}}
 /* DOMICILIO */
 .domi{display:grid;grid-template-columns:1.1fr 1fr;gap:0;border-radius:26px;overflow:hidden;border:1px solid var(--borde);background:var(--carbon)}
 .domi .ft{background:url(/static/muestras/barberia-ejemplo/domicilio.jpg) center/cover;min-height:380px;position:relative}
@@ -120,7 +144,7 @@ section{padding:80px 20px}
 /* PRODUCTOS */
 .prods{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
 .prod{background:var(--carbon);border:1px solid var(--borde);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:6px}
-.prod .ic{width:52px;height:52px;border-radius:14px;display:grid;place-items:center;font-size:1.6rem;background:rgba(212,162,76,.12)}
+.prod{padding:0 0 16px;overflow:hidden}.prod .pf{aspect-ratio:1;background-size:cover;background-position:center;margin-bottom:6px;transition:transform .5s}.prod:hover .pf{transform:scale(1.05)}.prod h3,.prod p,.prod .pie{padding:0 16px}
 .prod h3{margin:6px 0 0;font-size:.95rem}
 .prod p{margin:0;font-size:.78rem;color:var(--gris);flex:1}
 .prod .pie{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
@@ -273,11 +297,8 @@ label{display:block;font-size:.75rem;color:var(--gris);margin:12px 0 6px;font-we
 <section id="cortes" class="reco">
  <div class="cont">
   <h2 class="tit rv">¿Qué corte <em>me queda?</em></h2>
-  <p class="sub rv">Responda tres preguntas y le recomendamos los cortes que mejor le van. Después lo reserva con un toque.</p>
-  <div class="preg rv"><h4>1 · Forma de su cara</h4><div class="ops" data-p="cara"></div></div>
-  <div class="preg rv"><h4>2 · Su pelo</h4><div class="ops" data-p="pelo"></div></div>
-  <div class="preg rv"><h4>3 · Su estilo</h4><div class="ops" data-p="estilo"></div></div>
-  <div class="resreco" id="resreco"><div class="vacio">Escoja las tres opciones y aquí aparecen sus cortes recomendados.</div></div>
+  <p class="sub rv">Responda 3 preguntas tocando la foto que más se parezca a usted. Al final le mostramos los cortes que mejor le quedan, y lo reserva con un toque.</p>
+  <div class="wiz rv" id="wiz"></div>
  </div>
 </section>
 
@@ -411,10 +432,10 @@ const BARB = [
  {n:"Mateo", a:"", es:"Domicilios, eventos y novios", c:"#b07f30", dom:true, r:4.9}
 ];
 const PROD = [
- {ic:"🫙", n:"Cera mate", d:"Fijación fuerte, sin brillo. 100 g.", p:38000},
- {ic:"🧴", n:"Aceite para barba", d:"Suaviza y da brillo. 30 ml.", p:45000},
- {ic:"🧼", n:"Shampoo anticaída", d:"Con romero y biotina. 250 ml.", p:32000},
- {ic:"🎁", n:"Kit regalo", d:"Cera + aceite + peinilla de madera.", p:99000}
+ {f:"p_cera.jpg", n:"Cera mate", d:"Fijación fuerte, sin brillo. 100 g.", p:38000},
+ {f:"p_aceite.jpg", n:"Aceite para barba", d:"Suaviza y da brillo. 30 ml.", p:45000},
+ {f:"p_shampoo.jpg", n:"Shampoo anticaída", d:"Con romero y biotina. 250 ml.", p:32000},
+ {f:"p_kit.jpg", n:"Kit de barbería", d:"Secador, tijera y peinilla en estuche. Para regalar.", p:189000}
 ];
 const RES = [
  {n:"Camilo R.", t:"Reservé por la página en un minuto y a la hora exacta me estaban atendiendo. Andrés es un duro con el fade."},
@@ -441,7 +462,7 @@ $("#equipo-l").innerHTML = BARB.map(b => `
  ${b.dom ? `<span class="dom">🛵 Hace domicilios</span>` : ""}
  <div style="margin-top:12px"><button class="btn lin sm" onclick="abrir(null,null,'${b.n}')">Reservar con ${b.n}</button></div></div>`).join("");
 $("#prods").innerHTML = PROD.map((p,i) => `
- <div class="prod rv"><div class="ic">${p.ic}</div><h3>${p.n}</h3><p>${p.d}</p>
+ <div class="prod rv"><div class="pf" style="background-image:url(${F + p.f})"></div><h3>${p.n}</h3><p>${p.d}</p>
  <div class="pie"><span class="pr">${pesos(p.p)}</span><button class="mas" onclick="agregar(${i})" aria-label="Agregar">+</button></div></div>`).join("");
 $("#resenas").innerHTML = RES.map(r => `<div class="res rv"><div class="estr">★★★★★</div><p>“${r.t}”</p><small>${r.n} · Google</small></div>`).join("");
 const DIAS = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
@@ -453,55 +474,69 @@ $("#hor").innerHTML = [1,2,3,4,5,6,0].map(d => `<div class="${d===hoy.getDay()?"
 const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("ver"); io.unobserve(e.target); } }), {threshold:.12});
 document.querySelectorAll(".rv").forEach((el,i) => { el.style.transitionDelay = (i%4)*70 + "ms"; io.observe(el); });
 
-/* ---------- recomendador de cortes ---------- */
-const ICO = {
- ovalada:'<svg viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="6.5" ry="9"/></svg>',
- redonda:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg>',
- cuadrada:'<svg viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="16" rx="3"/></svg>',
- alargada:'<svg viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="5"/></svg>',
- corazon:'<svg viewBox="0 0 24 24"><path d="M5 5h14l-2 9-5 7-5-7z"/></svg>'
+/* ---------- recomendador de cortes (con fotos, una pregunta a la vez) ---------- */
+const FORMA = {
+ ovalada:'<svg viewBox="0 0 100 100" preserveAspectRatio="none"><ellipse cx="50" cy="50" rx="34" ry="47"/></svg>',
+ redonda:'<svg viewBox="0 0 100 100" preserveAspectRatio="none"><ellipse cx="50" cy="52" rx="44" ry="44"/></svg>',
+ cuadrada:'<svg viewBox="0 0 100 100" preserveAspectRatio="none"><rect x="10" y="6" width="80" height="88" rx="14"/></svg>',
+ alargada:'<svg style="left:34%;top:10%" viewBox="0 0 100 100" preserveAspectRatio="none"><rect x="22" y="2" width="56" height="96" rx="28"/></svg>',
+ triangular:'<svg viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M8 10 Q50 0 92 10 L70 80 Q50 100 30 80 Z"/></svg>'
 };
-const PREG = {
- cara:[["ovalada","Ovalada"],["redonda","Redonda"],["cuadrada","Cuadrada"],["alargada","Alargada"],["corazon","Triangular"]],
- pelo:[["liso","〰 Liso"],["ondulado","🌊 Ondulado"],["crespo","➰ Crespo / afro"],["poco","🫥 Entradas o poco pelo"]],
- estilo:[["ejecutivo","👔 Ejecutivo"],["moderno","🔥 Moderno"],["urbano","🎧 Urbano"],["practico","⚡ Práctico, sin peinarme"]]
-};
+const PREG = [
+ {k:"cara", t:"¿Qué forma tiene su cara?", ay:"Mírese al espejo y toque la que más se parezca. La línea punteada le muestra la forma.", ops:[
+  ["ovalada","Ovalada","Un poco más larga que ancha, sin ángulos marcados"],
+  ["redonda","Redonda","Casi igual de ancha que de larga, mejillas llenas"],
+  ["cuadrada","Cuadrada","Mandíbula fuerte y recta, frente ancha"],
+  ["alargada","Alargada","Bastante más larga que ancha"],
+  ["triangular","Triangular","Frente ancha y barbilla angosta"]]},
+ {k:"pelo", t:"¿Cómo es su pelo?", ay:"Piense en cómo le queda cuando lo deja crecer un poco.", ops:[
+  ["liso","Liso","Cae derecho, no hace ondas"],
+  ["ondulado","Ondulado","Hace ondas cuando crece"],
+  ["crespo","Crespo o afro","Rizos cerrados, con mucho volumen"],
+  ["poco","Entradas o poco pelo","Se le nota la frente o la coronilla"]]},
+ {k:"estilo", t:"¿Cómo se quiere ver?", ay:"Escoja el estilo que va con usted.", ops:[
+  ["ejecutivo","Ejecutivo","Serio y ordenado, para la oficina"],
+  ["moderno","Moderno","Con volumen y a la moda"],
+  ["urbano","Urbano","Degradados, rizos y diseños"],
+  ["practico","Práctico","Que se vea bien sin peinarme"]]}
+];
 const CORTES = [
  {n:"Low Fade + textura arriba", f:"c_lowfade.jpg", s:"fade", d:"Degradado bajo detrás de la oreja y textura con tijera arriba. Limpio pero con estilo.", m:"Retoque cada 2–3 semanas", cara:["ovalada","redonda","cuadrada","corazon"], pelo:["liso","ondulado"], estilo:["moderno","urbano"]},
  {n:"Crop francés", f:"c_crop.jpg", s:"fade", d:"Flequillo corto y texturizado hacia adelante. Disimula las entradas y da volumen arriba.", m:"Retoque cada 3 semanas", cara:["ovalada","alargada","cuadrada"], pelo:["liso","ondulado","poco"], estilo:["moderno","practico"]},
  {n:"Side part ejecutivo", f:"c_sidepart.jpg", s:"corte", d:"Raya al lado marcada, laterales cortos con tijera. Elegante para la oficina.", m:"Retoque cada 4 semanas", cara:["ovalada","redonda","cuadrada","corazon"], pelo:["liso","ondulado"], estilo:["ejecutivo"]},
  {n:"Pompadour moderno", f:"c_pompadour.jpg", s:"fade", d:"Volumen hacia arriba y atrás con laterales en degradado. Alarga la cara redonda.", m:"Retoque cada 3 semanas", cara:["redonda","cuadrada","ovalada"], pelo:["liso","ondulado"], estilo:["moderno","ejecutivo"]},
- {n:"Burst fade con rizos", f:"c_burst.jpg", s:"fade", d:"Degradado en media luna alrededor de la oreja y los rizos definidos arriba.", m:"Retoque cada 2 semanas", cara:["ovalada","redonda","alargada","corazon"], pelo:["crespo","ondulado"], estilo:["urbano","moderno"]},
+ {n:"Burst fade con rizos", f:"fade.jpg", s:"fade", d:"Degradado en media luna alrededor de la oreja y los rizos definidos arriba.", m:"Retoque cada 2 semanas", cara:["ovalada","redonda","alargada","corazon"], pelo:["crespo","ondulado"], estilo:["urbano","moderno"]},
  {n:"Buzz cut", f:"c_buzz.jpg", s:"corte", d:"Todo a máquina, parejo. Cero peinado y se ve muy bien con barba.", m:"Retoque cada 2 semanas", cara:["ovalada","cuadrada","corazon"], pelo:["crespo","poco","liso"], estilo:["practico","urbano"]},
  {n:"Quiff natural", f:"c_quiff.jpg", s:"cb", d:"Copete hacia adelante y arriba, con movimiento. Fresco y fácil de peinar con los dedos.", m:"Corte cada 3 semanas", cara:["alargada","ovalada","corazon","cuadrada"], pelo:["ondulado","liso"], estilo:["moderno","practico"]},
  {n:"Rizos con volumen", f:"c_rizos.jpg", s:"corte", d:"Rizos medianos arriba, laterales rebajados con tijera. Se definen con crema.", m:"Retoque cada 4 semanas", cara:["ovalada","alargada","cuadrada"], pelo:["ondulado","crespo"], estilo:["moderno","urbano"]},
  {n:"Ivy League", f:"c_ivy.jpg", s:"corte", d:"Versión más larga del militar: ordenado y elegante, se peina con los dedos.", m:"Retoque cada 4 semanas", cara:["redonda","cuadrada","alargada","ovalada"], pelo:["liso","poco","ondulado"], estilo:["ejecutivo","practico"]},
  {n:"Rapado + barba completa", f:"c_rapado.jpg", s:"cb", d:"Cabeza al ras y barba larga bien perfilada. La mejor salida cuando hay entradas.", m:"Barba cada 2 semanas", cara:["ovalada","redonda","cuadrada","alargada","corazon"], pelo:["poco"], estilo:["practico","urbano","moderno","ejecutivo"]}
 ];
-const elec = {};
-document.querySelectorAll(".ops").forEach(box => {
- const p = box.dataset.p;
- box.innerHTML = PREG[p].map(([k,t]) => `<button class="op" data-k="${k}">${p==="cara" ? ICO[k] : ""}${t}</button>`).join("");
- box.addEventListener("click", e => {
-  const b = e.target.closest(".op"); if (!b) return;
-  box.querySelectorAll(".op").forEach(x => x.classList.remove("on")); b.classList.add("on");
-  elec[p] = b.dataset.k; recomendar();
- });
-});
-function recomendar(){
- if (!(elec.cara && elec.pelo && elec.estilo)) {
-  const falta = 3 - Object.keys(elec).length;
-  $("#resreco").innerHTML = `<div class="vacio">Le falta${falta>1?"n":""} ${falta} respuesta${falta>1?"s":""}.</div>`; return;
+const elec = {}; let pq = 0;
+const fotoOp = k => F + "r_" + k + ".jpg";
+function wiz(){
+ const w = $("#wiz");
+ const cab = `<div class="wiz-cab"><div class="pasos3">${PREG.map((_,i) => `<i class="${i <= pq ? "on" : ""}"></i>`).join("")}</div><small>${pq < 3 ? "Pregunta " + (pq+1) + " de 3" : "Su resultado"}</small>${pq > 0 ? `<button onclick="${pq < 3 ? "pq--;wiz()" : "reiniciarReco()"}">${pq < 3 ? "← Atrás" : "↺ Volver a empezar"}</button>` : ""}</div>`;
+ if (pq < 3) {
+  const P = PREG[pq];
+  w.innerHTML = cab + `<h3>${P.t}</h3><p class="ay">${P.ay}</p><div class="opsf">` + P.ops.map(([k,t,d]) => `
+   <button class="opf ${elec[P.k]===k?"on":""}" onclick="elegir('${P.k}','${k}')"><div class="ft" style="background-image:url(${fotoOp(k)})">${P.k==="cara" ? FORMA[k] : ""}<span class="ok">✓</span></div><div class="tx"><b>${t}</b><small>${d}</small></div></button>`).join("") + `</div>`;
+  return;
  }
+ const nombre = (p,k) => PREG.find(x => x.k === p).ops.find(o => o[0] === k)[1];
  const pts = CORTES.map(c => ({c, s:(c.cara.includes(elec.cara)?40:0)+(c.pelo.includes(elec.pelo)?35:0)+(c.estilo.includes(elec.estilo)?25:0)}))
-  .filter(x => x.s >= 60).sort((a,b) => b.s - a.s).slice(0,3);
- if (!pts.length) pts.push({c:CORTES[0], s:70});
- $("#resreco").innerHTML = pts.map((x,i) => `
+  .sort((a,b) => b.s - a.s).slice(0,3);
+ w.innerHTML = cab + `<h3>Estos cortes le quedan a usted</h3>
+  <div class="resp">${PREG.map(P => `<span><i style="background-image:url(${fotoOp(elec[P.k])})"></i>${nombre(P.k, elec[P.k])}</span>`).join("")}</div>
+  <div class="resreco">` + pts.map((x,i) => `
   <div class="corte" style="animation-delay:${i*110}ms">
-   <div class="ft" style="background-image:url(${F + x.c.f})"><span class="match">${x.s}% para usted</span></div>
+   <div class="ft" style="background-image:url(${F + x.c.f})"><span class="match">${Math.max(x.s, 70)}% para usted</span></div>
    <div class="tx"><h3>${x.c.n}</h3><p>${x.c.d}</p><div class="mant">✂ ${x.c.m}</div>
-   <button class="btn oro sm" onclick="abrir('${x.c.s}',null,null,'${x.c.n}')">Reservar este corte</button></div></div>`).join("");
+   <button class="btn oro sm" onclick="abrir('${x.c.s}',null,null,'${x.c.n}')">Reservar este corte</button></div></div>`).join("") + `</div>`;
 }
+function elegir(p, k){ elec[p] = k; wiz(); setTimeout(() => { pq++; wiz(); const w = $("#wiz"); if (w.getBoundingClientRect().top < 0) w.scrollIntoView({behavior:"smooth"}); }, 320); }
+function reiniciarReco(){ for (const k in elec) delete elec[k]; pq = 0; wiz(); }
+wiz();
 
 /* ---------- reserva ---------- */
 const R = {serv:new Set(), lugar:"local", dir:"", barbero:null, dia:0, hora:null, nombre:"", cel:"", nota:"", corte:""};
