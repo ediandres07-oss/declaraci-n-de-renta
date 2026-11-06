@@ -2109,6 +2109,9 @@ _MUESTRAS = {"central-san-ignacio": "muestras/central_san_ignacio.html",
              # Ejemplo SIN nombre de cliente para la campaña de restaurantes (4-nov-2026)
              "carta-ejemplo": "muestras/carta_ejemplo.html",
              "carta-ejemplo-pedidos": "muestras/carta_ejemplo_pedidos.html",
+             # Barbería SIN nombre de cliente (6-nov-2026): reservas + recomendador de cortes + panel CRM
+             "barberia-ejemplo": "muestras/barberia_ejemplo.html",
+             "barberia-ejemplo-panel": "muestras/barberia_ejemplo_panel.html",
              # Cotización de todos los servicios para Alumital, con su video (5-nov-2026)
              "cotizacion-alumital": "muestras/cotizacion_alumital.html",
              # Cotización de la plataforma para Aacer S.A.S., SIN cotizador de ventanería (5-nov-2026)

@@ -1,0 +1,664 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Su Barbería · Reserve su cita</title>
+<meta name="description" content="Reserve su corte en 30 segundos: escoja el servicio, su barbero y la hora. También a domicilio.">
+<meta name="theme-color" content="#0d0d0f">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--negro:#0b0b0d;--carbon:#141418;--carbon2:#1c1c22;--borde:#2a2a33;--oro:#d4a24c;--oro2:#f0cf8a;--crema:#f5efe6;--gris:#9b9aa3;--verde:#3ccf8e;--rojo:#e0533d}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--negro);color:var(--crema);overflow-x:hidden}
+img{display:block;max-width:100%}
+a{color:inherit}
+.muestra{background:linear-gradient(90deg,#3a2a0c,#5a4012,#3a2a0c);color:var(--oro2);font-size:.72rem;text-align:center;padding:6px 10px;letter-spacing:.04em}
+.muestra a{color:#fff;font-weight:700}
+/* NAV */
+nav{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:14px;padding:12px 20px;background:rgba(11,11,13,.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.06)}
+.logo{display:flex;align-items:center;gap:10px;font-family:'Bebas Neue',sans-serif;font-size:1.55rem;letter-spacing:.06em;text-decoration:none}
+.logo i{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(from 0deg,var(--oro),#8a6420,var(--oro2),var(--oro));color:var(--negro);font-style:normal;font-size:1rem}
+nav .links{display:flex;gap:18px;margin-left:auto;font-size:.85rem;color:var(--gris)}
+nav .links a{text-decoration:none}nav .links a:hover{color:var(--oro2)}
+.btn{border:0;border-radius:999px;padding:12px 22px;font:700 .9rem Inter,sans-serif;cursor:pointer;transition:transform .15s,box-shadow .2s,background .2s;display:inline-flex;align-items:center;gap:8px;text-decoration:none}
+.btn:active{transform:scale(.97)}
+.btn.oro{background:linear-gradient(135deg,var(--oro2),var(--oro));color:#1a1206;box-shadow:0 8px 26px rgba(212,162,76,.35)}
+.btn.oro:hover{box-shadow:0 10px 34px rgba(212,162,76,.55)}
+.btn.lin{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.18);color:var(--crema)}
+.btn.lin:hover{border-color:var(--oro)}
+.btn.sm{padding:9px 16px;font-size:.8rem}
+/* HERO */
+.hero{position:relative;min-height:88vh;display:flex;align-items:flex-end;padding:0 20px 70px;overflow:hidden}
+.hero .bg{position:absolute;inset:0;background:url(/static/muestras/barberia-ejemplo/hero.jpg) center/cover;transform:scale(1.08);animation:zoom 18s ease-out forwards}
+@keyframes zoom{to{transform:scale(1)}}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(11,11,13,.35) 0%,rgba(11,11,13,.55) 45%,var(--negro) 100%)}
+.hero .in{position:relative;z-index:2;max-width:1100px;margin:0 auto;width:100%}
+.chip{display:inline-flex;align-items:center;gap:8px;background:rgba(0,0,0,.45);border:1px solid rgba(240,207,138,.35);color:var(--oro2);padding:7px 14px;border-radius:999px;font-size:.78rem;font-weight:600;backdrop-filter:blur(6px)}
+.chip .pt{width:8px;height:8px;border-radius:50%;background:var(--verde);box-shadow:0 0 0 0 rgba(60,207,142,.7);animation:late 1.8s infinite}
+@keyframes late{70%{box-shadow:0 0 0 10px rgba(60,207,142,0)}100%{box-shadow:0 0 0 0 rgba(60,207,142,0)}}
+.hero h1{font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:clamp(3.2rem,11vw,7.5rem);line-height:.88;margin:18px 0 14px;letter-spacing:.01em}
+.hero h1 span{background:linear-gradient(120deg,var(--oro2),var(--oro) 60%,#a8772a);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{font-size:1.08rem;color:#d6d1c8;max-width:560px;line-height:1.55;margin:0 0 26px}
+.hero .acc{display:flex;gap:12px;flex-wrap:wrap}
+.hero .datos{display:flex;gap:28px;margin-top:38px;flex-wrap:wrap}
+.hero .datos div b{display:block;font-family:'Bebas Neue';font-size:2.1rem;color:var(--oro2);font-weight:400;letter-spacing:.03em}
+.hero .datos div span{font-size:.75rem;color:var(--gris);text-transform:uppercase;letter-spacing:.08em}
+/* SECCIONES */
+section{padding:80px 20px}
+.cont{max-width:1100px;margin:0 auto}
+.tit{font-family:'Bebas Neue';font-weight:400;font-size:clamp(2.4rem,6vw,3.6rem);margin:0 0 8px;letter-spacing:.02em;line-height:1}
+.tit em{font-style:normal;color:var(--oro)}
+.sub{color:var(--gris);margin:0 0 34px;max-width:600px;line-height:1.55}
+.rv{opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s ease}
+.rv.ver{opacity:1;transform:none}
+/* SERVICIOS */
+.servs{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
+.serv{position:relative;border-radius:20px;overflow:hidden;background:var(--carbon);border:1px solid var(--borde);cursor:pointer;transition:transform .25s,border-color .25s}
+.serv:hover{transform:translateY(-4px);border-color:rgba(212,162,76,.55)}
+.serv .ft{height:190px;background-size:cover;background-position:center;transition:transform .6s}
+.serv:hover .ft{transform:scale(1.06)}
+.serv .tx{padding:16px 18px 18px}
+.serv h3{margin:0 0 4px;font-size:1.05rem}
+.serv p{margin:0 0 12px;color:var(--gris);font-size:.83rem;line-height:1.45;min-height:2.4em}
+.serv .pie{display:flex;justify-content:space-between;align-items:center}
+.serv .pr{font-family:'Bebas Neue';font-size:1.7rem;color:var(--oro2);letter-spacing:.03em}
+.serv .du{font-size:.75rem;color:var(--gris)}
+.serv .tag{position:absolute;top:12px;left:12px;background:rgba(11,11,13,.75);backdrop-filter:blur(6px);color:var(--oro2);font-size:.68rem;font-weight:700;padding:5px 10px;border-radius:999px;letter-spacing:.04em;text-transform:uppercase}
+/* RECOMENDADOR */
+.reco{background:radial-gradient(1200px 500px at 80% 0%,rgba(212,162,76,.12),transparent 60%),var(--carbon);border-top:1px solid var(--borde);border-bottom:1px solid var(--borde)}
+.preg{margin-bottom:22px}
+.preg h4{margin:0 0 10px;font-size:.8rem;text-transform:uppercase;letter-spacing:.1em;color:var(--oro2)}
+.ops{display:flex;gap:10px;flex-wrap:wrap}
+.op{border:1px solid var(--borde);background:var(--carbon2);color:var(--crema);border-radius:14px;padding:11px 16px;font:600 .88rem Inter;cursor:pointer;display:flex;align-items:center;gap:9px;transition:.2s}
+.op svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.6}
+.op:hover{border-color:var(--oro)}
+.op.on{background:linear-gradient(135deg,rgba(240,207,138,.18),rgba(212,162,76,.08));border-color:var(--oro);color:var(--oro2)}
+.resreco{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-top:10px}
+.corte{background:var(--negro);border:1px solid var(--borde);border-radius:18px;overflow:hidden;animation:aparece .5s both}
+@keyframes aparece{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+.corte .ft{height:190px;background-size:cover;background-position:center 15%;position:relative}
+.corte .match{position:absolute;right:10px;top:10px;background:var(--verde);color:#06291a;font-weight:800;font-size:.72rem;padding:5px 10px;border-radius:999px}
+.corte .tx{padding:14px 16px 16px}
+.corte h3{margin:0 0 4px;font-family:'Bebas Neue';font-weight:400;font-size:1.6rem;letter-spacing:.03em}
+.corte p{margin:0 0 10px;font-size:.82rem;color:var(--gris);line-height:1.45}
+.corte .mant{font-size:.74rem;color:var(--oro2);margin-bottom:12px}
+.vacio{color:var(--gris);font-size:.9rem;padding:20px;border:1px dashed var(--borde);border-radius:16px;text-align:center}
+/* DOMICILIO */
+.domi{display:grid;grid-template-columns:1.1fr 1fr;gap:0;border-radius:26px;overflow:hidden;border:1px solid var(--borde);background:var(--carbon)}
+.domi .ft{background:url(/static/muestras/barberia-ejemplo/domicilio.jpg) center/cover;min-height:380px;position:relative}
+.domi .ft::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent 40%,var(--carbon))}
+.domi .tx{padding:40px 36px}
+.pasos{list-style:none;padding:0;margin:18px 0 24px}
+.pasos li{display:flex;gap:14px;align-items:flex-start;margin-bottom:14px;font-size:.92rem;color:#d6d1c8;line-height:1.45}
+.pasos li b{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:rgba(212,162,76,.15);color:var(--oro2);font-size:.85rem}
+/* EQUIPO */
+.equipo{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
+.barb{background:var(--carbon);border:1px solid var(--borde);border-radius:20px;padding:22px 16px;text-align:center;transition:.25s}
+.barb:hover{border-color:rgba(212,162,76,.5);transform:translateY(-3px)}
+.av{width:78px;height:78px;border-radius:50%;margin:0 auto 12px;display:grid;place-items:center;font-family:'Bebas Neue';font-size:2rem;color:#1a1206;position:relative}
+.av::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:2px solid rgba(212,162,76,.45)}
+.barb h3{margin:0;font-size:1rem}
+.barb .es{font-size:.78rem;color:var(--gris);margin:4px 0 8px;min-height:2.3em}
+.estr{color:var(--oro);font-size:.8rem;letter-spacing:2px}
+.barb .dom{display:inline-block;margin-top:8px;font-size:.68rem;font-weight:700;color:var(--verde);background:rgba(60,207,142,.1);padding:4px 9px;border-radius:999px}
+/* CLUB */
+.club{display:grid;grid-template-columns:1fr 1fr;gap:30px;align-items:center}
+.tarjeta{aspect-ratio:1.6;border-radius:24px;padding:26px;background:linear-gradient(135deg,#2a1f0d,#0f0c07 55%,#3b2a10);border:1px solid rgba(240,207,138,.35);position:relative;overflow:hidden;box-shadow:0 30px 60px rgba(0,0,0,.5);transform:perspective(900px) rotateY(-8deg) rotateX(4deg);transition:transform .5s}
+.tarjeta:hover{transform:perspective(900px) rotateY(0) rotateX(0)}
+.tarjeta::before{content:"";position:absolute;inset:-60%;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.12) 50%,transparent 60%);animation:brillo 5s infinite}
+@keyframes brillo{from{transform:translateX(-40%)}to{transform:translateX(40%)}}
+.tarjeta .t1{font-family:'Bebas Neue';font-size:1.6rem;color:var(--oro2);letter-spacing:.08em}
+.tarjeta .t2{font-size:.75rem;color:var(--gris);margin-top:2px}
+.sellos{display:flex;gap:10px;margin-top:34px}
+.sello{width:46px;height:46px;border-radius:50%;border:2px dashed rgba(240,207,138,.4);display:grid;place-items:center;font-size:1.2rem}
+.sello.ok{border-style:solid;background:rgba(212,162,76,.2);border-color:var(--oro)}
+.sello.gratis{border-color:var(--verde);color:var(--verde);font-size:.6rem;font-weight:800}
+.tarjeta .nom{position:absolute;bottom:22px;left:26px;font-size:.85rem;letter-spacing:.12em;color:#d6d1c8}
+/* PRODUCTOS */
+.prods{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.prod{background:var(--carbon);border:1px solid var(--borde);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:6px}
+.prod .ic{width:52px;height:52px;border-radius:14px;display:grid;place-items:center;font-size:1.6rem;background:rgba(212,162,76,.12)}
+.prod h3{margin:6px 0 0;font-size:.95rem}
+.prod p{margin:0;font-size:.78rem;color:var(--gris);flex:1}
+.prod .pie{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+.prod .pr{font-weight:800;color:var(--oro2)}
+.mas{width:36px;height:36px;border-radius:50%;border:0;background:var(--oro);color:#1a1206;font-size:1.3rem;font-weight:800;cursor:pointer;transition:.2s}
+.mas:hover{transform:scale(1.1)}
+.carrito{position:fixed;right:18px;bottom:88px;z-index:45;background:var(--crema);color:var(--negro);border-radius:999px;padding:12px 18px;font-weight:700;font-size:.85rem;box-shadow:0 14px 40px rgba(0,0,0,.5);display:none;align-items:center;gap:10px;cursor:pointer}
+.carrito.ver{display:flex;animation:aparece .4s}
+.carrito .n{background:var(--rojo);color:#fff;border-radius:999px;padding:1px 8px;font-size:.75rem}
+/* GALERIA / RESEÑAS */
+.gal{display:grid;grid-template-columns:2fr 1fr 1fr;grid-template-rows:200px 200px;gap:12px}
+.gal div{background-size:cover;background-position:center;border-radius:18px}
+.gal div:first-child{grid-row:span 2}
+.resenas{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-top:30px}
+.res{background:var(--carbon);border:1px solid var(--borde);border-radius:18px;padding:18px}
+.res p{margin:8px 0 12px;font-size:.88rem;line-height:1.5;color:#d6d1c8}
+.res small{color:var(--gris)}
+.goo{display:flex;align-items:center;gap:14px;background:var(--carbon);border:1px solid var(--borde);border-radius:18px;padding:16px 20px;width:max-content;max-width:100%}
+.goo b{font-family:'Bebas Neue';font-size:2.6rem;color:var(--oro2);font-weight:400}
+/* UBICACION */
+.ubi{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.caja{background:var(--carbon);border:1px solid var(--borde);border-radius:20px;padding:24px}
+.hor div{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px dashed var(--borde);font-size:.9rem}
+.hor div.hoy{color:var(--oro2);font-weight:700}
+footer{padding:40px 20px 120px;text-align:center;color:var(--gris);font-size:.8rem;border-top:1px solid var(--borde)}
+footer a{color:var(--oro2)}
+/* BARRA FIJA */
+.barra{position:fixed;left:0;right:0;bottom:0;z-index:44;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:linear-gradient(0deg,var(--negro) 60%,transparent);display:none}
+.barra .btn{width:100%;justify-content:center;padding:15px}
+.wa{position:fixed;right:18px;bottom:22px;z-index:45;width:56px;height:56px;border-radius:50%;background:#25d366;display:grid;place-items:center;box-shadow:0 10px 30px rgba(37,211,102,.4);text-decoration:none}
+.wa svg{width:30px;height:30px;fill:#fff}
+/* RESERVA (drawer) */
+.velo{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);z-index:60;opacity:0;pointer-events:none;transition:opacity .3s}
+.velo.ver{opacity:1;pointer-events:auto}
+.res-p{position:fixed;top:0;right:0;bottom:0;width:min(520px,100%);background:var(--carbon);z-index:61;transform:translateX(105%);transition:transform .45s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;border-left:1px solid var(--borde)}
+.res-p.ver{transform:none}
+.rp-cab{padding:18px 22px 14px;border-bottom:1px solid var(--borde)}
+.rp-cab .fila1{display:flex;justify-content:space-between;align-items:center}
+.rp-cab h2{margin:0;font-family:'Bebas Neue';font-weight:400;font-size:1.9rem;letter-spacing:.03em}
+.x{width:38px;height:38px;border-radius:50%;border:1px solid var(--borde);background:transparent;color:var(--crema);font-size:1.1rem;cursor:pointer}
+.prog{display:flex;gap:6px;margin-top:12px}
+.prog i{flex:1;height:4px;border-radius:4px;background:var(--borde);transition:background .3s}
+.prog i.on{background:linear-gradient(90deg,var(--oro),var(--oro2))}
+.rp-cue{flex:1;overflow:auto;padding:20px 22px}
+.rp-pie{padding:14px 22px calc(14px + env(safe-area-inset-bottom));border-top:1px solid var(--borde);display:flex;gap:10px;align-items:center;background:var(--carbon2)}
+.rp-pie .tot{flex:1}
+.rp-pie .tot small{display:block;color:var(--gris);font-size:.72rem}
+.rp-pie .tot b{font-size:1.2rem;color:var(--oro2)}
+.paso{animation:aparece .35s}
+.paso h3{margin:0 0 4px;font-size:1.1rem}
+.paso .ayuda{color:var(--gris);font-size:.82rem;margin:0 0 16px}
+.it{display:flex;align-items:center;gap:12px;padding:10px;border:1px solid var(--borde);border-radius:16px;margin-bottom:10px;cursor:pointer;transition:.2s;background:var(--carbon2)}
+.it:hover{border-color:rgba(212,162,76,.5)}
+.it.on{border-color:var(--oro);background:linear-gradient(135deg,rgba(240,207,138,.12),rgba(212,162,76,.04))}
+.it .mini{width:58px;height:58px;border-radius:12px;background-size:cover;background-position:center;flex:none}
+.it .info{flex:1;min-width:0}
+.it .info b{display:block;font-size:.92rem}
+.it .info small{color:var(--gris);font-size:.76rem}
+.it .pr{font-weight:800;color:var(--oro2);font-size:.92rem;white-space:nowrap}
+.check{width:24px;height:24px;border-radius:50%;border:2px solid var(--borde);flex:none;display:grid;place-items:center;font-size:.75rem;color:#1a1206;transition:.2s}
+.it.on .check{background:var(--oro);border-color:var(--oro)}
+.lugar{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.lugar .it{flex-direction:column;text-align:center;padding:18px 12px;gap:6px}
+.lugar .it .em{font-size:1.8rem}
+input,textarea{width:100%;background:var(--negro);border:1px solid var(--borde);border-radius:12px;padding:13px 14px;color:var(--crema);font:500 .92rem Inter;outline:none;transition:border-color .2s}
+input:focus,textarea:focus{border-color:var(--oro)}
+label{display:block;font-size:.75rem;color:var(--gris);margin:12px 0 6px;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.dias{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;margin-bottom:14px;scrollbar-width:none}
+.dias::-webkit-scrollbar{display:none}
+.dia{flex:none;width:62px;padding:10px 0;border-radius:14px;border:1px solid var(--borde);background:var(--carbon2);text-align:center;cursor:pointer;transition:.2s}
+.dia small{display:block;font-size:.66rem;color:var(--gris);text-transform:uppercase;font-weight:700}
+.dia b{font-size:1.3rem}
+.dia.on{background:linear-gradient(135deg,var(--oro2),var(--oro));color:#1a1206;border-color:var(--oro)}
+.dia.on small{color:#4a3510}
+.franja{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--gris);margin:14px 0 8px;font-weight:700}
+.horas{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.hora{padding:11px 0;border-radius:12px;border:1px solid var(--borde);background:var(--carbon2);color:var(--crema);font:600 .85rem Inter;cursor:pointer;transition:.2s}
+.hora:hover:not(:disabled){border-color:var(--oro)}
+.hora.on{background:var(--oro);color:#1a1206;border-color:var(--oro)}
+.hora:disabled{opacity:.28;text-decoration:line-through;cursor:not-allowed}
+.resumen{background:var(--negro);border:1px solid var(--borde);border-radius:16px;padding:16px;margin-bottom:6px}
+.resumen .f{display:flex;justify-content:space-between;gap:12px;padding:7px 0;font-size:.86rem;border-bottom:1px dashed var(--borde)}
+.resumen .f:last-child{border:0}
+.resumen .f span{color:var(--gris)}
+.resumen .f b{text-align:right}
+/* CONFIRMACION */
+.ticket{text-align:center;padding:10px 4px}
+.ok-ic{width:86px;height:86px;border-radius:50%;margin:10px auto 16px;background:radial-gradient(circle,rgba(60,207,142,.25),transparent 70%);display:grid;place-items:center}
+.ok-ic svg{width:56px;height:56px}
+.ok-ic path{stroke:var(--verde);stroke-width:3;fill:none;stroke-dasharray:60;stroke-dashoffset:60;animation:traza .7s .2s forwards}
+@keyframes traza{to{stroke-dashoffset:0}}
+.ticket h3{font-family:'Bebas Neue';font-weight:400;font-size:2.2rem;margin:0;letter-spacing:.03em}
+.cod{display:inline-block;margin:8px 0 18px;padding:6px 14px;border-radius:999px;background:rgba(212,162,76,.14);color:var(--oro2);font-weight:800;letter-spacing:.12em;font-size:.85rem}
+.wa-msg{background:#0b141a;border-radius:16px;padding:14px;text-align:left;margin:16px 0;border:1px solid #1f2c33}
+.wa-msg .bur{background:#005c4b;color:#e9edef;padding:10px 12px;border-radius:12px 12px 2px 12px;font-size:.83rem;line-height:1.45;margin-left:auto;max-width:92%}
+.wa-msg .bur small{display:block;text-align:right;color:#8fbcb1;font-size:.66rem;margin-top:4px}
+.wa-msg .de{font-size:.7rem;color:#8696a0;margin-bottom:8px}
+.confeti{position:fixed;inset:0;pointer-events:none;z-index:70}
+.toast{position:fixed;left:50%;top:18px;transform:translate(-50%,-150%);background:var(--crema);color:var(--negro);padding:12px 20px;border-radius:14px;font-weight:700;font-size:.88rem;transition:.4s;z-index:80;box-shadow:0 16px 40px rgba(0,0,0,.45);max-width:92vw;text-align:center}
+.toast.ver{transform:translate(-50%,0)}
+@media(max-width:820px){
+ nav .links{display:none}nav .btn{margin-left:auto}
+ .hero{min-height:82vh;padding-bottom:50px}
+ section{padding:60px 16px}
+ .domi,.club,.ubi{grid-template-columns:1fr}
+ .domi .ft{min-height:240px}.domi .ft::after{background:linear-gradient(180deg,transparent 40%,var(--carbon))}
+ .domi .tx{padding:26px 22px}
+ .gal{grid-template-columns:1fr 1fr;grid-template-rows:160px 160px 160px}
+ .gal div:first-child{grid-column:span 2;grid-row:auto}
+ .barra{display:block}.wa{bottom:86px}.carrito{bottom:150px}
+ .horas{grid-template-columns:repeat(3,1fr)}
+}
+</style>
+</head>
+<body>
+<div class="muestra">MUESTRA · así se vería la página de reservas de su barbería · <a href="/muestra/barberia-ejemplo-panel">ver el panel del dueño →</a></div>
+
+<nav>
+ <a class="logo" href="#"><i>✂</i>SU BARBERÍA</a>
+ <div class="links"><a href="#servicios">Servicios</a><a href="#cortes">¿Qué corte me queda?</a><a href="#domicilio">A domicilio</a><a href="#equipo">Barberos</a><a href="#productos">Productos</a></div>
+ <button class="btn oro sm" onclick="abrir()">Reservar</button>
+</nav>
+
+<header class="hero">
+ <div class="bg"></div>
+ <div class="in">
+  <span class="chip"><span class="pt"></span><span id="abierto">Abierto ahora · hasta las 8:00 p. m.</span></span>
+  <h1>Su corte,<br><span>sin hacer fila.</span></h1>
+  <p>Escoja el servicio, su barbero y la hora en 30 segundos. Le llega la confirmación por WhatsApp y un recordatorio el día antes. ¿No puede venir? Vamos a su casa.</p>
+  <div class="acc">
+   <button class="btn oro" onclick="abrir()">✂ Reservar mi cita</button>
+   <a class="btn lin" href="#cortes">¿Qué corte me queda?</a>
+  </div>
+  <div class="datos">
+   <div><b>4,9 ★</b><span>612 reseñas en Google</span></div>
+   <div><b>5</b><span>barberos</span></div>
+   <div><b id="libres">7</b><span>turnos libres hoy</span></div>
+  </div>
+ </div>
+</header>
+
+<section id="servicios">
+ <div class="cont">
+  <h2 class="tit rv">Servicios y <em>precios</em></h2>
+  <p class="sub rv">Toque el que quiera y quedará listo para reservar. Los precios son los de la barbería; usted los cambia cuando quiera desde su panel.</p>
+  <div class="servs" id="servs"></div>
+ </div>
+</section>
+
+<section id="cortes" class="reco">
+ <div class="cont">
+  <h2 class="tit rv">¿Qué corte <em>me queda?</em></h2>
+  <p class="sub rv">Responda tres preguntas y le recomendamos los cortes que mejor le van. Después lo reserva con un toque.</p>
+  <div class="preg rv"><h4>1 · Forma de su cara</h4><div class="ops" data-p="cara"></div></div>
+  <div class="preg rv"><h4>2 · Su pelo</h4><div class="ops" data-p="pelo"></div></div>
+  <div class="preg rv"><h4>3 · Su estilo</h4><div class="ops" data-p="estilo"></div></div>
+  <div class="resreco" id="resreco"><div class="vacio">Escoja las tres opciones y aquí aparecen sus cortes recomendados.</div></div>
+ </div>
+</section>
+
+<section id="domicilio">
+ <div class="cont">
+  <div class="domi rv">
+   <div class="ft"></div>
+   <div class="tx">
+    <span class="chip">🛵 NUEVO</span>
+    <h2 class="tit" style="margin-top:14px">La barbería <em>va a su casa</em></h2>
+    <p class="sub" style="margin-bottom:0">Para el que no tiene tiempo, para eventos, novios, adultos mayores o la oficina.</p>
+    <ul class="pasos">
+     <li><b>1</b>Reserve y escoja «A domicilio». Ponga su dirección.</li>
+     <li><b>2</b>El barbero llega con silla, capa y kit desinfectado.</li>
+     <li><b>3</b>Le avisamos por WhatsApp cuando va en camino.</li>
+    </ul>
+    <button class="btn oro" onclick="abrir(null,'casa')">Pedir barbero a domicilio · +$15.000</button>
+   </div>
+  </div>
+ </div>
+</section>
+
+<section id="equipo" style="padding-top:20px">
+ <div class="cont">
+  <h2 class="tit rv">Nuestros <em>barberos</em></h2>
+  <p class="sub rv">Escoja con quién se quiere motilar. Cada uno tiene su especialidad.</p>
+  <div class="equipo" id="equipo-l"></div>
+ </div>
+</section>
+
+<section style="background:var(--carbon);border-top:1px solid var(--borde);border-bottom:1px solid var(--borde)">
+ <div class="cont club">
+  <div class="rv">
+   <h2 class="tit">Club de <em>clientes</em></h2>
+   <p class="sub">Cada corte suma un sello. Con 5 sellos, el sexto es gratis. No hay tarjeta de papel que se pierda: va con su número de celular.</p>
+   <ul class="pasos">
+    <li><b>🎂</b>En su cumpleaños le llega un 20 % de descuento.</li>
+    <li><b>⏰</b>Si pasan 4 semanas sin venir, le recordamos que ya toca.</li>
+    <li><b>⭐</b>Los clientes frecuentes escogen hora primero.</li>
+   </ul>
+  </div>
+  <div class="tarjeta rv">
+   <div class="t1">SU BARBERÍA · CLUB</div><div class="t2">Tarjeta de sellos digital</div>
+   <div class="sellos"><div class="sello ok">✂</div><div class="sello ok">✂</div><div class="sello ok">✂</div><div class="sello ok">✂</div><div class="sello">✂</div><div class="sello gratis">GRATIS</div></div>
+   <div class="nom">CAMILO R. · 4 DE 5</div>
+  </div>
+ </div>
+</section>
+
+<section id="productos">
+ <div class="cont">
+  <h2 class="tit rv">Productos <em>a domicilio</em></h2>
+  <p class="sub rv">Lo mismo que le aplicamos en la silla, para que su corte dure. Agréguelos y se los llevamos o los recoge en su cita.</p>
+  <div class="prods" id="prods"></div>
+ </div>
+</section>
+
+<section style="padding-top:20px">
+ <div class="cont">
+  <h2 class="tit rv">Lo que dicen <em>los clientes</em></h2>
+  <div class="goo rv"><b>4,9</b><div><div class="estr">★★★★★</div><small style="color:var(--gris)">612 reseñas en Google</small></div></div>
+  <div class="resenas" id="resenas"></div>
+  <div class="gal rv" style="margin-top:30px">
+   <div style="background-image:url(/static/muestras/barberia-ejemplo/galeria2.jpg)"></div>
+   <div style="background-image:url(/static/muestras/barberia-ejemplo/galeria1.jpg)"></div>
+   <div style="background-image:url(/static/muestras/barberia-ejemplo/silla.jpg)"></div>
+   <div style="background-image:url(/static/muestras/barberia-ejemplo/galeria3.jpg)"></div>
+   <div style="background-image:url(/static/muestras/barberia-ejemplo/productos.jpg)"></div>
+  </div>
+ </div>
+</section>
+
+<section style="padding-top:20px">
+ <div class="cont ubi">
+  <div class="caja rv">
+   <h2 class="tit" style="font-size:2.2rem">Horario</h2>
+   <div class="hor" id="hor"></div>
+  </div>
+  <div class="caja rv">
+   <h2 class="tit" style="font-size:2.2rem">Dónde estamos</h2>
+   <p style="color:#d6d1c8;line-height:1.6;margin:0 0 16px">Aquí va la dirección de su barbería, con el botón para llegar con Google Maps o Waze.</p>
+   <div style="display:flex;gap:10px;flex-wrap:wrap"><span class="btn lin sm">📍 Cómo llegar</span><span class="btn lin sm">🅿 Parqueadero</span></div>
+   <p style="color:var(--gris);font-size:.82rem;margin:22px 0 0">Pagos: efectivo, Nequi, Daviplata, tarjeta y transferencia.</p>
+  </div>
+ </div>
+</section>
+
+<footer>
+ <div class="logo" style="justify-content:center;margin-bottom:10px"><i>✂</i>SU BARBERÍA</div>
+ Página de ejemplo · sus servicios, fotos, barberos y precios van aquí.<br>
+ <a href="/muestra/barberia-ejemplo-panel">Ver el panel del dueño (agenda, clientes, caja) →</a><br><br>
+ Hecho por <a href="https://tributando.co">Tributando</a>
+</footer>
+
+<div class="barra"><button class="btn oro" onclick="abrir()">✂ Reservar mi cita</button></div>
+<a class="wa" href="javascript:avisar('En su página este botón abre el WhatsApp de la barbería')" aria-label="WhatsApp"><svg viewBox="0 0 32 32"><path d="M16 3C9 3 3.3 8.6 3.3 15.6c0 2.5.7 4.8 1.9 6.8L3 29l6.8-2.1c1.9 1 4 1.6 6.2 1.6 7 0 12.7-5.6 12.7-12.6S23 3 16 3zm0 23c-2 0-3.9-.6-5.6-1.6l-.4-.2-4 1.2 1.3-3.9-.3-.4c-1.1-1.7-1.7-3.6-1.7-5.6C5.3 9.8 10.1 5 16 5s10.7 4.8 10.7 10.6S21.9 26 16 26zm5.9-7.9c-.3-.2-1.9-.9-2.2-1s-.5-.2-.7.2-.8 1-1 1.2-.4.2-.7.1c-.3-.2-1.4-.5-2.6-1.6-1-.9-1.6-1.9-1.8-2.2s0-.5.1-.7l.5-.6c.2-.2.2-.4.3-.6.1-.2 0-.4 0-.6l-1-2.4c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4s-1.2 1.1-1.2 2.8 1.2 3.2 1.4 3.5c.2.2 2.4 3.6 5.8 5 .8.3 1.4.5 1.9.7.8.3 1.5.2 2.1.1.6-.1 1.9-.8 2.2-1.5.3-.7.3-1.4.2-1.5-.1-.2-.3-.3-.6-.4z"/></svg></a>
+<div class="carrito" id="carrito" onclick="pedirProductos()"><span>🛍</span><span id="carTx">Pedir productos</span><span class="n" id="carN">0</span></div>
+
+<div class="velo" id="velo" onclick="cerrar()"></div>
+<aside class="res-p" id="panel" aria-label="Reservar cita">
+ <div class="rp-cab">
+  <div class="fila1"><h2 id="rpTit">Reservar cita</h2><button class="x" onclick="cerrar()" aria-label="Cerrar">✕</button></div>
+  <div class="prog" id="prog"><i></i><i></i><i></i><i></i><i></i></div>
+ </div>
+ <div class="rp-cue" id="cue"></div>
+ <div class="rp-pie" id="pie">
+  <div class="tot"><small id="totTx">Total</small><b id="tot">$0</b></div>
+  <button class="btn lin sm" id="atras" onclick="atras()">Atrás</button>
+  <button class="btn oro" id="sig" onclick="siguiente()">Continuar</button>
+ </div>
+</aside>
+<div class="toast" id="toast"></div>
+<canvas class="confeti" id="confeti"></canvas>
+
+<script>
+const F = "/static/muestras/barberia-ejemplo/";
+const SERV = [
+ {id:"corte", n:"Corte clásico", d:"Tijera y máquina, lavado y peinado con cera.", p:35000, m:45, f:"corte.jpg", tag:"Más pedido"},
+ {id:"fade", n:"Fade / degradado", d:"Degradado a cero, bajo, medio o alto. Perfilado a navaja.", p:40000, m:50, f:"fade.jpg", tag:"Tendencia"},
+ {id:"cb", n:"Corte + barba", d:"El combo completo: corte, barba perfilada y toalla caliente.", p:55000, m:70, f:"corte_barba.jpg"},
+ {id:"barba", n:"Barba con navaja", d:"Perfilado, toalla caliente, aceite y bálsamo.", p:25000, m:30, f:"barba.jpg"},
+ {id:"diseno", n:"Diseños y cejas", d:"Líneas, figuras o cejas definidas.", p:12000, m:15, f:"diseno.jpg"},
+ {id:"afeitado", n:"Afeitado clásico", d:"Afeitado al ras con navaja, espuma y masaje.", p:30000, m:40, f:"afeitado.jpg"},
+ {id:"vip", n:"Experiencia VIP", d:"Corte, barba, mascarilla negra, masaje y bebida.", p:90000, m:100, f:"premium.jpg", tag:"Premium"}
+];
+const BARB = [
+ {n:"Andrés", a:"El Profe", es:"Fades y degradados perfectos", c:"#f0cf8a", dom:true, r:5},
+ {n:"Kevin", a:"", es:"Diseños, líneas y freestyle", c:"#e3b866", dom:false, r:5},
+ {n:"Santiago", a:"", es:"Barbas y afeitado con navaja", c:"#d4a24c", dom:false, r:5},
+ {n:"Juan Pablo", a:"", es:"Cortes clásicos y ejecutivos", c:"#c08f3c", dom:false, r:4.9},
+ {n:"Mateo", a:"", es:"Domicilios, eventos y novios", c:"#b07f30", dom:true, r:4.9}
+];
+const PROD = [
+ {ic:"🫙", n:"Cera mate", d:"Fijación fuerte, sin brillo. 100 g.", p:38000},
+ {ic:"🧴", n:"Aceite para barba", d:"Suaviza y da brillo. 30 ml.", p:45000},
+ {ic:"🧼", n:"Shampoo anticaída", d:"Con romero y biotina. 250 ml.", p:32000},
+ {ic:"🎁", n:"Kit regalo", d:"Cera + aceite + peinilla de madera.", p:99000}
+];
+const RES = [
+ {n:"Camilo R.", t:"Reservé por la página en un minuto y a la hora exacta me estaban atendiendo. Andrés es un duro con el fade."},
+ {n:"Daniela M.", t:"Le regalé a mi esposo la experiencia VIP a domicilio. Llegaron puntuales y dejaron todo limpio."},
+ {n:"Sebastián G.", t:"Me encanta que me recuerden por WhatsApp. Ya no se me pasa el corte."}
+];
+const $ = s => document.querySelector(s);
+const pesos = v => "$" + Math.round(v).toLocaleString("es-CO");
+const durTx = m => m >= 60 ? (Math.floor(m/60) + " h" + (m%60 ? " " + m%60 + " min" : "")) : m + " min";
+
+/* ---------- pintar secciones ---------- */
+$("#servs").innerHTML = SERV.map(s => `
+ <div class="serv rv" onclick="abrir('${s.id}')">
+  ${s.tag ? `<span class="tag">${s.tag}</span>` : ""}
+  <div class="ft" style="background-image:url(${F + s.f})"></div>
+  <div class="tx"><h3>${s.n}</h3><p>${s.d}</p>
+   <div class="pie"><div><div class="pr">${pesos(s.p)}</div><div class="du">⏱ ${durTx(s.m)}</div></div><span class="btn oro sm">Reservar</span></div>
+  </div></div>`).join("");
+const ini = n => n.split(" ").map(x => x[0]).join("").slice(0,2);
+$("#equipo-l").innerHTML = BARB.map(b => `
+ <div class="barb rv"><div class="av" style="background:linear-gradient(135deg,${b.c},#7a561c)">${ini(b.n)}</div>
+ <h3>${b.n}${b.a ? ` <small style="color:var(--oro2)">«${b.a}»</small>` : ""}</h3>
+ <div class="es">${b.es}</div><div class="estr">★★★★★</div>
+ ${b.dom ? `<span class="dom">🛵 Hace domicilios</span>` : ""}
+ <div style="margin-top:12px"><button class="btn lin sm" onclick="abrir(null,null,'${b.n}')">Reservar con ${b.n}</button></div></div>`).join("");
+$("#prods").innerHTML = PROD.map((p,i) => `
+ <div class="prod rv"><div class="ic">${p.ic}</div><h3>${p.n}</h3><p>${p.d}</p>
+ <div class="pie"><span class="pr">${pesos(p.p)}</span><button class="mas" onclick="agregar(${i})" aria-label="Agregar">+</button></div></div>`).join("");
+$("#resenas").innerHTML = RES.map(r => `<div class="res rv"><div class="estr">★★★★★</div><p>“${r.t}”</p><small>${r.n} · Google</small></div>`).join("");
+const DIAS = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
+const HOR = {0:"10:00 a. m. – 4:00 p. m.",1:"9:00 a. m. – 8:00 p. m.",2:"9:00 a. m. – 8:00 p. m.",3:"9:00 a. m. – 8:00 p. m.",4:"9:00 a. m. – 8:00 p. m.",5:"9:00 a. m. – 9:00 p. m.",6:"8:00 a. m. – 9:00 p. m."};
+const hoy = new Date();
+$("#hor").innerHTML = [1,2,3,4,5,6,0].map(d => `<div class="${d===hoy.getDay()?"hoy":""}"><span>${DIAS[d]}${d===hoy.getDay()?" · hoy":""}</span><span>${HOR[d]}</span></div>`).join("");
+
+/* ---------- aparecer al hacer scroll ---------- */
+const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("ver"); io.unobserve(e.target); } }), {threshold:.12});
+document.querySelectorAll(".rv").forEach((el,i) => { el.style.transitionDelay = (i%4)*70 + "ms"; io.observe(el); });
+
+/* ---------- recomendador de cortes ---------- */
+const ICO = {
+ ovalada:'<svg viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="6.5" ry="9"/></svg>',
+ redonda:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg>',
+ cuadrada:'<svg viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="16" rx="3"/></svg>',
+ alargada:'<svg viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="5"/></svg>',
+ corazon:'<svg viewBox="0 0 24 24"><path d="M5 5h14l-2 9-5 7-5-7z"/></svg>'
+};
+const PREG = {
+ cara:[["ovalada","Ovalada"],["redonda","Redonda"],["cuadrada","Cuadrada"],["alargada","Alargada"],["corazon","Triangular"]],
+ pelo:[["liso","〰 Liso"],["ondulado","🌊 Ondulado"],["crespo","➰ Crespo / afro"],["poco","🫥 Entradas o poco pelo"]],
+ estilo:[["ejecutivo","👔 Ejecutivo"],["moderno","🔥 Moderno"],["urbano","🎧 Urbano"],["practico","⚡ Práctico, sin peinarme"]]
+};
+const CORTES = [
+ {n:"Low Fade + textura arriba", f:"c_lowfade.jpg", s:"fade", d:"Degradado bajo detrás de la oreja y textura con tijera arriba. Limpio pero con estilo.", m:"Retoque cada 2–3 semanas", cara:["ovalada","redonda","cuadrada","corazon"], pelo:["liso","ondulado"], estilo:["moderno","urbano"]},
+ {n:"Crop francés", f:"c_crop.jpg", s:"fade", d:"Flequillo corto y texturizado hacia adelante. Disimula las entradas y da volumen arriba.", m:"Retoque cada 3 semanas", cara:["ovalada","alargada","cuadrada"], pelo:["liso","ondulado","poco"], estilo:["moderno","practico"]},
+ {n:"Side part ejecutivo", f:"c_sidepart.jpg", s:"corte", d:"Raya al lado marcada, laterales cortos con tijera. Elegante para la oficina.", m:"Retoque cada 4 semanas", cara:["ovalada","redonda","cuadrada","corazon"], pelo:["liso","ondulado"], estilo:["ejecutivo"]},
+ {n:"Pompadour moderno", f:"c_pompadour.jpg", s:"fade", d:"Volumen hacia arriba y atrás con laterales en degradado. Alarga la cara redonda.", m:"Retoque cada 3 semanas", cara:["redonda","cuadrada","ovalada"], pelo:["liso","ondulado"], estilo:["moderno","ejecutivo"]},
+ {n:"Burst fade con rizos", f:"c_burst.jpg", s:"fade", d:"Degradado en media luna alrededor de la oreja y los rizos definidos arriba.", m:"Retoque cada 2 semanas", cara:["ovalada","redonda","alargada","corazon"], pelo:["crespo","ondulado"], estilo:["urbano","moderno"]},
+ {n:"Buzz cut", f:"c_buzz.jpg", s:"corte", d:"Todo a máquina, parejo. Cero peinado y se ve muy bien con barba.", m:"Retoque cada 2 semanas", cara:["ovalada","cuadrada","corazon"], pelo:["crespo","poco","liso"], estilo:["practico","urbano"]},
+ {n:"Quiff natural", f:"c_quiff.jpg", s:"cb", d:"Copete hacia adelante y arriba, con movimiento. Fresco y fácil de peinar con los dedos.", m:"Corte cada 3 semanas", cara:["alargada","ovalada","corazon","cuadrada"], pelo:["ondulado","liso"], estilo:["moderno","practico"]},
+ {n:"Rizos con volumen", f:"c_rizos.jpg", s:"corte", d:"Rizos medianos arriba, laterales rebajados con tijera. Se definen con crema.", m:"Retoque cada 4 semanas", cara:["ovalada","alargada","cuadrada"], pelo:["ondulado","crespo"], estilo:["moderno","urbano"]},
+ {n:"Ivy League", f:"c_ivy.jpg", s:"corte", d:"Versión más larga del militar: ordenado y elegante, se peina con los dedos.", m:"Retoque cada 4 semanas", cara:["redonda","cuadrada","alargada","ovalada"], pelo:["liso","poco","ondulado"], estilo:["ejecutivo","practico"]},
+ {n:"Rapado + barba completa", f:"c_rapado.jpg", s:"cb", d:"Cabeza al ras y barba larga bien perfilada. La mejor salida cuando hay entradas.", m:"Barba cada 2 semanas", cara:["ovalada","redonda","cuadrada","alargada","corazon"], pelo:["poco"], estilo:["practico","urbano","moderno","ejecutivo"]}
+];
+const elec = {};
+document.querySelectorAll(".ops").forEach(box => {
+ const p = box.dataset.p;
+ box.innerHTML = PREG[p].map(([k,t]) => `<button class="op" data-k="${k}">${p==="cara" ? ICO[k] : ""}${t}</button>`).join("");
+ box.addEventListener("click", e => {
+  const b = e.target.closest(".op"); if (!b) return;
+  box.querySelectorAll(".op").forEach(x => x.classList.remove("on")); b.classList.add("on");
+  elec[p] = b.dataset.k; recomendar();
+ });
+});
+function recomendar(){
+ if (!(elec.cara && elec.pelo && elec.estilo)) {
+  const falta = 3 - Object.keys(elec).length;
+  $("#resreco").innerHTML = `<div class="vacio">Le falta${falta>1?"n":""} ${falta} respuesta${falta>1?"s":""}.</div>`; return;
+ }
+ const pts = CORTES.map(c => ({c, s:(c.cara.includes(elec.cara)?40:0)+(c.pelo.includes(elec.pelo)?35:0)+(c.estilo.includes(elec.estilo)?25:0)}))
+  .filter(x => x.s >= 60).sort((a,b) => b.s - a.s).slice(0,3);
+ if (!pts.length) pts.push({c:CORTES[0], s:70});
+ $("#resreco").innerHTML = pts.map((x,i) => `
+  <div class="corte" style="animation-delay:${i*110}ms">
+   <div class="ft" style="background-image:url(${F + x.c.f})"><span class="match">${x.s}% para usted</span></div>
+   <div class="tx"><h3>${x.c.n}</h3><p>${x.c.d}</p><div class="mant">✂ ${x.c.m}</div>
+   <button class="btn oro sm" onclick="abrir('${x.c.s}',null,null,'${x.c.n}')">Reservar este corte</button></div></div>`).join("");
+}
+
+/* ---------- reserva ---------- */
+const R = {serv:new Set(), lugar:"local", dir:"", barbero:null, dia:0, hora:null, nombre:"", cel:"", nota:"", corte:""};
+let paso = 0;
+function abrir(servId, lugar, barbero, corte){
+ if (servId) R.serv.add(servId);
+ if (lugar) R.lugar = lugar === "casa" ? "casa" : "local";
+ if (barbero) R.barbero = barbero;
+ if (corte) R.nota = "Quiero el corte: " + corte;
+ paso = R.serv.size ? 1 : 0;
+ if (lugar === "casa") paso = R.serv.size ? 1 : 0;
+ $("#velo").classList.add("ver"); $("#panel").classList.add("ver");
+ document.body.style.overflow = "hidden"; pintar();
+}
+function cerrar(){ $("#velo").classList.remove("ver"); $("#panel").classList.remove("ver"); document.body.style.overflow = ""; if (paso === 5) reiniciar(); }
+function reiniciar(){ R.serv.clear(); R.lugar="local"; R.dir=""; R.barbero=null; R.dia=0; R.hora=null; R.nota=""; paso=0; }
+function total(){ let t = 0; R.serv.forEach(id => t += SERV.find(s => s.id === id).p); if (R.lugar === "casa") t += 15000; return t; }
+function minutos(){ let t = 0; R.serv.forEach(id => t += SERV.find(s => s.id === id).m); return t; }
+function fecha(i){ const d = new Date(); d.setDate(d.getDate() + i); return d; }
+function semilla(str){ let h = 2166136261; for (const ch of str) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return () => { h ^= h << 13; h ^= h >>> 17; h ^= h << 5; return ((h >>> 0) % 1000) / 1000; }; }
+function horas(i){
+ const d = fecha(i), dw = d.getDay();
+ const ab = dw === 0 ? 10 : (dw === 6 ? 8 : 9), ci = dw === 0 ? 16 : (dw >= 5 ? 21 : 20);
+ const rnd = semilla(d.toDateString() + (R.barbero || "cualquiera"));
+ const out = [];
+ for (let h = ab; h < ci; h++) for (const m of [0,30]) {
+  let ocup = rnd() < (dw >= 5 ? .55 : .4);
+  if (i === 0) { const ya = new Date(); if (h < ya.getHours() + 1) ocup = true; }
+  out.push({h, m, ocup});
+ }
+ return out;
+}
+function hTx(h,m){ const ap = h < 12 ? "a. m." : "p. m."; const hh = h > 12 ? h - 12 : h; return `${hh}:${String(m).padStart(2,"0")} ${ap}`; }
+const PASOS = ["¿Qué se va a hacer?","¿Dónde?","¿Con quién?","¿Cuándo?","Sus datos","¡Listo!"];
+function pintar(){
+ $("#rpTit").textContent = PASOS[paso];
+ document.querySelectorAll("#prog i").forEach((el,i) => el.classList.toggle("on", i <= paso));
+ $("#prog").style.display = paso === 5 ? "none" : "flex";
+ const c = $("#cue"); let h = "";
+ if (paso === 0) {
+  h = `<div class="paso"><h3>Escoja uno o varios servicios</h3><p class="ayuda">Puede combinar, por ejemplo corte + diseño.</p>` +
+   SERV.map(s => `<div class="it ${R.serv.has(s.id)?"on":""}" onclick="togServ('${s.id}')"><div class="mini" style="background-image:url(${F + s.f})"></div><div class="info"><b>${s.n}</b><small>⏱ ${durTx(s.m)}</small></div><span class="pr">${pesos(s.p)}</span><span class="check">✓</span></div>`).join("") + `</div>`;
+ } else if (paso === 1) {
+  h = `<div class="paso"><h3>¿Viene a la barbería o vamos a su casa?</h3><p class="ayuda">A domicilio en Medellín, Envigado, Sabaneta, Itagüí y Bello.</p>
+   <div class="lugar"><div class="it ${R.lugar==="local"?"on":""}" onclick="setLugar('local')"><span class="em">💈</span><b>En la barbería</b><small style="color:var(--gris)">Sin costo adicional</small></div>
+   <div class="it ${R.lugar==="casa"?"on":""}" onclick="setLugar('casa')"><span class="em">🛵</span><b>A domicilio</b><small style="color:var(--gris)">+ $15.000</small></div></div>
+   ${R.lugar==="casa" ? `<label>Dirección</label><input id="dir" placeholder="Ej: Calle 10 # 43-20, apto 501, El Poblado" value="${R.dir}" oninput="R.dir=this.value"><label>Indicaciones (opcional)</label><input placeholder="Portería, torre, parqueadero…">` : ""}</div>`;
+ } else if (paso === 2) {
+  const lista = BARB.filter(b => R.lugar !== "casa" || b.dom);
+  h = `<div class="paso"><h3>Escoja su barbero</h3><p class="ayuda">${R.lugar==="casa" ? "Estos son los barberos que van a domicilio." : "O deje que le asignemos el primero libre."}</p>
+   <div class="it ${R.barbero==="Cualquiera"?"on":""}" onclick="setBarb('Cualquiera')"><div class="mini" style="display:grid;place-items:center;background:rgba(212,162,76,.12);font-size:1.6rem">✨</div><div class="info"><b>El primero disponible</b><small>Le damos la hora más pronta</small></div><span class="check">✓</span></div>` +
+   lista.map(b => `<div class="it ${R.barbero===b.n?"on":""}" onclick="setBarb('${b.n}')"><div class="mini av" style="width:58px;height:58px;margin:0;font-size:1.4rem;background:linear-gradient(135deg,${b.c},#7a561c)">${ini(b.n)}</div><div class="info"><b>${b.n}${b.a ? " «"+b.a+"»" : ""}</b><small>${b.es} · ★ ${b.r}</small></div><span class="check">✓</span></div>`).join("") + `</div>`;
+ } else if (paso === 3) {
+  const MES = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+  const ds = Array.from({length:14}, (_,i) => { const d = fecha(i); return `<div class="dia ${R.dia===i?"on":""}" onclick="setDia(${i})"><small>${i===0?"Hoy":i===1?"Mañana":DIAS[d.getDay()].slice(0,3)}</small><b>${d.getDate()}</b><small>${MES[d.getMonth()]}</small></div>`; }).join("");
+  const hs = horas(R.dia);
+  const grupo = (t, f) => { const l = hs.filter(f); return l.length ? `<div class="franja">${t}</div><div class="horas">` + l.map(x => { const k = x.h+":"+x.m; return `<button class="hora ${R.hora===k?"on":""}" ${x.ocup?"disabled":""} onclick="setHora('${k}')">${hTx(x.h,x.m).replace(" a. m.","").replace(" p. m.","")}</button>`; }).join("") + `</div>` : ""; };
+  const libres = hs.filter(x => !x.ocup).length;
+  h = `<div class="paso"><h3>Escoja día y hora</h3><p class="ayuda">${libres} turnos libres este día · duración ${durTx(minutos())}</p><div class="dias">${ds}</div>` +
+   grupo("☀ Mañana", x => x.h < 12) + grupo("🌤 Tarde", x => x.h >= 12 && x.h < 18) + grupo("🌙 Noche", x => x.h >= 18) + `</div>`;
+ } else if (paso === 4) {
+  const [hh, mm] = (R.hora || "0:0").split(":").map(Number);
+  h = `<div class="paso"><h3>Ya casi</h3><p class="ayuda">Con su celular le confirmamos por WhatsApp. No necesita crear cuenta.</p>
+   <div class="resumen">
+    <div class="f"><span>Servicio</span><b>${[...R.serv].map(id => SERV.find(s => s.id === id).n).join(" + ")}</b></div>
+    <div class="f"><span>Dónde</span><b>${R.lugar==="casa" ? "🛵 A domicilio" + (R.dir ? "<br><small style='color:var(--gris);font-weight:500'>" + esc(R.dir) + "</small>" : "") : "💈 En la barbería"}</b></div>
+    <div class="f"><span>Barbero</span><b>${R.barbero}</b></div>
+    <div class="f"><span>Cuándo</span><b>${diaTx(R.dia)} · ${hTx(hh,mm)}</b></div>
+    <div class="f"><span>Total</span><b style="color:var(--oro2)">${pesos(total())}</b></div>
+   </div>
+   <label>Su nombre</label><input id="nom" placeholder="Nombre y apellido" value="${esc(R.nombre)}" oninput="R.nombre=this.value">
+   <label>Celular (WhatsApp)</label><input id="cel" inputmode="numeric" placeholder="300 000 0000" value="${esc(R.cel)}" oninput="R.cel=this.value">
+   <label>Nota para el barbero (opcional)</label><textarea rows="2" placeholder="Ej: degradado bajo, no tocar la barba" oninput="R.nota=this.value">${esc(R.nota)}</textarea>
+   <p class="ayuda" style="margin-top:12px">Paga en la barbería o al barbero: efectivo, Nequi, Daviplata o tarjeta.</p></div>`;
+ } else {
+  const [hh, mm] = R.hora.split(":").map(Number);
+  const cod = "SB-" + Math.floor(1000 + Math.random()*9000);
+  R.cod = cod;
+  const nom = (R.nombre || "Cliente").split(" ")[0];
+  h = `<div class="paso ticket">
+   <div class="ok-ic"><svg viewBox="0 0 52 52"><path d="M14 27 l8 8 l16 -18"/></svg></div>
+   <h3>¡Cita reservada!</h3><div class="cod">${cod}</div>
+   <div class="resumen" style="text-align:left">
+    <div class="f"><span>Cuándo</span><b>${diaTx(R.dia)} · ${hTx(hh,mm)}</b></div>
+    <div class="f"><span>Con</span><b>${R.barbero}</b></div>
+    <div class="f"><span>Dónde</span><b>${R.lugar==="casa" ? "🛵 A domicilio" : "💈 En la barbería"}</b></div>
+    <div class="f"><span>Total</span><b style="color:var(--oro2)">${pesos(total())}</b></div>
+   </div>
+   <div class="wa-msg"><div class="de">WhatsApp · Su Barbería</div><div class="bur">Hola ${esc(nom)} 👋 Su cita quedó para el <b>${diaTx(R.dia).toLowerCase()} a las ${hTx(hh,mm)}</b> con ${R.barbero}. ${R.lugar==="casa" ? "Le avisamos cuando el barbero vaya en camino 🛵." : "Lo esperamos 💈."} Mañana le recordamos. Para cambiarla responda a este mensaje.<small>✓✓ ahora</small></div></div>
+   <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><button class="btn lin sm" onclick="ics()">📅 Agregar a mi calendario</button><a class="btn lin sm" href="/muestra/barberia-ejemplo-panel">👀 Ver cómo le llega al dueño</a></div>
+  </div>`;
+ }
+ c.innerHTML = h; c.scrollTop = 0;
+ $("#tot").textContent = pesos(total());
+ $("#totTx").textContent = R.serv.size ? `${R.serv.size} servicio${R.serv.size>1?"s":""} · ${durTx(minutos())}` : "Total";
+ $("#atras").style.display = paso > 0 && paso < 5 ? "" : "none";
+ $("#sig").textContent = paso === 4 ? "Confirmar cita" : paso === 5 ? "Cerrar" : "Continuar";
+ $("#pie").querySelector(".tot").style.visibility = paso === 5 ? "hidden" : "visible";
+}
+function esc(t){ return String(t||"").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function diaTx(i){ const d = fecha(i); return i===0 ? "Hoy" : i===1 ? "Mañana" : `${DIAS[d.getDay()]} ${d.getDate()}`; }
+function togServ(id){ R.serv.has(id) ? R.serv.delete(id) : R.serv.add(id); pintar(); }
+function setLugar(l){ R.lugar = l; if (l === "casa" && R.barbero && R.barbero !== "Cualquiera" && !BARB.find(b => b.n === R.barbero).dom) R.barbero = null; pintar(); if (l === "casa") setTimeout(() => $("#dir") && $("#dir").focus(), 50); }
+function setBarb(n){ R.barbero = n; R.hora = null; pintar(); setTimeout(siguiente, 220); }
+function setDia(i){ R.dia = i; R.hora = null; pintar(); }
+function setHora(k){ R.hora = k; pintar(); setTimeout(siguiente, 220); }
+function atras(){ if (paso > 0) { paso--; pintar(); } }
+function siguiente(){
+ if (paso === 0 && !R.serv.size) return avisar("Escoja al menos un servicio");
+ if (paso === 1 && R.lugar === "casa" && R.dir.trim().length < 6) return avisar("Escriba la dirección para el domicilio");
+ if (paso === 2 && !R.barbero) return avisar("Escoja un barbero");
+ if (paso === 3 && !R.hora) return avisar("Escoja una hora");
+ if (paso === 4) {
+  if ((R.nombre||"").trim().length < 2) return avisar("Escriba su nombre");
+  if ((R.cel||"").replace(/\D/g,"").length < 10) return avisar("Escriba su celular de 10 números");
+  paso = 5; pintar(); guardarParaPanel(); confeti(); return;
+ }
+ if (paso === 5) { cerrar(); return; }
+ paso++; pintar();
+}
+function guardarParaPanel(){
+ /* Solo en este navegador: para que el panel de muestra enseñe la cita recién hecha. No se envía a ningún lado. */
+ try {
+  const [hh, mm] = R.hora.split(":").map(Number);
+  localStorage.setItem("sb_demo_cita", JSON.stringify({nombre:R.nombre, serv:[...R.serv].map(id => SERV.find(s => s.id === id).n).join(" + "),
+   barbero:R.barbero, h:hh, m:mm, min:minutos(), dia:R.dia, lugar:R.lugar, dir:R.dir, total:total(), nota:R.nota, cod:R.cod, cuando:Date.now()}));
+ } catch(e) {}
+}
+function ics(){
+ const [hh, mm] = R.hora.split(":").map(Number); const d = fecha(R.dia); d.setHours(hh, mm, 0, 0);
+ const f = x => x.toISOString().replace(/[-:]/g,"").split(".")[0] + "Z";
+ const fin = new Date(d.getTime() + minutos()*60000);
+ const txt = ["BEGIN:VCALENDAR","VERSION:2.0","BEGIN:VEVENT","DTSTART:"+f(d),"DTEND:"+f(fin),"SUMMARY:Cita en Su Barbería con "+R.barbero,"END:VEVENT","END:VCALENDAR"].join("\r\n");
+ const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([txt],{type:"text/calendar"})); a.download = "cita-barberia.ics"; a.click();
+}
+let tt; function avisar(t){ const el = $("#toast"); el.textContent = t; el.classList.add("ver"); clearTimeout(tt); tt = setTimeout(() => el.classList.remove("ver"), 2400); }
+
+/* ---------- productos ---------- */
+const car = [];
+function agregar(i){ car.push(PROD[i]); const el = $("#carrito"); el.classList.add("ver"); $("#carN").textContent = car.length; $("#carTx").textContent = "Pedir · " + pesos(car.reduce((a,p) => a + p.p, 0)); avisar("🛍 " + PROD[i].n + " agregado"); }
+function pedirProductos(){ avisar("En su página esto manda el pedido al WhatsApp de la barbería con la dirección del cliente"); }
+
+/* ---------- detalles vivos ---------- */
+(function(){
+ const d = hoy.getDay(), h = hoy.getHours(), ci = d === 0 ? 16 : (d >= 5 ? 21 : 20), ab = d === 0 ? 10 : (d === 6 ? 8 : 9);
+ const abierto = h >= ab && h < ci;
+ $("#abierto").textContent = abierto ? `Abierto ahora · hasta las ${ci-12}:00 p. m.` : (h >= ci ? "Cerrado ahora · reserve para mañana" : `Cerrado ahora · abre a las ${ab}:00 a. m.`);
+ if (!abierto) document.querySelector(".chip .pt").style.background = "var(--rojo)";
+ $("#libres").textContent = Math.max(2, horas(0).filter(x => !x.ocup).length);
+})();
+function confeti(){
+ const cv = $("#confeti"), cx = cv.getContext("2d"); cv.width = innerWidth; cv.height = innerHeight;
+ const col = ["#f0cf8a","#d4a24c","#ffffff","#3ccf8e"];
+ const ps = Array.from({length:120}, () => ({x:innerWidth*(.55+Math.random()*.4), y:-20-Math.random()*200, vx:(Math.random()-.5)*4, vy:2+Math.random()*4, r:Math.random()*6+3, c:col[Math.floor(Math.random()*4)], a:Math.random()*6}));
+ let t = 0; (function an(){ cx.clearRect(0,0,cv.width,cv.height); ps.forEach(p => { p.x += p.vx; p.y += p.vy; p.vy += .05; p.a += .1; cx.save(); cx.translate(p.x,p.y); cx.rotate(p.a); cx.fillStyle = p.c; cx.fillRect(-p.r/2,-p.r/4,p.r,p.r/2); cx.restore(); }); if (++t < 180) requestAnimationFrame(an); else cx.clearRect(0,0,cv.width,cv.height); })();
+}
+document.addEventListener("keydown", e => { if (e.key === "Escape") cerrar(); });
+</script>
+</body>
+</html>
