@@ -354,6 +354,7 @@ def candidatos_restaurante_2(limite: int = 2000) -> list:
            .order_by(Prospecto.fecha_matricula.desc()))
     return [p for p in qry.limit(limite * 4).all()
             if es_restaurante(p) and (p.etapa or "") not in _ETAPAS_NO_SEGUNDO
+            and "bogot" not in (p.municipio or "").lower()          # Edison: solo Antioquia
             and not esta_de_baja(p.email)
             and not _RE_FIRMA_CONTABLE.search(p.actividad or "")][:limite]
 
