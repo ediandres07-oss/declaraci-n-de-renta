@@ -76,7 +76,8 @@ main{padding:22px 26px 60px;min-width:0}
 .agnav .fl{width:36px;height:36px;border-radius:50%;border:1px solid var(--borde);background:var(--carbon2);color:var(--crema);font-size:1.1rem;cursor:pointer}
 .agnav .fl:hover{border-color:var(--oro)}
 .agnav .hoyb{border:1px solid var(--borde);background:transparent;color:var(--oro2);font:700 .78rem Inter;padding:8px 14px;border-radius:999px;cursor:pointer}
-.agnav #agTit{font-weight:700;font-size:.95rem;min-width:190px;text-align:center;text-transform:capitalize}
+.agnav #agTit{font-weight:700;font-size:.95rem;min-width:190px;text-align:center}
+.agnav #agTit::first-letter{text-transform:uppercase}
 .mes{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
 .mes .dn{font-size:.7rem;color:var(--gris);text-transform:uppercase;letter-spacing:.08em;text-align:center;padding:4px 0}
 .mes .d{background:var(--carbon);border:1px solid var(--borde);border-radius:12px;min-height:84px;padding:8px;cursor:pointer;display:flex;flex-direction:column;gap:4px;transition:border-color .15s,transform .15s;text-align:left;color:inherit;font:inherit}
@@ -89,7 +90,7 @@ main{padding:22px 26px 60px;min-width:0}
 .mes .d .bar{height:5px;border-radius:9px;background:var(--carbon2);overflow:hidden;margin-top:auto}
 .mes .d .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--oro),var(--oro2))}
 .mes .d .st{font-size:.7rem;color:var(--oro2);font-weight:700}
-@media(max-width:700px){.mes{gap:4px}.mes .d{min-height:62px;padding:6px}.mes .d small{font-size:.6rem}.agnav #agTit{min-width:0;flex:1}}
+@media(max-width:700px){.mes{gap:4px}.mes .d{min-height:62px;padding:6px}.mes .d small{font-size:.6rem}.agnav #agTit{min-width:0;order:-1;flex-basis:100%;text-align:left;font-size:1.02rem;margin-bottom:2px}.agnav>span[style]{display:none}.agnav .hoyb{padding:8px 11px}}
 .agenda{overflow-x:auto;border-radius:16px;border:1px solid var(--borde);background:var(--carbon)}
 .ag{display:grid;min-width:760px;position:relative}
 .ag .cab{position:sticky;top:0;z-index:3;background:var(--carbon2);padding:12px 10px;border-bottom:1px solid var(--borde);border-left:1px solid var(--borde);display:flex;align-items:center;gap:10px}
