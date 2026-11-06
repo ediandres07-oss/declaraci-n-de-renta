@@ -284,6 +284,15 @@ footer a{color:var(--oro2)}
 input,textarea{width:100%;background:var(--negro);border:1px solid var(--borde);border-radius:12px;padding:13px 14px;color:var(--crema);font:500 .92rem Inter;outline:none;transition:border-color .2s}
 input:focus,textarea:focus{border-color:var(--oro)}
 label{display:block;font-size:.75rem;color:var(--gris);margin:12px 0 6px;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+nav .mc-btn{margin-right:-4px}@media(max-width:600px){nav .mc-btn span{display:none}nav .mc-btn{padding:9px 12px}}
+.mc-it{background:var(--carbon2);border:1px solid var(--borde);border-radius:14px;padding:14px;margin-bottom:10px}
+.mc-it b{display:block;font-size:.95rem}.mc-it small{display:block;color:var(--gris);font-size:.8rem;margin-top:3px}
+.mc-it .cod2{float:right;color:var(--oro2);font-weight:700;font-size:.75rem}
+.mc-acc{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.mc-acc .btn{flex:1;justify-content:center}
+.btn.rojo{background:rgba(224,83,61,.14);border:1px solid rgba(224,83,61,.5);color:#ffb4a6}
+.mc-seg{background:rgba(224,83,61,.08);border:1px dashed rgba(224,83,61,.5);border-radius:12px;padding:12px;margin-top:12px;font-size:.85rem}
+.mc-vacio{text-align:center;color:var(--gris);padding:30px 10px}
 .dias{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;margin-bottom:14px;scrollbar-width:none}
 .dias::-webkit-scrollbar{display:none}
 .dia{flex:none;width:62px;padding:10px 0;border-radius:14px;border:1px solid var(--borde);background:var(--carbon2);text-align:center;cursor:pointer;transition:.2s}
@@ -318,7 +327,7 @@ label{display:block;font-size:.75rem;color:var(--gris);margin:12px 0 6px;font-we
 .toast{position:fixed;left:50%;top:18px;transform:translate(-50%,-150%);background:var(--crema);color:var(--negro);padding:12px 20px;border-radius:14px;font-weight:700;font-size:.88rem;transition:.4s;z-index:80;box-shadow:0 16px 40px rgba(0,0,0,.45);max-width:92vw;text-align:center}
 .toast.ver{transform:translate(-50%,0)}
 @media(max-width:820px){
- nav .links{display:none}nav .btn{margin-left:auto}
+ nav .links{display:none}nav .btn{margin-left:auto}nav .btn.oro{margin-left:0}
  .hero{min-height:82vh;padding-bottom:50px}
  section{padding:60px 16px}
  .domi,.club,.ubi{grid-template-columns:1fr}
@@ -337,7 +346,7 @@ label{display:block;font-size:.75rem;color:var(--gris);margin:12px 0 6px;font-we
 <nav>
  <a class="logo" href="#"><i>✂</i>SU BARBERÍA</a>
  <div class="links"><a href="#servicios">Servicios</a><a href="#cortes">¿Qué corte me queda?</a><a href="#domicilio">A domicilio</a><a href="#equipo">Barberos</a><a href="#productos">Productos</a></div>
- <button class="btn oro sm" onclick="abrir()">Reservar</button>
+ <button class="btn lin sm mc-btn" onclick="misCitas()" aria-label="Mis citas">📅<span> Mis citas</span></button><button class="btn oro sm" onclick="abrir()">Reservar</button>
 </nav>
 
 <header class="cine" id="cine">
@@ -493,6 +502,7 @@ label{display:block;font-size:.75rem;color:var(--gris);margin:12px 0 6px;font-we
 <footer>
  <div class="logo" style="justify-content:center;margin-bottom:10px"><i>✂</i>SU BARBERÍA</div>
  Página de ejemplo · sus servicios, fotos, barberos y precios van aquí.<br>
+ <a href="javascript:misCitas()">📅 Mis citas · cancelar o cambiar una cita</a><br>
  <a href="/muestra/barberia-ejemplo-panel">Ver el panel del dueño (agenda, clientes, caja) →</a><br><br>
  Hecho por <a href="https://tributando.co">Tributando</a>
 </footer>
@@ -749,7 +759,7 @@ function abrir(servId, lugar, barbero, corte){
  $("#velo").classList.add("ver"); $("#panel").classList.add("ver");
  document.body.style.overflow = "hidden"; pintar();
 }
-function cerrar(){ $("#velo").classList.remove("ver"); $("#panel").classList.remove("ver"); document.body.style.overflow = ""; if (paso === 5) reiniciar(); }
+function cerrar(){ $("#velo").classList.remove("ver"); $("#panel").classList.remove("ver"); document.body.style.overflow = ""; if (paso >= 5) reiniciar(); }
 function reiniciar(){ R.serv.clear(); R.lugar="local"; R.dir=""; R.barbero=null; R.dia=0; R.hora=null; R.nota=""; paso=0; }
 function total(){ let t = 0; R.serv.forEach(id => t += SERV.find(s => s.id === id).p); if (R.lugar === "casa") t += 15000; return t; }
 function minutos(){ let t = 0; R.serv.forEach(id => t += SERV.find(s => s.id === id).m); return t; }
@@ -768,9 +778,11 @@ function horas(i){
  return out;
 }
 function hTx(h,m){ const ap = h < 12 ? "a. m." : "p. m."; const hh = h > 12 ? h - 12 : h; return `${hh}:${String(m).padStart(2,"0")} ${ap}`; }
-const PASOS = ["¿Qué se va a hacer?","¿Dónde?","¿Con quién?","¿Cuándo?","Sus datos","¡Listo!"];
+const PASOS = ["¿Qué se va a hacer?","¿Dónde?","¿Con quién?","¿Cuándo?","Sus datos","¡Listo!","Mis citas"];
 function pintar(){
  $("#rpTit").textContent = PASOS[paso];
+ $("#pie").style.display = paso === 6 ? "none" : "";
+ if (paso === 6) { $("#prog").style.display = "none"; $("#cue").innerHTML = htmlMisCitas(); $("#cue").scrollTop = 0; return; }
  document.querySelectorAll("#prog i").forEach((el,i) => el.classList.toggle("on", i <= paso));
  $("#prog").style.display = paso === 5 ? "none" : "flex";
  const c = $("#cue"); let h = "";
@@ -789,7 +801,7 @@ function pintar(){
    lista.map(b => `<div class="it ${R.barbero===b.n?"on":""}" onclick="setBarb('${b.n}')"><div class="mini av" style="width:58px;height:58px;margin:0;font-size:1.4rem;background:linear-gradient(135deg,${b.c},#7a561c)">${ini(b.n)}</div><div class="info"><b>${b.n}${b.a ? " «"+b.a+"»" : ""}</b><small>${b.es} · ★ ${b.r}</small></div><span class="check">✓</span></div>`).join("") + `</div>`;
  } else if (paso === 3) {
   const MES = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
-  const ds = Array.from({length:14}, (_,i) => { const d = fecha(i); return `<div class="dia ${R.dia===i?"on":""}" onclick="setDia(${i})"><small>${i===0?"Hoy":i===1?"Mañana":DIAS[d.getDay()].slice(0,3)}</small><b>${d.getDate()}</b><small>${MES[d.getMonth()]}</small></div>`; }).join("");
+  const ds = Array.from({length:62}, (_,i) => { const d = fecha(i); return `<div class="dia ${R.dia===i?"on":""}" onclick="setDia(${i})"><small>${i===0?"Hoy":i===1?"Mañana":DIAS[d.getDay()].slice(0,3)}</small><b>${d.getDate()}</b><small>${MES[d.getMonth()]}</small></div>`; }).join("");
   const hs = horas(R.dia);
   const grupo = (t, f) => { const l = hs.filter(f); return l.length ? `<div class="franja">${t}</div><div class="horas">` + l.map(x => { const k = x.h+":"+x.m; return `<button class="hora ${R.hora===k?"on":""}" ${x.ocup?"disabled":""} onclick="setHora('${k}')">${hTx(x.h,x.m).replace(" a. m.","").replace(" p. m.","")}</button>`; }).join("") + `</div>` : ""; };
   const libres = hs.filter(x => !x.ocup).length;
@@ -823,11 +835,12 @@ function pintar(){
     <div class="f"><span>Dónde</span><b>${R.lugar==="casa" ? "🛵 A domicilio" : "💈 En la barbería"}</b></div>
     <div class="f"><span>Total</span><b style="color:var(--oro2)">${pesos(total())}</b></div>
    </div>
-   <div class="wa-msg"><div class="de">WhatsApp · Su Barbería</div><div class="bur">Hola ${esc(nom)} 👋 Su cita quedó para el <b>${diaTx(R.dia).toLowerCase()} a las ${hTx(hh,mm)}</b> con ${R.barbero}. ${R.lugar==="casa" ? "Le avisamos cuando el barbero vaya en camino 🛵." : "Lo esperamos 💈."} Mañana le recordamos. Para cambiarla responda a este mensaje.<small>✓✓ ahora</small></div></div>
-   <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><button class="btn lin sm" onclick="ics()">📅 Agregar a mi calendario</button><a class="btn lin sm" href="/muestra/barberia-ejemplo-panel">👀 Ver cómo le llega al dueño</a></div>
+   <div class="wa-msg"><div class="de">WhatsApp · Su Barbería</div><div class="bur">Hola ${esc(nom)} 👋 Su cita quedó para el <b>${diaTx(R.dia).toLowerCase()} a las ${hTx(hh,mm)}</b> con ${R.barbero}. ${R.lugar==="casa" ? "Le avisamos cuando el barbero vaya en camino 🛵." : "Lo esperamos 💈."} Mañana le recordamos. Para cancelarla o cambiarla toque «Mis citas» en la página o responda a este mensaje.<small>✓✓ ahora</small></div></div>
+   <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><button class="btn lin sm" onclick="ics()">📅 Agregar a mi calendario</button><a class="btn lin sm" href="/muestra/barberia-ejemplo-panel">👀 Ver cómo le llega al dueño</a><button class="btn lin sm" onclick="misCitas()">✕ Cancelar o cambiar</button></div>
   </div>`;
  }
  c.innerHTML = h; c.scrollTop = 0;
+ if (paso === 3) { const di = c.querySelector(".dias"), on = c.querySelector(".dia.on"); if (di && on) di.scrollLeft = on.offsetLeft - di.offsetLeft - di.clientWidth/2 + on.clientWidth/2; }
  $("#tot").textContent = pesos(total());
  $("#totTx").textContent = R.serv.size ? `${R.serv.size} servicio${R.serv.size>1?"s":""} · ${durTx(minutos())}` : "Total";
  $("#atras").style.display = paso > 0 && paso < 5 ? "" : "none";
@@ -855,13 +868,62 @@ function siguiente(){
  if (paso === 5) { cerrar(); return; }
  paso++; pintar();
 }
+/* ---------- Mis citas: el cliente cancela o cambia (Edison 6-nov) ---------- */
+const MC = {cel:"", conf:null, hecho:null};
+function misCitas(){
+ const l = citasGuardadas(); if (!MC.cel && l.length) MC.cel = l[l.length-1].cel || "";
+ MC.conf = null; MC.hecho = null; paso = 6;
+ $("#velo").classList.add("ver"); $("#panel").classList.add("ver"); document.body.style.overflow = "hidden"; pintar();
+}
+function citasGuardadas(){ try { return JSON.parse(localStorage.getItem("sb_demo_citas") || "[]"); } catch(e) { return []; } }
+function fechaLarga(f){ const [y,m,d] = f.split("-").map(Number); return new Date(y, m-1, d).toLocaleDateString("es-CO", {weekday:"long", day:"numeric", month:"long"}); }
+function htmlMisCitas(){
+ const hoyI = isoF(new Date()), cel = MC.cel.replace(/\D/g, "");
+ const l = cel.length >= 10 ? citasGuardadas().filter(g => g.fecha >= hoyI && (g.cel || "").replace(/\D/g, "") === cel) : [];
+ let h = `<div class="paso"><h3>Cancelar o cambiar una cita</h3><p class="ayuda">Escriba el celular con el que reservó. Puede cancelar o cambiar sin costo hasta 2 horas antes.</p>
+  <label>Celular (WhatsApp)</label><input inputmode="numeric" placeholder="300 000 0000" value="${esc(MC.cel)}" oninput="MC.cel=this.value; if(this.value.replace(/\D/g,'').length>=10){pintar(); const i=document.querySelector('#cue input'); i.focus(); i.setSelectionRange(99,99);}">`;
+ if (MC.hecho) h += `<div class="wa-msg" style="margin-top:14px"><div class="de">WhatsApp · Su Barbería</div><div class="bur">${MC.hecho}<small>✓✓ ahora</small></div></div>`;
+ if (cel.length < 10) return h + `</div>`;
+ if (!l.length) return h + `<div class="mc-vacio">No tiene citas próximas con ese número.<br><br><button class="btn oro sm" onclick="paso=0; pintar()">Reservar una cita</button></div></div>`;
+ h += `<div style="margin-top:16px">` + l.map(g => `<div class="mc-it"><span class="cod2">${esc(g.cod || "")}</span><b>${esc(g.serv)}</b>
+  <small>📅 ${fechaLarga(g.fecha)} · ${hTx(g.h, g.m)}</small><small>✂ Con ${esc(g.barbero || "el primero disponible")} · ${g.lugar === "casa" ? "🛵 A domicilio" : "💈 En la barbería"}</small>
+  ${MC.conf === g.cod ? `<div class="mc-seg">¿Seguro que quiere cancelar esta cita? El espacio queda libre para otro cliente.<div class="mc-acc"><button class="btn rojo sm" onclick="cancelarCita('${g.cod}')">Sí, cancelar</button><button class="btn lin sm" onclick="MC.conf=null; pintar()">No</button></div></div>`
+   : `<div class="mc-acc"><button class="btn lin sm" onclick="cambiarCita('${g.cod}')">🔁 Cambiar día u hora</button><button class="btn rojo sm" onclick="MC.conf='${g.cod}'; pintar()">✕ Cancelar</button></div>`}</div>`).join("") + `</div></div>`;
+ return h;
+}
+function quitarCita(cod, cambio){
+ const l = citasGuardadas(), g = l.find(x => x.cod === cod); if (!g) return null;
+ localStorage.setItem("sb_demo_citas", JSON.stringify(l.filter(x => x.cod !== cod)));
+ try { const u = JSON.parse(localStorage.getItem("sb_demo_cita") || "null"); if (u && u.cod === cod) localStorage.removeItem("sb_demo_cita"); } catch(e) {}
+ localStorage.setItem("sb_demo_cancel", JSON.stringify({...g, cambio:!!cambio, cuando:Date.now()}));   /* el panel lo oye y libera el espacio */
+ return g;
+}
+function cancelarCita(cod){
+ const g = quitarCita(cod, false); if (!g) return;
+ MC.conf = null;
+ MC.hecho = `Listo ${esc((g.nombre || "").split(" ")[0])}, cancelamos su cita del <b>${fechaLarga(g.fecha)} a las ${hTx(g.h, g.m)}</b>. Cuando quiera, vuelva a reservar aquí mismo 💈`;
+ pintar(); avisar("Cita cancelada. La barbería ya fue avisada.");
+}
+function cambiarCita(cod){
+ const g = citasGuardadas().find(x => x.cod === cod); if (!g) return;
+ quitarCita(cod, true);
+ reiniciar();
+ (g.serv || "").split(" + ").forEach(n => { const s = SERV.find(x => x.n === n); if (s) R.serv.add(s.id); });
+ R.lugar = g.lugar === "casa" ? "casa" : "local"; R.dir = g.dir || ""; R.barbero = g.barbero || null; R.nombre = g.nombre || ""; R.cel = g.cel || ""; R.nota = g.nota || "";
+ paso = R.serv.size ? 3 : 0; pintar(); avisar("Escoja el nuevo día y la hora");
+}
+const isoF = d => d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
 function guardarParaPanel(){
  campana(3);
  /* Solo en este navegador: para que el panel de muestra enseñe la cita recién hecha. No se envía a ningún lado. */
  try {
   const [hh, mm] = R.hora.split(":").map(Number);
   localStorage.setItem("sb_demo_cita", JSON.stringify({nombre:R.nombre, serv:[...R.serv].map(id => SERV.find(s => s.id === id).n).join(" + "),
-   barbero:R.barbero, h:hh, m:mm, min:minutos(), dia:R.dia, lugar:R.lugar, dir:R.dir, total:total(), nota:R.nota, cod:R.cod, cuando:Date.now()}));
+   barbero:R.barbero, h:hh, m:mm, min:minutos(), dia:R.dia, fecha:isoF(fecha(R.dia)), lugar:R.lugar, dir:R.dir, total:total(), nota:R.nota, cod:R.cod, cel:R.cel, cuando:Date.now()}));
+  /* Todas las reservas (cualquier día o mes) para que el panel las muestre en su fecha */
+  const todas = JSON.parse(localStorage.getItem("sb_demo_citas") || "[]");
+  todas.push(JSON.parse(localStorage.getItem("sb_demo_cita")));
+  localStorage.setItem("sb_demo_citas", JSON.stringify(todas.slice(-30)));
  } catch(e) {}
 }
 function ics(){

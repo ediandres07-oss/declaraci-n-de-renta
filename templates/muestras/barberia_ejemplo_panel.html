@@ -51,6 +51,27 @@ main{padding:22px 26px 60px;min-width:0}
 .card h2{margin:0 0 4px;font-size:1rem}
 .card .ay{color:var(--gris);font-size:.8rem;margin:0 0 14px}
 /* AGENDA */
+.agnav{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.agnav .sw{display:flex;background:var(--carbon2);border:1px solid var(--borde);border-radius:999px;padding:3px}
+.agnav .sw button{border:0;background:transparent;color:var(--gris);font:700 .8rem Inter;padding:7px 16px;border-radius:999px;cursor:pointer}
+.agnav .sw button.on{background:linear-gradient(135deg,var(--oro2),var(--oro));color:#1a1206}
+.agnav .fl{width:36px;height:36px;border-radius:50%;border:1px solid var(--borde);background:var(--carbon2);color:var(--crema);font-size:1.1rem;cursor:pointer}
+.agnav .fl:hover{border-color:var(--oro)}
+.agnav .hoyb{border:1px solid var(--borde);background:transparent;color:var(--oro2);font:700 .78rem Inter;padding:8px 14px;border-radius:999px;cursor:pointer}
+.agnav #agTit{font-weight:700;font-size:.95rem;min-width:190px;text-align:center;text-transform:capitalize}
+.mes{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.mes .dn{font-size:.7rem;color:var(--gris);text-transform:uppercase;letter-spacing:.08em;text-align:center;padding:4px 0}
+.mes .d{background:var(--carbon);border:1px solid var(--borde);border-radius:12px;min-height:84px;padding:8px;cursor:pointer;display:flex;flex-direction:column;gap:4px;transition:border-color .15s,transform .15s;text-align:left;color:inherit;font:inherit}
+.mes .d:hover{border-color:var(--oro);transform:translateY(-2px)}
+.mes .d.fuera{opacity:.3;pointer-events:none}
+.mes .d.pas{opacity:.6}
+.mes .d.hoy{border-color:var(--verde);box-shadow:0 0 0 1px var(--verde) inset}
+.mes .d b{font-size:1rem}
+.mes .d small{font-size:.72rem;color:var(--gris)}
+.mes .d .bar{height:5px;border-radius:9px;background:var(--carbon2);overflow:hidden;margin-top:auto}
+.mes .d .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--oro),var(--oro2))}
+.mes .d .st{font-size:.7rem;color:var(--oro2);font-weight:700}
+@media(max-width:700px){.mes{gap:4px}.mes .d{min-height:62px;padding:6px}.mes .d small{font-size:.6rem}.agnav #agTit{min-width:0;flex:1}}
 .agenda{overflow-x:auto;border-radius:16px;border:1px solid var(--borde);background:var(--carbon)}
 .ag{display:grid;min-width:760px;position:relative}
 .ag .cab{position:sticky;top:0;z-index:3;background:var(--carbon2);padding:12px 10px;border-bottom:1px solid var(--borde);border-left:1px solid var(--borde);display:flex;align-items:center;gap:10px}
@@ -216,7 +237,13 @@ tr.f:hover{background:var(--carbon2)}
 
  <!-- AGENDA -->
  <div class="vista on" id="v-agenda">
-  <div class="agenda"><div class="ag" id="ag"></div></div>
+  <div class="agnav">
+   <div class="sw"><button id="vDia" class="on" onclick="vista('dia')">Día</button><button id="vMes" onclick="vista('mes')">Mes</button></div>
+   <button class="fl" onclick="mover(-1)" aria-label="Anterior">‹</button><span id="agTit"></span><button class="fl" onclick="mover(1)" aria-label="Siguiente">›</button>
+   <button class="hoyb" onclick="irHoy()">Hoy</button>
+  </div>
+  <div class="agenda" id="agWrap"><div class="ag" id="ag"></div></div>
+  <div class="mes" id="mes" hidden></div>
   <div class="ley"><span><i style="background:var(--oro)"></i>Corte</span><span><i style="background:var(--azul)"></i>Barba / afeitado</span><span><i style="background:var(--morado)"></i>VIP</span><span><i style="background:var(--verde)"></i>A domicilio</span><span><i style="background:var(--rojo)"></i>Ahora</span></div>
   <div class="dos">
    <div class="card"><h2>⏰ Clientes que ya les toca volver</h2><p class="ay">Pasaron más de 4 semanas desde su último corte. Un mensaje y vuelven.</p><div id="tocaVolver"></div></div>
@@ -310,10 +337,14 @@ BARB.forEach((b, bi) => {
 /* Fuera del horario (madrugada o noche) la muestra se ve como un día en plena tarde */
 function ahoraMin(){ const d = new Date(); const m = d.getHours()*60 + d.getMinutes(); return (m >= 10*60 && m <= H1*60 - 45) ? m : 15*60 + 40; }
 /* La cita que el cliente acaba de reservar en la página de muestra (mismo navegador) */
+const iso = d => d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+const HOY_ISO = iso(hoy);
+let RESERVAS = [];   /* todas las reservas hechas en la página (cualquier día), las más nuevas al final */
+try { RESERVAS = JSON.parse(localStorage.getItem("sb_demo_citas") || "[]").filter(g => g && g.fecha >= HOY_ISO); } catch(e) {}
 let citaDemo = null;
 try {
  const g = JSON.parse(localStorage.getItem("sb_demo_cita") || "null");
- if (g && Date.now() - g.cuando < 864e5 * 2 && g.dia === 0) {
+ if (g && (g.fecha ? g.fecha === HOY_ISO : (Date.now() - g.cuando < 864e5 * 2 && g.dia === 0))) {
   const bn = BARB.find(b => b.n === g.barbero) ? g.barbero : "Andrés";
   citaDemo = {b:bn, ini:g.h*60 + g.m, min:g.min || 45, sv:{n:g.serv, p:g.total, t:"corte"}, dom:g.lugar === "casa", demo:true,
    cli:{n:g.nombre, id:-1, vis:1, dias:0, ult:g.serv, b:bn, gas:g.total, nota:g.nota || "Cliente nuevo: reservó por la página.", sellos:1, nuevo:true, cel:"", cum:hoy}, pago:"Por cobrar", prop:0};
@@ -322,14 +353,78 @@ try {
  }
 } catch(e) {}
 
+/* ---------- agenda de cualquier día y vista del mes ---------- */
+let DIA = 0, VISTA = "dia", MESOFF = 0, LISTA = CITAS;
+const _cache = {};
+function fechaOff(off){ const d = new Date(hoy); d.setHours(12,0,0,0); d.setDate(d.getDate() + off); return d; }
+function offDe(isoTxt){ const [y,m,d] = isoTxt.split("-").map(Number); return Math.round((new Date(y, m-1, d, 12) - fechaOff(0)) / 864e5); }
+function semilla(str){ let h = 2166136261; for (const ch of str) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return () => { h ^= h << 13; h ^= h >>> 17; h ^= h << 5; return ((h >>> 0) % 1000) / 1000; }; }
+function reservaACita(g){
+ const bn = BARB.find(b => b.n === g.barbero) ? g.barbero : "Andrés";
+ return {b:bn, ini:g.h*60 + g.m, min:g.min || 45, sv:{n:g.serv, p:g.total, t:"corte"}, dom:g.lugar === "casa", demo:true,
+  cli:{n:g.nombre, id:-1, vis:1, dias:0, ult:g.serv, b:bn, gas:g.total, nota:g.nota || "Cliente nuevo: reservó por la página.", sellos:1, nuevo:true, cel:"", cum:hoy}, pago:"Por cobrar", prop:0};
+}
+function citasDe(off){
+ if (off === 0) return CITAS;
+ if (_cache[off]) return _cache[off];
+ const d = fechaOff(off), r = semilla("dia" + iso(d)), dw = d.getDay();
+ /* días pasados casi llenos; hacia adelante cada vez más libres (todavía no han reservado) */
+ const llen = off < 0 ? .78 : off <= 3 ? .62 : off <= 10 ? .42 : off <= 30 ? .22 : .09;
+ const h1 = dw === 0 ? 16 : H1, l = [];
+ BARB.forEach((b, bi) => {
+  let t = H0 * 60 + Math.floor(r()*3)*30;
+  while (t < h1 * 60 - 30) {
+   if (r() > llen * (dw >= 5 ? 1.15 : 1)) { t += 30; continue; }
+   const sv = SERV[Math.floor(r() * (bi === 2 ? 6 : SERV.length))], dom = b.dom && r() < .25;
+   l.push({b:b.n, ini:t, min:sv.m, sv, dom, cli:CL[Math.floor(r()*CL.length)], pago: off < 0 ? ["Efectivo","Nequi","Daviplata","Tarjeta"][Math.floor(r()*4)] : "Por cobrar", prop:0});
+   t += Math.ceil((sv.m + (dom ? 30 : 0)) / 30) * 30;
+  }
+ });
+ RESERVAS.filter(g => g.fecha === iso(d)).forEach(g => {
+  const c = reservaACita(g);
+  for (let i = l.length - 1; i >= 0; i--) { const x = l[i]; if (x.b === c.b && x.ini < c.ini + c.min && c.ini < x.ini + x.min) l.splice(i, 1); }
+  l.push(c);
+ });
+ return (_cache[off] = l);
+}
+function tituloDia(off){
+ const d = fechaOff(off);
+ const t = d.toLocaleDateString("es-CO", {weekday:"long", day:"numeric", month:"long"});
+ return off === 0 ? "Hoy · " + t : off === 1 ? "Mañana · " + t : off === -1 ? "Ayer · " + t : t;
+}
+function vista(v){ VISTA = v; if (v === "mes") MESOFF = (() => { const d = fechaOff(DIA); return (d.getFullYear() - hoy.getFullYear()) * 12 + d.getMonth() - hoy.getMonth(); })(); pintarAgenda(); }
+function mover(n){ if (VISTA === "dia") DIA += n; else MESOFF += n; pintarAgenda(); }
+function irHoy(){ DIA = 0; MESOFF = 0; pintarAgenda(); }
+function abrirDia(off){ DIA = off; VISTA = "dia"; pintarAgenda(); $("#agWrap").scrollIntoView({behavior:"smooth", block:"start"}); }
+function pintarMes(){
+ const base = new Date(hoy.getFullYear(), hoy.getMonth() + MESOFF, 1, 12);
+ $("#agTit").textContent = base.toLocaleDateString("es-CO", {month:"long", year:"numeric"});
+ const pri = (base.getDay() + 6) % 7, ult = new Date(base.getFullYear(), base.getMonth() + 1, 0).getDate();
+ let h = ["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"].map(x => `<div class="dn">${x}</div>`).join("");
+ for (let i = 0; i < pri; i++) h += `<div class="d fuera"></div>`;
+ const cap = BARB.length * (H1 - H0) * 60;
+ for (let dd = 1; dd <= ult; dd++) {
+  const off = offDe(iso(new Date(base.getFullYear(), base.getMonth(), dd, 12)));
+  const l = citasDe(off), oc = Math.min(100, Math.round(l.reduce((a,c) => a + c.min, 0) / cap * 100));
+  const st = l.filter(c => c.demo).length;
+  h += `<button class="d ${off === 0 ? "hoy" : ""} ${off < 0 ? "pas" : ""}" onclick="abrirDia(${off})"><b>${dd}</b><small>${l.length} citas</small>${st ? `<span class="st">⭐ ${st} por la página</span>` : ""}<div class="bar"><i style="width:${oc}%"></i></div></button>`;
+ }
+ $("#mes").innerHTML = h;
+}
 function pintarAgenda(){
+ $("#vDia").classList.toggle("on", VISTA === "dia"); $("#vMes").classList.toggle("on", VISTA === "mes");
+ $("#agWrap").hidden = VISTA === "mes"; $("#mes").hidden = VISTA !== "mes";
+ if ($(".nv.on") && $(".nv.on").dataset.v === "agenda") $("#titulo").textContent = VISTA === "mes" ? "Agenda del mes" : DIA === 0 ? "Agenda de hoy" : "Agenda";
+ if (VISTA === "mes") { pintarMes(); return; }
+ $("#agTit").textContent = tituloDia(DIA);
+ const CITAS = LISTA = citasDe(DIA);
  const cols = BARB.length;
  const ag = $("#ag"); ag.style.gridTemplateColumns = `62px repeat(${cols}, 1fr)`;
  const filas = (H1 - H0) * 2;
  let h = `<div class="cab" style="justify-content:center"><small>Hora</small></div>` +
   BARB.map(b => { const n = CITAS.filter(c => c.b === b.n).length; return `<div class="cab"><div class="av" style="background:linear-gradient(135deg,${b.c},#7a561c)">${ini(b.n)}</div><div><b>${b.n}</b><small>${n} citas${b.dom ? " · 🛵" : ""}</small></div></div>`; }).join("");
  h += `<div>` + Array.from({length:filas}, (_,i) => `<div class="hr" style="height:${PX}px">${i%2===0 ? hCorta(H0 + i/2) : ""}</div>`).join("") + `</div>`;
- const now = ahoraMin();
+ const now = DIA === 0 ? ahoraMin() : DIA < 0 ? 99999 : -1;
  BARB.forEach(b => {
   h += `<div class="col">` + Array.from({length:filas}, () => `<div class="lin"></div>`).join("");
   CITAS.filter(c => c.b === b.n).forEach(c => {
@@ -341,7 +436,7 @@ function pintarAgenda(){
   });
   h += `</div>`;
  });
- ag.innerHTML = h + `<div class="ahora" style="top:${(now - H0*60)/30*PX + 46}px"></div>`;
+ ag.innerHTML = h + (DIA === 0 ? `<div class="ahora" style="top:${(now - H0*60)/30*PX + 46}px"></div>` : "");
 }
 function hCorta(h){ return (h > 12 ? h - 12 : h) + (h < 12 ? " a. m." : " p. m."); }
 function hTx(h, m){ const ap = h < 12 ? "a. m." : "p. m."; const hh = h > 12 ? h - 12 : h; return `${hh}:${String(m).padStart(2,"0")} ${ap}`; }
@@ -424,7 +519,7 @@ function whats(id){
 }
 function enviado(n){ cerrarModal(); toast("✅", "Mensaje enviado a " + n, "Si reserva, le avisamos aquí."); evento("💬", `Mensaje enviado a <b>${n}</b>`, "WhatsApp"); }
 function verCita(i){
- const c = CITAS[i];
+ const c = LISTA[i];
  abrirModal(`<div class="m-cab"><div class="av" style="background:${colAv(c.cli.n)}">${ini(c.cli.n)}</div><div><h3>${c.cli.n}</h3><small>${c.sv.n} · ${hTx(Math.floor(c.ini/60), c.ini%60)} · ${c.min} min · con ${c.b}</small></div><button class="x" onclick="cerrarModal()">✕</button></div>
   <div class="m-cue">
    ${c.demo ? `<div class="nota" style="border-color:var(--verde);background:rgba(60,207,142,.08)"><b style="color:var(--verde)">⭐ Esta es la cita que usted acaba de hacer en la página.</b> Le llegó así al dueño, al instante.</div>` : ""}
@@ -433,7 +528,7 @@ function verCita(i){
    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn oro" onclick="cobrar(${i})">💰 Cobrar</button>${c.cli.id !== -1 ? `<button class="btn lin" onclick="ficha(${c.cli.id})">Ver ficha</button>` : ""}<button class="btn lin" onclick="cerrarModal();toast('🔁','Cita movida','Al cliente le llega el aviso por WhatsApp.')">Mover</button></div>
   </div>`);
 }
-function cobrar(i){ const c = CITAS[i]; cerrarModal(); toast("💰", "Cobrado " + pesos(c.sv.p) + " · " + (c.pago === "Por cobrar" ? "Nequi" : c.pago), "Ya quedó en la caja y en la contabilidad."); evento("💰", `Pago de <b>${c.cli.n}</b> · ${pesos(c.sv.p)}`, c.pago === "Por cobrar" ? "Nequi" : c.pago); }
+function cobrar(i){ const c = LISTA[i]; cerrarModal(); toast("💰", "Cobrado " + pesos(c.sv.p) + " · " + (c.pago === "Por cobrar" ? "Nequi" : c.pago), "Ya quedó en la caja y en la contabilidad."); evento("💰", `Pago de <b>${c.cli.n}</b> · ${pesos(c.sv.p)}`, c.pago === "Por cobrar" ? "Nequi" : c.pago); }
 function abrirModal(h){ $("#modal").innerHTML = h; $("#velo").classList.add("ver"); }
 function cerrarModal(){ $("#velo").classList.remove("ver"); }
 $("#velo").addEventListener("click", e => { if (e.target.id === "velo") cerrarModal(); });
@@ -492,7 +587,7 @@ const TIT = {agenda:"Agenda de hoy", clientes:"Clientes", domicilios:"Domicilios
 document.querySelectorAll(".nv").forEach(b => b.addEventListener("click", () => {
  document.querySelectorAll(".nv").forEach(x => x.classList.remove("on")); b.classList.add("on");
  document.querySelectorAll(".vista").forEach(v => v.classList.remove("on")); $("#v-" + b.dataset.v).classList.add("on");
- $("#titulo").textContent = TIT[b.dataset.v];
+ $("#titulo").textContent = TIT[b.dataset.v]; if (b.dataset.v === "agenda") pintarAgenda();
  if (b.dataset.v === "caja") pintarCaja();
  if (b.dataset.v === "domicilios") pintarDomicilios();
  scrollTo({top:0, behavior:"smooth"});
@@ -549,6 +644,19 @@ function activarSonido(){
 }
 /* Reserva hecha en la página del cliente en OTRA pestaña del mismo navegador */
 window.addEventListener("storage", e => {
+ if (e.key === "sb_demo_cancel" && e.newValue) {
+  try {
+   const g = JSON.parse(e.newValue);
+   RESERVAS = RESERVAS.filter(x => x.cod !== g.cod); for (const k in _cache) delete _cache[k];
+   for (let i = CITAS.length - 1; i >= 0; i--) if (CITAS[i].demo && CITAS[i].cli.n === g.nombre && CITAS[i].ini === g.h*60 + g.m) CITAS.splice(i, 1);
+   campana(1);
+   const cuando = new Date(g.fecha + "T12:00").toLocaleDateString("es-CO", {weekday:"long", day:"numeric", month:"short"}) + " " + hTx(g.h, g.m);
+   toast(g.cambio ? "🔁" : "❌", (g.cambio ? "Cambió su cita: " : "Canceló: ") + g.nombre, cuando + " con " + (g.barbero || "el primero disponible") + " · el espacio quedó libre");
+   evento(g.cambio ? "🔁" : "❌", `<b>${g.nombre}</b> ${g.cambio ? "cambió" : "canceló"} la del ${cuando}`, g.cambio ? "Está escogiendo otra hora" : "Se avisó a la lista de espera");
+   pintarAgenda(); pintarKpis();
+  } catch(x) {}
+  return;
+ }
  if (e.key !== "sb_demo_cita" || !e.newValue) return;
  try { const g = JSON.parse(e.newValue); campana(3); toast("🔔", "Nueva reserva de " + g.nombre, g.serv + " · desde la página"); setTimeout(() => location.reload(), 2600); } catch(x) {}
 });
