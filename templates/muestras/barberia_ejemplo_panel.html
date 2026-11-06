@@ -502,16 +502,16 @@ let ttt; function toast(ic, t, s){ const el = $("#toast"); el.innerHTML = `<span
 /* ---------- planes (lo que ofrece Tributando) ---------- */
 const WA_TRIB = "573332470715";
 function planes(){
- const P = [["1 a 3 barberos","Barbero o barbería pequeña",52500,""],["4 a 10 barberos","La más pedida",122500,"MÁS PEDIDO"],["Más de 10 o varias sedes","Cadena o barbería grande",262500,""]];
+ const P = [["1 a 3 barberos","Hasta 2.500 mensajes de WhatsApp al mes",87500,""],["4 a 10 barberos","Hasta 7.500 mensajes de WhatsApp al mes",140000,"MÁS PEDIDO"],["Más de 10 o varias sedes","Hasta 14.000 mensajes de WhatsApp al mes",262500,""]];
  const txt = encodeURIComponent("Hola, vi la muestra de la app para barberías y quiero una para mi barbería.");
  abrirModal(`<div class="m-cab"><div class="av" style="background:linear-gradient(135deg,var(--oro2),var(--oro));color:#1a1206">✂</div><div><h3>Planes para su barbería</h3><small>Todo lo que vio en esta muestra, con su nombre</small></div><button class="x" onclick="cerrarModal()">✕</button></div>
  <div class="m-cue">
   <div class="pl-grid">${P.map(p => `<div class="pl ${p[3] ? "dest" : ""}">${p[3] ? `<span class="et">${p[3]}</span>` : ""}<h4>${p[0]}</h4><small>${p[1]}</small><div class="pr">${pesos(p[2])} <span>/ mes</span></div></div>`).join("")}</div>
-  <ul class="incl"><li>✓ Página de reservas con su nombre</li><li>✓ Reservas 24/7 sin llamadas</li><li>✓ Barbero a domicilio</li><li>✓ Recomendador de cortes</li><li>✓ Agenda de cada barbero</li><li>✓ Clientes con su ficha</li><li>✓ Recordatorios por WhatsApp</li><li>✓ «Ya le toca» y cumpleaños</li><li>✓ Club de sellos</li><li>✓ Caja y comisiones</li></ul>
+  <ul class="incl"><li>✓ Página de reservas con su nombre</li><li>✓ Reservas 24/7 sin llamadas</li><li>✓ Barbero a domicilio</li><li>✓ Recomendador de cortes</li><li>✓ Agenda de cada barbero</li><li>✓ Clientes con su ficha</li><li>✓ Recordatorios por WhatsApp incluidos</li><li>✓ «Ya le toca» y cumpleaños</li><li>✓ Club de sellos</li><li>✓ Caja y comisiones</li></ul>
   <div class="nota"><b>Montaje: ${pesos(262500)}</b> una sola vez. Lo dejamos listo: servicios, precios, fotos, barberos y horarios, sus clientes cargados y el QR para el local.</div>
   <div class="combo"><b style="color:var(--verde)">💡 Con su contabilidad en Tributando, la app queda a mitad de precio</b> y el montaje no se cobra. Cada servicio cobrado pasa solo a sus libros.</div>
   <a class="btn wa" style="width:100%;justify-content:center;padding:14px" target="_blank" rel="noopener" href="https://wa.me/${WA_TRIB}?text=${txt}">💬 La quiero para mi barbería</a>
-  <p style="font-size:.72rem;color:var(--gris);margin:12px 0 0;text-align:center">Valores 2026. Suben cada año lo que sube el salario mínimo.</p>
+  <p style="font-size:.72rem;color:var(--gris);margin:12px 0 0;text-align:center">Todo incluido, también los mensajes de WhatsApp. Si un mes pasa el tope: $10.000 por cada 1.000 mensajes más.<br>Valores 2026. Suben cada año lo que sube el salario mínimo.</p>
  </div>`);
 }
 if (location.hash === "#planes") setTimeout(planes, 600);
