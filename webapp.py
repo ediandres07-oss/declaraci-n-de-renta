@@ -830,6 +830,36 @@ def whatsapp_webhook():
     return "ok", 200
 
 
+@app.post("/api/asesor/responder")
+def asesor_responder():
+    """El MISMO asesor del WhatsApp (empresas de la prospección → asesor_empresas;
+    lo demás → bot de contadores), pero SOLO devuelve el texto: lo usa la bandeja
+    multiagente de la contabilidad (bot_modo «tributando»), que es la que envía y
+    guarda la conversación. Protegido con BANDEJA_REMOTO_TOKEN (sin él: 404)."""
+    import hmac as _hmac
+    tk = os.environ.get("BANDEJA_REMOTO_TOKEN", "").strip()
+    if not tk:
+        abort(404)
+    if not _hmac.compare_digest(request.headers.get("X-Bandeja-Token", ""), tk):
+        return jsonify({"error": "forbidden"}), 403
+    d = request.get_json(silent=True) or {}
+    hist = [{"rol": "user" if h.get("rol") == "user" else "assistant",
+             "texto": str(h.get("texto") or "")[:4000]} for h in (d.get("historial") or [])][-20:]
+    remitente = str(d.get("remitente") or "")[:80]
+    if not hist or hist[-1]["rol"] != "user":
+        return jsonify({"respuesta": ""})
+    from src import asesor_empresas as _ases
+    try:
+        if _ases.es_empresa(remitente, hist[-1]["texto"]):
+            r = _ases.generar(hist, remitente, IA_CFG)
+        else:
+            r = responder_ia(hist, IA_CFG, contexto="contador")
+    except Exception as ex:                       # noqa: BLE001
+        app.logger.warning("asesor/responder: %s", ex)
+        r = ""
+    return jsonify({"respuesta": r or ""})
+
+
 @app.post("/api/guia")
 def api_guia():
     """Captura el correo para la lista de espera y entrega la guía-obsequio.
