@@ -2175,6 +2175,44 @@ def apps_a_la_medida():
     return render_template("apps_a_la_medida.html")
 
 
+@app.get("/cine")
+def cine():
+    """Landing cinematográfica de PRUEBA (7-nov-2026): la historia se cuenta con el scroll
+    (Three.js): papeles → datos → libro, WhatsApp, declaraciones, módulos y cierre. NO reemplaza
+    la home: Edison la revisa primero («probar en un lado primero»). Todo es de ejemplo."""
+    from src.prospectos import VENTANERIA_PAUSADA
+    wa = IA_CFG.get("negocio", {}).get("whatsapp") or "573332470715"
+    return render_template("cine.html", whatsapp=re.sub(r"\D", "", str(wa)),
+                           app_url=os.environ.get("CONTABILIDAD_URL",
+                                                  "https://contabilidad-tributando.onrender.com").rstrip("/"),
+                           con_ventaneria=not VENTANERIA_PAUSADA)
+
+
+# Hash de la llave del dueño (la misma de la demo privada de ventanería, contabilidad/bloqueos.py).
+_LLAVE_DUENO_HASH = "1154c3e0d60084e57cf43fe4cd8ff5e6dbade47113c21a4f9732afc89f14ccfa"
+
+
+@app.get("/ventaneria/cine")
+def ventaneria_cine():
+    """PRUEBA (7-nov-2026): ventana corrediza 3D que se desarma con el scroll y termina en el
+    cotizador por WhatsApp. Catálogo PROPIO (Serie 20, refs TV###). Mientras VENTANERIA_PAUSADA
+    queda cerrada al público como /ventaneria; el dueño entra con ?llave=<la de la demo>."""
+    import hashlib
+    from src.prospectos import VENTANERIA_PAUSADA
+    if VENTANERIA_PAUSADA:
+        llave = (request.args.get("llave") or "").strip()
+        if llave and hashlib.sha256(llave.encode()).hexdigest() == _LLAVE_DUENO_HASH:
+            session["vent_cine_dueno"] = True
+            return redirect("/ventaneria/cine")          # la llave no queda en la barra
+        if not session.get("vent_cine_dueno"):
+            return Response("<!doctype html><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'>"
+                            "<title>No disponible</title><body style='font-family:system-ui;max-width:520px;margin:15vh auto;padding:0 20px;color:#222'>"
+                            "<h2>Esta página no está disponible</h2><p>Visite <a href='https://tributando.co'>tributando.co</a>.</p>",
+                            status=404, mimetype="text/html")
+    wa = IA_CFG.get("negocio", {}).get("whatsapp") or "573332470715"
+    return render_template("ventana_cine.html", whatsapp=re.sub(r"\D", "", str(wa)))
+
+
 @app.before_request
 def _ventaneria_pausada_estaticos():
     """5-nov-2026 Edison: «y el pdf también». Mientras VENTANERIA_PAUSADA, no se sirven el PDF,

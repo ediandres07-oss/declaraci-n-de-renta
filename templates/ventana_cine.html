@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ventana por dentro · Tributando Ventanería</title>
+<meta name="description" content="Una ventana corrediza que se desarma pieza por pieza con el scroll: marco, hojas, perfiles, vidrio templado, rodachinas, felpa, cierre y empaques. Y al final, el cotizador.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0d1119">
+<link rel="icon" href="/static/img/logo-tributando.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d1119;--tx:#f3f4f6;--mut:#aab0bd;--acc:#d4a24c;--acc2:#b9862f;--osc:#111827;--line:rgba(255,255,255,.12)}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--bg);overflow-x:hidden;overflow-x:clip}
+body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--tx);line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden;overflow-x:clip}
+a{color:inherit;text-decoration:none}
+#gl{position:fixed;inset:0;width:100vw;height:100vh;height:100lvh;display:block;z-index:0;touch-action:pan-y}
+#poster{position:fixed;inset:0;z-index:1;pointer-events:none;background:#0d1119 url(/static/cine/poster-ventana.jpg?v=20261107) center/cover no-repeat;transition:opacity .9s}
+@media(min-width:861px){ #poster{background-image:url(/static/cine/poster-ventana-ancho.jpg?v=20261107)}}
+#poster.fuera{opacity:0}
+.velo{position:fixed;left:0;right:0;top:0;height:52vh;z-index:2;pointer-events:none;background:linear-gradient(180deg,rgba(13,17,25,.94),rgba(13,17,25,.55) 55%,rgba(13,17,25,0))}
+@media(min-width:861px){.velo{bottom:0;height:auto;width:52vw;background:linear-gradient(90deg,rgba(13,17,25,.9),rgba(13,17,25,.45) 62%,rgba(13,17,25,0))}}
+.bar{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:calc(12px + env(safe-area-inset-top)) 16px 12px}
+.bar b{font-size:15px;letter-spacing:.3px}.bar b span{color:var(--acc)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--acc);color:#111827;font-weight:800;font-size:16px;padding:15px 22px;border-radius:14px;border:0;cursor:pointer;font-family:inherit}
+.btn.sm{font-size:13px;padding:9px 14px;border-radius:11px}
+.btn.wa{background:#25d366;color:#05351b;width:100%;font-size:17px}
+.btn svg{width:20px;height:20px;fill:currentColor}
+.avance{position:fixed;left:0;top:0;height:3px;width:100%;transform-origin:0 50%;transform:scaleX(0);z-index:21;background:var(--acc)}
+.cap{position:fixed;left:0;right:0;top:0;z-index:5;padding:calc(78px + env(safe-area-inset-top)) 22px 0;opacity:0;pointer-events:none;will-change:opacity,transform}
+.eye{display:inline-flex;align-items:center;gap:10px;color:var(--acc);font-size:11.5px;font-weight:800;letter-spacing:2.6px;text-transform:uppercase}
+.eye:before{content:"";width:24px;height:1px;background:currentColor}
+.cap h1,.cap h2{font-size:clamp(34px,10.4vw,88px);line-height:1;letter-spacing:-.04em;font-weight:900;margin:12px 0 12px;text-shadow:0 4px 36px rgba(0,0,0,.6)}
+.cap em{font-style:normal;color:var(--acc)}
+.cap p{color:#cfd3dc;font-size:clamp(15px,4vw,18.5px);max-width:32em;text-shadow:0 2px 16px rgba(0,0,0,.75)}
+.cap p b{color:#fff}
+@media(min-width:861px){.cap{top:50%;left:6vw;right:auto;width:min(42vw,600px);padding:0;transform:translateY(-50%)}.bar{padding:18px 6vw}}
+/* etiquetas de las piezas */
+#etiq{position:fixed;inset:0;z-index:4;pointer-events:none}
+.et{position:absolute;left:0;top:0;display:flex;align-items:center;gap:7px;opacity:0;white-space:nowrap;will-change:transform,opacity}
+.et i{width:9px;height:9px;border-radius:50%;background:var(--acc);box-shadow:0 0 0 3px rgba(212,162,76,.3),0 0 14px rgba(212,162,76,.8);flex:none}
+.et span{background:rgba(13,17,25,.82);border:1px solid rgba(212,162,76,.45);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  border-radius:9px;padding:5px 9px;font-size:12px;font-weight:700;line-height:1.25}
+.et span small{display:block;font-weight:600;color:var(--mut);font-size:10.5px}
+.et.izq{flex-direction:row-reverse}
+@media(min-width:861px){.et span{font-size:14px;padding:7px 11px}.et span small{font-size:12px}}
+.pista{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));z-index:6;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:7px;color:var(--mut);font-size:11px;letter-spacing:2.4px;text-transform:uppercase;pointer-events:none}
+.pista i{width:22px;height:36px;border:1.5px solid rgba(255,255,255,.45);border-radius:12px;position:relative}
+.pista i:after{content:"";position:absolute;left:50%;top:7px;width:3px;height:7px;margin-left:-1.5px;border-radius:2px;background:var(--acc);animation:r 1.6s infinite}
+@keyframes r{0%{opacity:0}30%{opacity:1}100%{opacity:0;transform:translateY(12px)}}
+/* cotizador */
+.cotiza{position:relative;z-index:6;padding:46vh 16px 40px}
+.tarjeta{max-width:520px;margin:0 auto;background:rgba(17,24,39,.94);border:1px solid rgba(212,162,76,.45);border-radius:22px;padding:22px 18px 20px;
+  box-shadow:0 30px 80px -20px rgba(0,0,0,.7);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.tarjeta h2{font-size:clamp(28px,8vw,40px);font-weight:900;letter-spacing:-.03em;line-height:1.05;margin:8px 0 6px}
+.tarjeta h2 em{font-style:normal;color:var(--acc)}
+.tarjeta .sub{color:var(--mut);font-size:15px;margin-bottom:16px}
+.campos{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.campos label{display:block;font-size:12px;font-weight:700;color:var(--mut);margin-bottom:5px;letter-spacing:.3px}
+.campos .full{grid-column:1/-1}
+.campos input,.campos select{width:100%;font:600 16px Inter,system-ui,sans-serif;color:var(--tx);background:#0b101a;border:1px solid var(--line);border-radius:11px;padding:12px 12px;-webkit-appearance:none;appearance:none}
+.campos select{background-image:linear-gradient(45deg,transparent 50%,#aab0bd 50%),linear-gradient(135deg,#aab0bd 50%,transparent 50%);background-position:calc(100% - 18px) 52%,calc(100% - 13px) 52%;background-size:5px 5px;background-repeat:no-repeat;padding-right:32px}
+.campos input:focus,.campos select:focus{outline:2px solid var(--acc);outline-offset:1px}
+.desp{margin:16px 0 16px;border-top:1px solid var(--line);padding-top:12px}
+.desp summary{cursor:pointer;font-weight:800;font-size:14.5px}
+.desp ul{list-style:none;margin-top:8px;display:grid;gap:4px}
+.desp li{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;color:#d5d9e1;border-bottom:1px dashed rgba(255,255,255,.08);padding:4px 0}
+.desp li b{color:var(--acc);font-weight:700;font-variant-numeric:tabular-nums}
+.ref{font-size:12.5px;color:var(--mut);margin-top:6px}
+.mas{display:block;text-align:center;margin-top:12px;font-size:14px;color:var(--mut);text-decoration:underline}
+footer{position:relative;z-index:6;text-align:center;color:#7d8494;font-size:12.5px;padding:10px 20px 30px}
+@media(min-width:861px){.cotiza{padding:30vh 6vw 60px}.tarjeta{margin:0 0 0 auto;max-width:480px}}
+/* sin animación */
+.estatico #gl,.estatico .pista,.estatico #largo,.estatico .velo,.estatico .avance,.estatico #etiq{display:none}
+.estatico #poster{position:relative;height:56vh;opacity:1!important;inset:auto;display:block}
+.estatico .cap{position:relative;opacity:1!important;transform:none!important;top:auto;left:auto;width:auto;max-width:760px;margin:0 auto;padding:34px 22px}
+.estatico .cotiza{padding-top:20px}
+.estatico .bar{background:rgba(13,17,25,.92)}
+</style>
+</head>
+<body>
+<script>
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches || /[?&]estatico\b/.test(location.search))
+    document.documentElement.classList.add("estatico");
+</script>
+{% set wa_txt = "Hola, quiero probar el cotizador de ventanería de Tributando." %}
+<canvas id="gl" aria-hidden="true"></canvas>
+<div id="poster" aria-hidden="true"></div>
+<div class="velo" aria-hidden="true"></div>
+<div class="avance" id="avance"></div>
+<div id="etiq" aria-hidden="true"></div>
+
+<div class="bar"><b>Tributando <span>·</span> Ventanería</b><a class="btn sm" href="#cotizar">Cotizar</a></div>
+
+<section class="cap" data-cap="0">
+  <span class="eye">Ventana corrediza · Serie 20</span>
+  <h1>Así se ve una ventana <em>por dentro.</em></h1>
+  <p>Baje despacio: la desarmamos pieza por pieza. Ventana corrediza de 2 hojas (1 móvil).</p>
+</section>
+<section class="cap" data-cap="1">
+  <span class="eye">01 · Marco y hojas</span>
+  <h2>Primero, <em>marco y hojas.</em></h2>
+  <p>Cabezal, sillar y jambas forman el <b>marco</b>. Las <b>hojas</b> corren sobre él: una fija y una móvil.</p>
+</section>
+<section class="cap" data-cap="2">
+  <span class="eye">02 · Pieza por pieza</span>
+  <h2>Cada pieza, <em>con su referencia.</em></h2>
+  <p>Perfiles <b>TV201 a TV206</b>, vidrio templado, <b>2 rodachinas</b> en la hoja móvil, felpa, cierre y empaques.</p>
+</section>
+<section class="cap" data-cap="3">
+  <span class="eye">03 · El precio</span>
+  <h2>El cotizador <em>las cuenta todas.</em></h2>
+  <p>Perfiles, vidrio, accesorios, empaques y mano de obra, con sus precios. El precio sale solo, sin calculadora.</p>
+</section>
+<section class="cap" data-cap="4">
+  <span class="eye">04 · En 3D</span>
+  <h2>Armada, y <em>en 3D</em> para su cliente.</h2>
+  <p>Antes de aprobar, su cliente gira la ventana en el celular: color del aluminio, vidrio y cómo abre.</p>
+</section>
+
+<div id="largo" aria-hidden="true"></div>
+
+<section class="cotiza" id="cotizar">
+  <div class="tarjeta">
+    <span class="eye">Cotizador</span>
+    <h2>Cotice su <em>ventana.</em></h2>
+    <p class="sub">Ponga las medidas y escoja vidrio y color. Se la devolvemos cotizada con el programa, con el dibujo y el despiece.</p>
+    <form class="campos" id="fCot" onsubmit="return false">
+      <div class="full"><label for="dis">Diseño</label>
+        <select id="dis">
+          <option value="XO">Ventana corrediza de 2 hojas (1 móvil)</option>
+          <option value="OXO">Ventana corrediza de 3 hojas (1 móvil)</option>
+          <option value="XOX">Ventana corrediza de 3 hojas (2 móviles)</option>
+          <option value="OXXO">Ventana corrediza de 4 hojas (2 móviles)</option>
+          <option value="P">Ventana proyectante</option>
+          <option value="F">Ventana fija</option>
+        </select></div>
+      <div><label for="an">Ancho (cm)</label><input id="an" type="number" inputmode="numeric" min="30" max="600" value="150"></div>
+      <div><label for="al">Alto (cm)</label><input id="al" type="number" inputmode="numeric" min="30" max="300" value="120"></div>
+      <div><label for="vid">Vidrio</label>
+        <select id="vid">
+          <option>Templado 8 mm claro</option><option>Vidrio claro 4 mm</option><option>Vidrio claro 5 mm</option>
+          <option>Vidrio bronce 5 mm</option><option>Vidrio gris 5 mm</option><option>Laminado 3+3 claro</option>
+        </select></div>
+      <div><label for="aca">Color del aluminio</label>
+        <select id="aca"><option>Natural</option><option>Blanco</option><option>Negro</option><option>Bronce</option></select></div>
+    </form>
+    <details class="desp" id="desp" open>
+      <summary>Despiece de la ventana</summary>
+      <ul id="lista"></ul>
+      <p class="ref" id="ref">Ref. TV-0001 · Serie 20 · catálogo de ejemplo</p>
+    </details>
+    <a class="btn wa" id="btnWa" href="https://wa.me/{{ whatsapp }}" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm4.5 12.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3z"/></svg>
+      Cotice su ventana por WhatsApp</a>
+    <a class="mas" href="https://wa.me/{{ whatsapp }}?text={{ wa_txt|urlencode }}" target="_blank" rel="noopener">¿Tiene un taller? Pruebe el cotizador 15 días gratis</a>
+  </div>
+</section>
+<footer>Tributando · Ventanería — software para talleres de aluminio y vidrio · catálogo y precios de ejemplo · <a href="https://tributando.co">tributando.co</a></footer>
+<div class="pista" id="pista"><i></i>Deslice</div>
+
+<script>
+window.VENT_WA = "{{ whatsapp }}";
+/* Cotizador: despiece del catálogo PROPIO de ejemplo (Serie 20, refs TV###) y el mensaje de WhatsApp. */
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var NOM = {XO: "Ventana corrediza de 2 hojas (1 móvil)", OXO: "Ventana corrediza de 3 hojas (1 móvil)", XOX: "Ventana corrediza de 3 hojas (2 móviles)",
+             OXXO: "Ventana corrediza de 4 hojas (2 móviles)", P: "Ventana proyectante", F: "Ventana fija"};
+  function despiece(d) {
+    if (d === "P") return [["Marco proyectante · TV381", 4], ["Nave proyectante · TV382", 4], ["Vidrio", 1], ["Brazo proyectante (par)", 1], ["Manija", 1], ["Empaque vinilo", "ml"]];
+    if (d === "F") return [["Marco fijo · TV101", 4], ["Pisavidrio · TV102", 4], ["Vidrio", 1], ["Empaque vinilo", "ml"]];
+    var n = d.length, mov = (d.match(/X/g) || []).length;
+    return [["Cabezal · TV201", 1], ["Sillar · TV202", 1], ["Jamba · TV203", 2], ["Horizontal de nave · TV204", 2 * n],
+            ["Enganche · TV205", 2 * (n - 1)], ["Traslape lateral · TV206", 2], ["Vidrio", n], ["Rodachinas (2 por hoja móvil)", 2 * mov],
+            ["Cierre de embutir", mov], ["Felpa", "ml"], ["Empaque vinilo", "ml"], ["Mano de obra: corte, ensamble e instalación", "min"]];
+  }
+  function actualizar() {
+    var d = $("dis").value, an = parseInt($("an").value, 10) || 0, al = parseInt($("al").value, 10) || 0;
+    $("lista").innerHTML = despiece(d).map(function (p) {
+      var c = typeof p[1] === "number" ? "× " + p[1] : (p[1] === "ml" ? "por metro" : "en minutos");
+      return "<li><span>" + p[0] + (p[0] === "Vidrio" ? " · " + $("vid").value.toLowerCase() : "") + "</span><b>" + c + "</b></li>";
+    }).join("");
+    var txt = "Hola, quiero cotizar una ventana: " + NOM[d] + ", " + an + " × " + al + " cm, " + $("vid").value.toLowerCase() + ", aluminio " + $("aca").value.toLowerCase() + ".";
+    $("btnWa").href = "https://wa.me/" + window.VENT_WA + "?text=" + encodeURIComponent(txt);
+    if (window.__vent3d) window.__vent3d.acabado($("aca").value);
+  }
+  ["dis", "an", "al", "vid", "aca"].forEach(function (id) { $(id).addEventListener("input", actualizar); $(id).addEventListener("change", actualizar); });
+  window.__ventActualizar = actualizar;
+  actualizar();
+})();
+/* Scroll → capítulo continuo c (0…6). Capítulos 0–4 fijos; el 5 es el cotizador. */
+(function () {
+  if (document.documentElement.classList.contains("estatico")) return;
+  var L = [1.2, 1.7, 2.0, 1.6, 1.8];
+  var caps = [].slice.call(document.querySelectorAll(".cap")), largo = document.getElementById("largo");
+  var pista = document.getElementById("pista"), avance = document.getElementById("avance");
+  var vh = innerHeight, vw = innerWidth, sumL = L.reduce(function (a, b) { return a + b; }, 0);
+  var captura = /[?&]captura\b/.test(location.search), ancho = matchMedia("(min-width:861px)");
+  function medir() { vh = innerHeight; vw = innerWidth; largo.style.height = (sumL * vh) + "px"; }
+  medir();
+  addEventListener("resize", function () { if (innerWidth !== vw || Math.abs(innerHeight - vh) > 140) medir(); });
+  function cDeScroll() {
+    var y = Math.max(0, scrollY) / vh, acc = 0;
+    for (var k = 0; k < L.length; k++) { if (y < acc + L[k]) return k + (y - acc) / L[k]; acc += L[k]; }
+    return Math.min(6, 5 + (y - acc) / 0.9);
+  }
+  function sm(a, b, x) { x = Math.min(1, Math.max(0, (x - a) / (b - a))); return x * x * (3 - 2 * x); }
+  function textos(c) {
+    caps.forEach(function (el, k) {
+      var o, dy;
+      if (k === 0) { o = 1 - sm(0.5, 0.88, c); dy = -60 * sm(0.4, 0.88, c); }
+      else { var a = sm(k + 0.06, k + 0.22, c), b = 1 - sm(k + 0.8, k + 0.96, c); o = Math.min(a, b); dy = 40 * (1 - a) - 50 * (1 - b); }
+      el.style.opacity = o.toFixed(3);
+      el.style.transform = ancho.matches ? "translateY(calc(-50% + " + dy.toFixed(1) + "px))" : "translateY(" + dy.toFixed(1) + "px)";
+    });
+    pista.style.opacity = (1 - sm(0.05, 0.3, c)).toFixed(3);
+    avance.style.transform = "scaleX(" + Math.min(1, c / 5.6).toFixed(4) + ")";
+  }
+  var cs = cDeScroll(), ultimo = performance.now();
+  function cuadro(now) {
+    var dt = Math.min(0.1, (now - ultimo) / 1000); ultimo = now;
+    var meta = cDeScroll();
+    cs += (meta - cs) * (1 - Math.exp(-dt * 7));
+    if (Math.abs(meta - cs) < 0.0005) cs = meta;
+    textos(cs);
+    if (window.__vent3d) window.__vent3d.render(cs, now / 1000);
+    requestAnimationFrame(cuadro);
+  }
+  textos(cs);
+  if (captura) window.__ventCaptura = function (t) { cs = cDeScroll(); textos(cs); if (window.__vent3d) window.__vent3d.render(cs, t); return cs; };
+  else requestAnimationFrame(cuadro);
+})();
+</script>
+<script>if (!document.documentElement.classList.contains("estatico")) { var s = document.createElement("script"); s.type = "module"; s.src = "/static/cine/ventana-cine.js?v=20261107";  document.body.appendChild(s); }</script>
+</body>
+</html>
