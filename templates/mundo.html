@@ -73,7 +73,11 @@ p.lead{margin-top:22px;font-size:clamp(16px,1.5vw,20px);line-height:1.55;color:v
 .burbuja.yo{background:rgba(55,211,143,.16);border:1px solid rgba(55,211,143,.35);align-self:flex-end;border-bottom-right-radius:4px}
 .burbuja.el{background:rgba(255,255,255,.06);border:1px solid var(--linea);border-bottom-left-radius:4px}
 .burbuja b{color:var(--oro)}
-.demo{margin-top:26px;max-width:460px;opacity:0;transform:translateY(18px);transition:opacity 1s .5s,transform 1s .5s}
+.fuentes{list-style:none;margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:520px;opacity:0;transform:translateY(18px);transition:opacity 1s .4s,transform 1s .4s}
+.vista .fuentes{opacity:1;transform:none}
+.fuentes li{padding:10px 12px;border:1px solid var(--linea);border-radius:12px;background:rgba(10,14,22,.55);backdrop-filter:blur(6px);font-size:12.5px;color:var(--tenue);line-height:1.35}
+.fuentes b{display:block;color:var(--txt);font-size:14px;margin-bottom:2px}
+.demo{margin-top:18px;max-width:460px;opacity:0;transform:translateY(18px);transition:opacity 1s .5s,transform 1s .5s}
 .vista .demo{opacity:1;transform:none}
 .soltar{display:block;cursor:pointer;padding:18px 20px;border:1.5px dashed rgba(55,211,143,.5);border-radius:16px;background:rgba(55,211,143,.06);backdrop-filter:blur(8px);transition:background .25s,border-color .25s,transform .25s}
 .soltar:hover,.soltar.encima{background:rgba(55,211,143,.14);border-color:var(--verde);transform:translateY(-2px)}
@@ -103,6 +107,8 @@ html.sin3d body{background:radial-gradient(80% 60% at 70% 30%,rgba(55,211,143,.1
 @media (max-width:760px){
   .escena .fijo{align-items:flex-end;padding-bottom:9vh}
   .demo .resultado{max-height:34vh;overflow:auto}
+  .fuentes{grid-template-columns:1fr 1fr;gap:6px}.fuentes li{padding:8px 10px;font-size:11.5px}.fuentes b{font-size:13px}
+  .escena:nth-of-type(2) .fijo{position:relative;height:auto;min-height:100vh;padding-top:12vh}
   .asiento{max-height:40vh;overflow:auto}
   .escena.der .fijo{justify-content:flex-start}
   .capitulos{display:none}
@@ -136,7 +142,15 @@ html.sin3d body{background:radial-gradient(80% 60% at 70% 30%,rgba(55,211,143,.1
     <div class="fijo"><div class="texto">
       <div class="etiqueta">01 · Llega</div>
       <h2 class="partir">Una factura <em>entra.</em></h2>
-      <p class="lead">Del correo, de la DIAN o de una foto con el celular. Tributando la lee completa: el tercero, cada ítem, el IVA y las retenciones. En segundos.</p>
+      <p class="lead">Llegue por donde llegue, Tributando la lee completa: el tercero, cada ítem, el IVA y las retenciones. En segundos.</p>
+      <ul class="fuentes">
+        <li><b>Su correo</b>reenvía las facturas y entran solas</li>
+        <li><b>La DIAN</b>bajamos todo el mes con su enlace o su certificado digital</li>
+        <li><b>XML o ZIP</b>los arrastra y listo</li>
+        <li><b>Papel</b>escáner o foto: cuentas de cobro, extractos, recibos</li>
+        <li><b>Sus ventas</b>las que factura en Tributando, en su POS o por WhatsApp</li>
+        <li><b>Su programa anterior</b>traemos lo de Siigo comprobante por comprobante</li>
+      </ul>
       <div class="demo" id="demo">
         <label class="soltar" id="soltar"><input type="file" id="archivo" accept=".xml,.zip,application/xml,text/xml,application/zip" hidden>
           <b>Pruébelo con una factura suya</b>
