@@ -113,6 +113,13 @@ p.lead{margin-top:22px;font-size:clamp(16px,1.5vw,20px);line-height:1.55;color:v
 .asiento tr.suma td{border:0;font-weight:700;color:var(--verde)}
 .asiento p{margin-top:10px;color:var(--tenue);font-size:12px;line-height:1.4}
 .escena.abajo .fijo{align-items:flex-end;padding-bottom:12vh}
+.vivo{margin:26px auto 0;display:inline-flex;align-items:center;gap:10px;padding:9px 16px;border-radius:999px;border:1px solid var(--linea);background:rgba(10,14,22,.6);backdrop-filter:blur(8px);font-size:14px;color:var(--suave)}
+.vivo i{width:8px;height:8px;border-radius:50%;background:var(--verde);box-shadow:0 0 0 0 rgba(55,211,143,.7);animation:pulso 1.6s infinite}
+.vivo b{color:var(--txt);font-variant-numeric:tabular-nums}
+@keyframes pulso{0%{box-shadow:0 0 0 0 rgba(55,211,143,.7)}70%{box-shadow:0 0 0 10px rgba(55,211,143,0)}100%{box-shadow:0 0 0 0 rgba(55,211,143,0)}}
+.escuchar{margin-top:16px;display:inline-flex;align-items:center;gap:10px;padding:12px 18px;border-radius:999px;border:1px solid var(--verde);background:rgba(55,211,143,.12);color:var(--txt);font:inherit;font-weight:700;font-size:14px;cursor:pointer;animation:latido 2.4s ease-in-out infinite}
+.escuchar .ico{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--verde);color:#04140c;font-size:11px}
+.escuchar.sonando{animation:none;background:rgba(55,211,143,.25)}
 .pie{position:relative;z-index:10;padding:40px clamp(16px,4vw,48px);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;color:var(--tenue);font-size:13px;border-top:1px solid var(--linea);background:rgba(4,6,11,.75)}
 .pie a{color:var(--suave)}
 html.sin3d #lienzo{display:none}
@@ -147,6 +154,7 @@ html.sin3d body{background:radial-gradient(80% 60% at 70% 30%,rgba(55,211,143,.1
       <div class="etiqueta">Tributando · 2026</div>
       <h1 class="partir">Contabilidad que se <em>mueve sola.</em></h1>
       <p class="lead">Cada factura que se emite en Colombia pasa por la DIAN. Nosotros la tomamos ahí y la convertimos en libros, impuestos y decisiones. Baje despacio.</p>
+      <div class="vivo" id="vivo" hidden><i></i><span>Hoy Tributando ha leído <b id="cHoy">0</b> facturas · <b id="cMes">0</b> este mes</span></div>
     </div></div>
     <div class="bajar">BAJE</div>
   </section>
@@ -194,6 +202,7 @@ html.sin3d body{background:radial-gradient(80% 60% at 70% 30%,rgba(55,211,143,.1
         <div class="burbuja yo">¿Cuánto IVA voy a pagar en este bimestre?</div>
         <div class="burbuja el">Con lo causado hasta hoy, el borrador del 300 da <b>$4.812.000</b>. El descontable más grande es de su proveedor de vidrio.</div>
       </div>
+      <button type="button" class="escuchar" id="escuchar"><span class="ico">▶</span> Escuchar la respuesta</button>
     </div></div>
   </section>
 
@@ -265,7 +274,47 @@ try { var c = document.createElement("canvas"); if (!(c.getContext("webgl2") || 
 catch (e) { document.documentElement.classList.add("sin3d"); }
 </script>
 
+<script>
+// Contador en vivo (solo totales, desde la app).
+fetch("{{ app_url }}/api/publico/contador").then(function (r) { return r.json(); }).then(function (d) {
+  if (!d || !d.ok || !(d.mes > 0)) return;
+  var anim = function (el, fin) { var t0 = performance.now(); (function paso(t) { var k = Math.min(1, (t - t0) / 1600); el.textContent = Math.round(fin * (1 - Math.pow(1 - k, 3))).toLocaleString("es-CO"); if (k < 1) requestAnimationFrame(paso); })(t0); };
+  document.getElementById("vivo").hidden = false;
+  anim(document.getElementById("cHoy"), d.hoy); anim(document.getElementById("cMes"), d.mes);
+}).catch(function () {});
+</script>
 {% raw %}
+<script>
+// ---------- Voz: la onda de puntos se mueve con el audio ----------
+(function () {
+  var b = document.getElementById("escuchar"), audio = null, an = null, buf = null;
+  window.__nivelVoz = 0;
+  b.addEventListener("click", function () {
+    if (audio && !audio.paused) { audio.pause(); return; }
+    if (!audio) {
+      audio = new Audio("/static/mundo/respuesta.mp3");
+      try {
+        var ctx = new (window.AudioContext || window.webkitAudioContext)();
+        var src = ctx.createMediaElementSource(audio); an = ctx.createAnalyser(); an.fftSize = 512;
+        src.connect(an); an.connect(ctx.destination); buf = new Uint8Array(an.fftSize);
+        audio.addEventListener("play", function () { if (ctx.state === "suspended") ctx.resume(); });
+      } catch (e) { an = null; }
+      audio.addEventListener("play", function () { b.classList.add("sonando"); b.querySelector(".ico").textContent = "❚❚"; });
+      var fin = function () { b.classList.remove("sonando"); b.querySelector(".ico").textContent = "▶"; window.__nivelVoz = 0; };
+      audio.addEventListener("pause", fin); audio.addEventListener("ended", fin);
+      (function medir() {
+        if (an && audio && !audio.paused) {
+          an.getByteTimeDomainData(buf); var s = 0;
+          for (var i = 0; i < buf.length; i++) { var v = (buf[i] - 128) / 128; s += v * v; }
+          window.__nivelVoz = Math.min(1, Math.sqrt(s / buf.length) * 4);
+        } else if (audio && !audio.paused) { window.__nivelVoz = .5 + .4 * Math.sin(performance.now() / 90); }
+        requestAnimationFrame(medir);
+      })();
+    }
+    audio.currentTime = 0; audio.play();
+  });
+})();
+</script>
 <script>
 // ---------- Demostración: el visitante suelta su factura (se lee en el navegador) ----------
 (function () {
@@ -519,15 +568,28 @@ formas.forEach((f, i) => geo.setAttribute("p" + i, new THREE.BufferAttribute(f, 
 geo.setAttribute("position", new THREE.BufferAttribute(formas[0].slice(), 3));
 const semilla = new Float32Array(N); for (let i = 0; i < N; i++) semilla[i] = rnd();
 geo.setAttribute("semilla", new THREE.BufferAttribute(semilla, 1));
+const faro = new Float32Array(N), f0 = formas[0];
+{ const R0 = movil ? 3.1 : 3.4, lat = 4.6 * Math.PI / 180, lon = -74 * Math.PI / 180;
+  const cx = Math.cos(lat) * Math.cos(lon), cy = Math.sin(lat), cz = Math.cos(lat) * Math.sin(lon);
+  for (let i = 0; i < N * .04; i++) {
+    const j = Math.floor(rnd() * N * .82), r = Math.pow(rnd(), 1.6) * .32, a2 = rnd() * 6.283;
+    const ux = -Math.sin(lon), uz = Math.cos(lon);                 // eje este-oeste
+    const vx = -Math.sin(lat) * Math.cos(lon), vy = Math.cos(lat), vz = -Math.sin(lat) * Math.sin(lon);
+    let x = cx + (ux * Math.cos(a2) + vx * Math.sin(a2)) * r, y = cy + vy * Math.sin(a2) * r, z = cz + (uz * Math.cos(a2) + vz * Math.sin(a2)) * r;
+    const l = Math.hypot(x, y, z) / (R0 * 1.01); f0[j*3] = x / l; f0[j*3+1] = y / l; f0[j*3+2] = z / l; faro[j] = 1;
+  }
+  geo.attributes.p0.needsUpdate = true; geo.attributes.position.array.set(f0); }
+geo.setAttribute("faro", new THREE.BufferAttribute(faro, 1));
 
 const mat = new THREE.ShaderMaterial({
   transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
-  uniforms: { uDest: { value: 0 }, uProg: { value: 0 }, uT: { value: 0 }, uRaton: { value: new THREE.Vector3(99, 99, 0) },
+  uniforms: { uVoz: { value: 0 }, uDest: { value: 0 }, uProg: { value: 0 }, uT: { value: 0 }, uRaton: { value: new THREE.Vector3(99, 99, 0) },
               uPx: { value: render.getPixelRatio() }, uTam: { value: movil ? 2.3 : 2.0 } },
   vertexShader: `
     attribute vec3 p0; attribute vec3 p1; attribute vec3 p2; attribute vec3 p3; attribute vec3 p4; attribute vec3 p5;
     attribute float semilla;
-    uniform float uProg, uT, uPx, uTam, uDest; uniform vec3 uRaton;
+    uniform float uProg, uT, uPx, uTam, uDest, uVoz; uniform vec3 uRaton;
+    attribute float faro; varying float vFaro;
     varying float vMezcla; varying float vBrillo; varying float vSem;
     vec3 forma(float i){ return i<.5?p0: i<1.5?p1: i<2.5?p2: i<3.5?p3: i<4.5?p4: p5; }
     void main(){
@@ -540,6 +602,9 @@ const mat = new THREE.ShaderMaterial({
       float vuelo = sin(k*3.14159);
       pos += vec3(sin(semilla*91.+uT*.7), cos(semilla*53.+uT*.6), sin(semilla*17.+uT*.5)) * vuelo * 1.6;
       pos += vec3(sin(uT*.6+semilla*40.), cos(uT*.5+semilla*30.), 0.) * .018;
+      float w3 = max(0., 1. - abs(uProg - 3.));
+      pos.y *= 1. + uVoz * 1.8 * w3 * (.7 + .6*sin(pos.x*2.3 + uT*9.));
+      vFaro = faro * max(0., 1. - uProg*1.6);
       vec4 mv = modelViewMatrix * vec4(pos,1.);
       vec4 pr = projectionMatrix * mv;
       vec2 ndc = pr.xy/pr.w; vec2 dif = ndc - uRaton.xy; float dist = length(dif);
@@ -547,16 +612,17 @@ const mat = new THREE.ShaderMaterial({
       pr.xy += normalize(dif + 1e-4) * empuje * .09 * pr.w;
       gl_Position = pr;
       gl_PointSize = uTam * uPx * (1. + empuje*1.6) * (9. / -mv.z) * (.6 + semilla*.8);
-      vMezcla = (a + k) / 5.; vBrillo = .55 + vuelo*.6 + empuje + uDest * max(0., 1. - abs(uProg - 1.)) * 1.4; vSem = semilla;
+      vMezcla = (a + k) / 5.; vBrillo = .55 + vuelo*.6 + empuje + vFaro*(1.4 + 1.1*sin(uT*3.2)) + uVoz*w3*.9 + uDest * max(0., 1. - abs(uProg - 1.)) * 1.4; vSem = semilla;
     }`,
   fragmentShader: `
-    varying float vMezcla; varying float vBrillo; varying float vSem;
+    varying float vMezcla; varying float vBrillo; varying float vSem; varying float vFaro;
     void main(){
       vec2 c = gl_PointCoord - .5; float r = length(c); if(r>.5) discard;
       float suave = pow(1. - r*2., 1.8);
       vec3 verde = vec3(.216,.827,.561), oro = vec3(.902,.769,.514), blanco = vec3(.93,.95,.98);
       vec3 col = mix(verde, oro, smoothstep(.15,.95, fract(vSem*3.7 + vMezcla*.6)) * .55);
       col = mix(col, blanco, step(.93, vSem) * .7);
+      col = mix(col, oro, clamp(vFaro, 0., 1.));
       gl_FragColor = vec4(col * vBrillo, suave * .85);
     }`
 });
@@ -620,7 +686,7 @@ const reducido = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const t = reloj.getElapsedTime();
   prog += (objetivo - prog) * (reducido ? 1 : .06);
   raton.lerp(ratonObj, .12);
-  destello *= .97; mat.uniforms.uDest.value = destello; mat.uniforms.uProg.value = prog; mat.uniforms.uT.value = t; mat.uniforms.uRaton.value.copy(raton);
+  destello *= .97; mat.uniforms.uDest.value = destello; mat.uniforms.uVoz.value += ((window.__nivelVoz || 0) - mat.uniforms.uVoz.value) * .35; mat.uniforms.uProg.value = prog; mat.uniforms.uT.value = t; mat.uniforms.uRaton.value.copy(raton);
   const a = Math.floor(prog), f = prog - a, b = Math.min(5, a + 1), e = f * f * (3 - 2 * f);
   const gx = giros[a][0] + (giros[b][0] - giros[a][0]) * e, gy = giros[a][1] + (giros[b][1] - giros[a][1]) * e;
   const auto = (prog < .6 ? t * .12 : 0) + (prog > 3.4 && prog < 4.6 ? 0 : 0);
