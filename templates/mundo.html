@@ -129,6 +129,11 @@ p.lead{margin-top:22px;font-size:clamp(16px,1.5vw,20px);line-height:1.55;color:v
 html.sin3d #lienzo{display:none}
 html.sin3d body{background:radial-gradient(80% 60% at 70% 30%,rgba(55,211,143,.18),transparent),radial-gradient(60% 50% at 20% 80%,rgba(230,196,131,.12),transparent),var(--bg)}
 @media (max-width:760px){
+  header{padding:12px 14px}
+  .marca{font-size:15px;gap:7px}.marca img{width:24px;height:24px}
+  .menu{gap:10px}.menu .boton{padding:9px 13px;font-size:13px;white-space:nowrap}.menu .largo{display:none}
+  .menu .boton:first-letter{text-transform:uppercase}
+  .entrar{font-size:13px}
   .escena .fijo{align-items:flex-end;padding-bottom:9vh}
   .demo .resultado{max-height:34vh;overflow:auto}
   .fuentes{grid-template-columns:1fr 1fr;gap:6px}.fuentes li{padding:8px 10px;font-size:11.5px}.fuentes b{font-size:13px}
@@ -147,7 +152,7 @@ html.sin3d body{background:radial-gradient(80% 60% at 70% 30%,rgba(55,211,143,.1
 
 <header>
   <a class="marca" href="/"><img src="/static/img/logo-tributando.png" alt="">Tributando<span>.co</span></a>
-  <div class="menu"><a class="entrar" href="{{ app_url }}/login">Entrar</a><a class="boton" href="https://wa.me/{{ whatsapp }}?text={{ 'Hola, vi la página de Tributando y quiero una demostración.'|urlencode }}">Pida una demostración</a></div>
+  <div class="menu"><a class="entrar" href="{{ app_url }}/login">Entrar</a><a class="boton" href="https://wa.me/{{ whatsapp }}?text={{ 'Hola, vi la página de Tributando y quiero una demostración.'|urlencode }}"><span class="largo">Pida una </span>demostración</a></div>
 </header>
 <nav class="capitulos" id="capitulos" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></nav>
 <div class="contador" id="contador"><b>01</b> / 06 · <span id="nombreCap">EL MUNDO</span></div>
@@ -541,7 +546,7 @@ function libro() {
 function voz() {
   const o = new Float32Array(N * 3), lineas = 46;
   for (let i = 0; i < N; i++) {
-    const l = i % lineas, t = rnd(), x = (t - .5) * (movil ? 6 : 6.8);
+    const l = i % lineas, t = rnd(), x = (t - .5) * (movil ? 5.2 : 6.8);
     const env = Math.exp(-Math.pow(x / (movil ? 1.7 : 1.9), 2));
     const fase = l * .18, y = env * (Math.sin(x * 3.1 + fase) * .9 + Math.sin(x * 7.3 - fase * 2) * .35) * (1.6 - Math.abs(l - lineas / 2) / lineas * 2);
     o[i * 3] = x; o[i * 3 + 1] = y; o[i * 3 + 2] = (l - lineas / 2) * .035;
@@ -682,7 +687,7 @@ leerScroll();
 
 // Posición de la nube según la escena (deja espacio al texto).
 const desplazX = movil ? [0, 0, 0, 0, 0, 0] : [0, 2.8, -1.7, 3.1, -3.1, 0];
-const desplazY = movil ? [1.4, 1.8, 1.4, 2.2, 1.9, 2.4] : [0, 0, .2, 0, 0, 1.7];
+const desplazY = movil ? [1.4, 1.8, 1.4, 3.6, 2.1, 2.4] : [0, 0, .2, 0, 0, 1.7];
 const giros = [[.25, 0], [0, -.35], [.42, .5], [.05, -.18], [0, .28], [0, 0]];
 const reloj = new THREE.Clock();
 const reducido = matchMedia("(prefers-reduced-motion: reduce)").matches;
