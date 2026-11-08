@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Cotizador de Obra · Tributando</title>
+<meta name="theme-color" content="#0f1720">
+<link rel="manifest" href="/cotizador-obra/manifest.json">
+<link rel="apple-touch-icon" href="/static/obra/icono-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Cotizador">
+<style>
+:root{--f:#0f1720;--p:#17212c;--l:#243241;--t:#e8eef3;--s:#93a3b3;--v:#37d38f;--o:#f5b942;--r:#ff6b6b;--al:#b8c4cf}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--f);color:var(--t);font:16px/1.4 -apple-system,system-ui,Segoe UI,Roboto,sans-serif}
+header{position:sticky;top:0;z-index:5;background:var(--f);padding:calc(10px + env(safe-area-inset-top)) 16px 10px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--l)}
+header b{font-size:17px}header small{color:var(--s);display:block;font-size:12px}
+header .esp{flex:1}
+main{padding:14px 16px 120px;max-width:720px;margin:0 auto}
+.card{background:var(--p);border:1px solid var(--l);border-radius:16px;padding:14px;margin-bottom:14px}
+h2{font-size:15px;margin:0 0 10px;color:var(--s);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+label{display:block;font-size:13px;color:var(--s);margin:8px 0 4px}
+input,select{width:100%;background:var(--f);border:1px solid var(--l);color:var(--t);border-radius:10px;padding:12px;font-size:17px}
+input:focus,select:focus{outline:2px solid var(--v);border-color:transparent}
+.fila{display:flex;gap:10px}.fila>*{flex:1;min-width:0}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:12px;padding:13px 16px;font-size:16px;font-weight:700;cursor:pointer;background:var(--l);color:var(--t);text-decoration:none}
+.btn.v{background:var(--v);color:#04130b}.btn.o{background:var(--o);color:#1b1200}.btn.w{background:#25d366;color:#04130b}
+.btn.full{width:100%}.btn.chico{padding:8px 12px;font-size:14px}
+.disenos{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.dis{background:var(--f);border:2px solid var(--l);border-radius:12px;padding:6px 4px;text-align:center;font-size:11px;color:var(--s);cursor:pointer}
+.dis.sel{border-color:var(--v);color:var(--t)}
+.dis svg{width:100%;height:46px;display:block}
+.item{border-top:1px solid var(--l);padding:10px 0;display:flex;gap:10px;align-items:center}
+.item:first-child{border-top:0}
+.item svg{width:56px;height:46px;flex:none}
+.item .d{flex:1;min-width:0}.item .d b{display:block;font-size:15px}.item .d small{color:var(--s)}
+.item .pr{font-weight:700;white-space:nowrap}
+.x{background:none;border:0;color:var(--r);font-size:20px;padding:4px 6px;cursor:pointer}
+.tot{display:flex;justify-content:space-between;padding:4px 0}.tot.g{font-size:20px;font-weight:800;color:var(--v)}
+.tot span:first-child{color:var(--s)}
+.tabs{display:flex;gap:6px;margin-bottom:10px;overflow-x:auto}
+.tab{flex:none;padding:8px 12px;border-radius:999px;background:var(--f);border:1px solid var(--l);color:var(--s);font-size:14px;cursor:pointer}
+.tab.sel{background:var(--v);color:#04130b;border-color:var(--v);font-weight:700}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;color:var(--s);font-weight:600;font-size:12px;padding:6px 4px;border-bottom:1px solid var(--l)}
+td{padding:7px 4px;border-bottom:1px solid var(--l);vertical-align:top}
+td.n{text-align:right;white-space:nowrap}
+.barra{margin:6px 0 10px}.barra .et{font-size:12px;color:var(--s);margin-bottom:3px;display:flex;justify-content:space-between}
+.barra .b{display:flex;height:26px;border-radius:6px;overflow:hidden;background:#3a2626}
+.barra .s{background:var(--al);color:#111;font-size:11px;display:flex;align-items:center;justify-content:center;border-right:2px solid var(--f);overflow:hidden;white-space:nowrap}
+.aviso{background:#2a2410;border:1px solid #5a4a14;color:#ffe2a0;border-radius:12px;padding:10px 12px;font-size:14px;margin-bottom:14px}
+.barra-inf{position:fixed;left:0;right:0;bottom:0;background:rgba(15,23,32,.96);backdrop-filter:blur(8px);border-top:1px solid var(--l);padding:10px 16px calc(10px + env(safe-area-inset-bottom));display:flex;gap:8px;z-index:6}
+.barra-inf .btn{flex:1;padding:12px 6px;font-size:14px}
+.oculto{display:none!important}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.modal .c{background:var(--p);width:100%;max-width:720px;max-height:88vh;overflow:auto;border-radius:20px 20px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom))}
+.modal h3{margin:0 0 6px}
+.mini{font-size:13px;color:var(--s)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.hist{border-top:1px solid var(--l);padding:10px 0;display:flex;justify-content:space-between;gap:8px;cursor:pointer}
+/* ---------- impresión: cotización al cliente u hoja de taller ---------- */
+#imp{display:none}
+@media print{
+  @page{size:letter;margin:14mm}
+  body{background:#fff;color:#111}
+  header,main,.barra-inf,.modal{display:none!important}
+  #imp{display:block;font:12px/1.4 -apple-system,system-ui,sans-serif;color:#111}
+  #imp h1{font-size:20px;margin:0}#imp .cab{display:flex;justify-content:space-between;border-bottom:2px solid #111;padding-bottom:8px;margin-bottom:12px}
+  #imp table{font-size:12px}#imp th{color:#555;border-bottom:1px solid #999}#imp td{border-bottom:1px solid #ddd}
+  #imp .tg{font-size:16px;font-weight:800}
+  #imp .barra .b{background:#f3d6d6;height:20px}#imp .barra .s{background:#d9dee3;border-right:2px solid #fff}
+  #imp .barra .et{color:#444}
+  #imp svg{width:70px;height:56px}
+  #imp .pie{margin-top:18px;color:#555;font-size:11px}
+  #imp .seccion{page-break-inside:avoid;margin-top:14px}
+}
+</style>
+</head>
+<body>
+<header>
+  <svg width="30" height="30" viewBox="0 0 64 64"><rect x="6" y="8" width="52" height="48" rx="4" fill="none" stroke="#37d38f" stroke-width="5"/><line x1="32" y1="8" x2="32" y2="56" stroke="#37d38f" stroke-width="5"/><path d="M14 32h10m-4-4 4 4-4 4" stroke="#f5b942" stroke-width="4" fill="none"/></svg>
+  <div><b>Cotizador de Obra</b><small id="sub">Medidas → cortes, vidrio y precio</small></div>
+  <div class="esp"></div>
+  <button class="btn chico" onclick="abrir('hist')">Guardadas</button>
+  <button class="btn chico" onclick="abrir('ajustes')" aria-label="Ajustes">⚙︎</button>
+</header>
+
+<main>
+  <div id="licAviso" class="aviso oculto"></div>
+
+  <div class="card">
+    <h2>1 · Ventana o puerta</h2>
+    <div class="disenos" id="disenos"></div>
+    <div class="fila">
+      <div><label>Ancho (cm)</label><input id="an" type="number" inputmode="decimal" placeholder="120"></div>
+      <div><label>Alto (cm)</label><input id="al" type="number" inputmode="decimal" placeholder="150"></div>
+      <div style="flex:.6"><label>Cant.</label><input id="ca" type="number" inputmode="numeric" value="1"></div>
+    </div>
+    <div class="fila">
+      <div><label>Color</label><select id="acab"></select></div>
+      <div><label>Vidrio</label><select id="vid"></select></div>
+    </div>
+    <label>Ubicación (opcional)</label><input id="ubi" placeholder="Alcoba principal">
+    <button class="btn v full" style="margin-top:12px" onclick="agregar()">＋ Agregar a la cotización</button>
+  </div>
+
+  <div class="card">
+    <h2>2 · Cotización</h2>
+    <div class="fila">
+      <div><label>Cliente</label><input id="cli" placeholder="Nombre del cliente"></div>
+      <div><label>Celular</label><input id="tel" type="tel" inputmode="tel" placeholder="300 123 4567"></div>
+    </div>
+    <div class="fila">
+      <div><label>Ganancia %</label><input id="gan" type="number" inputmode="decimal"></div>
+      <div><label>Anticipo %</label><input id="ant" type="number" inputmode="decimal"></div>
+      <div><label>Instalación</label><select id="inst"><option value="1">Incluida</option><option value="0">No</option></select></div>
+    </div>
+    <div id="items" style="margin-top:8px"></div>
+    <div id="totales"></div>
+  </div>
+
+  <div class="card" id="cardTaller">
+    <h2>3 · Para el taller</h2>
+    <div class="tabs">
+      <span class="tab sel" data-t="cortes">Plan de corte</span>
+      <span class="tab" data-t="piezas">Piezas</span>
+      <span class="tab" data-t="vidrios">Vidrios</span>
+      <span class="tab" data-t="otros">Accesorios</span>
+      <span class="tab" data-t="costo">Costo</span>
+    </div>
+    <div id="taller"></div>
+  </div>
+  <p class="mini" style="text-align:center">Funciona sin internet. Sus precios y descuentos quedan guardados en este celular.</p>
+</main>
+
+<div class="barra-inf">
+  <button class="btn w" onclick="enviarWA()">WhatsApp</button>
+  <button class="btn" onclick="imprimir('cliente')">PDF cliente</button>
+  <button class="btn" onclick="imprimir('taller')">Hoja taller</button>
+  <button class="btn o" onclick="guardar(true)">Nueva</button>
+</div>
+
+<div id="imp"></div>
+
+<!-- modales -->
+<div class="modal oculto" id="m-ajustes" onclick="if(event.target===this)cerrar()"><div class="c">
+  <h3>Ajustes del taller</h3>
+  <p class="mini">Esto sale en el PDF y en el mensaje de WhatsApp.</p>
+  <label>Nombre del taller</label><input id="cfgTaller" placeholder="Vidrios y Aluminios ...">
+  <div class="fila"><div><label>Celular</label><input id="cfgTel" type="tel"></div><div><label>NIT / C.C.</label><input id="cfgNit"></div></div>
+  <div class="fila">
+    <div><label>Barra (m)</label><select id="cfgBarra"><option value="6000">6,00</option><option value="6100">6,10</option><option value="5800">5,80</option></select></div>
+    <div><label>Disco (mm)</label><input id="cfgKerf" type="number" inputmode="decimal"></div>
+    <div><label>Desperdicio %</label><input id="cfgDesp" type="number" inputmode="decimal"></div>
+  </div>
+  <div class="fila">
+    <div><label>Cobrar aluminio</label><select id="cfgCobro"><option value="m">Por metros usados</option><option value="b">Por barras completas</option></select></div>
+    <div><label>Validez (días)</label><input id="cfgValidez" type="number" inputmode="numeric"></div>
+  </div>
+  <div class="fila" style="margin-top:12px">
+    <button class="btn" onclick="abrir('precios')">Mis precios</button>
+    <button class="btn" onclick="abrir('descuentos')">Mis descuentos</button>
+  </div>
+  <button class="btn v full" style="margin-top:12px" onclick="guardarAjustes()">Guardar</button>
+  <div id="licInfo" class="mini" style="margin-top:14px"></div>
+</div></div>
+
+<div class="modal oculto" id="m-precios" onclick="if(event.target===this)cerrar()"><div class="c">
+  <h3>Mis precios</h3>
+  <p class="mini">Perfiles: precio de la barra en color natural. Vidrio: por m². Mano de obra: por m².</p>
+  <div id="listaPrecios"></div>
+  <button class="btn v full" style="margin-top:12px" onclick="guardarPrecios()">Guardar precios</button>
+</div></div>
+
+<div class="modal oculto" id="m-descuentos" onclick="if(event.target===this)cerrar()"><div class="c">
+  <h3>Mis descuentos</h3>
+  <p class="mini">Milímetros que se suman (+) o restan (−) a la medida de cada pieza. Ajústelos a como corta su taller.</p>
+  <select id="descDis" onchange="pintarDescuentos()"></select>
+  <div id="listaDesc" style="margin-top:10px"></div>
+  <button class="btn v full" style="margin-top:12px" onclick="guardarDescuentos()">Guardar descuentos</button>
+</div></div>
+
+<div class="modal oculto" id="m-hist" onclick="if(event.target===this)cerrar()"><div class="c">
+  <h3>Cotizaciones guardadas</h3>
+  <div id="listaHist"></div>
+</div></div>
+
+<div class="modal oculto" id="m-activar" onclick="if(event.target===this)cerrar()"><div class="c">
+  <h3>Active su Cotizador</h3>
+  <p>Ya usó sus <b id="gratisN"></b> cotizaciones de prueba. Active el cotizador con un <b>pago único de {{ precio_txt }}</b>, sin mensualidad.</p>
+  <a class="btn w full" id="btnComprar" target="_blank" rel="noopener">Comprar por WhatsApp</a>
+  <label style="margin-top:14px">¿Ya pagó? Escriba su código de activación</label>
+  <input id="codigo" placeholder="OBRA-0000-XXXXXX" autocapitalize="characters">
+  <button class="btn v full" style="margin-top:10px" onclick="activar()">Activar</button>
+  <p class="mini" id="actMsg"></p>
+</div></div>
+
+{% raw %}
+<script>
+"use strict";
+/* ============ Catálogo GENÉRICO de ejemplo (propio de Tributando; ningún cliente) ============ */
+const CAT0 = {
+  perfiles: {
+    "C20-01":["Cabezal corrediza",98000],"C20-02":["Sillar corrediza",112000],"C20-03":["Jamba corrediza",86000],
+    "C20-04":["Horizontal de nave",74000],"C20-05":["Enganche",69000],"C20-06":["Traslape lateral",71000],
+    "P38-01":["Marco proyectante",92000],"P38-02":["Nave proyectante",88000],
+    "F10-01":["Marco fijo",79000],"F10-02":["Pisavidrio",32000],
+    "PC80-01":["Cabezal puerta corrediza",168000],"PC80-02":["Sillar puerta corrediza",184000],
+    "PC80-03":["Jamba puerta corrediza",142000],"PC80-04":["Horizontal nave puerta",126000],"PC80-05":["Vertical nave puerta",131000],
+    "CB-01":["Riel cabina de baño",118000],"CB-02":["Perfil U de muro",46000],
+    "PB45-01":["Marco puerta batiente",154000],"PB45-02":["Nave puerta batiente",148000]
+  },
+  vidrios: {"Vidrio claro 4 mm":58000,"Vidrio claro 5 mm":72000,"Vidrio bronce 5 mm":86000,"Vidrio gris 5 mm":86000,
+            "Laminado 3+3 claro":150000,"Templado 8 mm claro":210000},
+  acc: {"Rodamiento sencillo":9000,"Rodamiento puerta":24000,"Cierre de embutir":14000,"Chapa puerta corrediza":68000,
+        "Manija":18000,"Brazo proyectante (par)":45000,"Bisagra de aluminio":22000,"Chapa puerta batiente":85000,
+        "Tornillería (kit)":6000,"Jaladera cabina":38000,"Rodachina cabina":16000},
+  emp: {"Felpa":900,"Empaque vinilo":1100,"Silicona estructural":2500},
+  mo: {"m2 Ensamble Ventana":28000,"m2 Instalación Ventana":22000,"m2 Ensamble Puerta":34000,"m2 Instalación Puerta":26000},
+  acabados: {"Natural":1,"Blanco":1.08,"Negro":1.12,"Bronce":1.12}
+};
+const f = (k=0,w=0,h=0,wh=0)=>({k,w,h,wh});
+const P = (ref,cant,med)=>({c:"perfil",ref,cant,med});
+const V = (cant,an,al)=>({c:"vidrio",cant,an,al});
+const A = (n,cant)=>({c:"acc",n,cant});
+const E = (n,cant)=>({c:"emp",n,cant});
+function corrediza(naves,moviles){return [
+  P("C20-01",f(1),f(0,1)),P("C20-02",f(1),f(0,1)),P("C20-03",f(2),f(0,0,1)),
+  P("C20-04",f(2*naves),f(15,1/naves)),P("C20-05",f(2*(naves-1)),f(-40,0,1)),P("C20-06",f(2),f(-40,0,1)),
+  V(f(naves),f(-45,1/naves),f(-110,0,1)),
+  A("Rodamiento sencillo",f(2*moviles)),A("Cierre de embutir",f(naves-1)),A("Tornillería (kit)",f(1)),
+  E("Felpa",f(0,0.002*naves,0.004*naves)),E("Empaque vinilo",f(0,0.002,0.002*naves))];}
+const DIS = [
+ {id:"XO",n:"Corrediza 2 hojas",tipo:"V",dib:"XO",vid:"v",p:corrediza(2,1)},
+ {id:"XOX",n:"Corrediza 3 hojas",tipo:"V",dib:"XOX",vid:"v",p:corrediza(3,2)},
+ {id:"OXO",n:"Corrediza central",tipo:"V",dib:"OXO",vid:"v",p:corrediza(3,1)},
+ {id:"P",n:"Proyectante",tipo:"V",dib:"P",vid:"v",p:[
+   P("P38-01",f(2),f(0,1)),P("P38-01",f(2),f(0,0,1)),P("P38-02",f(2),f(-30,1)),P("P38-02",f(2),f(-30,0,1)),
+   V(f(1),f(-90,1),f(-90,0,1)),A("Brazo proyectante (par)",f(1)),A("Manija",f(1)),A("Tornillería (kit)",f(1)),
+   E("Empaque vinilo",f(0,0.004,0.004))]},
+ {id:"O",n:"Fija",tipo:"V",dib:"O",vid:"v",p:[
+   P("F10-01",f(2),f(0,1)),P("F10-01",f(2),f(0,0,1)),P("F10-02",f(2),f(-50,1)),P("F10-02",f(2),f(-50,0,1)),
+   V(f(1),f(-56,1),f(-56,0,1)),A("Tornillería (kit)",f(1)),E("Empaque vinilo",f(0,0.004,0.004))]},
+ {id:"PXO",n:"Puerta corrediza",tipo:"P",dib:"XO",vid:"p",p:[
+   P("PC80-01",f(1),f(0,1)),P("PC80-02",f(1),f(0,1)),P("PC80-03",f(2),f(0,0,1)),
+   P("PC80-04",f(4),f(20,.5)),P("PC80-05",f(4),f(-45,0,1)),V(f(2),f(-70,.5),f(-160,0,1)),
+   A("Rodamiento puerta",f(2)),A("Chapa puerta corrediza",f(1)),A("Tornillería (kit)",f(2)),
+   E("Felpa",f(0,0.004,0.008)),E("Empaque vinilo",f(0,0.004,0.004))]},
+ {id:"PZ",n:"Puerta batiente",tipo:"P",dib:"Z",vid:"p",p:[
+   P("PB45-01",f(1),f(0,1)),P("PB45-01",f(2),f(0,0,1)),P("PB45-02",f(2),f(-40,1)),P("PB45-02",f(2),f(-25,0,1)),
+   V(f(1),f(-160,1),f(-180,0,1)),A("Bisagra de aluminio",f(3)),A("Chapa puerta batiente",f(1)),A("Tornillería (kit)",f(2)),
+   E("Empaque vinilo",f(0,0.002,0.004))]},
+ {id:"CB",n:"Cabina de baño",tipo:"P",dib:"XO",vid:"p",p:[
+   P("CB-01",f(1),f(0,1)),P("CB-02",f(2),f(0,0,1)),V(f(2),f(25,.5),f(-30,0,1)),
+   A("Rodachina cabina",f(2)),A("Jaladera cabina",f(1)),E("Silicona estructural",f(0,0,0.002))]}
+];
+const VID_V = ["Vidrio claro 4 mm","Vidrio claro 5 mm","Vidrio bronce 5 mm","Vidrio gris 5 mm","Laminado 3+3 claro"];
+const VID_P = ["Templado 8 mm claro","Laminado 3+3 claro"];
+
+/* ============ almacenamiento seguro ============ */
+const LS = {
+  get(k,d){try{const v=localStorage.getItem("obra_"+k);return v?JSON.parse(v):d}catch(e){return d}},
+  set(k,v){try{localStorage.setItem("obra_"+k,JSON.stringify(v))}catch(e){}}
+};
+const CFG0 = {taller:"",tel:"",nit:"",barra:6000,kerf:4,desp:10,cobro:"m",validez:15,gan:35,ant:50,inst:"1"};
+let cfg = Object.assign({},CFG0,LS.get("cfg",{}));
+let precios = LS.get("precios",{});      // {"perfil|C20-01":98000,...}
+let desc = LS.get("desc",{});            // {"XO|3|med":15}
+let cot = LS.get("actual",null);
+let disSel = "XO";
+</script>
+{% endraw %}
+<script>
+"use strict";
+const GRATIS = {{ gratis|int }};
+const WA = {{ whatsapp|tojson }};
+const PRECIO_TXT = {{ precio_txt|tojson }};
+if(!cot)cot=nuevaCot();
+function nuevaCot(){return {id:Date.now(),num:(LS.get("num",0)+1),fecha:new Date().toISOString().slice(0,10),cli:"",tel:"",items:[]};}
+const $=id=>document.getElementById(id);
+const pesos=n=>"$"+Math.round(n).toLocaleString("es-CO");
+const mm=n=>Math.round(n).toLocaleString("es-CO");
+function precio(tipo,clave){const o=precios[tipo+"|"+clave];if(o!=null&&o!=="")return +o;
+  if(tipo==="perfil")return CAT0.perfiles[clave][1];return CAT0[tipo][clave];}
+function nomPerfil(ref){return CAT0.perfiles[ref]?CAT0.perfiles[ref][0]:ref}
+function ev(fo,W,H){return (fo.k||0)+(fo.w||0)*W+(fo.h||0)*H+(fo.wh||0)*W*H}
+function kDe(d,i,campo,fo){const o=desc[d.id+"|"+i+"|"+campo];return o!=null&&o!==""?+o:fo.k}
+
+/* ---------- dibujo de la ventana ---------- */
+function dibujo(code,w=100,h=80){
+  const n=code.length,pad=4,iw=w-2*pad,ih=h-2*pad,hw=iw/n;let s=`<svg viewBox="0 0 ${w} ${h}"><rect x="${pad}" y="${pad}" width="${iw}" height="${ih}" fill="#9ec9e6" stroke="#8c99a5" stroke-width="4" rx="1"/>`;
+  for(let i=0;i<n;i++){const x=pad+i*hw,c=code[i];
+    if(i>0)s+=`<line x1="${x}" y1="${pad}" x2="${x}" y2="${h-pad}" stroke="#8c99a5" stroke-width="3"/>`;
+    const cx=x+hw/2,cy=h/2;
+    if(c==="X"){const dir=i<n/2?1:-1;s+=`<path d="M${cx-8*dir} ${cy}h${16*dir}m${-5*dir} -5 ${5*dir} 5 ${-5*dir} 5" stroke="#1f9d5a" stroke-width="2.5" fill="none"/>`;}
+    if(c==="P")s+=`<path d="M${x+3} ${h-pad-2} L${cx} ${pad+4} L${x+hw-3} ${h-pad-2}" stroke="#1f9d5a" stroke-width="2" fill="none" stroke-dasharray="4 3"/>`;
+    if(c==="Z")s+=`<path d="M${x+hw-3} ${pad+3} L${x+4} ${cy} L${x+hw-3} ${h-pad-3}" stroke="#1f9d5a" stroke-width="2" fill="none" stroke-dasharray="4 3"/>`;
+  }
+  return s+"</svg>";
+}
+
+/* ---------- cálculo de un ítem ---------- */
+function calcItem(it){
+  const d=DIS.find(x=>x.id===it.dis),W=it.an,H=it.al,q=it.cant,fac=CAT0.acabados[it.acab]||1;
+  const r={perf:[],vid:[],acc:[],emp:[],mo:[],costo:0,m2:W*H/1e6};
+  d.p.forEach((pz,i)=>{
+    const c=Math.round(ev(pz.cant,W,H));
+    if(pz.c==="perfil"){const fo=Object.assign({},pz.med,{k:kDe(d,i,"med",pz.med)});
+      r.perf.push({ref:pz.ref,n:nomPerfil(pz.ref),cant:c*q,largo:Math.round(ev(fo,W,H)),acab:it.acab,fac});}
+    else if(pz.c==="vidrio"){const a=Object.assign({},pz.an,{k:kDe(d,i,"an",pz.an)}),b=Object.assign({},pz.al,{k:kDe(d,i,"al",pz.al)});
+      const va=Math.round(ev(a,W,H)),vb=Math.round(ev(b,W,H));r.vid.push({n:it.vid,cant:c*q,an:va,al:vb,m2:va*vb/1e6*c*q});}
+    else if(pz.c==="acc")r.acc.push({n:pz.n,cant:c*q});
+    else if(pz.c==="emp")r.emp.push({n:pz.n,ml:ev(pz.cant,W,H)*q});
+  });
+  const t=d.tipo==="P"?"Puerta":"Ventana";
+  r.mo.push({n:"m2 Ensamble "+t,m2:r.m2*q});
+  if(cot.inst!=="0")r.mo.push({n:"m2 Instalación "+t,m2:r.m2*q});
+  return r;
+}
+
+/* ---------- optimizador 1D (primero el más largo) ---------- */
+function planCorte(piezas){
+  const L=+cfg.barra,k=+cfg.kerf||0,grupos={};
+  piezas.forEach(p=>{const g=p.ref+"·"+p.acab;(grupos[g]=grupos[g]||{ref:p.ref,n:p.n,acab:p.acab,fac:p.fac,cortes:[]});
+    for(let i=0;i<p.cant;i++)grupos[g].cortes.push(p.largo);});
+  return Object.values(grupos).map(g=>{
+    const barras=[];g.cortes.sort((a,b)=>b-a).forEach(c=>{
+      if(c>L){barras.push({cortes:[c],usado:c,larga:true});return;}
+      let b=barras.find(b=>!b.larga&&b.usado+(b.cortes.length?k:0)+c<=L);
+      if(!b){b={cortes:[],usado:0};barras.push(b);}b.usado+=(b.cortes.length?k:0)+c;b.cortes.push(c);});
+    g.barras=barras;g.metros=g.cortes.reduce((a,b)=>a+b,0)/1000;return g;});
+}
+
+/* ---------- todo junto ---------- */
+function calcular(){
+  const R={perf:[],vid:[],acc:{},emp:{},mo:{},items:[]};
+  cot.items.forEach(it=>{const r=calcItem(it);R.items.push(r);R.perf.push(...r.perf);R.vid.push(...r.vid);
+    r.acc.forEach(a=>R.acc[a.n]=(R.acc[a.n]||0)+a.cant);r.emp.forEach(e=>R.emp[e.n]=(R.emp[e.n]||0)+e.ml);
+    r.mo.forEach(m=>R.mo[m.n]=(R.mo[m.n]||0)+m.m2);});
+  R.plan=planCorte(R.perf);
+  const L=+cfg.barra/1000,desp=1+(+cfg.desp||0)/100;
+  let cAl=0;R.plan.forEach(g=>{const pm=precio("perfil",g.ref)*g.fac/6;  // precio por metro (barra de referencia 6 m)
+    g.costo=cfg.cobro==="b"?pm*L*g.barras.length:pm*g.metros*desp;cAl+=g.costo;});
+  let cVi=0;R.vid.forEach(v=>{v.costo=precio("vidrios",v.n)*v.m2;cVi+=v.costo;});
+  let cAc=0;for(const n in R.acc)cAc+=precio("acc",n)*R.acc[n];
+  let cEm=0;for(const n in R.emp)cEm+=precio("emp",n)*R.emp[n];
+  let cMo=0;for(const n in R.mo)cMo+=precio("mo",n)*R.mo[n];
+  R.costos={Aluminio:cAl,Vidrio:cVi,Accesorios:cAc,Empaques:cEm,"Mano de obra":cMo};
+  R.costo=cAl+cVi+cAc+cEm+cMo;
+  const g=1+(+cot.gan||0)/100;R.total=Math.round(R.costo*g/100)*100;
+  // precio por ítem proporcional a su costo propio
+  cot.items.forEach((it,i)=>{const r=R.items[i];
+    let c=0;const L2={};r.perf.forEach(p=>{c+=precio("perfil",p.ref)*p.fac/6*p.largo/1000*p.cant*desp});
+    r.vid.forEach(v=>c+=precio("vidrios",v.n)*v.m2);r.acc.forEach(a=>c+=precio("acc",a.n)*a.cant);
+    r.emp.forEach(e=>c+=precio("emp",e.n)*e.ml);r.mo.forEach(m=>c+=precio("mo",m.n)*m.m2);r.cBase=c;});
+  const sb=R.items.reduce((a,r)=>a+r.cBase,0)||1;
+  R.items.forEach(r=>r.precio=Math.round(R.total*r.cBase/sb/100)*100);
+  if(R.items.length){const dif=R.total-R.items.reduce((a,r)=>a+r.precio,0);R.items[R.items.length-1].precio+=dif;}
+  R.anticipo=Math.round(R.total*(+cot.ant||0)/100/100)*100;
+  return R;
+}
+
+/* ---------- pintar ---------- */
+let tabT="cortes";
+function pintar(){
+  cot.gan=$("gan").value;cot.ant=$("ant").value;cot.inst=$("inst").value;cot.cli=$("cli").value;cot.tel=$("tel").value;
+  LS.set("actual",cot);
+  const R=calcular();
+  $("items").innerHTML=cot.items.length?cot.items.map((it,i)=>{const d=DIS.find(x=>x.id===it.dis);
+    return `<div class="item">${dibujo(d.dib)}<div class="d"><b>${it.cant} × ${d.n}</b><small>${mm(it.an/10)} × ${mm(it.al/10)} cm · ${it.acab} · ${it.vid}${it.ubi?" · "+esc(it.ubi):""}</small></div>
+    <span class="pr">${pesos(R.items[i].precio)}</span><button class="x" onclick="quitar(${i})" aria-label="Quitar">×</button></div>`}).join("")
+    :`<p class="mini">Agregue la primera ventana arriba.</p>`;
+  $("totales").innerHTML=cot.items.length?`<div style="border-top:1px solid var(--l);margin-top:6px;padding-top:8px">
+    <div class="tot g"><span>Total</span><span>${pesos(R.total)}</span></div>
+    <div class="tot"><span>Anticipo ${cot.ant||0}%</span><span>${pesos(R.anticipo)}</span></div>
+    <div class="tot"><span>Su ganancia</span><span>${pesos(R.total-R.costo)}</span></div></div>`:"";
+  $("cardTaller").classList.toggle("oculto",!cot.items.length);
+  $("taller").innerHTML=htmlTaller(R,tabT);
+}
+function htmlTaller(R,t){
+  if(t==="cortes")return R.plan.map(g=>`<div style="margin-bottom:10px"><b>${g.ref} · ${esc(g.n)}</b> <span class="mini">${g.acab} · ${g.barras.length} barra${g.barras.length>1?"s":""} de ${(cfg.barra/1000).toFixed(2).replace(".",",")} m</span>
+    ${g.barras.map((b,j)=>{const L=Math.max(+cfg.barra,b.usado);return `<div class="barra"><div class="et"><span>Barra ${j+1}</span><span>sobra ${mm(Math.max(0,cfg.barra-b.usado))} mm</span></div><div class="b">
+    ${b.cortes.map(c=>`<div class="s" style="width:${c/L*100}%">${mm(c)}</div>`).join("")}</div></div>`}).join("")}</div>`).join("");
+  if(t==="piezas"){const filas=[];cot.items.forEach((it,i)=>{const d=DIS.find(x=>x.id===it.dis);
+      filas.push(`<tr><td colspan="4" style="color:var(--v);font-weight:700">${i+1}. ${d.n} ${mm(it.an)} × ${mm(it.al)} mm × ${it.cant}</td></tr>`);
+      R.items[i].perf.forEach(p=>filas.push(`<tr><td>${p.ref}</td><td>${esc(p.n)}</td><td class="n">${p.cant}</td><td class="n">${mm(p.largo)}</td></tr>`));});
+    return `<table><tr><th>Ref.</th><th>Pieza</th><th class="n">Cant</th><th class="n">Corte mm</th></tr>${filas.join("")}</table>`;}
+  if(t==="vidrios")return `<table><tr><th>Vidrio</th><th class="n">Cant</th><th class="n">Ancho</th><th class="n">Alto</th><th class="n">m²</th></tr>
+    ${R.vid.map(v=>`<tr><td>${esc(v.n)}</td><td class="n">${v.cant}</td><td class="n">${mm(v.an)}</td><td class="n">${mm(v.al)}</td><td class="n">${v.m2.toFixed(2)}</td></tr>`).join("")}</table>
+    <button class="btn w full" style="margin-top:10px" onclick="pedidoVidrio()">Pedir vidrio por WhatsApp</button>`;
+  if(t==="otros")return `<table><tr><th>Accesorio / empaque</th><th class="n">Cant</th></tr>
+    ${Object.entries(R.acc).map(([n,c])=>`<tr><td>${esc(n)}</td><td class="n">${c}</td></tr>`).join("")}
+    ${Object.entries(R.emp).map(([n,c])=>`<tr><td>${esc(n)}</td><td class="n">${c.toFixed(1)} m</td></tr>`).join("")}</table>`;
+  if(t==="costo")return `<table>${Object.entries(R.costos).map(([n,c])=>`<tr><td>${n}</td><td class="n">${pesos(c)}</td></tr>`).join("")}
+    <tr><td><b>Costo total</b></td><td class="n"><b>${pesos(R.costo)}</b></td></tr>
+    <tr><td>Ganancia ${cot.gan||0}%</td><td class="n">${pesos(R.total-R.costo)}</td></tr>
+    <tr><td><b>Precio al cliente</b></td><td class="n"><b>${pesos(R.total)}</b></td></tr></table>
+    <p class="mini">Aluminio cobrado ${cfg.cobro==="b"?"por barras completas":"por metros usados + "+cfg.desp+"% de desperdicio"}. Cámbielo en ⚙︎ Ajustes.</p>`;
+  return "";
+}
+function esc(s){return String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+
+/* ---------- acciones ---------- */
+function pintarDisenos(){
+  $("disenos").innerHTML=DIS.map(d=>`<div class="dis ${d.id===disSel?"sel":""}" onclick="selDis('${d.id}')">${dibujo(d.dib)}${d.n}</div>`).join("");
+  const d=DIS.find(x=>x.id===disSel),lista=d.vid==="p"?VID_P:VID_V,prev=$("vid").value;
+  $("vid").innerHTML=lista.map(v=>`<option>${v}</option>`).join("");if(lista.includes(prev))$("vid").value=prev;
+}
+function selDis(id){disSel=id;pintarDisenos();}
+function agregar(){
+  const an=parseFloat(($("an").value||"").replace(",",".")),al=parseFloat(($("al").value||"").replace(",",".")),ca=parseInt($("ca").value)||1;
+  if(!(an>20&&al>20)){alert("Escriba ancho y alto en centímetros (ej. 120 y 150).");return;}
+  if(an>1000||al>1000){alert("¿Seguro? Las medidas van en centímetros.");return;}
+  cot.items.push({dis:disSel,an:Math.round(an*10),al:Math.round(al*10),cant:ca,acab:$("acab").value,vid:$("vid").value,ubi:$("ubi").value.trim()});
+  $("an").value="";$("al").value="";$("ca").value=1;$("ubi").value="";pintar();
+  $("items").scrollIntoView({behavior:"smooth",block:"center"});
+}
+function quitar(i){cot.items.splice(i,1);pintar();}
+
+/* ---------- licencia: N cotizaciones gratis, luego código ---------- */
+function lic(){return LS.get("lic",null)}
+function usadas(){return LS.get("usadas",0)}
+function puedeEntregar(){
+  if(lic())return true;
+  if(usadas()<GRATIS)return true;
+  $("gratisN").textContent=GRATIS;
+  $("btnComprar").href=`https://wa.me/${WA}?text=${encodeURIComponent("Hola, quiero activar el Cotizador de Obra (pago único "+PRECIO_TXT+").")}`;
+  abrir("activar");return false;
+}
+function contarEntrega(){ // cuenta una vez por cotización
+  if(lic())return;const ya=LS.get("contadas",[]);if(ya.includes(cot.id))return;
+  ya.push(cot.id);LS.set("contadas",ya.slice(-50));LS.set("usadas",usadas()+1);pintarLic();
+}
+function pintarLic(){
+  const l=lic(),u=usadas(),q=Math.max(0,GRATIS-u);
+  $("licAviso").classList.toggle("oculto",!!l);
+  if(!l)$("licAviso").innerHTML=q>0?`Prueba gratis: le quedan <b>${q}</b> de ${GRATIS} cotizaciones para enviar. Calcular es ilimitado.`
+     :`Terminó la prueba. <a href="#" onclick="puedeEntregar();return false" style="color:#ffe2a0">Active su cotizador</a> con un pago único de ${PRECIO_TXT}.`;
+  $("licInfo").innerHTML=l?`✅ Activado (${esc(l.codigo)})`:`Prueba: ${Math.min(u,GRATIS)} de ${GRATIS} cotizaciones usadas.`;
+}
+async function activar(){
+  const c=$("codigo").value.trim().toUpperCase();$("actMsg").textContent="Verificando…";
+  try{const r=await fetch("/cotizador-obra/activar",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({codigo:c})});
+    const j=await r.json();if(j.ok){LS.set("lic",{codigo:c,fecha:new Date().toISOString()});$("actMsg").textContent="¡Listo! Quedó activado en este celular.";pintarLic();setTimeout(cerrar,1200);}
+    else $("actMsg").textContent=j.error||"Código no válido.";}
+  catch(e){$("actMsg").textContent="Para activar necesita internet una sola vez. Intente de nuevo con señal.";}
+}
+
+/* ---------- entregar ---------- */
+function textoCliente(R){
+  const t=cfg.taller||"Cotización";let s=`*${t}*\nCotización N.º ${cot.num} · ${cot.fecha}\n${cot.cli?"Cliente: "+cot.cli+"\n":""}\n`;
+  cot.items.forEach((it,i)=>{const d=DIS.find(x=>x.id===it.dis);
+    s+=`${i+1}. ${it.cant} × ${d.n} ${mm(it.an/10)}×${mm(it.al/10)} cm, ${it.acab.toLowerCase()}, ${it.vid.toLowerCase()}${it.ubi?" ("+it.ubi+")":""}: ${pesos(R.items[i].precio)}\n`;});
+  s+=`\n*Total: ${pesos(R.total)}*\n${cot.inst!=="0"?"Incluye instalación.\n":""}Anticipo para empezar (${cot.ant||0}%): ${pesos(R.anticipo)}\nValidez: ${cfg.validez} días.`;
+  if(cfg.tel)s+=`\n${cfg.tel}`;return s;
+}
+function enviarWA(){
+  if(!cot.items.length){alert("Agregue al menos una ventana.");return;}
+  if(!puedeEntregar())return;contarEntrega();guardar(false);
+  const R=calcular(),tel=(cot.tel||"").replace(/\D/g,""),num=tel.length===10?"57"+tel:tel;
+  window.open(`https://wa.me/${num}?text=${encodeURIComponent(textoCliente(R))}`,"_blank");
+}
+function pedidoVidrio(){
+  const R=calcular();let s=`*Pedido de vidrio*${cfg.taller?" · "+cfg.taller:""}\nObra: ${cot.cli||"N.º "+cot.num}\n\n`;
+  R.vid.forEach(v=>s+=`${v.cant} × ${v.n}: ${mm(v.an)} × ${mm(v.al)} mm\n`);
+  s+=`\nTotal: ${R.vid.reduce((a,v)=>a+v.m2,0).toFixed(2)} m²`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(s)}`,"_blank");
+}
+function imprimir(tipo){
+  if(!cot.items.length){alert("Agregue al menos una ventana.");return;}
+  if(tipo==="cliente"){if(!puedeEntregar())return;contarEntrega();guardar(false);}
+  const R=calcular(),c=cfg;
+  const cab=`<div class="cab"><div><h1>${esc(c.taller||"Cotización")}</h1>${c.nit?"NIT/C.C. "+esc(c.nit)+"<br>":""}${esc(c.tel)}</div>
+    <div style="text-align:right"><b>${tipo==="cliente"?"COTIZACIÓN":"HOJA DE TALLER"} N.º ${cot.num}</b><br>${cot.fecha}<br>${esc(cot.cli)}<br>${esc(cot.tel)}</div></div>`;
+  let h=cab;
+  if(tipo==="cliente"){
+    h+=`<table><tr><th></th><th>Descripción</th><th>Medida (cm)</th><th class="n">Cant</th><th class="n">Valor</th></tr>
+    ${cot.items.map((it,i)=>{const d=DIS.find(x=>x.id===it.dis);return `<tr><td>${dibujo(d.dib)}</td><td><b>${d.n}</b><br>${it.acab} · ${it.vid}${it.ubi?"<br>"+esc(it.ubi):""}</td>
+      <td>${mm(it.an/10)} × ${mm(it.al/10)}</td><td class="n">${it.cant}</td><td class="n">${pesos(R.items[i].precio)}</td></tr>`}).join("")}</table>
+    <div style="text-align:right;margin-top:10px"><div class="tg">Total ${pesos(R.total)}</div>Anticipo para iniciar (${cot.ant||0}%): <b>${pesos(R.anticipo)}</b></div>
+    <div class="pie">${cot.inst!=="0"?"Incluye suministro e instalación.":"Solo suministro, no incluye instalación."} Validez de la oferta: ${c.validez} días. Medidas sujetas a verificación en obra.</div>`;
+  }else{
+    h+=`<div class="seccion"><h3>Piezas de aluminio</h3>${htmlTaller(R,"piezas")}</div>
+        <div class="seccion"><h3>Plan de corte</h3>${htmlTaller(R,"cortes")}</div>
+        <div class="seccion"><h3>Vidrios</h3>${htmlTaller(R,"vidrios").replace(/<button[\s\S]*<\/button>/,"")}</div>
+        <div class="seccion"><h3>Accesorios y empaques</h3>${htmlTaller(R,"otros")}</div>`;
+  }
+  $("imp").innerHTML=h;setTimeout(()=>window.print(),50);
+}
+
+/* ---------- guardar / historial ---------- */
+function guardar(nueva){
+  if(cot.items.length){const h=LS.get("hist",[]),i=h.findIndex(x=>x.id===cot.id),R=calcular();
+    const reg=Object.assign({},cot,{total:R.total});if(i>=0)h[i]=reg;else h.unshift(reg);LS.set("hist",h.slice(0,100));
+    if(cot.num>LS.get("num",0))LS.set("num",cot.num);}
+  if(nueva){if(cot.items.length&&!confirm("¿Empezar una cotización nueva? La actual queda en Guardadas."))return;
+    cot=nuevaCot();$("cli").value="";$("tel").value="";pintar();window.scrollTo({top:0,behavior:"smooth"});}
+}
+function pintarHist(){const h=LS.get("hist",[]);
+  $("listaHist").innerHTML=h.length?h.map(x=>`<div class="hist" onclick="cargar(${x.id})"><div><b>N.º ${x.num} · ${esc(x.cli||"Sin nombre")}</b><br><span class="mini">${x.fecha} · ${x.items.length} ítem(s)</span></div><b>${pesos(x.total)}</b></div>`).join("")
+  :`<p class="mini">Aún no hay cotizaciones guardadas.</p>`;}
+function cargar(id){const x=LS.get("hist",[]).find(h=>h.id===id);if(!x)return;cot=JSON.parse(JSON.stringify(x));delete cot.total;
+  $("cli").value=cot.cli||"";$("tel").value=cot.tel||"";$("gan").value=cot.gan??cfg.gan;$("ant").value=cot.ant??cfg.ant;$("inst").value=cot.inst||"1";cerrar();pintar();}
+
+/* ---------- ajustes, precios y descuentos ---------- */
+function abrir(m){
+  if(m==="ajustes"){$("cfgTaller").value=cfg.taller;$("cfgTel").value=cfg.tel;$("cfgNit").value=cfg.nit;$("cfgBarra").value=cfg.barra;
+    $("cfgKerf").value=cfg.kerf;$("cfgDesp").value=cfg.desp;$("cfgCobro").value=cfg.cobro;$("cfgValidez").value=cfg.validez;pintarLic();}
+  if(m==="precios")pintarPrecios();
+  if(m==="descuentos"){$("descDis").innerHTML=DIS.map(d=>`<option value="${d.id}">${d.n}</option>`).join("");pintarDescuentos();}
+  if(m==="hist")pintarHist();
+  document.querySelectorAll(".modal").forEach(x=>x.classList.add("oculto"));$("m-"+m).classList.remove("oculto");
+}
+function cerrar(){document.querySelectorAll(".modal").forEach(x=>x.classList.add("oculto"));}
+function guardarAjustes(){
+  Object.assign(cfg,{taller:$("cfgTaller").value.trim(),tel:$("cfgTel").value.trim(),nit:$("cfgNit").value.trim(),barra:+$("cfgBarra").value,
+    kerf:+$("cfgKerf").value||0,desp:+$("cfgDesp").value||0,cobro:$("cfgCobro").value,validez:+$("cfgValidez").value||15});
+  LS.set("cfg",cfg);cerrar();pintar();
+}
+function pintarPrecios(){
+  const fila=(tipo,clave,nom,uni)=>`<div class="fila" style="align-items:center;margin-bottom:6px"><div style="flex:2;font-size:14px">${esc(nom)}<br><span class="mini">${uni}</span></div>
+    <div><input type="number" inputmode="numeric" data-k="${tipo}|${clave}" value="${precio(tipo,clave)}"></div></div>`;
+  let h="<h2 style='margin-top:10px'>Perfiles</h2>";for(const r in CAT0.perfiles)h+=fila("perfil",r,r+" · "+CAT0.perfiles[r][0],"barra 6 m");
+  h+="<h2>Vidrios</h2>";for(const v in CAT0.vidrios)h+=fila("vidrios",v,v,"m²");
+  h+="<h2>Accesorios</h2>";for(const a in CAT0.acc)h+=fila("acc",a,a,"unidad");
+  h+="<h2>Empaques</h2>";for(const e in CAT0.emp)h+=fila("emp",e,e,"metro");
+  h+="<h2>Mano de obra</h2>";for(const m in CAT0.mo)h+=fila("mo",m,m.replace("m2 ",""),"m²");
+  $("listaPrecios").innerHTML=h;
+}
+function guardarPrecios(){document.querySelectorAll("#listaPrecios input").forEach(i=>{if(i.value!=="")precios[i.dataset.k]=+i.value;});LS.set("precios",precios);cerrar();pintar();}
+function pintarDescuentos(){
+  const d=DIS.find(x=>x.id===$("descDis").value);let h="";
+  d.p.forEach((pz,i)=>{
+    if(pz.c==="perfil")h+=filaD(d,i,"med",pz.med,`${pz.ref} · ${nomPerfil(pz.ref)}`,pz.med.w?"sobre el ancho"+(pz.med.w!==1?" ÷ "+Math.round(1/pz.med.w):""):"sobre el alto");
+    if(pz.c==="vidrio"){h+=filaD(d,i,"an",pz.an,"Vidrio · ancho","sobre el ancho"+(pz.an.w!==1?" ÷ "+Math.round(1/pz.an.w):""));h+=filaD(d,i,"al",pz.al,"Vidrio · alto","sobre el alto");}
+  });$("listaDesc").innerHTML=h;
+}
+function filaD(d,i,campo,fo,nom,base){const v=kDe(d,i,campo,fo);
+  return `<div class="fila" style="align-items:center;margin-bottom:6px"><div style="flex:2;font-size:14px">${esc(nom)}<br><span class="mini">${base}</span></div>
+  <div><input type="number" inputmode="numeric" data-k="${d.id}|${i}|${campo}" value="${v}"></div></div>`;}
+function guardarDescuentos(){document.querySelectorAll("#listaDesc input").forEach(i=>{desc[i.dataset.k]=i.value===""?null:+i.value;});LS.set("desc",desc);cerrar();pintar();}
+
+/* ---------- arranque ---------- */
+$("acab").innerHTML=Object.keys(CAT0.acabados).map(a=>`<option>${a}</option>`).join("");
+$("gan").value=cot.gan??cfg.gan;$("ant").value=cot.ant??cfg.ant;$("inst").value=cot.inst||cfg.inst;$("cli").value=cot.cli||"";$("tel").value=cot.tel||"";
+["gan","ant","inst","cli","tel"].forEach(id=>$(id).addEventListener("input",pintar));
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("sel"));t.classList.add("sel");tabT=t.dataset.t;pintar();});
+pintarDisenos();pintarLic();pintar();
+if("serviceWorker" in navigator)navigator.serviceWorker.register("/cotizador-obra/sw.js",{scope:"/cotizador-obra"}).catch(()=>{});
+</script>
+</body>
+</html>

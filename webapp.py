@@ -2230,6 +2230,105 @@ def ventaneria_cine():
     return render_template("ventana_cine.html", whatsapp=re.sub(r"\D", "", str(wa)))
 
 
+# ---------------------------------------------------------------------------
+# Cotizador de Obra (8-nov-2026): app liviana de celular para vidrierías, respuesta a «Vidriería
+# Rentable» (US$5,90 pago único). Funciona sin internet (service worker); precios y descuentos viven
+# en el celular. Catálogo GENÉRICO propio (Serie 20/38/10/80/45, el de la demo), nunca de un cliente.
+# N cotizaciones gratis; luego código de activación OBRA-NNNN-XXXXXX (HMAC con la secret_key) que
+# Edison genera en /cotizador-obra/codigo tras recibir el pago. Mientras VENTANERIA_PAUSADA, solo
+# el dueño la ve (misma llave de /ventaneria/cine).
+_OBRA_GRATIS = 3
+_OBRA_PRECIO_TXT = "$24.900"
+
+
+def _obra_firma(n: int) -> str:
+    import hashlib, hmac
+    return hmac.new(app.secret_key.encode() if isinstance(app.secret_key, str) else app.secret_key,
+                    f"obra:{n}".encode(), hashlib.sha256).hexdigest()[:6].upper()
+
+
+def _obra_abierta() -> bool:
+    import hashlib
+    from src.prospectos import VENTANERIA_PAUSADA
+    llave = (request.args.get("llave") or "").strip()
+    if llave and hashlib.sha256(llave.encode()).hexdigest() == _LLAVE_DUENO_HASH:
+        session["vent_cine_dueno"] = True
+    return (not VENTANERIA_PAUSADA) or bool(session.get("vent_cine_dueno"))
+
+
+_NO_DISPONIBLE = ("<!doctype html><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'>"
+                  "<title>No disponible</title><body style='font-family:system-ui;max-width:520px;margin:15vh auto;padding:0 20px;color:#222'>"
+                  "<h2>Esta página no está disponible</h2><p>Visite <a href='https://tributando.co'>tributando.co</a>.</p>")
+
+
+@app.get("/cotizador-obra")
+def cotizador_obra():
+    if not _obra_abierta():
+        return Response(_NO_DISPONIBLE, status=404, mimetype="text/html")
+    if request.args.get("llave"):
+        return redirect("/cotizador-obra")               # la llave no queda en la barra
+    wa = IA_CFG.get("negocio", {}).get("whatsapp") or "573332470715"
+    return render_template("cotizador_obra.html", whatsapp=re.sub(r"\D", "", str(wa)),
+                           gratis=_OBRA_GRATIS, precio_txt=_OBRA_PRECIO_TXT)
+
+
+@app.get("/cotizador-obra/manifest.json")
+def cotizador_obra_manifest():
+    return jsonify({"name": "Cotizador de Obra · Tributando", "short_name": "Cotizador",
+                    "start_url": "/cotizador-obra", "scope": "/cotizador-obra", "display": "standalone",
+                    "background_color": "#0f1720", "theme_color": "#0f1720", "lang": "es-CO",
+                    "icons": [{"src": "/static/obra/icono-192.png", "sizes": "192x192", "type": "image/png"},
+                              {"src": "/static/obra/icono-512.png", "sizes": "512x512", "type": "image/png",
+                               "purpose": "any maskable"}]})
+
+
+_OBRA_SW = """const C='obra-v1',U=['/cotizador-obra','/cotizador-obra/manifest.json','/static/obra/icono-192.png','/static/obra/icono-512.png'];
+self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(C).then(c=>c.addAll(U)).catch(()=>{}))});
+self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==C).map(x=>caches.delete(x)))).then(()=>self.clients.claim())));
+self.addEventListener('fetch',e=>{const r=e.request;if(r.method!=='GET')return;const u=new URL(r.url);
+ if(u.origin!==location.origin||!U.includes(u.pathname))return;
+ // red primero (precios y arreglos nuevos); sin señal, lo guardado
+ e.respondWith(fetch(r).then(res=>{if(res.ok){const cp=res.clone();caches.open(C).then(c=>c.put(u.pathname,cp))}return res})
+  .catch(()=>caches.match(u.pathname)))});"""
+
+
+@app.get("/cotizador-obra/sw.js")
+def cotizador_obra_sw():
+    return Response(_OBRA_SW, mimetype="application/javascript",
+                    headers={"Service-Worker-Allowed": "/cotizador-obra", "Cache-Control": "no-cache"})
+
+
+@app.post("/cotizador-obra/activar")
+def cotizador_obra_activar():
+    import hmac
+    codigo = str((request.get_json(silent=True) or {}).get("codigo", "")).strip().upper()
+    m = re.fullmatch(r"OBRA-(\d{4})-([0-9A-F]{6})", codigo)
+    if not m or not hmac.compare_digest(_obra_firma(int(m.group(1))), m.group(2)):
+        return jsonify({"ok": False, "error": "Código no válido. Revíselo o escríbanos por WhatsApp."})
+    app.logger.info("Cotizador de Obra activado: %s", codigo)
+    return jsonify({"ok": True})
+
+
+@app.get("/cotizador-obra/codigo")
+def cotizador_obra_codigo():
+    """Solo el dueño: genera el código de activación número n (uno por cliente que pagó)."""
+    if not session.get("vent_cine_dueno"):
+        _obra_abierta()                                  # acepta ?llave=
+    if not session.get("vent_cine_dueno"):
+        return Response(_NO_DISPONIBLE, status=404, mimetype="text/html")
+    try:
+        n = max(1, min(9999, int(request.args.get("n", "1"))))
+    except ValueError:
+        n = 1
+    cod = f"OBRA-{n:04d}-{_obra_firma(n)}"
+    return Response(f"<!doctype html><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'>"
+                    f"<body style='font-family:system-ui;max-width:520px;margin:10vh auto;padding:0 20px'>"
+                    f"<p>Código de activación n.º {n}:</p><h1 style='letter-spacing:.05em'>{cod}</h1>"
+                    f"<p><a href='?n={n + 1}'>Siguiente número ({n + 1})</a></p>"
+                    f"<p style='color:#666'>Use un número distinto por cada cliente y anótelo con su nombre.</p>",
+                    mimetype="text/html")
+
+
 @app.before_request
 def _ventaneria_pausada_estaticos():
     """5-nov-2026 Edison: «y el pdf también». Mientras VENTANERIA_PAUSADA, no se sirven el PDF,
