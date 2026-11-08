@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portafolio · Edison Monsalve, Contador Público · Tributando</title>
+<meta name="description" content="Contador público con software propio: contabilidad, impuestos y nómina, más factura electrónica, POS, nómina electrónica y CRM con WhatsApp.">
+<meta name="robots" content="noindex">
+<link rel="icon" href="/static/img/logo-tributando.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#05070c;--txt:#eef1f6;--suave:#aab3c2;--tenue:#707b8d;--verde:#37d38f;--oro:#e6c483;--linea:rgba(255,255,255,.08);--tarjeta:rgba(14,19,29,.72)}
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
+html{background:var(--bg);scroll-behavior:smooth}
+body{background:var(--bg);color:var(--txt);font-family:"Plus Jakarta Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+#fondo{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;pointer-events:none}
+.velo{position:fixed;inset:0;z-index:1;pointer-events:none;background:radial-gradient(120% 90% at 50% 40%,transparent 35%,rgba(5,7,12,.9) 100%)}
+.barra{position:fixed;left:0;top:0;height:2px;z-index:30;background:linear-gradient(90deg,var(--verde),var(--oro));width:0}
+header{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:16px clamp(16px,4vw,48px);transition:background .3s}
+header.fijo{background:rgba(5,7,12,.82);backdrop-filter:blur(12px);border-bottom:1px solid var(--linea)}
+.marca{display:flex;align-items:center;gap:10px;color:var(--txt);text-decoration:none;font-weight:800;letter-spacing:-.02em}
+.marca img{width:28px;height:28px;border-radius:7px}.marca span{color:var(--verde)}
+.boton{display:inline-flex;align-items:center;gap:8px;background:var(--verde);color:#04140c;font-weight:700;padding:12px 20px;border-radius:999px;text-decoration:none;font-size:15px;transition:transform .2s,box-shadow .2s;white-space:nowrap}
+.boton:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(55,211,143,.35)}
+.boton.chico{padding:9px 15px;font-size:13px}
+main{position:relative;z-index:10}
+section{padding:0 clamp(16px,7vw,110px)}
+.portada{min-height:100vh;display:flex;flex-direction:column;justify-content:center;max-width:980px}
+.etiqueta{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.22em;color:var(--oro);text-transform:uppercase;display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.etiqueta:before{content:"";width:28px;height:1px;background:var(--oro)}
+h1{font-size:clamp(42px,7.4vw,104px);font-weight:800;letter-spacing:-.045em;line-height:.98}
+h2{font-size:clamp(34px,5vw,68px);font-weight:800;letter-spacing:-.04em;line-height:1}
+h1 em,h2 em{font-style:normal;background:linear-gradient(100deg,var(--verde),#9ff0c9 45%,var(--oro));-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{margin-top:22px;font-size:clamp(17px,1.6vw,21px);line-height:1.55;color:var(--suave);max-width:640px}
+.lead b{color:var(--txt)}
+.acciones{margin-top:32px;display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.acciones small{color:var(--tenue);font-size:13px}
+.firma{margin-top:42px;display:flex;align-items:center;gap:14px;color:var(--suave);font-size:14px}
+.firma i{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,var(--verde),var(--oro));color:#04140c;font-style:normal;font-weight:800}
+.firma b{display:block;color:var(--txt);font-size:15px}
+/* bloques con scroll */
+.bloque{min-height:100vh;padding-top:18vh;padding-bottom:12vh}
+.cabeza{max-width:760px;margin-bottom:46px}
+.lista{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;max-width:1100px}
+.item{position:relative;padding:24px 22px 22px;border-radius:20px;background:var(--tarjeta);border:1px solid var(--linea);backdrop-filter:blur(10px);
+  opacity:0;transform:translateY(40px) scale(.97);transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1),border-color .3s}
+.item.ver{opacity:1;transform:none}
+.item:hover{border-color:rgba(55,211,143,.45)}
+.item .num{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--oro);letter-spacing:.14em}
+.item h3{margin:12px 0 8px;font-size:20px;letter-spacing:-.02em}
+.item p{color:var(--suave);font-size:15px;line-height:1.5}
+.item .ico{position:absolute;right:20px;top:20px;width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:rgba(55,211,143,.12);color:var(--verde);font-size:18px}
+.bloque.herramientas .item .ico{background:rgba(230,196,131,.12);color:var(--oro)}
+.extras{display:flex;flex-wrap:wrap;gap:10px;max-width:1100px}
+.extras span{padding:12px 18px;border-radius:999px;border:1px solid var(--linea);background:var(--tarjeta);font-size:15px;color:var(--suave);opacity:0;transform:translateY(20px);transition:opacity .7s,transform .7s}
+.extras span.ver{opacity:1;transform:none}
+.extras span b{color:var(--txt)}
+.pasos{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;max-width:1100px;counter-reset:p}
+.paso{padding:24px;border-left:2px solid var(--verde);background:linear-gradient(90deg,rgba(55,211,143,.08),transparent);border-radius:0 18px 18px 0;opacity:0;transform:translateX(-30px);transition:opacity .8s,transform .8s}
+.paso.ver{opacity:1;transform:none}
+.paso:before{counter-increment:p;content:"0" counter(p);font-family:"JetBrains Mono",monospace;color:var(--verde);font-size:13px;letter-spacing:.14em}
+.paso h3{margin:10px 0 6px;font-size:19px}.paso p{color:var(--suave);font-size:15px;line-height:1.5}
+.cierre{min-height:80vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
+.cierre .lead{margin-left:auto;margin-right:auto}
+.cierre .acciones{justify-content:center}
+.titulo-in{opacity:0;transform:translateY(30px);filter:blur(8px);transition:opacity 1s,transform 1s,filter 1s}
+.titulo-in.ver{opacity:1;transform:none;filter:none}
+footer{position:relative;z-index:10;padding:28px clamp(16px,4vw,48px);border-top:1px solid var(--linea);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;color:var(--tenue);font-size:13px;background:rgba(5,7,12,.85)}
+footer a{color:var(--suave)}
+.flotante{position:fixed;right:18px;bottom:18px;z-index:25;opacity:0;transform:translateY(20px);transition:all .4s;pointer-events:none}
+.flotante.on{opacity:1;transform:none;pointer-events:auto}
+@media (max-width:700px){
+  header{padding:12px 14px}.marca{font-size:15px}
+  .bloque{padding-top:12vh}
+  .item .ico{display:none}
+}
+@media (prefers-reduced-motion:reduce){.item,.extras span,.paso,.titulo-in{opacity:1;transform:none;filter:none;transition:none}}
+</style>
+</head>
+<body>
+<canvas id="fondo" aria-hidden="true"></canvas><div class="velo"></div><div class="barra" id="barra"></div>
+{% set wa = 'https://wa.me/' ~ whatsapp ~ '?text=' ~ wa_texto %}
+<header id="cab">
+  <a class="marca" href="/"><img src="/static/img/logo-tributando.png" alt="">Tributando<span>.co</span></a>
+  <a class="boton chico" href="{{ wa }}">Pida una demostración</a>
+</header>
+
+<main>
+  <section class="portada" data-color="0">
+    <div class="etiqueta">{% if empresa %}Propuesta para {{ empresa }}{% else %}Portafolio{% endif %}</div>
+    <h1 class="titulo-in ver">Su contador público, <em>con su propio software.</em></h1>
+    <p class="lead">Llevo la contabilidad y los impuestos de su empresa, y le doy las herramientas para <b>facturar, vender y pagar la nómina</b> en un solo lugar, conectadas a sus libros.</p>
+    <div class="acciones">
+      <a class="boton" href="{{ wa }}">Pida una demostración</a>
+      <small>Le respondemos el mismo día hábil.</small>
+    </div>
+    <div class="firma"><i>EM</i><div><b>Edison Monsalve</b>Contador Público · Tributando</div></div>
+  </section>
+
+  <section class="bloque" data-color="1">
+    <div class="cabeza">
+      <div class="etiqueta">01 · Como su contador</div>
+      <h2 class="titulo-in">Su empresa <em>al día.</em></h2>
+    </div>
+    <div class="lista">
+      <div class="item"><span class="ico">▤</span><span class="num">01</span><h3>Contabilidad mensual</h3><p>Sus compras, ventas, bancos y gastos causados cada mes, con estados financieros que sí se entienden.</p></div>
+      <div class="item"><span class="ico">%</span><span class="num">02</span><h3>Impuestos</h3><p>IVA, retención en la fuente, ICA, renta y exógena. Presentados a tiempo y salidos de sus propios libros.</p></div>
+      <div class="item"><span class="ico">☺</span><span class="num">03</span><h3>Nómina y seguridad social</h3><p>Liquidación de nómina, PILA, prestaciones, vacaciones y contratos.</p></div>
+      <div class="item"><span class="ico">✓</span><span class="num">04</span><h3>Asesoría</h3><p>Le explico sus números y le ayudo a decidir: cuánto pagar, cuándo y cómo ahorrar en impuestos dentro de la ley.</p></div>
+    </div>
+  </section>
+
+  <section class="bloque herramientas" data-color="2">
+    <div class="cabeza">
+      <div class="etiqueta">02 · Las herramientas de Tributando</div>
+      <h2 class="titulo-in">Todo conectado <em>a sus libros.</em></h2>
+      <p class="lead">Lo que su empresa emite y vende entra solo a la contabilidad. Sin digitar dos veces.</p>
+    </div>
+    <div class="lista">
+      <div class="item"><span class="ico">⎙</span><span class="num">FACTURA</span><h3>Factura electrónica</h3><p>Emita desde el celular o el computador. Le hacemos la habilitación ante la DIAN.</p></div>
+      <div class="item"><span class="ico">▦</span><span class="num">POS</span><h3>POS electrónico</h3><p>Para ventas al detal: caja, tiquete electrónico y cierre del día.</p></div>
+      <div class="item"><span class="ico">☷</span><span class="num">NÓMINA</span><h3>Nómina electrónica</h3><p>Desprendibles, PILA y la nómina electrónica de cada mes.</p></div>
+      <div class="item"><span class="ico">✎</span><span class="num">SOPORTE</span><h3>Documento soporte</h3><p>Para sus compras a personas que no facturan, sin perder el costo ni el gasto.</p></div>
+      <div class="item"><span class="ico">✆</span><span class="num">CRM</span><h3>CRM con WhatsApp</h3><p>Un solo WhatsApp para todo su equipo: clientes, seguimiento y un asistente que responde.</p></div>
+      <div class="item"><span class="ico">◉</span><span class="num">ASISTENTE</span><h3>Pregúntele a sus números</h3><p>Por WhatsApp o por voz: «¿cuánto IVA voy a pagar?» y le responde con sus libros.</p></div>
+    </div>
+  </section>
+
+  <section class="bloque" data-color="3" style="min-height:70vh">
+    <div class="cabeza">
+      <div class="etiqueta">03 · Además</div>
+      <h2 class="titulo-in">Lo que su empresa <em>necesite.</em></h2>
+    </div>
+    <div class="extras">
+      <span><b>Conciliación bancaria</b> y cartera</span>
+      <span><b>Pagos a proveedores</b> en un archivo para el banco</span>
+      <span><b>Seguridad y salud</b> en el trabajo (SST)</span>
+      <span><b>Carta digital con pedidos</b> para restaurantes</span>
+    </div>
+  </section>
+
+  <section class="bloque" data-color="4" style="min-height:80vh">
+    <div class="cabeza">
+      <div class="etiqueta">04 · Cómo empezamos</div>
+      <h2 class="titulo-in">Tres pasos, <em>sin enredos.</em></h2>
+    </div>
+    <div class="pasos">
+      <div class="paso"><h3>Hablamos</h3><p>Me escribe por WhatsApp y me cuenta cómo está su empresa.</p></div>
+      <div class="paso"><h3>Le hago la demostración</h3><p>Con sus propias facturas: ve cómo quedan en sus libros y sus impuestos.</p></div>
+      <div class="paso"><h3>Arrancamos</h3><p>Montamos su empresa, traemos lo de su programa anterior y quedamos al día.</p></div>
+    </div>
+  </section>
+
+  <section class="cierre" data-color="5">
+    <div class="etiqueta" style="justify-content:center">Tributando</div>
+    <h2 class="titulo-in">Un contador de verdad. <em>Un software que trabaja solo.</em></h2>
+    <p class="lead">Pida su demostración y le muestro, con sus facturas, cómo quedaría su empresa.</p>
+    <div class="acciones"><a class="boton" href="{{ wa }}">Pida una demostración</a></div>
+  </section>
+</main>
+
+<footer>
+  <span>Edison Monsalve · Contador Público · Tributando · Medellín, Colombia</span>
+  <span><a href="/">tributando.co</a> · <a href="mailto:contacto@tributando.co">contacto@tributando.co</a></span>
+</footer>
+<a class="boton flotante" id="flot" href="{{ wa }}">Pida una demostración</a>
+
+<script>
+(function () {
+  // Aparecer al bajar
+  var io = new IntersectionObserver(function (es) {
+    es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("ver"); io.unobserve(e.target); } });
+  }, { threshold: .18, rootMargin: "0px 0px -8% 0px" });
+  document.querySelectorAll(".item,.extras span,.paso,.titulo-in").forEach(function (el, i) {
+    var hermanos = el.parentElement.children, k = Array.prototype.indexOf.call(hermanos, el);
+    el.style.transitionDelay = (k * 0.09) + "s"; io.observe(el);
+  });
+  var cab = document.getElementById("cab"), barra = document.getElementById("barra"), flot = document.getElementById("flot");
+  var secciones = Array.from(document.querySelectorAll("[data-color]"));
+
+  // Fondo: puntos de luz que siguen el scroll y cambian de color por sección
+  var c = document.getElementById("fondo"), g = c.getContext("2d"), dpr = Math.min(devicePixelRatio || 1, 2);
+  var pal = [[55, 211, 143], [55, 211, 143], [230, 196, 131], [140, 200, 255], [55, 211, 143], [230, 196, 131]];
+  var N = innerWidth < 700 ? 90 : 170, pts = [], col = pal[0].slice(), obj = pal[0], sy = 0, vy = 0, mx = .5, my = .5;
+  function tam() { c.width = innerWidth * dpr; c.height = innerHeight * dpr; }
+  tam(); addEventListener("resize", tam);
+  for (var i = 0; i < N; i++) pts.push({ x: Math.random(), y: Math.random() * 3, z: .2 + Math.random() * .8, f: Math.random() * 6.28 });
+  addEventListener("pointermove", function (e) { mx = e.clientX / innerWidth; my = e.clientY / innerHeight; }, { passive: true });
+  function onScroll() {
+    var y = scrollY, tot = document.documentElement.scrollHeight - innerHeight;
+    barra.style.width = (y / Math.max(1, tot) * 100) + "%";
+    cab.classList.toggle("fijo", y > 40);
+    flot.classList.toggle("on", y > innerHeight * .9 && y < tot - innerHeight * .6);
+    var mitad = y + innerHeight * .5;
+    secciones.forEach(function (s) { if (s.offsetTop <= mitad) obj = pal[+s.dataset.color] || pal[0]; });
+  }
+  addEventListener("scroll", onScroll, { passive: true }); onScroll();
+  (function cuadro(t) {
+    vy += ((scrollY / innerHeight) - vy) * .08;
+    for (var k = 0; k < 3; k++) col[k] += (obj[k] - col[k]) * .04;
+    g.clearRect(0, 0, c.width, c.height);
+    var W = c.width, H = c.height;
+    for (var i = 0; i < pts.length; i++) {
+      var p = pts[i], yy = ((p.y - vy * p.z * .55) % 3 + 3) % 3;
+      var x = (p.x + (mx - .5) * .04 * p.z + Math.sin(t / 3000 + p.f) * .01) * W;
+      var y = (yy / 3 * 1.3 - .15 + (my - .5) * .03 * p.z) * H;
+      var r = (1 + p.z * 2.2) * dpr, a = .25 + p.z * .55 + Math.sin(t / 700 + p.f) * .15;
+      g.beginPath(); g.arc(x, y, r, 0, 6.283);
+      g.fillStyle = "rgba(" + (col[0] | 0) + "," + (col[1] | 0) + "," + (col[2] | 0) + "," + a.toFixed(3) + ")";
+      g.shadowColor = g.fillStyle; g.shadowBlur = 12 * p.z * dpr; g.fill();
+      for (var j = i + 1; j < Math.min(i + 6, pts.length); j++) {
+        var q = pts[j], yq = ((q.y - vy * q.z * .55) % 3 + 3) % 3, x2 = (q.x + (mx - .5) * .04 * q.z) * W, y2 = (yq / 3 * 1.3 - .15) * H;
+        var d = Math.hypot(x - x2, y - y2); if (d < 140 * dpr) { g.shadowBlur = 0; g.strokeStyle = "rgba(" + (col[0] | 0) + "," + (col[1] | 0) + "," + (col[2] | 0) + "," + (0.12 * (1 - d / (140 * dpr))).toFixed(3) + ")"; g.lineWidth = dpr; g.beginPath(); g.moveTo(x, y); g.lineTo(x2, y2); g.stroke(); }
+      }
+    }
+    requestAnimationFrame(cuadro);
+  })(0);
+})();
+</script>
+</body>
+</html>
