@@ -73,12 +73,37 @@ p.lead{margin-top:22px;font-size:clamp(16px,1.5vw,20px);line-height:1.55;color:v
 .burbuja.yo{background:rgba(55,211,143,.16);border:1px solid rgba(55,211,143,.35);align-self:flex-end;border-bottom-right-radius:4px}
 .burbuja.el{background:rgba(255,255,255,.06);border:1px solid var(--linea);border-bottom-left-radius:4px}
 .burbuja b{color:var(--oro)}
+.demo{margin-top:26px;max-width:460px;opacity:0;transform:translateY(18px);transition:opacity 1s .5s,transform 1s .5s}
+.vista .demo{opacity:1;transform:none}
+.soltar{display:block;cursor:pointer;padding:18px 20px;border:1.5px dashed rgba(55,211,143,.5);border-radius:16px;background:rgba(55,211,143,.06);backdrop-filter:blur(8px);transition:background .25s,border-color .25s,transform .25s}
+.soltar:hover,.soltar.encima{background:rgba(55,211,143,.14);border-color:var(--verde);transform:translateY(-2px)}
+.soltar b{display:block;font-size:16px;margin-bottom:4px}
+.soltar span{display:block;color:var(--suave);font-size:14px;line-height:1.45}
+.soltar small{display:block;margin-top:8px;color:var(--tenue);font-size:12px}
+.enlace{margin-top:10px;background:none;border:0;color:var(--oro);font:inherit;font-size:14px;cursor:pointer;padding:4px 0}
+.resultado,.asiento{margin-top:16px;padding:16px 18px;border-radius:16px;background:rgba(10,14,22,.78);border:1px solid var(--linea);backdrop-filter:blur(10px);font-size:14px}
+.resultado h4,.asiento h4{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--oro);font-family:"JetBrains Mono",monospace;margin-bottom:10px;font-weight:600}
+.resultado dl{display:grid;grid-template-columns:auto 1fr;gap:4px 14px}
+.resultado dt{color:var(--tenue)}.resultado dd{text-align:right;font-variant-numeric:tabular-nums;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.resultado dd.grande{font-size:20px;font-weight:800;color:var(--verde)}
+.resultado .error{color:#ff9b8a}
+.lado{display:flex;gap:6px;margin:10px 0 2px}.lado button{flex:1;padding:7px;border-radius:999px;border:1px solid var(--linea);background:transparent;color:var(--suave);font:inherit;font-size:13px;cursor:pointer}
+.lado button.on{background:rgba(55,211,143,.18);border-color:var(--verde);color:var(--txt)}
+.asiento table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.asiento td{padding:6px 0;border-bottom:1px solid var(--linea);vertical-align:top}
+.asiento td.n{text-align:right;white-space:nowrap;padding-left:10px}
+.asiento td small{display:block;color:var(--tenue);font-size:12px}
+.asiento tr.suma td{border:0;font-weight:700;color:var(--verde)}
+.asiento p{margin-top:10px;color:var(--tenue);font-size:12px;line-height:1.4}
+.escena.abajo .fijo{align-items:flex-end;padding-bottom:12vh}
 .pie{position:relative;z-index:10;padding:40px clamp(16px,4vw,48px);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;color:var(--tenue);font-size:13px;border-top:1px solid var(--linea);background:rgba(4,6,11,.75)}
 .pie a{color:var(--suave)}
 html.sin3d #lienzo{display:none}
 html.sin3d body{background:radial-gradient(80% 60% at 70% 30%,rgba(55,211,143,.18),transparent),radial-gradient(60% 50% at 20% 80%,rgba(230,196,131,.12),transparent),var(--bg)}
 @media (max-width:760px){
-  .escena .fijo{align-items:flex-end;padding-bottom:14vh}
+  .escena .fijo{align-items:flex-end;padding-bottom:9vh}
+  .demo .resultado{max-height:34vh;overflow:auto}
+  .asiento{max-height:40vh;overflow:auto}
   .escena.der .fijo{justify-content:flex-start}
   .capitulos{display:none}
   .escena{min-height:170vh}
@@ -92,7 +117,7 @@ html.sin3d body{background:radial-gradient(80% 60% at 70% 30%,rgba(55,211,143,.1
 
 <header>
   <a class="marca" href="/"><img src="/static/img/logo-tributando.png" alt="">Tributando<span>.co</span></a>
-  <a class="boton" href="{{ app_url }}/activar">Empiece gratis</a>
+  <a class="boton" href="https://wa.me/{{ whatsapp }}?text={{ 'Hola, vi la página de Tributando y quiero una demostración.'|urlencode }}">Pida una demostración</a>
 </header>
 <nav class="capitulos" id="capitulos" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></nav>
 <div class="contador" id="contador"><b>01</b> / 06 · <span id="nombreCap">EL MUNDO</span></div>
@@ -112,7 +137,14 @@ html.sin3d body{background:radial-gradient(80% 60% at 70% 30%,rgba(55,211,143,.1
       <div class="etiqueta">01 · Llega</div>
       <h2 class="partir">Una factura <em>entra.</em></h2>
       <p class="lead">Del correo, de la DIAN o de una foto con el celular. Tributando la lee completa: el tercero, cada ítem, el IVA y las retenciones. En segundos.</p>
-      <div class="dato"><div><b data-n="96">0</b><small>caracteres del CUFE que la identifican</small></div><div><b>XML · PDF · foto</b><small>lo que le llegue</small></div></div>
+      <div class="demo" id="demo">
+        <label class="soltar" id="soltar"><input type="file" id="archivo" accept=".xml,.zip,application/xml,text/xml,application/zip" hidden>
+          <b>Pruébelo con una factura suya</b>
+          <span>Suelte aquí el XML o el ZIP que le llegó de la DIAN, o toque para buscarlo.</span>
+          <small>Se lee aquí mismo, en su navegador. No se sube a ningún lado.</small></label>
+        <button type="button" class="enlace" id="ejemplo">o véala con una factura de ejemplo →</button>
+        <div class="resultado" id="resultado" hidden></div>
+      </div>
     </div></div>
   </section>
 
@@ -121,7 +153,8 @@ html.sin3d body{background:radial-gradient(80% 60% at 70% 30%,rgba(55,211,143,.1
       <div class="etiqueta">02 · Se causa</div>
       <h2 class="partir">Y se vuelve <em>libro.</em></h2>
       <p class="lead">Cada factura cae en su cuenta de su plan de cuentas, con el centro de costo, el IVA descontable y la retención que corresponde. Lo que aprendió del proveedor lo repite solo. Usted revisa y aprueba.</p>
-      <div class="dato"><div><b>PUC</b><small>a 8 dígitos, el suyo</small></div><div><b>0</b><small>pesos digitados a mano</small></div></div>
+      <div class="dato" id="datoLibro"><div><b>PUC</b><small>a 8 dígitos, el suyo</small></div><div><b>0</b><small>pesos digitados a mano</small></div></div>
+      <div class="asiento" id="asiento" hidden></div>
     </div></div>
   </section>
 
@@ -146,14 +179,14 @@ html.sin3d body{background:radial-gradient(80% 60% at 70% 30%,rgba(55,211,143,.1
     </div></div>
   </section>
 
-  <section class="escena centro" data-nombre="TRIBUTANDO">
+  <section class="escena centro abajo" data-nombre="TRIBUTANDO">
     <div class="fijo"><div class="texto">
-      <div class="etiqueta">05 · Empiece</div>
+      <div class="etiqueta">05 · Conózcalo</div>
       <h2 class="partir">Una factura entra. <em>Una decisión sale.</em></h2>
-      <p class="lead">Software contable con POS, nómina electrónica y un contador de verdad detrás. Pruébelo con sus propias facturas.</p>
+      <p class="lead">Software contable con POS, nómina electrónica y un contador de verdad detrás. Le hacemos una demostración con sus propias facturas.</p>
       <div class="acciones">
-        <a class="boton" href="{{ app_url }}/activar">Empiece gratis</a>
-        <a class="boton fant" href="https://wa.me/{{ whatsapp }}?text={{ 'Hola, vi la página de Tributando y quiero saber más.'|urlencode }}">Escríbanos por WhatsApp</a>
+        <a class="boton" href="https://wa.me/{{ whatsapp }}?text={{ 'Hola, vi la página de Tributando y quiero una demostración.'|urlencode }}">Pida una demostración</a>
+        <a class="boton fant" href="#demo">Probar otra factura</a>
       </div>
     </div></div>
   </section>
@@ -161,7 +194,7 @@ html.sin3d body{background:radial-gradient(80% 60% at 70% 30%,rgba(55,211,143,.1
 
 <footer class="pie">
   <span>© 2026 Tributando · Medellín, Colombia</span>
-  <span>Cifras y conversación de ejemplo. <a href="/">Volver al inicio</a></span>
+  <span>Cifras y conversación de ejemplo. Su factura se lee en su navegador y no se guarda. <a href="/">Volver al inicio</a></span>
 </footer>
 
 <script>
@@ -206,6 +239,136 @@ catch (e) { document.documentElement.classList.add("sin3d"); }
 </script>
 
 {% raw %}
+<script>
+// ---------- Demostración: el visitante suelta su factura (se lee en el navegador) ----------
+(function () {
+  var soltar = document.getElementById("soltar"), archivo = document.getElementById("archivo");
+  var res = document.getElementById("resultado"), asiento = document.getElementById("asiento");
+  var datoLibro = document.getElementById("datoLibro");
+  var actual = null, lado = "compra";
+  var $ = function (n) { return "$ " + Math.round(n).toLocaleString("es-CO"); };
+  var esc = function (s) { return String(s || "").replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+  function hijo(el, tag) { if (!el) return null; for (var i = 0; i < el.children.length; i++) if (el.children[i].localName === tag) return el.children[i]; return null; }
+  function txt(el, tag) { if (!el) return ""; var n = el.getElementsByTagNameNS("*", tag)[0]; return n ? n.textContent.trim() : ""; }
+  function num(s) { var v = parseFloat(String(s || "").replace(/[^\d.\-]/g, "")); return isFinite(v) ? v : 0; }
+
+  function parsear(xml) {
+    var dp = new DOMParser(), doc = dp.parseFromString(xml, "application/xml");
+    if (doc.getElementsByTagName("parsererror").length) throw new Error("El archivo no es un XML válido.");
+    if (doc.documentElement.localName === "AttachedDocument") {
+      var ds = doc.getElementsByTagNameNS("*", "Description"), hallado = null;
+      for (var i = 0; i < ds.length && !hallado; i++) {
+        var s = ds[i].textContent.trim();
+        if (s.charAt(0) !== "<") continue;
+        var d2 = dp.parseFromString(s, "application/xml");
+        if (!d2.getElementsByTagName("parsererror").length && /Invoice|CreditNote|DebitNote/.test(d2.documentElement.localName)) hallado = d2;
+      }
+      if (hallado) doc = hallado;
+    }
+    var r = doc.documentElement;
+    if (!/Invoice|CreditNote|DebitNote/.test(r.localName)) throw new Error("No encontré una factura electrónica en este archivo.");
+    var parte = function (tag) { var p = r.getElementsByTagNameNS("*", tag)[0]; return { nombre: txt(p, "RegistrationName") || txt(p, "Name"), nit: txt(p, "CompanyID") }; };
+    var lmt = hijo(r, "LegalMonetaryTotal") || hijo(r, "RequestedMonetaryTotal");
+    var iva = 0, inc = 0, otros = 0, rete = 0;
+    for (var k = 0; k < r.children.length; k++) {
+      var c = r.children[k], monto = num(txt(c, "TaxAmount"));
+      if (c.localName === "TaxTotal") { var id = txt(c, "ID"); if (id === "01") iva += monto; else if (id === "04") inc += monto; else otros += monto; }
+      if (c.localName === "WithholdingTaxTotal") rete += monto;
+    }
+    var lineas = r.getElementsByTagNameNS("*", /Credit/.test(r.localName) ? "CreditNoteLine" : /Debit/.test(r.localName) ? "DebitNoteLine" : "InvoiceLine");
+    var primero = lineas.length ? txt(lineas[0], "Description") : "";
+    return {
+      tipo: /Credit/.test(r.localName) ? "Nota crédito" : /Debit/.test(r.localName) ? "Nota débito" : "Factura electrónica",
+      numero: (hijo(r, "ID") || {}).textContent || "", fecha: (hijo(r, "IssueDate") || {}).textContent || "",
+      cufe: ((hijo(r, "UUID") || {}).textContent || "").trim(),
+      emisor: parte("AccountingSupplierParty"), receptor: parte("AccountingCustomerParty"),
+      subtotal: num(txt(lmt, "LineExtensionAmount")), total: num(txt(lmt, "PayableAmount")),
+      iva: iva, inc: inc, otros: otros, rete: rete, items: lineas.length, primero: primero
+    };
+  }
+
+  function pintarResultado(d) {
+    res.hidden = false;
+    res.innerHTML = "<h4>Esto leyó Tributando</h4><dl>" +
+      "<dt>Documento</dt><dd>" + esc(d.tipo) + " " + esc(d.numero) + "</dd>" +
+      "<dt>Fecha</dt><dd>" + esc(d.fecha) + "</dd>" +
+      "<dt>Emisor</dt><dd title='" + esc(d.emisor.nombre) + "'>" + esc(d.emisor.nombre) + "</dd>" +
+      "<dt>NIT</dt><dd>" + esc(d.emisor.nit) + "</dd>" +
+      "<dt>Ítems</dt><dd>" + d.items + (d.primero ? " · " + esc(d.primero.slice(0, 28)) : "") + "</dd>" +
+      "<dt>Subtotal</dt><dd>" + $(d.subtotal) + "</dd>" +
+      (d.iva ? "<dt>IVA</dt><dd>" + $(d.iva) + "</dd>" : "") +
+      (d.inc ? "<dt>Impoconsumo</dt><dd>" + $(d.inc) + "</dd>" : "") +
+      (d.rete ? "<dt>Retenciones</dt><dd>" + $(d.rete) + "</dd>" : "") +
+      "<dt>Total</dt><dd class='grande'>" + $(d.total) + "</dd></dl>" +
+      "<div class='lado'><button type='button' data-l='compra'" + (lado === "compra" ? " class='on'" : "") + ">Yo la compré</button>" +
+      "<button type='button' data-l='venta'" + (lado === "venta" ? " class='on'" : "") + ">Yo la vendí</button></div>";
+    res.querySelectorAll(".lado button").forEach(function (b) {
+      b.onclick = function () { lado = b.dataset.l; pintarResultado(d); pintarAsiento(d); };
+    });
+  }
+
+  function pintarAsiento(d) {
+    var imp = d.iva, filas = [];
+    if (lado === "compra") {
+      filas.push(["Gasto o inventario", "La cuenta que usted usa con " + (d.emisor.nombre || "este proveedor") + (d.inc ? " (el impoconsumo va como más gasto)" : ""), d.total - imp, 0]);
+      if (imp) filas.push(["240810 · IVA descontable", "Para el 300", imp, 0]);
+      if (d.rete) filas.push(["2365 · Retención por pagar", "Para el 350", 0, d.rete]);
+      filas.push(["220505 · Proveedores", d.emisor.nombre, 0, d.total - d.rete]);
+    } else {
+      filas.push(["130505 · Clientes", d.receptor.nombre || "Su cliente", d.total - d.rete, 0]);
+      if (d.rete) filas.push(["1355 · Retención que le hicieron", "Anticipo de su renta", d.rete, 0]);
+      filas.push(["41 · Ingresos", "Según su actividad", d.total - imp - d.inc, 0]);
+      if (imp) filas.push(["240805 · IVA generado", "Para el 300", 0, imp]);
+      if (d.inc) filas.push(["Impuesto al consumo por pagar", "Para el 310", 0, d.inc]);
+    }
+    var deb = 0, cre = 0, h = "<h4>Así queda en su libro</h4><table>";
+    filas.forEach(function (f) { deb += f[2]; cre += f[3];
+      h += "<tr><td>" + esc(f[0]) + "<small>" + esc(f[1]) + "</small></td><td class='n'>" + (f[2] ? $(f[2]) : "") + "</td><td class='n'>" + (f[3] ? $(f[3]) : "") + "</td></tr>"; });
+    if (lado === "venta") { cre += 0; }
+    h += "<tr class='suma'><td>Sumas iguales</td><td class='n'>" + $(deb) + "</td><td class='n'>" + $(cre + (lado === "venta" ? 0 : 0)) + "</td></tr></table>";
+    h += "<p>Cuentas de ejemplo del PUC. En Tributando quedan con su plan de cuentas a 8 dígitos y lo que aprenda de cada proveedor se repite solo.</p>";
+    asiento.innerHTML = h; asiento.hidden = false; datoLibro.hidden = true;
+  }
+
+  function mostrar(d) {
+    actual = d; lado = "compra";
+    pintarResultado(d); pintarAsiento(d);
+    if (window.__rearmarFactura) window.__rearmarFactura(d); else window.__facturaPendiente = d;
+  }
+  function fallo(msg) { res.hidden = false; res.innerHTML = "<p class='error'>" + esc(msg) + "</p>"; }
+
+  function cargarJSZip() {
+    return window.JSZip ? Promise.resolve(window.JSZip) : new Promise(function (ok, mal) {
+      var s = document.createElement("script"); s.src = "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js";
+      s.onload = function () { ok(window.JSZip); }; s.onerror = function () { mal(new Error("No pude abrir el ZIP.")); };
+      document.head.appendChild(s);
+    });
+  }
+  function leer(f) {
+    if (!f) return;
+    if (f.size > 15e6) return fallo("El archivo es muy grande para la demostración.");
+    var esZip = /\.zip$/i.test(f.name) || /zip/.test(f.type);
+    (esZip ? cargarJSZip().then(function (Z) { return Z.loadAsync(f); }).then(function (z) {
+      var xs = Object.keys(z.files).filter(function (n) { return /\.xml$/i.test(n) && !/__MACOSX/.test(n); });
+      if (!xs.length) throw new Error("El ZIP no trae ningún XML.");
+      return z.files[xs[0]].async("string");
+    }).catch(function (e) { throw new Error(/password|encrypt/i.test(String(e)) ? "Ese ZIP tiene clave: descomprímalo y suelte el XML." : (e.message || "No pude abrir el ZIP.")); })
+      : f.text()).then(function (x) { mostrar(parsear(x)); }).catch(function (e) { fallo(e.message || String(e)); });
+  }
+  archivo.addEventListener("change", function () { leer(archivo.files[0]); archivo.value = ""; });
+  ["dragenter", "dragover"].forEach(function (ev) { addEventListener(ev, function (e) { e.preventDefault(); soltar.classList.add("encima"); }); });
+  ["dragleave", "drop"].forEach(function (ev) { addEventListener(ev, function (e) { e.preventDefault(); if (ev === "dragleave" && e.relatedTarget) return; soltar.classList.remove("encima"); }); });
+  addEventListener("drop", function (e) {
+    var f = e.dataTransfer && e.dataTransfer.files[0]; if (!f) return;
+    document.getElementById("demo").scrollIntoView({ behavior: "smooth", block: "center" }); leer(f);
+  });
+  document.getElementById("ejemplo").addEventListener("click", function () {
+    mostrar({ tipo: "Factura electrónica", numero: "FE 2048", fecha: "2026-11-06", cufe: "",
+      emisor: { nombre: "PROVEEDOR DE EJEMPLO S.A.S.", nit: "900000000" }, receptor: { nombre: "SU EMPRESA S.A.S.", nit: "" },
+      subtotal: 3400000, iva: 646000, inc: 0, otros: 0, rete: 0, total: 4046000, items: 6, primero: "Vidrio templado 6 mm" });
+  });
+})();
+</script>
 <script type="module">
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js";
 
@@ -259,18 +422,21 @@ function mundo() {
 }
 
 // 1 · la factura electrónica
-function factura() {
+function factura(d) {
+  const corto = (s, n) => { s = String(s || ""); return s.length > n ? s.slice(0, n - 1) + "…" : s; };
+  const pesos = v => "$ " + Math.round(v).toLocaleString("es-CO");
   const p = muestrearLienzo((g, w, h) => {
     g.lineWidth = 6; g.strokeRect(10, 10, w - 20, h - 20);
-    g.font = "800 46px Plus Jakarta Sans, sans-serif"; g.fillText("FACTURA", 40, 82);
-    g.font = "600 26px Plus Jakarta Sans, sans-serif"; g.fillText("ELECTRÓNICA DE VENTA", 40, 118);
+    g.font = "800 46px Plus Jakarta Sans, sans-serif"; g.fillText(d ? corto(d.emisor.nombre, 13).toUpperCase() : "FACTURA", 40, 82);
+    g.font = "600 26px Plus Jakarta Sans, sans-serif"; g.fillText(d ? corto("NIT " + d.emisor.nit + " · " + d.numero, 22) : "ELECTRÓNICA DE VENTA", 40, 118);
     for (let i = 0; i < 6; i++) for (let j = 0; j < 6; j++) if ((i * 7 + j * 3) % 5 < 3) g.fillRect(w - 150 + i * 18, 34 + j * 18, 15, 15);
     g.fillRect(40, 160, w - 80, 4);
     for (let r = 0; r < 9; r++) { const y = 200 + r * 42; g.fillRect(40, y, 160 + (r * 53) % 150, 10); g.fillRect(w - 190, y, 70 + (r * 31) % 80, 10); }
     g.fillRect(40, 600, w - 80, 4);
-    g.font = "800 40px Plus Jakarta Sans, sans-serif"; g.fillText("TOTAL", 40, 662); g.fillText("$ 4.812.000", w - 300, 662);
+    g.font = "800 40px Plus Jakarta Sans, sans-serif"; g.fillText("TOTAL", 40, 662);
+    g.textAlign = "right"; g.fillText(d ? pesos(d.total) : "$ 4.812.000", w - 40, 662); g.textAlign = "left";
     g.font = "400 15px JetBrains Mono, monospace";
-    g.fillText("CUFE 9f3a1c0e7b52d84a6e10c9b3f27d5e8a...", 40, 715);
+    g.fillText("CUFE " + (d && d.cufe ? d.cufe.slice(0, 32) : "9f3a1c0e7b52d84a6e10c9b3f27d5e8a") + "...", 40, 715);
   }, 460, 740, movil ? 0.0085 : 0.0095, 0.25);
   for (let i = 0; i < N; i++) { const x = p[i * 3]; p[i * 3 + 2] += x * 0.18; }
   return p;
@@ -278,8 +444,8 @@ function factura() {
 
 // 2 · el libro: una ciudad de datos (barras = cuentas)
 function libro() {
-  const o = new Float32Array(N * 3), cols = 14, filas = 9, paso = movil ? .36 : .44;
-  const alturas = []; for (let i = 0; i < cols * filas; i++) alturas.push(.25 + Math.pow(rnd(), 2.2) * (movil ? 3.6 : 4.4));
+  const o = new Float32Array(N * 3), cols = 10, filas = 7, paso = movil ? .42 : .5;
+  const alturas = []; for (let i = 0; i < cols * filas; i++) alturas.push(.3 + Math.pow(rnd(), 1.8) * (movil ? 3.0 : 3.6));
   for (let i = 0; i < N; i++) {
     const b = Math.floor(rnd() * cols * filas), cx = b % cols, cz = Math.floor(b / cols), h = alturas[b];
     const lado = paso * .7; let x = (rnd() - .5) * lado, z = (rnd() - .5) * lado, y = rnd() * h;
@@ -293,10 +459,10 @@ function libro() {
 function voz() {
   const o = new Float32Array(N * 3), lineas = 46;
   for (let i = 0; i < N; i++) {
-    const l = i % lineas, t = rnd(), x = (t - .5) * (movil ? 7 : 10);
-    const env = Math.exp(-Math.pow(x / (movil ? 1.9 : 2.6), 2));
+    const l = i % lineas, t = rnd(), x = (t - .5) * (movil ? 6 : 6.8);
+    const env = Math.exp(-Math.pow(x / (movil ? 1.7 : 1.9), 2));
     const fase = l * .18, y = env * (Math.sin(x * 3.1 + fase) * .9 + Math.sin(x * 7.3 - fase * 2) * .35) * (1.6 - Math.abs(l - lineas / 2) / lineas * 2);
-    o[i * 3] = x; o[i * 3 + 1] = y; o[i * 3 + 2] = (l - lineas / 2) * .07;
+    o[i * 3] = x; o[i * 3 + 1] = y; o[i * 3 + 2] = (l - lineas / 2) * .035;
   }
   return o;
 }
@@ -306,7 +472,7 @@ function declaracion() {
   return muestrearLienzo((g, w, h) => {
     g.font = "800 300px Plus Jakarta Sans, sans-serif"; g.textAlign = "center"; g.fillText("300", w / 2, 290);
     g.lineWidth = 3; for (let r = 0; r < 4; r++) for (let c = 0; c < 6; c++) g.strokeRect(40 + c * 110, 340 + r * 44, 100, 34);
-  }, 740, 530, movil ? 0.0088 : 0.011, 0.6);
+  }, 740, 530, movil ? 0.0078 : 0.0074, 0.6);
 }
 
 // 5 · la marca
@@ -328,12 +494,12 @@ geo.setAttribute("semilla", new THREE.BufferAttribute(semilla, 1));
 
 const mat = new THREE.ShaderMaterial({
   transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
-  uniforms: { uProg: { value: 0 }, uT: { value: 0 }, uRaton: { value: new THREE.Vector3(99, 99, 0) },
+  uniforms: { uDest: { value: 0 }, uProg: { value: 0 }, uT: { value: 0 }, uRaton: { value: new THREE.Vector3(99, 99, 0) },
               uPx: { value: render.getPixelRatio() }, uTam: { value: movil ? 2.3 : 2.0 } },
   vertexShader: `
     attribute vec3 p0; attribute vec3 p1; attribute vec3 p2; attribute vec3 p3; attribute vec3 p4; attribute vec3 p5;
     attribute float semilla;
-    uniform float uProg, uT, uPx, uTam; uniform vec3 uRaton;
+    uniform float uProg, uT, uPx, uTam, uDest; uniform vec3 uRaton;
     varying float vMezcla; varying float vBrillo; varying float vSem;
     vec3 forma(float i){ return i<.5?p0: i<1.5?p1: i<2.5?p2: i<3.5?p3: i<4.5?p4: p5; }
     void main(){
@@ -353,7 +519,7 @@ const mat = new THREE.ShaderMaterial({
       pr.xy += normalize(dif + 1e-4) * empuje * .09 * pr.w;
       gl_Position = pr;
       gl_PointSize = uTam * uPx * (1. + empuje*1.6) * (9. / -mv.z) * (.6 + semilla*.8);
-      vMezcla = (a + k) / 5.; vBrillo = .55 + vuelo*.6 + empuje; vSem = semilla;
+      vMezcla = (a + k) / 5.; vBrillo = .55 + vuelo*.6 + empuje + uDest * max(0., 1. - abs(uProg - 1.)) * 1.4; vSem = semilla;
     }`,
   fragmentShader: `
     varying float vMezcla; varying float vBrillo; varying float vSem;
@@ -367,6 +533,12 @@ const mat = new THREE.ShaderMaterial({
     }`
 });
 const nube = new THREE.Points(geo, mat);
+window.__rearmarFactura = d => {
+  geo.attributes.p1.array.set(factura(d)); geo.attributes.p1.needsUpdate = true;
+  destello = 1;
+};
+let destello = 0;
+if (window.__facturaPendiente) window.__rearmarFactura(window.__facturaPendiente);
 escena.add(nube);
 
 // polvo de fondo
@@ -410,9 +582,9 @@ addEventListener("resize", () => {
 leerScroll();
 
 // Posición de la nube según la escena (deja espacio al texto).
-const desplazX = movil ? [0, 0, 0, 0, 0, 0] : [0, 2.6, -2.6, 2.4, -2.4, 0];
-const desplazY = movil ? [1.4, 1.6, 1.0, 1.6, 1.4, 1.0] : [0, 0, 0, 0, 0, 0];
-const giros = [[.25, 0], [0, -.35], [.62, .55], [.1, -.25], [0, .3], [0, 0]];
+const desplazX = movil ? [0, 0, 0, 0, 0, 0] : [0, 2.8, -2.4, 3.1, -3.1, 0];
+const desplazY = movil ? [1.4, 1.8, 1.4, 2.2, 1.9, 2.4] : [0, 0, .2, 0, 0, 1.7];
+const giros = [[.25, 0], [0, -.35], [.5, .62], [.05, -.18], [0, .28], [0, 0]];
 const reloj = new THREE.Clock();
 const reducido = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -420,7 +592,7 @@ const reducido = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const t = reloj.getElapsedTime();
   prog += (objetivo - prog) * (reducido ? 1 : .06);
   raton.lerp(ratonObj, .12);
-  mat.uniforms.uProg.value = prog; mat.uniforms.uT.value = t; mat.uniforms.uRaton.value.copy(raton);
+  destello *= .97; mat.uniforms.uDest.value = destello; mat.uniforms.uProg.value = prog; mat.uniforms.uT.value = t; mat.uniforms.uRaton.value.copy(raton);
   const a = Math.floor(prog), f = prog - a, b = Math.min(5, a + 1), e = f * f * (3 - 2 * f);
   const gx = giros[a][0] + (giros[b][0] - giros[a][0]) * e, gy = giros[a][1] + (giros[b][1] - giros[a][1]) * e;
   const auto = (prog < .6 ? t * .12 : 0) + (prog > 3.4 && prog < 4.6 ? 0 : 0);
