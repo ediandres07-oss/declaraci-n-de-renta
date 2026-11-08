@@ -92,7 +92,12 @@ p.lead{margin-top:22px;font-size:clamp(16px,1.5vw,20px);line-height:1.55;color:v
 .soltar b{display:block;font-size:16px;margin-bottom:4px}
 .soltar span{display:block;color:var(--suave);font-size:14px;line-height:1.45}
 .soltar small{display:block;margin-top:8px;color:var(--tenue);font-size:12px}
-.enlace{margin-top:10px;background:none;border:0;color:var(--oro);font:inherit;font-size:14px;cursor:pointer;padding:4px 0}
+.ejemplo{margin-top:12px;display:inline-flex;align-items:center;gap:8px;padding:12px 18px;border-radius:999px;border:1px solid var(--oro);
+  background:rgba(230,196,131,.12);color:var(--oro);font:inherit;font-weight:700;font-size:14px;cursor:pointer;animation:latidoOro 2.4s ease-in-out infinite 1.2s}
+.ejemplo:hover{background:rgba(230,196,131,.22)}
+@keyframes latidoOro{0%,100%{box-shadow:0 0 0 0 rgba(230,196,131,0)}50%{box-shadow:0 0 26px 3px rgba(230,196,131,.45)}}
+.resultado{animation:entra .6s cubic-bezier(.2,.7,.2,1)}
+@keyframes entra{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 .resultado,.asiento{margin-top:16px;padding:16px 18px;border-radius:16px;background:rgba(10,14,22,.78);border:1px solid var(--linea);backdrop-filter:blur(10px);font-size:14px}
 .resultado h4,.asiento h4{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--oro);font-family:"JetBrains Mono",monospace;margin-bottom:10px;font-weight:600}
 .resultado dl{display:grid;grid-template-columns:auto 1fr;gap:4px 14px}
@@ -164,7 +169,7 @@ html.sin3d body{background:radial-gradient(80% 60% at 70% 30%,rgba(55,211,143,.1
           <b>Pruébelo con una factura suya</b>
           <span>Suelte aquí el XML o el ZIP que le llegó de la DIAN, o toque para buscarlo.</span>
           <small>Se lee aquí mismo, en su navegador. No se sube a ningún lado.</small></label>
-        <button type="button" class="enlace" id="ejemplo">o véala con una factura de ejemplo →</button>
+        <button type="button" class="ejemplo" id="ejemplo">▶ Ver la demostración con una factura de ejemplo</button>
         <div class="resultado" id="resultado" hidden></div>
       </div>
     </div></div>
@@ -353,9 +358,10 @@ catch (e) { document.documentElement.classList.add("sin3d"); }
   }
 
   function mostrar(d) {
-    actual = d; lado = "compra"; soltar.classList.add("listo");
+    actual = d; lado = "compra"; soltar.classList.add("listo"); document.getElementById("ejemplo").style.animation = "none";
     pintarResultado(d); pintarAsiento(d);
     if (window.__rearmarFactura) window.__rearmarFactura(d); else window.__facturaPendiente = d;
+    setTimeout(function () { res.scrollIntoView({ behavior: "smooth", block: "center" }); }, 80);
   }
   function fallo(msg) { res.hidden = false; res.innerHTML = "<p class='error'>" + esc(msg) + "</p>"; }
 
