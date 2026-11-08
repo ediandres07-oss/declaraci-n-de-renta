@@ -1353,7 +1353,7 @@ def portafolio():
         except Exception:  # noqa: BLE001 — una visita nunca tumba la página
             prosp_mod.db.session.rollback()
     if request.args.get("v") == "2":     # 7-nov-2026: versión simple con scroll (prueba)
-        return render_template("portafolio2.html", whatsapp=wa, empresa=empresa,
+        return render_template("portafolio2.html", whatsapp=wa, empresa=empresa, comerciante=comerciante,
                                wa_texto=quote("Hola Edison, vi su portafolio y quiero una propuesta de contabilidad para mi "
                                               + ("negocio." if comerciante else "empresa.")))
     return render_template("portafolio.html", whatsapp=wa, empresa=empresa, sitio=sitio,
