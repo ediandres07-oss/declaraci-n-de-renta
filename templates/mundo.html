@@ -125,6 +125,7 @@ p.lead{margin-top:22px;font-size:clamp(16px,1.5vw,20px);line-height:1.55;color:v
 .pie .enlaces{width:100%;display:flex;flex-wrap:wrap;gap:10px 22px;padding-bottom:14px;margin-bottom:6px;border-bottom:1px solid var(--linea)}
 .pie .enlaces a{text-decoration:none}.pie .enlaces a:hover{color:var(--verde)}
 .menu{display:flex;align-items:center;gap:16px}
+.menu .corto{display:none}
 .entrar{color:var(--suave);text-decoration:none;font-weight:600;font-size:14px}.entrar:hover{color:var(--txt)}
 html.sin3d #lienzo{display:none}
 html.sin3d body{background:radial-gradient(80% 60% at 70% 30%,rgba(55,211,143,.18),transparent),radial-gradient(60% 50% at 20% 80%,rgba(230,196,131,.12),transparent),var(--bg)}
@@ -132,7 +133,7 @@ html.sin3d body{background:radial-gradient(80% 60% at 70% 30%,rgba(55,211,143,.1
   header{padding:12px 14px}
   .marca{font-size:15px;gap:7px}.marca img{width:24px;height:24px}
   .menu{gap:10px}.menu .boton{padding:9px 13px;font-size:13px;white-space:nowrap}.menu .largo{display:none}
-  .menu .boton:first-letter{text-transform:uppercase}
+  .menu .corto{display:inline}
   .entrar{font-size:13px}
   .escena .fijo{align-items:flex-end;padding-bottom:9vh}
   .demo .resultado{max-height:34vh;overflow:auto}
@@ -152,7 +153,7 @@ html.sin3d body{background:radial-gradient(80% 60% at 70% 30%,rgba(55,211,143,.1
 
 <header>
   <a class="marca" href="/"><img src="/static/img/logo-tributando.png" alt="">Tributando<span>.co</span></a>
-  <div class="menu"><a class="entrar" href="{{ app_url }}/login">Entrar</a><a class="boton" href="https://wa.me/{{ whatsapp }}?text={{ 'Hola, vi la página de Tributando y quiero una demostración.'|urlencode }}"><span class="largo">Pida una </span>demostración</a></div>
+  <div class="menu"><a class="entrar" href="{{ app_url }}/login">Entrar</a><a class="boton" href="https://wa.me/{{ whatsapp }}?text={{ 'Hola, vi la página de Tributando y quiero una demostración.'|urlencode }}"><span class="largo">Pida una demostración</span><span class="corto">Demostración</span></a></div>
 </header>
 <nav class="capitulos" id="capitulos" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></nav>
 <div class="contador" id="contador"><b>01</b> / 06 · <span id="nombreCap">EL MUNDO</span></div>
