@@ -2309,6 +2309,45 @@ def cotizador_obra_activar():
     return jsonify({"ok": True})
 
 
+_OBRA_ULTIMO: dict = {}
+
+
+@app.post("/cotizador-obra/uso")
+def cotizador_obra_uso():
+    """8-nov-2026 (Edison: «darme razón quién utiliza el cotizador, cualquiera»): la app avisa
+    cuando la abren (una vez al día por celular) y cuando entregan una cotización. Le llega a Edison
+    por WhatsApp y correo; máximo un aviso por celular cada 20 minutos."""
+    import threading
+    d = request.get_json(silent=True, force=True) or {}
+    clave = (request.headers.get("X-Forwarded-For", request.remote_addr or "").split(",")[0].strip()
+             + "|" + str(d.get("disp", ""))[:40])
+    ahora = time.time()
+    if ahora - _OBRA_ULTIMO.get(clave, 0) < 20 * 60:
+        return jsonify({"ok": True})
+    _OBRA_ULTIMO[clave] = ahora
+    def _t(k, n=80):
+        return re.sub(r"[<>]", "", str(d.get(k) or ""))[:n]
+    accion = {"abrio": "abrió la app", "whatsapp": "mandó una cotización por WhatsApp",
+              "pdf": "sacó el PDF de una cotización"}.get(_t("accion", 20), "usó la app")
+    texto = (f"📐 Cotizador de Obra: {accion}\n"
+             f"Taller: {_t('taller') or '(sin nombre en ajustes)'} · tel {_t('tel', 30) or '—'}\n"
+             + (f"Cliente: {_t('cliente')} · {_t('items', 10)} ítem(s) · total {_t('total', 20)}\n" if d.get("total") else "")
+             + f"{'Activado ' + _t('lic', 30) if d.get('lic') else 'En prueba (' + _t('usadas', 3) + ' usadas)'}")
+    def _go():
+        try:
+            wa_mod.enviar(IA_CFG, "573207526680", texto)
+        except Exception:  # noqa: BLE001
+            pass
+        try:
+            from src import correo as _correo
+            _correo.enviar_email("ediandres07@gmail.com", "Tributando: uso del Cotizador de Obra",
+                                 "<p>" + texto.replace("\n", "<br>") + "</p>")
+        except Exception:  # noqa: BLE001
+            pass
+    threading.Thread(target=_go, daemon=True).start()
+    return jsonify({"ok": True})
+
+
 @app.get("/cotizador-obra/codigo")
 def cotizador_obra_codigo():
     """Solo el dueño: genera el código de activación número n (uno por cliente que pagó)."""

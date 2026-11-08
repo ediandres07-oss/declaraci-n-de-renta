@@ -446,6 +446,14 @@ async function activar(){
   catch(e){$("actMsg").textContent="Para activar necesita internet una sola vez. Intente de nuevo con señal.";}
 }
 
+/* ---------- aviso de uso a Tributando ---------- */
+function disp(){let d=LS.get("disp",null);if(!d){d=Math.random().toString(36).slice(2,10);LS.set("disp",d);}return d;}
+function avisarUso(accion){try{const R=accion==="abrio"?null:calcular();const l=lic();
+  const b=JSON.stringify({accion,disp:disp(),taller:cfg.taller,tel:cfg.tel,cliente:cot.cli,items:cot.items.length,
+    total:R?pesos(R.total):"",lic:l?l.codigo:"",usadas:usadas()});
+  if(navigator.sendBeacon)navigator.sendBeacon("/cotizador-obra/uso",new Blob([b],{type:"application/json"}));
+  else fetch("/cotizador-obra/uso",{method:"POST",headers:{"Content-Type":"application/json"},body:b,keepalive:true});}catch(e){}}
+
 /* ---------- entregar ---------- */
 function textoCliente(R){
   const t=cfg.taller||"Cotización";let s=`*${t}*\nCotización N.º ${cot.num} · ${cot.fecha}\n${cot.cli?"Cliente: "+cot.cli+"\n":""}\n`;
@@ -456,7 +464,7 @@ function textoCliente(R){
 }
 function enviarWA(){
   if(!cot.items.length){alert("Agregue al menos una ventana.");return;}
-  if(!puedeEntregar())return;contarEntrega();guardar(false);
+  if(!puedeEntregar())return;contarEntrega();guardar(false);avisarUso("whatsapp");
   const R=calcular(),tel=(cot.tel||"").replace(/\D/g,""),num=tel.length===10?"57"+tel:tel;
   window.open(`https://wa.me/${num}?text=${encodeURIComponent(textoCliente(R))}`,"_blank");
 }
@@ -468,7 +476,7 @@ function pedidoVidrio(){
 }
 function imprimir(tipo){
   if(!cot.items.length){alert("Agregue al menos una ventana.");return;}
-  if(tipo==="cliente"){if(!puedeEntregar())return;contarEntrega();guardar(false);}
+  if(tipo==="cliente"){if(!puedeEntregar())return;contarEntrega();guardar(false);avisarUso("pdf");}
   const R=calcular(),c=cfg;
   const cab=`<div class="cab"><div><h1>${esc(c.taller||"Cotización")}</h1>${c.nit?"NIT/C.C. "+esc(c.nit)+"<br>":""}${esc(c.tel)}</div>
     <div style="text-align:right"><b>${tipo==="cliente"?"COTIZACIÓN":"HOJA DE TALLER"} N.º ${cot.num}</b><br>${cot.fecha}<br>${esc(cot.cli)}<br>${esc(cot.tel)}</div></div>`;
@@ -546,6 +554,7 @@ $("gan").value=cot.gan??cfg.gan;$("ant").value=cot.ant??cfg.ant;$("inst").value=
 ["gan","ant","inst","cli","tel"].forEach(id=>$(id).addEventListener("input",pintar));
 document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("sel"));t.classList.add("sel");tabT=t.dataset.t;pintar();});
 pintarDisenos();pintarLic();pintar();
+(function(){const hoy=new Date().toISOString().slice(0,10);if(LS.get("visto","")!==hoy){LS.set("visto",hoy);avisarUso("abrio");}})();
 if("serviceWorker" in navigator)navigator.serviceWorker.register("/cotizador-obra/sw.js",{scope:"/cotizador-obra"}).catch(()=>{});
 </script>
 </body>
