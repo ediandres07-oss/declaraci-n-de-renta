@@ -282,7 +282,7 @@ function dibujarChat(n, escribe, t) {
   g.fillStyle = "#1f2c34"; g.fillRect(0, 0, 540, 150);
   g.fillStyle = "#37d38f"; g.beginPath(); g.arc(70, 100, 30, 0, 7); g.fill();
   g.fillStyle = "#04130b"; g.font = `800 28px ${FF}`; g.textAlign = "center"; g.fillText("J", 70, 110); g.textAlign = "left";
-  g.fillStyle = "#e9edef"; g.font = `700 30px ${FF}`; g.fillText("Jarvis · Tributando", 116, 94);
+  g.fillStyle = "#e9edef"; g.font = `700 30px ${FF}`; g.fillText("Asistente · Tributando", 116, 94);
   g.fillStyle = "#8696a0"; g.font = `500 21px ${FF}`; g.fillText(escribe ? "escribiendo…" : "Contador Auxiliar IA · en línea", 116, 122);
   g.fillStyle = "#e9edef"; g.font = `600 19px ${FF}`; g.fillText("9:41", 40, 40);
   let y = 180;
