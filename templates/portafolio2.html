@@ -54,6 +54,8 @@ h1 em,h2 em{font-style:normal;background:linear-gradient(100deg,var(--verde),#9f
 .item p{color:var(--suave);font-size:15px;line-height:1.5}
 .item .ico{position:absolute;right:20px;top:20px;width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:rgba(55,211,143,.12);color:var(--verde);font-size:18px}
 .bloque.herramientas .item .ico{background:rgba(230,196,131,.12);color:var(--oro)}
+.aviso{margin-top:18px;max-width:1100px;padding:18px 22px;border-radius:18px;border:1px solid rgba(230,196,131,.45);background:linear-gradient(90deg,rgba(230,196,131,.12),rgba(230,196,131,.03));font-size:16px;line-height:1.5;color:var(--suave);opacity:0;transform:translateY(24px);transition:opacity .8s .3s,transform .8s .3s}
+.aviso.ver{opacity:1;transform:none}.aviso b{color:var(--oro)}
 .extras{display:flex;flex-wrap:wrap;gap:10px;max-width:1100px}
 .extras span{padding:12px 18px;border-radius:999px;border:1px solid var(--linea);background:var(--tarjeta);font-size:15px;color:var(--suave);opacity:0;transform:translateY(20px);transition:opacity .7s,transform .7s}
 .extras span.ver{opacity:1;transform:none}
@@ -112,6 +114,7 @@ footer a{color:var(--suave)}
       <div class="item"><span class="ico">☺</span><span class="num">03</span><h3>Nómina y seguridad social</h3><p>Liquidación de nómina, PILA, prestaciones, vacaciones y contratos.</p></div>
       <div class="item"><span class="ico">✓</span><span class="num">04</span><h3>Asesoría</h3><p>Le explico sus números y le ayudo a decidir: cuánto pagar, cuándo y cómo ahorrar en impuestos dentro de la ley.</p></div>
     </div>
+    <div class="aviso"><b>¿Ya tiene otro programa contable?</b> Igual le llevamos la contabilidad: trabajamos en Siigo, World Office, Helisa, Alegra o el que usted use. Si quiere, también le pasamos todo a Tributando.</div>
   </section>
 
   <section class="bloque herramientas" data-color="2">
@@ -151,14 +154,14 @@ footer a{color:var(--suave)}
     <div class="pasos">
       <div class="paso"><h3>Hablamos</h3><p>Me escribe por WhatsApp y me cuenta cómo está su empresa.</p></div>
       <div class="paso"><h3>Le envío su propuesta</h3><p>Con mis honorarios según el tamaño de su empresa, y lo que incluye.</p></div>
-      <div class="paso"><h3>Arrancamos</h3><p>Montamos su empresa, traemos lo de su programa anterior y quedamos al día.</p></div>
+      <div class="paso"><h3>Arrancamos</h3><p>En Tributando o en su programa actual: recibimos la información y dejamos su empresa al día.</p></div>
     </div>
   </section>
 
   <section class="cierre" data-color="5">
     <div class="etiqueta" style="justify-content:center">Tributando</div>
     <h2 class="titulo-in">Su contabilidad, <em>en buenas manos.</em></h2>
-    <p class="lead">Cuénteme de su empresa y le envío la propuesta con mis honorarios. El software va incluido.</p>
+    <p class="lead">Cuénteme de su empresa y le envío la propuesta con mis honorarios. Con Tributando incluido, o en el programa que usted ya tenga.</p>
     <div class="acciones"><a class="boton" href="{{ wa }}">Pida su propuesta</a></div>
   </section>
 </main>
@@ -175,7 +178,7 @@ footer a{color:var(--suave)}
   var io = new IntersectionObserver(function (es) {
     es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("ver"); io.unobserve(e.target); } });
   }, { threshold: .18, rootMargin: "0px 0px -8% 0px" });
-  document.querySelectorAll(".item,.extras span,.paso,.titulo-in").forEach(function (el, i) {
+  document.querySelectorAll(".item,.extras span,.paso,.titulo-in,.aviso").forEach(function (el, i) {
     var hermanos = el.parentElement.children, k = Array.prototype.indexOf.call(hermanos, el);
     el.style.transitionDelay = (k * 0.09) + "s"; io.observe(el);
   });
