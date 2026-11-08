@@ -2237,7 +2237,7 @@ def ventaneria_cine():
 # N cotizaciones gratis; luego código de activación OBRA-NNNN-XXXXXX (HMAC con la secret_key) que
 # Edison genera en /cotizador-obra/codigo tras recibir el pago. Mientras VENTANERIA_PAUSADA, solo
 # el dueño la ve (misma llave de /ventaneria/cine).
-_OBRA_GRATIS = 3
+_OBRA_GRATIS = 2   # 8-nov-2026 Edison: «solamente dos cotizaciones gratis»
 _OBRA_PRECIO_TXT = "$24.900"
 
 
