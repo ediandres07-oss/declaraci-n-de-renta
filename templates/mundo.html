@@ -122,6 +122,10 @@ p.lead{margin-top:22px;font-size:clamp(16px,1.5vw,20px);line-height:1.55;color:v
 .escuchar.sonando{animation:none;background:rgba(55,211,143,.25)}
 .pie{position:relative;z-index:10;padding:40px clamp(16px,4vw,48px);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;color:var(--tenue);font-size:13px;border-top:1px solid var(--linea);background:rgba(4,6,11,.75)}
 .pie a{color:var(--suave)}
+.pie .enlaces{width:100%;display:flex;flex-wrap:wrap;gap:10px 22px;padding-bottom:14px;margin-bottom:6px;border-bottom:1px solid var(--linea)}
+.pie .enlaces a{text-decoration:none}.pie .enlaces a:hover{color:var(--verde)}
+.menu{display:flex;align-items:center;gap:16px}
+.entrar{color:var(--suave);text-decoration:none;font-weight:600;font-size:14px}.entrar:hover{color:var(--txt)}
 html.sin3d #lienzo{display:none}
 html.sin3d body{background:radial-gradient(80% 60% at 70% 30%,rgba(55,211,143,.18),transparent),radial-gradient(60% 50% at 20% 80%,rgba(230,196,131,.12),transparent),var(--bg)}
 @media (max-width:760px){
@@ -143,7 +147,7 @@ html.sin3d body{background:radial-gradient(80% 60% at 70% 30%,rgba(55,211,143,.1
 
 <header>
   <a class="marca" href="/"><img src="/static/img/logo-tributando.png" alt="">Tributando<span>.co</span></a>
-  <a class="boton" href="https://wa.me/{{ whatsapp }}?text={{ 'Hola, vi la página de Tributando y quiero una demostración.'|urlencode }}">Pida una demostración</a>
+  <div class="menu"><a class="entrar" href="{{ app_url }}/login">Entrar</a><a class="boton" href="https://wa.me/{{ whatsapp }}?text={{ 'Hola, vi la página de Tributando y quiero una demostración.'|urlencode }}">Pida una demostración</a></div>
 </header>
 <nav class="capitulos" id="capitulos" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></nav>
 <div class="contador" id="contador"><b>01</b> / 06 · <span id="nombreCap">EL MUNDO</span></div>
@@ -229,6 +233,7 @@ html.sin3d body{background:radial-gradient(80% 60% at 70% 30%,rgba(55,211,143,.1
 </main>
 
 <footer class="pie">
+  <nav class="enlaces"><a href="/contadores/lector">Lector XML DIAN</a><a href="{{ app_url }}/descargador.zip">Descargador</a><a href="/contadores">Para contadores</a><a href="/liquidador">Liquidador de renta</a><a href="/sas">Crear su SAS</a><a href="/aliados">Aliados</a><a href="/privacidad">Privacidad</a><a href="mailto:contacto@tributando.co">contacto@tributando.co</a></nav>
   <span>© 2026 Tributando · Medellín, Colombia</span>
   <span>Cifras y conversación de ejemplo. Su factura se lee en su navegador y no se guarda. <a href="/">Volver al inicio</a></span>
 </footer>

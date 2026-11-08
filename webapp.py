@@ -623,8 +623,9 @@ def salud():
     }), (200 if conectada else 503)
 
 
-@app.get("/")
+@app.get("/inicio-anterior")
 def landing():
+    # 7-nov-2026: la home pasó a ser /mundo (Edison: «la quiero en tributando.co»); esta queda de respaldo.
     # Todo el contenido de la landing es visible sin iniciar sesión; solo las
     # interacciones (subir exógena, checkout) piden login — ver JS abajo y los
     # decoradores @login_requerido en las rutas /api/* correspondientes. El chat
@@ -2175,6 +2176,7 @@ def apps_a_la_medida():
     return render_template("apps_a_la_medida.html")
 
 
+@app.get("/")
 @app.get("/mundo")
 def mundo():
     """Landing de PRUEBA (7-nov-2026, Edison: «algo bien moderno, mundial, que no se haya
