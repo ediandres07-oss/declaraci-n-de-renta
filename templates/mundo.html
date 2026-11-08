@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tributando · Contabilidad que se mueve sola</title>
+<meta name="description" content="Las facturas llegan, se causan solas, usted pregunta por WhatsApp y sus declaraciones salen de sus libros.">
+<meta property="og:title" content="Tributando · Contabilidad que se mueve sola">
+<meta property="og:description" content="Una factura entra. Una decisión sale.">
+<link rel="icon" href="/static/img/logo-tributando.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#04060b;--txt:#eef1f6;--suave:#aab3c2;--tenue:#6f7a8c;--verde:#37d38f;--oro:#e6c483;--linea:rgba(255,255,255,.08)}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--bg)}
+body{background:var(--bg);color:var(--txt);font-family:"Plus Jakarta Sans",system-ui,sans-serif;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+#lienzo{position:fixed;inset:0;width:100vw;height:100vh;display:block;z-index:0}
+.velo{position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(120% 80% at 50% 50%,transparent 40%,rgba(4,6,11,.85) 100%)}
+.grano{position:fixed;inset:-50%;z-index:2;pointer-events:none;opacity:.06;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  animation:grano 1.2s steps(6) infinite}
+@keyframes grano{0%{transform:translate(0,0)}50%{transform:translate(-3%,2%)}100%{transform:translate(2%,-3%)}}
+header{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:18px clamp(16px,4vw,48px)}
+.marca{display:flex;align-items:center;gap:10px;color:var(--txt);text-decoration:none;font-weight:800;letter-spacing:-.02em}
+.marca img{width:28px;height:28px;border-radius:7px}
+.marca span{color:var(--verde)}
+.boton{display:inline-flex;align-items:center;gap:8px;background:var(--verde);color:#04140c;font-weight:700;
+  padding:11px 18px;border-radius:999px;text-decoration:none;font-size:14px;transition:transform .2s,box-shadow .2s}
+.boton:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(55,211,143,.35)}
+.boton.fant{background:transparent;color:var(--txt);border:1px solid rgba(255,255,255,.22)}
+/* indicador lateral */
+.capitulos{position:fixed;right:clamp(12px,2.4vw,32px);top:50%;transform:translateY(-50%);z-index:20;display:flex;flex-direction:column;gap:14px}
+.capitulos i{display:block;width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.25);transition:all .4s}
+.capitulos i.on{background:var(--verde);height:26px;border-radius:4px}
+.contador{position:fixed;left:clamp(16px,4vw,48px);bottom:22px;z-index:20;font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--tenue);letter-spacing:.12em}
+.contador b{color:var(--txt);font-weight:600}
+.barra{position:fixed;left:0;top:0;height:2px;z-index:30;background:linear-gradient(90deg,var(--verde),var(--oro));width:0}
+/* escenas */
+main{position:relative;z-index:10}
+.escena{min-height:200vh;position:relative}
+.escena .fijo{position:sticky;top:0;height:100vh;display:flex;align-items:center;padding:0 clamp(16px,7vw,110px)}
+.texto{max-width:560px}
+.escena.der .fijo{justify-content:flex-end}
+.escena.centro .fijo{justify-content:center;text-align:center}
+.escena.centro .texto{max-width:820px}
+.etiqueta{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.24em;color:var(--oro);text-transform:uppercase;margin-bottom:18px;display:flex;align-items:center;gap:12px}
+.escena.centro .etiqueta{justify-content:center}
+.etiqueta:before{content:"";width:28px;height:1px;background:var(--oro)}
+h1,h2{font-weight:800;letter-spacing:-.045em;line-height:.95}
+h1{font-size:clamp(46px,9vw,132px)}
+h2{font-size:clamp(38px,6.4vw,92px)}
+h1 em,h2 em{font-style:normal;background:linear-gradient(100deg,var(--verde),#9ff0c9 45%,var(--oro));-webkit-background-clip:text;background-clip:text;color:transparent}
+p.lead{margin-top:22px;font-size:clamp(16px,1.5vw,20px);line-height:1.55;color:var(--suave);max-width:520px}
+.escena.centro p.lead{margin-left:auto;margin-right:auto}
+.palabra{display:inline-block;opacity:0;transform:translateY(.5em) rotate(4deg);filter:blur(10px);transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1),filter .9s}
+.vista .palabra{opacity:1;transform:none;filter:none}
+.lead,.dato,.acciones{opacity:0;transform:translateY(18px);transition:opacity 1s .35s,transform 1s .35s}
+.vista .lead,.vista .dato,.vista .acciones{opacity:1;transform:none}
+.dato{margin-top:28px;display:flex;gap:28px;flex-wrap:wrap}
+.dato div{border-left:1px solid var(--linea);padding-left:14px}
+.dato b{display:block;font-size:clamp(26px,3vw,40px);font-weight:800;letter-spacing:-.03em}
+.dato small{color:var(--tenue);font-size:13px}
+.acciones{margin-top:34px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.bajar{position:absolute;bottom:34px;left:50%;transform:translateX(-50%);font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.3em;color:var(--tenue);display:flex;flex-direction:column;align-items:center;gap:10px}
+.bajar:after{content:"";width:1px;height:46px;background:linear-gradient(var(--tenue),transparent);animation:baja 1.8s infinite}
+@keyframes baja{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+/* chat de voz */
+.chat{margin-top:26px;display:flex;flex-direction:column;gap:10px;max-width:420px}
+.burbuja{padding:12px 16px;border-radius:18px;font-size:15px;line-height:1.45;width:fit-content;max-width:100%;backdrop-filter:blur(10px)}
+.burbuja.yo{background:rgba(55,211,143,.16);border:1px solid rgba(55,211,143,.35);align-self:flex-end;border-bottom-right-radius:4px}
+.burbuja.el{background:rgba(255,255,255,.06);border:1px solid var(--linea);border-bottom-left-radius:4px}
+.burbuja b{color:var(--oro)}
+.pie{position:relative;z-index:10;padding:40px clamp(16px,4vw,48px);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;color:var(--tenue);font-size:13px;border-top:1px solid var(--linea);background:rgba(4,6,11,.75)}
+.pie a{color:var(--suave)}
+html.sin3d #lienzo{display:none}
+html.sin3d body{background:radial-gradient(80% 60% at 70% 30%,rgba(55,211,143,.18),transparent),radial-gradient(60% 50% at 20% 80%,rgba(230,196,131,.12),transparent),var(--bg)}
+@media (max-width:760px){
+  .escena .fijo{align-items:flex-end;padding-bottom:14vh}
+  .escena.der .fijo{justify-content:flex-start}
+  .capitulos{display:none}
+  .escena{min-height:170vh}
+}
+@media (prefers-reduced-motion:reduce){.palabra,.lead,.dato,.acciones{transition:none}.grano{animation:none}}
+</style>
+</head>
+<body>
+<canvas id="lienzo" aria-hidden="true"></canvas>
+<div class="velo"></div><div class="grano"></div><div class="barra" id="barra"></div>
+
+<header>
+  <a class="marca" href="/"><img src="/static/img/logo-tributando.png" alt="">Tributando<span>.co</span></a>
+  <a class="boton" href="{{ app_url }}/activar">Empiece gratis</a>
+</header>
+<nav class="capitulos" id="capitulos" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></nav>
+<div class="contador" id="contador"><b>01</b> / 06 · <span id="nombreCap">EL MUNDO</span></div>
+
+<main>
+  <section class="escena centro" data-nombre="EL MUNDO">
+    <div class="fijo"><div class="texto">
+      <div class="etiqueta">Tributando · 2026</div>
+      <h1 class="partir">Contabilidad que se <em>mueve sola.</em></h1>
+      <p class="lead">Cada factura que se emite en Colombia pasa por la DIAN. Nosotros la tomamos ahí y la convertimos en libros, impuestos y decisiones. Baje despacio.</p>
+    </div></div>
+    <div class="bajar">BAJE</div>
+  </section>
+
+  <section class="escena" data-nombre="LA FACTURA">
+    <div class="fijo"><div class="texto">
+      <div class="etiqueta">01 · Llega</div>
+      <h2 class="partir">Una factura <em>entra.</em></h2>
+      <p class="lead">Del correo, de la DIAN o de una foto con el celular. Tributando la lee completa: el tercero, cada ítem, el IVA y las retenciones. En segundos.</p>
+      <div class="dato"><div><b data-n="96">0</b><small>caracteres del CUFE que la identifican</small></div><div><b>XML · PDF · foto</b><small>lo que le llegue</small></div></div>
+    </div></div>
+  </section>
+
+  <section class="escena der" data-nombre="EL LIBRO">
+    <div class="fijo"><div class="texto">
+      <div class="etiqueta">02 · Se causa</div>
+      <h2 class="partir">Y se vuelve <em>libro.</em></h2>
+      <p class="lead">Cada factura cae en su cuenta de su plan de cuentas, con el centro de costo, el IVA descontable y la retención que corresponde. Lo que aprendió del proveedor lo repite solo. Usted revisa y aprueba.</p>
+      <div class="dato"><div><b>PUC</b><small>a 8 dígitos, el suyo</small></div><div><b>0</b><small>pesos digitados a mano</small></div></div>
+    </div></div>
+  </section>
+
+  <section class="escena" data-nombre="LA VOZ">
+    <div class="fijo"><div class="texto">
+      <div class="etiqueta">03 · Pregunte</div>
+      <h2 class="partir">Hable con <em>sus números.</em></h2>
+      <p class="lead">Por WhatsApp o por voz. Jarvis responde con sus libros, no con un manual.</p>
+      <div class="chat">
+        <div class="burbuja yo">¿Cuánto IVA voy a pagar en este bimestre?</div>
+        <div class="burbuja el">Con lo causado hasta hoy, el borrador del 300 da <b>$4.812.000</b>. El descontable más grande es de su proveedor de vidrio.</div>
+      </div>
+    </div></div>
+  </section>
+
+  <section class="escena der" data-nombre="LA DECLARACIÓN">
+    <div class="fijo"><div class="texto">
+      <div class="etiqueta">04 · Declare</div>
+      <h2 class="partir">Las declaraciones <em>ya están hechas.</em></h2>
+      <p class="lead">El 300 de IVA, el 350 de retención, la renta y la exógena salen de lo que ya está causado. No se vuelve a digitar nada: se revisa y se presenta.</p>
+      <div class="dato"><div><b>300</b><small>IVA</small></div><div><b>350</b><small>Retención</small></div><div><b>110 · 210</b><small>Renta</small></div></div>
+    </div></div>
+  </section>
+
+  <section class="escena centro" data-nombre="TRIBUTANDO">
+    <div class="fijo"><div class="texto">
+      <div class="etiqueta">05 · Empiece</div>
+      <h2 class="partir">Una factura entra. <em>Una decisión sale.</em></h2>
+      <p class="lead">Software contable con POS, nómina electrónica y un contador de verdad detrás. Pruébelo con sus propias facturas.</p>
+      <div class="acciones">
+        <a class="boton" href="{{ app_url }}/activar">Empiece gratis</a>
+        <a class="boton fant" href="https://wa.me/{{ whatsapp }}?text={{ 'Hola, vi la página de Tributando y quiero saber más.'|urlencode }}">Escríbanos por WhatsApp</a>
+      </div>
+    </div></div>
+  </section>
+</main>
+
+<footer class="pie">
+  <span>© 2026 Tributando · Medellín, Colombia</span>
+  <span>Cifras y conversación de ejemplo. <a href="/">Volver al inicio</a></span>
+</footer>
+
+<script>
+// Palabras que entran una por una.
+document.querySelectorAll(".partir").forEach(function (h) {
+  var i = 0;
+  (function recorrer(nodo) {
+    Array.from(nodo.childNodes).forEach(function (n) {
+      if (n.nodeType === 3) {
+        var frag = document.createDocumentFragment();
+        n.textContent.split(/(\s+)/).forEach(function (t) {
+          if (!t) return;
+          if (/^\s+$/.test(t)) { frag.appendChild(document.createTextNode(t)); return; }
+          var s = document.createElement("span"); s.className = "palabra"; s.textContent = t;
+          s.style.transitionDelay = (i++ * 0.07) + "s"; frag.appendChild(s);
+        });
+        n.replaceWith(frag);
+      } else if (n.nodeType === 1) {
+        if (n.tagName === "EM") { n.classList.add("palabra"); n.style.transitionDelay = (i++ * 0.07) + "s"; }
+        else recorrer(n);
+      }
+    });
+  })(h);
+});
+var escenas = Array.from(document.querySelectorAll(".escena"));
+var io = new IntersectionObserver(function (es) {
+  es.forEach(function (e) {
+    var f = e.target.querySelector(".fijo");
+    if (e.isIntersecting) {
+      f.classList.add("vista");
+      e.target.querySelectorAll("[data-n]").forEach(function (b) {
+        if (b.dataset.hecho) return; b.dataset.hecho = 1;
+        var fin = +b.dataset.n, t0 = performance.now();
+        (function paso(t) { var k = Math.min(1, (t - t0) / 1400); b.textContent = Math.round(fin * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(paso); })(t0);
+      });
+    }
+  });
+}, { threshold: 0.35 });
+escenas.forEach(function (s) { io.observe(s); });
+try { var c = document.createElement("canvas"); if (!(c.getContext("webgl2") || c.getContext("webgl"))) document.documentElement.classList.add("sin3d"); }
+catch (e) { document.documentElement.classList.add("sin3d"); }
+</script>
+
+{% raw %}
+<script type="module">
+import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js";
+
+const html = document.documentElement;
+if (html.classList.contains("sin3d")) throw new Error("sin webgl");
+const movil = matchMedia("(max-width:760px)").matches;
+const N = movil ? 22000 : 60000;
+const lienzo = document.getElementById("lienzo");
+const render = new THREE.WebGLRenderer({ canvas: lienzo, antialias: false, alpha: false, powerPreference: "high-performance" });
+render.setPixelRatio(Math.min(devicePixelRatio, movil ? 1.5 : 2));
+render.setSize(innerWidth, innerHeight);
+render.setClearColor(0x04060b, 1);
+const escena = new THREE.Scene();
+const camara = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.1, 100);
+camara.position.set(0, 0, movil ? 13 : 10.5);
+
+// ---------- formas (cada una devuelve N puntos x,y,z) ----------
+const rnd = (() => { let s = 7; return () => (s = (s * 16807) % 2147483647) / 2147483647; })();
+
+function muestrearLienzo(dibujar, ancho, alto, escala, prof) {
+  const c = document.createElement("canvas"); c.width = ancho; c.height = alto;
+  const g = c.getContext("2d"); g.fillStyle = "#fff"; g.strokeStyle = "#fff"; dibujar(g, ancho, alto);
+  const d = g.getImageData(0, 0, ancho, alto).data, pts = [];
+  for (let y = 0; y < alto; y += 2) for (let x = 0; x < ancho; x += 2) if (d[(y * ancho + x) * 4 + 3] > 120) pts.push(x, y);
+  const out = new Float32Array(N * 3), n = pts.length / 2;
+  for (let i = 0; i < N; i++) {
+    const k = Math.floor(rnd() * n) * 2;
+    out[i * 3] = (pts[k] - ancho / 2 + (rnd() - .5) * 2) * escala;
+    out[i * 3 + 1] = -(pts[k + 1] - alto / 2 + (rnd() - .5) * 2) * escala;
+    out[i * 3 + 2] = (rnd() - .5) * prof;
+  }
+  return out;
+}
+
+// 0 · el mundo: esfera de puntos con meridianos y un anillo orbital
+function mundo() {
+  const o = new Float32Array(N * 3), R = movil ? 3.1 : 3.4, ga = Math.PI * (3 - Math.sqrt(5));
+  for (let i = 0; i < N; i++) {
+    let x, y, z;
+    if (i < N * 0.82) {
+      const t = i / (N * 0.82), yy = 1 - 2 * t, r = Math.sqrt(1 - yy * yy), th = ga * i;
+      x = Math.cos(th) * r * R; y = yy * R; z = Math.sin(th) * r * R;
+    } else {
+      const a = rnd() * Math.PI * 2, rr = R * (1.55 + rnd() * .12);
+      x = Math.cos(a) * rr; y = (rnd() - .5) * .08; z = Math.sin(a) * rr;
+      const inc = .42; const y2 = y * Math.cos(inc) - z * Math.sin(inc); z = y * Math.sin(inc) + z * Math.cos(inc); y = y2;
+    }
+    o[i * 3] = x; o[i * 3 + 1] = y; o[i * 3 + 2] = z;
+  }
+  return o;
+}
+
+// 1 · la factura electrónica
+function factura() {
+  const p = muestrearLienzo((g, w, h) => {
+    g.lineWidth = 6; g.strokeRect(10, 10, w - 20, h - 20);
+    g.font = "800 46px Plus Jakarta Sans, sans-serif"; g.fillText("FACTURA", 40, 82);
+    g.font = "600 26px Plus Jakarta Sans, sans-serif"; g.fillText("ELECTRÓNICA DE VENTA", 40, 118);
+    for (let i = 0; i < 6; i++) for (let j = 0; j < 6; j++) if ((i * 7 + j * 3) % 5 < 3) g.fillRect(w - 150 + i * 18, 34 + j * 18, 15, 15);
+    g.fillRect(40, 160, w - 80, 4);
+    for (let r = 0; r < 9; r++) { const y = 200 + r * 42; g.fillRect(40, y, 160 + (r * 53) % 150, 10); g.fillRect(w - 190, y, 70 + (r * 31) % 80, 10); }
+    g.fillRect(40, 600, w - 80, 4);
+    g.font = "800 40px Plus Jakarta Sans, sans-serif"; g.fillText("TOTAL", 40, 662); g.fillText("$ 4.812.000", w - 300, 662);
+    g.font = "400 15px JetBrains Mono, monospace";
+    g.fillText("CUFE 9f3a1c0e7b52d84a6e10c9b3f27d5e8a...", 40, 715);
+  }, 460, 740, movil ? 0.0085 : 0.0095, 0.25);
+  for (let i = 0; i < N; i++) { const x = p[i * 3]; p[i * 3 + 2] += x * 0.18; }
+  return p;
+}
+
+// 2 · el libro: una ciudad de datos (barras = cuentas)
+function libro() {
+  const o = new Float32Array(N * 3), cols = 14, filas = 9, paso = movil ? .36 : .44;
+  const alturas = []; for (let i = 0; i < cols * filas; i++) alturas.push(.25 + Math.pow(rnd(), 2.2) * (movil ? 3.6 : 4.4));
+  for (let i = 0; i < N; i++) {
+    const b = Math.floor(rnd() * cols * filas), cx = b % cols, cz = Math.floor(b / cols), h = alturas[b];
+    const lado = paso * .7; let x = (rnd() - .5) * lado, z = (rnd() - .5) * lado, y = rnd() * h;
+    const cara = rnd(); if (cara < .25) x = lado / 2 * Math.sign(x || 1); else if (cara < .5) z = lado / 2 * Math.sign(z || 1); else if (cara < .62) y = h;
+    o[i * 3] = (cx - cols / 2 + .5) * paso + x; o[i * 3 + 1] = y - 1.8; o[i * 3 + 2] = (cz - filas / 2 + .5) * paso + z;
+  }
+  return o;
+}
+
+// 3 · la voz: ondas de sonido concéntricas
+function voz() {
+  const o = new Float32Array(N * 3), lineas = 46;
+  for (let i = 0; i < N; i++) {
+    const l = i % lineas, t = rnd(), x = (t - .5) * (movil ? 7 : 10);
+    const env = Math.exp(-Math.pow(x / (movil ? 1.9 : 2.6), 2));
+    const fase = l * .18, y = env * (Math.sin(x * 3.1 + fase) * .9 + Math.sin(x * 7.3 - fase * 2) * .35) * (1.6 - Math.abs(l - lineas / 2) / lineas * 2);
+    o[i * 3] = x; o[i * 3 + 1] = y; o[i * 3 + 2] = (l - lineas / 2) * .07;
+  }
+  return o;
+}
+
+// 4 · la declaración: «300» monumental con el formulario detrás
+function declaracion() {
+  return muestrearLienzo((g, w, h) => {
+    g.font = "800 300px Plus Jakarta Sans, sans-serif"; g.textAlign = "center"; g.fillText("300", w / 2, 290);
+    g.lineWidth = 3; for (let r = 0; r < 4; r++) for (let c = 0; c < 6; c++) g.strokeRect(40 + c * 110, 340 + r * 44, 100, 34);
+  }, 740, 530, movil ? 0.0088 : 0.011, 0.6);
+}
+
+// 5 · la marca
+function marca() {
+  return muestrearLienzo((g, w, h) => {
+    g.font = "800 150px Plus Jakarta Sans, sans-serif"; g.textAlign = "center"; g.fillText("tributando", w / 2, 175);
+  }, 900, 240, movil ? 0.0068 : 0.0098, 0.5);
+}
+
+await document.fonts.ready;
+const formas = [mundo(), factura(), libro(), voz(), declaracion(), marca()];
+
+// ---------- partículas ----------
+const geo = new THREE.BufferGeometry();
+formas.forEach((f, i) => geo.setAttribute("p" + i, new THREE.BufferAttribute(f, 3)));
+geo.setAttribute("position", new THREE.BufferAttribute(formas[0].slice(), 3));
+const semilla = new Float32Array(N); for (let i = 0; i < N; i++) semilla[i] = rnd();
+geo.setAttribute("semilla", new THREE.BufferAttribute(semilla, 1));
+
+const mat = new THREE.ShaderMaterial({
+  transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+  uniforms: { uProg: { value: 0 }, uT: { value: 0 }, uRaton: { value: new THREE.Vector3(99, 99, 0) },
+              uPx: { value: render.getPixelRatio() }, uTam: { value: movil ? 2.3 : 2.0 } },
+  vertexShader: `
+    attribute vec3 p0; attribute vec3 p1; attribute vec3 p2; attribute vec3 p3; attribute vec3 p4; attribute vec3 p5;
+    attribute float semilla;
+    uniform float uProg, uT, uPx, uTam; uniform vec3 uRaton;
+    varying float vMezcla; varying float vBrillo; varying float vSem;
+    vec3 forma(float i){ return i<.5?p0: i<1.5?p1: i<2.5?p2: i<3.5?p3: i<4.5?p4: p5; }
+    void main(){
+      float a = floor(uProg), f = uProg - a;
+      float d = semilla * .45;
+      float k = clamp((f - d) / .55, 0., 1.);
+      k = k*k*(3.-2.*k);
+      vec3 A = forma(a), B = forma(min(a+1., 5.));
+      vec3 pos = mix(A, B, k);
+      float vuelo = sin(k*3.14159);
+      pos += vec3(sin(semilla*91.+uT*.7), cos(semilla*53.+uT*.6), sin(semilla*17.+uT*.5)) * vuelo * 1.6;
+      pos += vec3(sin(uT*.6+semilla*40.), cos(uT*.5+semilla*30.), 0.) * .018;
+      vec4 mv = modelViewMatrix * vec4(pos,1.);
+      vec4 pr = projectionMatrix * mv;
+      vec2 ndc = pr.xy/pr.w; vec2 dif = ndc - uRaton.xy; float dist = length(dif);
+      float empuje = smoothstep(.28, 0., dist);
+      pr.xy += normalize(dif + 1e-4) * empuje * .09 * pr.w;
+      gl_Position = pr;
+      gl_PointSize = uTam * uPx * (1. + empuje*1.6) * (9. / -mv.z) * (.6 + semilla*.8);
+      vMezcla = (a + k) / 5.; vBrillo = .55 + vuelo*.6 + empuje; vSem = semilla;
+    }`,
+  fragmentShader: `
+    varying float vMezcla; varying float vBrillo; varying float vSem;
+    void main(){
+      vec2 c = gl_PointCoord - .5; float r = length(c); if(r>.5) discard;
+      float suave = pow(1. - r*2., 1.8);
+      vec3 verde = vec3(.216,.827,.561), oro = vec3(.902,.769,.514), blanco = vec3(.93,.95,.98);
+      vec3 col = mix(verde, oro, smoothstep(.15,.95, fract(vSem*3.7 + vMezcla*.6)) * .55);
+      col = mix(col, blanco, step(.93, vSem) * .7);
+      gl_FragColor = vec4(col * vBrillo, suave * .85);
+    }`
+});
+const nube = new THREE.Points(geo, mat);
+escena.add(nube);
+
+// polvo de fondo
+const pg = new THREE.BufferGeometry(), pp = new Float32Array(1500 * 3);
+for (let i = 0; i < 1500; i++) { pp[i*3] = (rnd()-.5)*60; pp[i*3+1] = (rnd()-.5)*40; pp[i*3+2] = -10 - rnd()*30; }
+pg.setAttribute("position", new THREE.BufferAttribute(pp, 3));
+escena.add(new THREE.Points(pg, new THREE.PointsMaterial({ color: 0x5f6b80, size: .06, transparent: true, opacity: .5 })));
+
+// ---------- scroll, ratón y capítulos ----------
+const secciones = Array.from(document.querySelectorAll(".escena"));
+const puntos = Array.from(document.querySelectorAll("#capitulos i"));
+const barra = document.getElementById("barra"), cont = document.getElementById("contador"), nom = document.getElementById("nombreCap");
+let objetivo = 0, prog = 0, rx = 0, ry = 0, mx = 0, my = 0, capActual = -1;
+const raton = new THREE.Vector3(99, 99, 0), ratonObj = new THREE.Vector3(99, 99, 0);
+
+function leerScroll() {
+  const y = scrollY + innerHeight * .5;
+  let p = 0;
+  secciones.forEach((s, i) => { const top = s.offsetTop, h = s.offsetHeight; if (y >= top) p = i + Math.min(1, (y - top) / h); });
+  objetivo = Math.min(5, Math.max(0, p - .5));
+  const total = document.documentElement.scrollHeight - innerHeight;
+  barra.style.width = (scrollY / Math.max(1, total) * 100) + "%";
+  const cap = Math.min(5, Math.round(objetivo));
+  if (cap !== capActual) {
+    capActual = cap;
+    puntos.forEach((d, i) => d.classList.toggle("on", i === cap));
+    cont.firstElementChild.textContent = String(cap + 1).padStart(2, "0");
+    nom.textContent = secciones[cap].dataset.nombre;
+  }
+}
+addEventListener("scroll", leerScroll, { passive: true });
+addEventListener("pointermove", e => {
+  mx = e.clientX / innerWidth - .5; my = e.clientY / innerHeight - .5;
+  ratonObj.set(mx * 2, -my * 2, 0);
+}, { passive: true });
+addEventListener("pointerleave", () => ratonObj.set(99, 99, 0));
+addEventListener("resize", () => {
+  camara.aspect = innerWidth / innerHeight; camara.updateProjectionMatrix();
+  render.setSize(innerWidth, innerHeight); leerScroll();
+});
+leerScroll();
+
+// Posición de la nube según la escena (deja espacio al texto).
+const desplazX = movil ? [0, 0, 0, 0, 0, 0] : [0, 2.6, -2.6, 2.4, -2.4, 0];
+const desplazY = movil ? [1.4, 1.6, 1.0, 1.6, 1.4, 1.0] : [0, 0, 0, 0, 0, 0];
+const giros = [[.25, 0], [0, -.35], [.62, .55], [.1, -.25], [0, .3], [0, 0]];
+const reloj = new THREE.Clock();
+const reducido = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+(function cuadro() {
+  const t = reloj.getElapsedTime();
+  prog += (objetivo - prog) * (reducido ? 1 : .06);
+  raton.lerp(ratonObj, .12);
+  mat.uniforms.uProg.value = prog; mat.uniforms.uT.value = t; mat.uniforms.uRaton.value.copy(raton);
+  const a = Math.floor(prog), f = prog - a, b = Math.min(5, a + 1), e = f * f * (3 - 2 * f);
+  const gx = giros[a][0] + (giros[b][0] - giros[a][0]) * e, gy = giros[a][1] + (giros[b][1] - giros[a][1]) * e;
+  const auto = (prog < .6 ? t * .12 : 0) + (prog > 3.4 && prog < 4.6 ? 0 : 0);
+  rx += ((gx + my * .25) - rx) * .05; ry += ((gy + mx * .4) - ry) * .05;
+  nube.rotation.set(rx, ry + auto * (1 - Math.min(1, prog / .6)), 0);
+  nube.position.x = desplazX[a] + (desplazX[b] - desplazX[a]) * e;
+  nube.position.y = desplazY[a] + (desplazY[b] - desplazY[a]) * e;
+  render.render(escena, camara);
+  requestAnimationFrame(cuadro);
+})();
+</script>
+{% endraw %}
+</body>
+</html>

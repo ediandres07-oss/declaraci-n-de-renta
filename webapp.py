@@ -2175,6 +2175,17 @@ def apps_a_la_medida():
     return render_template("apps_a_la_medida.html")
 
 
+@app.get("/mundo")
+def mundo():
+    """Landing de PRUEBA (7-nov-2026, Edison: «algo bien moderno, mundial, que no se haya
+    visto antes»): una sola nube de 60.000 partículas que se transforma con el scroll
+    (mundo → factura → libro → voz → 300 → marca). NO reemplaza la home."""
+    wa = IA_CFG.get("negocio", {}).get("whatsapp") or "573332470715"
+    return render_template("mundo.html", whatsapp=re.sub(r"\D", "", str(wa)),
+                           app_url=os.environ.get("CONTABILIDAD_URL",
+                                                  "https://contabilidad-tributando.onrender.com").rstrip("/"))
+
+
 @app.get("/cine")
 def cine():
     """Landing cinematográfica de PRUEBA (7-nov-2026): la historia se cuenta con el scroll
