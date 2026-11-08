@@ -292,7 +292,7 @@ fetch("{{ app_url }}/api/publico/contador").then(function (r) { return r.json();
   b.addEventListener("click", function () {
     if (audio && !audio.paused) { audio.pause(); return; }
     if (!audio) {
-      audio = new Audio("/static/mundo/respuesta.mp3");
+      audio = new Audio("/static/mundo/respuesta.mp3?v=aoede");
       try {
         var ctx = new (window.AudioContext || window.webkitAudioContext)();
         var src = ctx.createMediaElementSource(audio); an = ctx.createAnalyser(); an.fftSize = 512;
