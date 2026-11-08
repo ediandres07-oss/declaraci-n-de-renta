@@ -842,7 +842,7 @@ def enviar_propuesta_ventaneria(p: Prospecto, nombre_rl: str = "") -> bool:
 VENT_ORIGEN = "maps-ventaneria"
 # 5-nov-2026 Edison: «bloquea el anuncio del cotizador». Mientras esté en True no sale
 # ningún correo de ventanería a talleres (el cotizador está cerrado, ver bloqueos.py).
-VENTANERIA_PAUSADA = True
+VENTANERIA_PAUSADA = False   # 8-nov-2026 Edison: «abre el cotizador para todos»
 PIE_WEB = "Le escribimos porque el correo de su negocio aparece publicado en su página web."
 
 
