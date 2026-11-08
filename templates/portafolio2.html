@@ -42,7 +42,7 @@ h1 em,h2 em{font-style:normal;background:linear-gradient(100deg,var(--verde),#9f
 .firma i{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,var(--verde),var(--oro));color:#04140c;font-style:normal;font-weight:800}
 .firma b{display:block;color:var(--txt);font-size:15px}
 /* bloques con scroll */
-.bloque{min-height:100vh;padding-top:18vh;padding-bottom:12vh}
+.bloque{padding-top:14vh;padding-bottom:6vh}
 .cabeza{max-width:760px;margin-bottom:46px}
 .lista{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;max-width:1100px}
 .item{position:relative;padding:24px 22px 22px;border-radius:20px;background:var(--tarjeta);border:1px solid var(--linea);backdrop-filter:blur(10px);
@@ -63,7 +63,7 @@ h1 em,h2 em{font-style:normal;background:linear-gradient(100deg,var(--verde),#9f
 .paso.ver{opacity:1;transform:none}
 .paso:before{counter-increment:p;content:"0" counter(p);font-family:"JetBrains Mono",monospace;color:var(--verde);font-size:13px;letter-spacing:.14em}
 .paso h3{margin:10px 0 6px;font-size:19px}.paso p{color:var(--suave);font-size:15px;line-height:1.5}
-.cierre{min-height:80vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
+.cierre{min-height:70vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
 .cierre .lead{margin-left:auto;margin-right:auto}
 .cierre .acciones{justify-content:center}
 .titulo-in{opacity:0;transform:translateY(30px);filter:blur(8px);transition:opacity 1s,transform 1s,filter 1s}
@@ -74,7 +74,7 @@ footer a{color:var(--suave)}
 .flotante.on{opacity:1;transform:none;pointer-events:auto}
 @media (max-width:700px){
   header{padding:12px 14px}.marca{font-size:15px}
-  .bloque{padding-top:12vh}
+  .bloque{padding-top:10vh}
   .item .ico{display:none}
 }
 @media (prefers-reduced-motion:reduce){.item,.extras span,.paso,.titulo-in{opacity:1;transform:none;filter:none;transition:none}}
@@ -129,7 +129,7 @@ footer a{color:var(--suave)}
     </div>
   </section>
 
-  <section class="bloque" data-color="3" style="min-height:70vh">
+  <section class="bloque" data-color="3">
     <div class="cabeza">
       <div class="etiqueta">03 · Además</div>
       <h2 class="titulo-in">Lo que su empresa <em>necesite.</em></h2>
@@ -142,7 +142,7 @@ footer a{color:var(--suave)}
     </div>
   </section>
 
-  <section class="bloque" data-color="4" style="min-height:80vh">
+  <section class="bloque" data-color="4">
     <div class="cabeza">
       <div class="etiqueta">04 · Cómo empezamos</div>
       <h2 class="titulo-in">Tres pasos, <em>sin enredos.</em></h2>
