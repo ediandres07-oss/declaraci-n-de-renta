@@ -81,6 +81,13 @@ p.lead{margin-top:22px;font-size:clamp(16px,1.5vw,20px);line-height:1.55;color:v
 .demo{margin-top:18px;max-width:460px;opacity:0;transform:translateY(18px);transition:opacity 1s .5s,transform 1s .5s}
 .vista .demo{opacity:1;transform:none}
 .soltar{display:block;cursor:pointer;padding:18px 20px;border:1.5px dashed rgba(55,211,143,.5);border-radius:16px;background:rgba(55,211,143,.06);backdrop-filter:blur(8px);transition:background .25s,border-color .25s,transform .25s}
+.soltar{position:relative;animation:latido 2.4s ease-in-out infinite}
+.soltar:before{content:"";position:absolute;inset:-14px;border-radius:26px;z-index:-1;pointer-events:none;
+  background:radial-gradient(60% 70% at 50% 50%,rgba(55,211,143,.55),transparent 70%);filter:blur(14px);animation:halo 2.4s ease-in-out infinite}
+@keyframes latido{0%,100%{border-color:rgba(55,211,143,.45);box-shadow:0 0 0 0 rgba(55,211,143,0)}50%{border-color:#5ff0ac;box-shadow:0 0 28px 4px rgba(55,211,143,.45)}}
+@keyframes halo{0%,100%{opacity:.15;transform:scale(.96)}50%{opacity:.9;transform:scale(1.03)}}
+.soltar.listo,.soltar.listo:before{animation:none}.soltar.listo:before{opacity:0}
+@media (prefers-reduced-motion:reduce){.soltar,.soltar:before{animation:none}}
 .soltar:hover,.soltar.encima{background:rgba(55,211,143,.14);border-color:var(--verde);transform:translateY(-2px)}
 .soltar b{display:block;font-size:16px;margin-bottom:4px}
 .soltar span{display:block;color:var(--suave);font-size:14px;line-height:1.45}
@@ -346,7 +353,7 @@ catch (e) { document.documentElement.classList.add("sin3d"); }
   }
 
   function mostrar(d) {
-    actual = d; lado = "compra";
+    actual = d; lado = "compra"; soltar.classList.add("listo");
     pintarResultado(d); pintarAsiento(d);
     if (window.__rearmarFactura) window.__rearmarFactura(d); else window.__facturaPendiente = d;
   }
