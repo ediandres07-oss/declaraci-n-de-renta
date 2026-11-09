@@ -104,6 +104,9 @@ p.lead{margin-top:22px;font-size:clamp(16px,1.5vw,20px);line-height:1.55;color:v
 .resultado dt{color:var(--tenue)}.resultado dd{text-align:right;font-variant-numeric:tabular-nums;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .resultado dd.grande{font-size:20px;font-weight:800;color:var(--verde)}
 .resultado .error{color:#ff9b8a}
+@media (min-width:761px){.probada .fuentes,.probada p.lead{display:none}}
+.resultado .leyendo{color:var(--verde);animation:pulso 1.2s ease-in-out infinite}
+@keyframes pulso{50%{opacity:.45}}
 .lado{display:flex;gap:6px;margin:10px 0 2px}.lado button{flex:1;padding:7px;border-radius:999px;border:1px solid var(--linea);background:transparent;color:var(--suave);font:inherit;font-size:13px;cursor:pointer}
 .lado button.on{background:rgba(55,211,143,.18);border-color:var(--verde);color:var(--txt)}
 .asiento table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
@@ -127,6 +130,35 @@ p.lead{margin-top:22px;font-size:clamp(16px,1.5vw,20px);line-height:1.55;color:v
 .menu{display:flex;align-items:center;gap:16px}
 .menu .corto{display:none}
 .entrar{color:var(--suave);text-decoration:none;font-weight:600;font-size:14px}.entrar:hover{color:var(--txt)}
+/* la factura real que aparece donde estaba la de puntos (al final de la demo) */
+.freal{position:fixed;z-index:5;left:0;top:0;width:300px;height:480px;opacity:0;pointer-events:none;transform:perspective(1600px) rotateY(-9deg) scale(.94);transform-origin:50% 50%;transition:opacity .6s,transform 1s cubic-bezier(.2,.7,.2,1)}
+.freal.ver{opacity:1;pointer-events:auto;transform:perspective(1600px) rotateY(-9deg) scale(1)}
+.freal .hoja{position:relative;height:100%;background:#fbfaf6;color:#1b2430;border-radius:.45em;padding:1.3em 1.4em;box-shadow:0 30px 80px rgba(0,0,0,.65),0 0 0 1px rgba(55,211,143,.45),0 0 70px rgba(55,211,143,.28);overflow:hidden;clip-path:inset(0 0 100% 0 round .45em);transition:clip-path 1.4s cubic-bezier(.3,.6,.2,1) .15s;display:flex;flex-direction:column;font-family:"Plus Jakarta Sans",sans-serif}
+.freal.ver .hoja{clip-path:inset(0 0 0 0 round .45em)}
+.freal:after{content:"";position:absolute;left:-4%;right:-4%;top:0;height:.18em;background:linear-gradient(90deg,transparent,#37d38f 30%,#e6c483 70%,transparent);box-shadow:0 0 18px #37d38f;opacity:0;pointer-events:none}
+.freal.ver:after{animation:fbarre 1.4s cubic-bezier(.3,.6,.2,1) .15s}
+@keyframes fbarre{0%{top:0;opacity:1}90%{opacity:1}100%{top:100%;opacity:0}}
+.freal .fcab{display:flex;justify-content:space-between;gap:.8em;align-items:flex-start;border-bottom:.12em solid #1b2430;padding-bottom:.6em}
+.freal .fem{font-weight:800;font-size:1.05em;line-height:1.15;letter-spacing:-.01em}
+.freal .fem small{display:block;font-weight:500;font-size:.68em;color:#5b6676;margin-top:.25em;letter-spacing:0}
+.freal canvas.fqr{width:4.6em;height:4.6em;flex:none;image-rendering:pixelated}
+.freal .ftit{margin:.7em 0 .5em;font-size:.62em;letter-spacing:.14em;text-transform:uppercase;color:#5b6676;font-weight:700}
+.freal .ftit b{display:block;font-size:1.75em;letter-spacing:-.01em;text-transform:none;color:#1b2430;margin-top:.1em}
+.freal .fmeta{display:grid;grid-template-columns:auto 1fr;gap:.15em .8em;font-size:.66em;margin-bottom:.7em}
+.freal .fmeta dt{color:#5b6676}.freal .fmeta dd{text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.freal table{width:100%;border-collapse:collapse;font-size:.62em}
+.freal th{text-align:left;font-weight:700;color:#5b6676;border-bottom:1px solid #d9d4c6;padding:.3em 0;text-transform:uppercase;letter-spacing:.06em;font-size:.85em}
+.freal td{padding:.32em 0;border-bottom:1px dashed #e4dfd2;vertical-align:top}
+.freal td.n,.freal th.n{text-align:right;white-space:nowrap;padding-left:.6em;font-variant-numeric:tabular-nums}
+.freal td.d{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:1px;width:100%}
+.freal .fmas{font-size:.6em;color:#5b6676;margin-top:.3em}
+.freal .ftot{margin-top:auto;display:grid;grid-template-columns:1fr auto;gap:.15em .8em;font-size:.7em;border-top:.12em solid #1b2430;padding-top:.5em;font-variant-numeric:tabular-nums}
+.freal .ftot dd{text-align:right}
+.freal .ftot .g{font-size:1.45em;font-weight:800;color:#0f7a4c}
+.freal .fcufe{font-family:"JetBrains Mono",monospace;font-size:.5em;color:#5b6676;margin-top:.6em;word-break:break-all;line-height:1.35}
+.freal .fsello{position:absolute;right:1.4em;top:7.4em;transform:rotate(-12deg);border:.14em solid #37d38f;color:#0f7a4c;border-radius:.3em;padding:.15em .5em;font-size:.62em;font-weight:800;letter-spacing:.12em;text-transform:uppercase;opacity:0;transition:opacity .4s 1.5s,transform .4s 1.5s}
+.freal.ver .fsello{opacity:.9;transform:rotate(-12deg) scale(1)}
+.freal .fcerrar{position:absolute;top:-.9em;right:-.9em;width:2em;height:2em;border-radius:50%;border:1px solid var(--linea);background:#0b0f17;color:#cfd6e2;font-size:.9em;cursor:pointer;z-index:2}
 html.sin3d #lienzo{display:none}
 html.sin3d body{background:radial-gradient(80% 60% at 70% 30%,rgba(55,211,143,.18),transparent),radial-gradient(60% 50% at 20% 80%,rgba(230,196,131,.12),transparent),var(--bg)}
 @media (max-width:760px){
@@ -183,15 +215,20 @@ html.sin3d body{background:radial-gradient(80% 60% at 70% 30%,rgba(55,211,143,.1
         <li><b>Su programa anterior</b>traemos lo de Siigo comprobante por comprobante</li>
       </ul>
       <div class="demo" id="demo">
-        <label class="soltar" id="soltar"><input type="file" id="archivo" accept=".xml,.zip,application/xml,text/xml,application/zip" hidden>
+        <label class="soltar" id="soltar"><input type="file" id="archivo" accept=".xml,.zip,.pdf,image/*,application/xml,text/xml,application/zip,application/pdf" hidden>
           <b>Pruébelo con una factura suya</b>
-          <span>Suelte aquí el XML o el ZIP que le llegó de la DIAN, o toque para buscarlo.</span>
-          <small>Se lee aquí mismo, en su navegador. No se sube a ningún lado.</small></label>
+          <span>Suelte aquí el XML o el ZIP de la DIAN, el PDF o una foto de la factura, o toque para buscarla.</span>
+          <small>El XML se lee en su navegador. La foto o el PDF los lee nuestra IA y no se guardan.</small></label>
         <button type="button" class="ejemplo" id="ejemplo">▶ Ver la demostración con una factura de ejemplo</button>
         <div class="resultado" id="resultado" hidden></div>
       </div>
     </div></div>
   </section>
+
+  <div class="freal" id="facturaReal" aria-hidden="true">
+    <button type="button" class="fcerrar" id="fCerrar" aria-label="Cerrar la factura">×</button>
+    <div class="hoja" id="fHoja"></div>
+  </div>
 
   <section class="escena der" data-nombre="EL LIBRO">
     <div class="fijo"><div class="texto">
@@ -241,7 +278,7 @@ html.sin3d body{background:radial-gradient(80% 60% at 70% 30%,rgba(55,211,143,.1
 <footer class="pie">
   <nav class="enlaces"><a href="/contadores/lector">Lector XML DIAN</a><a href="{{ app_url }}/descargador.zip">Descargador</a><a href="/contadores">Para contadores</a><a href="/liquidador">Liquidador de renta</a><a href="/sas">Crear su SAS</a><a href="/aliados">Aliados</a><a href="/privacidad">Privacidad</a><a href="mailto:contacto@tributando.co">contacto@tributando.co</a></nav>
   <span>© 2026 Tributando · Medellín, Colombia</span>
-  <span>Cifras y conversación de ejemplo. Su factura se lee en su navegador y no se guarda. <a href="/">Volver al inicio</a></span>
+  <span>Cifras y conversación de ejemplo. Su factura no se guarda en ningún lado. <a href="/">Volver al inicio</a></span>
 </footer>
 
 <script>
@@ -287,6 +324,7 @@ catch (e) { document.documentElement.classList.add("sin3d"); }
 
 <script>
 // Contador en vivo (solo totales, desde la app).
+window.__APP = "{{ app_url }}";
 fetch("{{ app_url }}/api/publico/contador").then(function (r) { return r.json(); }).then(function (d) {
   if (!d || !d.ok || !(d.mes > 0)) return;
   var anim = function (el, fin) { var t0 = performance.now(); (function paso(t) { var k = Math.min(1, (t - t0) / 1600); el.textContent = Math.round(fin * (1 - Math.pow(1 - k, 3))).toLocaleString("es-CO"); if (k < 1) requestAnimationFrame(paso); })(t0); };
@@ -364,19 +402,22 @@ fetch("{{ app_url }}/api/publico/contador").then(function (r) { return r.json();
     }
     var lineas = r.getElementsByTagNameNS("*", /Credit/.test(r.localName) ? "CreditNoteLine" : /Debit/.test(r.localName) ? "DebitNoteLine" : "InvoiceLine");
     var primero = lineas.length ? txt(lineas[0], "Description") : "";
+    var cant = /Credit/.test(r.localName) ? "CreditedQuantity" : /Debit/.test(r.localName) ? "DebitedQuantity" : "InvoicedQuantity";
+    var detalle = [];
+    for (var q = 0; q < lineas.length && q < 7; q++) detalle.push({ d: txt(lineas[q], "Description"), c: num(txt(lineas[q], cant)), v: num(txt(lineas[q], "LineExtensionAmount")) });
     return {
       tipo: /Credit/.test(r.localName) ? "Nota crédito" : /Debit/.test(r.localName) ? "Nota débito" : "Factura electrónica",
       numero: (hijo(r, "ID") || {}).textContent || "", fecha: (hijo(r, "IssueDate") || {}).textContent || "",
       cufe: ((hijo(r, "UUID") || {}).textContent || "").trim(),
       emisor: parte("AccountingSupplierParty"), receptor: parte("AccountingCustomerParty"),
       subtotal: num(txt(lmt, "LineExtensionAmount")), total: num(txt(lmt, "PayableAmount")),
-      iva: iva, inc: inc, otros: otros, rete: rete, items: lineas.length, primero: primero
+      iva: iva, inc: inc, otros: otros, rete: rete, items: lineas.length, primero: primero, detalle: detalle
     };
   }
 
   function pintarResultado(d) {
     res.hidden = false;
-    res.innerHTML = "<h4>Esto leyó Tributando</h4><dl>" +
+    res.innerHTML = "<h4>" + (d.ia ? "Esto leyó la IA de Tributando" : "Esto leyó Tributando") + "</h4><dl>" +
       "<dt>Documento</dt><dd>" + esc(d.tipo) + " " + esc(d.numero) + "</dd>" +
       "<dt>Fecha</dt><dd>" + esc(d.fecha) + "</dd>" +
       "<dt>Emisor</dt><dd title='" + esc(d.emisor.nombre) + "'>" + esc(d.emisor.nombre) + "</dd>" +
@@ -421,8 +462,86 @@ fetch("{{ app_url }}/api/publico/contador").then(function (r) { return r.json();
     actual = d; lado = "compra"; soltar.classList.add("listo"); document.getElementById("ejemplo").style.animation = "none";
     pintarResultado(d); pintarAsiento(d);
     if (window.__rearmarFactura) window.__rearmarFactura(d); else window.__facturaPendiente = d;
-    setTimeout(function () { res.scrollIntoView({ behavior: "smooth", block: "center" }); }, 80);
+    revelarFacturaReal(d);
+    // ya probó: se quitan las casillas de fuentes para que el resultado quepa sin salir de la escena
+    var esc2 = document.getElementById("demo").closest(".escena"); if (esc2) esc2.classList.add("probada");
+    setTimeout(function () {
+      var r = res.getBoundingClientRect();
+      if (innerWidth < 760 || r.top < 0 || r.bottom > innerHeight) res.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 80);
   }
+  // ---- la factura real: aparece encima de la de puntos cuando ya se armó ----
+  var fReal = document.getElementById("facturaReal"), fHoja = document.getElementById("fHoja"), fTimer = 0;
+  function cargarQR() {
+    return window.qrcode ? Promise.resolve(window.qrcode) : new Promise(function (ok, mal) {
+      var s = document.createElement("script"); s.src = "https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js";
+      s.onload = function () { ok(window.qrcode); }; s.onerror = mal; document.head.appendChild(s);
+    });
+  }
+  function pintarQR(cv, texto) {
+    cargarQR().then(function (Q) {
+      var q = Q(0, "M"); q.addData(texto); q.make();
+      var n = q.getModuleCount(), m = 2, g = cv.getContext("2d"); cv.width = cv.height = n + m * 2;
+      g.fillStyle = "#fbfaf6"; g.fillRect(0, 0, cv.width, cv.height); g.fillStyle = "#1b2430";
+      for (var y = 0; y < n; y++) for (var x = 0; x < n; x++) if (q.isDark(y, x)) g.fillRect(x + m, y + m, 1, 1);
+    }).catch(function () { cv.style.display = "none"; });
+  }
+  function pintarFacturaReal(d) {
+    var det = (d.detalle && d.detalle.length) ? d.detalle : [{ d: d.primero || "Según la factura", c: 1, v: d.subtotal }];
+    var filas = det.map(function (x) {
+      return "<tr><td class='d' title='" + esc(x.d) + "'>" + esc(x.d || "—") + "</td><td class='n'>" + (x.c ? (+x.c).toLocaleString("es-CO") : "") + "</td><td class='n'>" + $(x.v) + "</td></tr>";
+    }).join("");
+    var mas = d.items > det.length ? "<p class='fmas'>+ " + (d.items - det.length) + " ítem(s) más</p>" : "";
+    fHoja.innerHTML =
+      "<div class='fcab'><div class='fem'>" + esc(d.emisor.nombre || "Emisor") + "<small>NIT " + esc(d.emisor.nit || "—") + "</small></div><canvas class='fqr'></canvas></div>" +
+      "<div class='ftit'>" + esc(d.tipo === "Factura electrónica" ? "Factura electrónica de venta" : d.tipo) + "<b>No. " + esc(d.numero) + "</b></div>" +
+      "<dl class='fmeta'><dt>Fecha</dt><dd>" + esc(d.fecha) + "</dd><dt>Cliente</dt><dd title='" + esc(d.receptor.nombre) + "'>" + esc(d.receptor.nombre || "—") + "</dd>" +
+      (d.receptor.nit ? "<dt>NIT</dt><dd>" + esc(d.receptor.nit) + "</dd>" : "") + "</dl>" +
+      "<table><tr><th>Descripción</th><th class='n'>Cant.</th><th class='n'>Valor</th></tr>" + filas + "</table>" + mas +
+      "<dl class='ftot'><dt>Subtotal</dt><dd>" + $(d.subtotal) + "</dd>" +
+      (d.iva ? "<dt>IVA</dt><dd>" + $(d.iva) + "</dd>" : "") +
+      (d.inc ? "<dt>Impoconsumo</dt><dd>" + $(d.inc) + "</dd>" : "") +
+      (d.rete ? "<dt>Retenciones</dt><dd>− " + $(d.rete) + "</dd>" : "") +
+      "<dt class='g'>Total</dt><dd class='g'>" + $(d.total) + "</dd></dl>" +
+      "<p class='fcufe'>CUFE " + esc(d.cufe || "de ejemplo: la suya trae el código único de la DIAN") + "</p>" +
+      "<span class='fsello'>Leída ✓</span>";
+    pintarQR(fHoja.querySelector(".fqr"), d.cufe ? "https://catalogo-vpfe.dian.gov.co/document/searchqr?documentkey=" + d.cufe : "https://tributando.co");
+  }
+  function ubicarFacturaReal() {
+    var r = window.__rectFactura && window.__rectFactura();
+    if (!r) return false;
+    var cel = innerWidth < 760, arriba = cel ? 70 : 12;
+    var w = Math.min(r.w, innerWidth - 24, cel ? innerWidth * .6 : 1e9), h = Math.min(r.h, innerHeight - arriba - 12, cel ? innerHeight * .5 : 1e9);
+    if (w / h > 460 / 740) w = h * 460 / 740; else h = w * 740 / 460;
+    fReal.style.width = w + "px"; fReal.style.height = h + "px";
+    fReal.style.left = Math.max(12, Math.min(innerWidth - w - 12, r.x - w / 2)) + "px";
+    fReal.style.top = Math.max(arriba, Math.min(innerHeight - h - 12, r.y - h / 2)) + "px";
+    yVista = scrollY; tVista = performance.now();
+    fReal.style.fontSize = (w / 300 * 15) + "px";
+    return true;
+  }
+  window.__ocultarFacturaReal = function () { clearTimeout(fTimer); fReal.classList.remove("ver"); fReal.setAttribute("aria-hidden", "true"); };
+  window.__volverFacturaReal = function () { if (fReal.dataset.lista === "1" && ubicarFacturaReal()) { fReal.classList.add("ver"); fReal.setAttribute("aria-hidden", "false"); } };
+  document.getElementById("fCerrar").onclick = function (ev) { ev.stopPropagation(); fReal.dataset.lista = "0"; window.__ocultarFacturaReal(); };
+  // en el celular tapa el resultado: se cierra con un toque y se esconde al bajar a leer
+  var yVista = 0, tVista = 0;
+  fReal.addEventListener("click", function () { if (innerWidth < 760) window.__ocultarFacturaReal(); });
+  addEventListener("scroll", function () {
+    if (!(innerWidth < 760 && fReal.classList.contains("ver"))) return;
+    if (performance.now() - tVista < 1500) { yVista = scrollY; return; }   // el desplazamiento suave de la demo
+    if (Math.abs(scrollY - yVista) > 140) window.__ocultarFacturaReal();
+  }, { passive: true });
+  addEventListener("resize", function () { if (fReal.classList.contains("ver")) ubicarFacturaReal(); });
+  function revelarFacturaReal(d) {
+    window.__ocultarFacturaReal(); fReal.dataset.lista = "0";
+    pintarFacturaReal(d);
+    // primero los puntos se reacomodan con los datos; al final aparece la factura de verdad
+    fTimer = setTimeout(function () {
+      fReal.dataset.lista = "1";
+      if (window.__capActual === 1 && ubicarFacturaReal()) { void fReal.offsetWidth; fReal.classList.add("ver"); fReal.setAttribute("aria-hidden", "false"); }
+    }, 1900);
+  }
+
   function fallo(msg) { res.hidden = false; res.innerHTML = "<p class='error'>" + esc(msg) + "</p>"; }
 
   function cargarJSZip() {
@@ -432,8 +551,37 @@ fetch("{{ app_url }}/api/publico/contador").then(function (r) { return r.json();
       document.head.appendChild(s);
     });
   }
+  // Foto o PDF: los lee la IA en el servidor de la app (no se guardan). La foto se achica
+  // antes de subirla para que vaya rápido desde el celular.
+  function achicar(f) {
+    if (!/^image\//.test(f.type) || /gif|svg/.test(f.type)) return Promise.resolve(f);
+    return new Promise(function (ok) {
+      var u = URL.createObjectURL(f), im = new Image();
+      im.onload = function () {
+        var k = Math.min(1, 2000 / Math.max(im.width, im.height)), c = document.createElement("canvas");
+        c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+        c.getContext("2d").drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(u);
+        c.toBlob(function (b) { ok(b || f); }, "image/jpeg", .88);
+      };
+      im.onerror = function () { URL.revokeObjectURL(u); ok(f); };
+      im.src = u;
+    });
+  }
+  function leerConIA(f) {
+    if (f.size > 25e6) return fallo("El archivo es muy grande para la demostración.");
+    res.hidden = false; res.innerHTML = "<p class='leyendo'>Leyendo su factura con IA…</p>";
+    achicar(f).then(function (b) {
+      if (b.size > 8e6) throw new Error("El archivo pasa de 8 MB.");
+      var fd = new FormData(); fd.append("f", b, /pdf/.test(f.type) || /\.pdf$/i.test(f.name) ? "factura.pdf" : "factura.jpg");
+      return fetch(window.__APP + "/api/publico/leer-factura", { method: "POST", body: fd });
+    }).then(function (r) { return r.json(); }).then(function (j) {
+      if (!j.ok) throw new Error(j.error || "No pude leer ese documento.");
+      mostrar(j.factura);
+    }).catch(function (e) { fallo(e.message === "Failed to fetch" ? "No hubo conexión. Intente otra vez." : (e.message || String(e))); });
+  }
   function leer(f) {
     if (!f) return;
+    if (/^image\//.test(f.type) || /\.(pdf|jpe?g|png|heic|webp)$/i.test(f.name) || f.type === "application/pdf") return leerConIA(f);
     if (f.size > 15e6) return fallo("El archivo es muy grande para la demostración.");
     var esZip = /\.zip$/i.test(f.name) || /zip/.test(f.type);
     (esZip ? cargarJSZip().then(function (Z) { return Z.loadAsync(f); }).then(function (z) {
@@ -453,7 +601,10 @@ fetch("{{ app_url }}/api/publico/contador").then(function (r) { return r.json();
   document.getElementById("ejemplo").addEventListener("click", function () {
     mostrar({ tipo: "Factura electrónica", numero: "FE 2048", fecha: "2026-11-06", cufe: "",
       emisor: { nombre: "PROVEEDOR DE EJEMPLO S.A.S.", nit: "900000000" }, receptor: { nombre: "SU EMPRESA S.A.S.", nit: "" },
-      subtotal: 3400000, iva: 646000, inc: 0, otros: 0, rete: 0, total: 4046000, items: 6, primero: "Vidrio templado 6 mm" });
+      subtotal: 3400000, iva: 646000, inc: 0, otros: 0, rete: 0, total: 4046000, items: 6, primero: "Vidrio templado 6 mm",
+      detalle: [{ d: "Vidrio templado 6 mm incoloro (m²)", c: 8, v: 1120000 }, { d: "Perfil sistema corredizo natural", c: 14, v: 980000 },
+        { d: "Tornillería y anclajes (kit)", c: 1, v: 600000 }, { d: "Silicona estructural", c: 12, v: 300000 },
+        { d: "Rodachinas para hoja móvil", c: 16, v: 240000 }, { d: "Felpa y empaque (m)", c: 40, v: 160000 }] });
   });
 })();
 </script>
@@ -643,6 +794,19 @@ window.__rearmarFactura = d => {
   destello = 1;
 };
 let destello = 0;
+// Dónde queda en pantalla la factura de puntos (para poner encima la factura real).
+window.__rectFactura = () => {
+  const p = geo.attributes.p1.array; let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+  for (let i = 0; i < p.length; i += 30) { const x = p[i], y = p[i + 1]; if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+  nube.updateMatrixWorld();
+  const v = new THREE.Vector3(), xs = [], ys = [];
+  [[x0, y0], [x1, y0], [x0, y1], [x1, y1]].forEach(([x, y]) => {
+    v.set(x, y, x * .18).applyMatrix4(nube.matrixWorld).project(camara);
+    xs.push((v.x + 1) / 2 * innerWidth); ys.push((1 - v.y) / 2 * innerHeight);
+  });
+  const l = Math.min(...xs), r = Math.max(...xs), t = Math.min(...ys), b = Math.max(...ys);
+  return { x: (l + r) / 2, y: (t + b) / 2, w: r - l, h: b - t };
+};
 if (window.__facturaPendiente) window.__rearmarFactura(window.__facturaPendiente);
 escena.add(nube);
 
@@ -668,7 +832,9 @@ function leerScroll() {
   barra.style.width = (scrollY / Math.max(1, total) * 100) + "%";
   const cap = Math.min(5, Math.round(objetivo));
   if (cap !== capActual) {
-    capActual = cap;
+    capActual = cap; window.__capActual = cap;
+    if (cap === 1) { if (window.__volverFacturaReal) setTimeout(window.__volverFacturaReal, 900); }
+    else if (window.__ocultarFacturaReal) window.__ocultarFacturaReal();
     puntos.forEach((d, i) => d.classList.toggle("on", i === cap));
     cont.firstElementChild.textContent = String(cap + 1).padStart(2, "0");
     nom.textContent = secciones[cap].dataset.nombre;
