@@ -156,7 +156,7 @@ p.lead{margin-top:22px;font-size:clamp(16px,1.5vw,20px);line-height:1.55;color:v
 .freal .ftot dd{text-align:right}
 .freal .ftot .g{font-size:1.45em;font-weight:800;color:#0f7a4c}
 .freal .fcufe{font-family:"JetBrains Mono",monospace;font-size:.5em;color:#5b6676;margin-top:.6em;word-break:break-all;line-height:1.35}
-.freal .fsello{position:absolute;right:1.4em;top:7.4em;transform:rotate(-12deg);border:.14em solid #37d38f;color:#0f7a4c;border-radius:.3em;padding:.15em .5em;font-size:.62em;font-weight:800;letter-spacing:.12em;text-transform:uppercase;opacity:0;transition:opacity .4s 1.5s,transform .4s 1.5s}
+.freal .fsello{position:absolute;right:1.2em;top:9.4em;transform:rotate(-12deg);border:.14em solid #37d38f;color:#0f7a4c;border-radius:.3em;padding:.15em .5em;font-size:.62em;font-weight:800;letter-spacing:.12em;text-transform:uppercase;opacity:0;transition:opacity .4s 1.5s,transform .4s 1.5s}
 .freal.ver .fsello{opacity:.9;transform:rotate(-12deg) scale(1)}
 .freal .fcerrar{position:absolute;top:-.9em;right:-.9em;width:2em;height:2em;border-radius:50%;border:1px solid var(--linea);background:#0b0f17;color:#cfd6e2;font-size:.9em;cursor:pointer;z-index:2}
 html.sin3d #lienzo{display:none}
@@ -426,8 +426,9 @@ fetch("{{ app_url }}/api/publico/contador").then(function (r) { return r.json();
       "<dt>Subtotal</dt><dd>" + $(d.subtotal) + "</dd>" +
       (d.iva ? "<dt>IVA</dt><dd>" + $(d.iva) + "</dd>" : "") +
       (d.inc ? "<dt>Impoconsumo</dt><dd>" + $(d.inc) + "</dd>" : "") +
-      (d.rete ? "<dt>Retenciones</dt><dd>" + $(d.rete) + "</dd>" : "") +
-      "<dt>Total</dt><dd class='grande'>" + $(d.total) + "</dd></dl>" +
+      (d.rete ? "<dt>Total factura</dt><dd>" + $(d.total) + "</dd><dt>Retenciones</dt><dd>− " + $(d.rete) + "</dd>" +
+                "<dt>Neto a pagar</dt><dd class='grande'>" + $(d.total - d.rete) + "</dd></dl>"
+              : "<dt>Total</dt><dd class='grande'>" + $(d.total) + "</dd></dl>") +
       "<div class='lado'><button type='button' data-l='compra'" + (lado === "compra" ? " class='on'" : "") + ">Yo la compré</button>" +
       "<button type='button' data-l='venta'" + (lado === "venta" ? " class='on'" : "") + ">Yo la vendí</button></div>";
     res.querySelectorAll(".lado button").forEach(function (b) {
@@ -501,8 +502,9 @@ fetch("{{ app_url }}/api/publico/contador").then(function (r) { return r.json();
       "<dl class='ftot'><dt>Subtotal</dt><dd>" + $(d.subtotal) + "</dd>" +
       (d.iva ? "<dt>IVA</dt><dd>" + $(d.iva) + "</dd>" : "") +
       (d.inc ? "<dt>Impoconsumo</dt><dd>" + $(d.inc) + "</dd>" : "") +
-      (d.rete ? "<dt>Retenciones</dt><dd>− " + $(d.rete) + "</dd>" : "") +
-      "<dt class='g'>Total</dt><dd class='g'>" + $(d.total) + "</dd></dl>" +
+      (d.rete ? "<dt>Total factura</dt><dd>" + $(d.total) + "</dd><dt>Retenciones</dt><dd>− " + $(d.rete) + "</dd>" +
+                "<dt class='g'>Neto a pagar</dt><dd class='g'>" + $(d.total - d.rete) + "</dd></dl>"
+              : "<dt class='g'>Total</dt><dd class='g'>" + $(d.total) + "</dd></dl>") +
       "<p class='fcufe'>CUFE " + esc(d.cufe || "de ejemplo: la suya trae el código único de la DIAN") + "</p>" +
       "<span class='fsello'>Leída ✓</span>";
     pintarQR(fHoja.querySelector(".fqr"), d.cufe ? "https://catalogo-vpfe.dian.gov.co/document/searchqr?documentkey=" + d.cufe : "https://tributando.co");
