@@ -1,0 +1,143 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mesero · su restaurante</title><meta name="robots" content="noindex">
+<meta name="theme-color" content="#100d0d">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d0b0b;--card:#171313;--card2:#1f1919;--line:#2d2525;--tx:#f5efe9;--mut:#b0a39a;--acc:#e63946;--ok:#2a9d5c;--am:#f4a261;--az:#4ea8de}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--tx);font:500 15px/1.4 Montserrat,system-ui,sans-serif;min-height:100vh;padding-bottom:110px}
+.demo{background:#000;color:#ffb3ab;font-size:12.5px;text-align:center;padding:7px 10px}.demo a{color:#fff}
+header{position:sticky;top:0;z-index:20;background:#100d0d;border-bottom:1px solid var(--line);padding:12px 16px;display:flex;align-items:center;gap:10px}
+header .logo{font-weight:900;letter-spacing:.06em;color:var(--acc);font-size:1rem}
+header .yo{margin-left:auto;font-size:13px;color:var(--mut);display:flex;gap:8px;align-items:center}
+header button,.btn{border:1px solid var(--line);background:var(--card);color:var(--tx);border-radius:999px;padding:7px 12px;font:inherit;font-size:13px;cursor:pointer}
+.btn.p{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:700}
+.btn.ok{background:var(--ok);border-color:var(--ok);color:#fff;font-weight:700}
+.wrap{max-width:720px;margin:0 auto;padding:16px}
+h2{font-size:1.15rem;font-weight:800;margin:6px 0 12px}
+.sub{color:var(--mut);font-size:13px;margin:-6px 0 14px}
+/* login */
+.meseros{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.meseros button{background:var(--card);border:1px solid var(--line);color:var(--tx);border-radius:16px;padding:22px 10px;font:inherit;font-size:16px;font-weight:700;cursor:pointer}
+.meseros button span{display:block;font-size:34px;margin-bottom:6px}
+/* mesas */
+.leyenda{display:flex;gap:14px;font-size:12px;color:var(--mut);margin-bottom:12px;flex-wrap:wrap}.leyenda i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.mesas{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.mesa{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 10px;text-align:center;cursor:pointer;position:relative;min-height:96px}
+.mesa b{display:block;font-size:24px;font-weight:800}.mesa small{display:block;color:var(--mut);font-size:11.5px;margin-top:2px}
+.mesa.ocu{border-color:var(--acc);background:#2a1416}.mesa.lista{border-color:var(--ok);background:#12261b;animation:lat 1.2s infinite}
+.mesa .tot{font-weight:700;font-size:13px;margin-top:4px;color:#fff}
+.mesa .badge{position:absolute;top:6px;right:8px;font-size:10.5px;font-weight:800;background:var(--ok);color:#fff;border-radius:999px;padding:2px 7px}
+@keyframes lat{50%{box-shadow:0 0 0 4px rgba(42,157,92,.35)}}
+/* pedido */
+.top2{display:flex;align-items:center;gap:10px;margin-bottom:10px}.top2 h2{margin:0}
+.rondas{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:12px}
+.rondas .r{border-bottom:1px dashed var(--line);padding:7px 0;font-size:13.5px}.rondas .r:last-child{border:0}
+.rondas .r .h{display:flex;justify-content:space-between;color:var(--mut);font-size:12px}
+.est{font-weight:800;font-size:11px;border-radius:999px;padding:2px 8px}
+.est.nueva{background:#3a2a10;color:var(--am)}.est.preparando{background:#132a3a;color:var(--az)}.est.lista{background:#12261b;color:#6ee7a0}.est.entregada{background:#222;color:var(--mut)}
+.buscar{width:100%;background:var(--card);border:1px solid var(--line);color:var(--tx);border-radius:12px;padding:11px 13px;font:inherit;margin-bottom:10px}
+.chips{display:flex;gap:7px;overflow-x:auto;padding-bottom:8px;margin-bottom:6px;scrollbar-width:none}.chips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;border:1px solid var(--line);background:var(--card);color:var(--tx);border-radius:999px;padding:7px 12px;font:inherit;font-size:13px;cursor:pointer;white-space:nowrap}.chip.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.lista-p .it{display:flex;align-items:center;gap:10px;padding:11px 2px;border-bottom:1px solid var(--line)}
+.it .nm{flex:1}.it .nm b{display:block;font-size:14.5px}.it .nm span{color:#ff8a80;font-size:13px;font-weight:700}
+.it .q{display:flex;align-items:center;gap:8px}
+.it .q button{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--card2);color:var(--tx);font-size:20px;cursor:pointer}
+.it .q button.mas{background:var(--acc);border-color:var(--acc);color:#fff}
+.it .q em{font-style:normal;font-weight:800;min-width:18px;text-align:center}
+.it .nota{display:block;margin-top:6px;width:100%;background:var(--bg);border:1px dashed var(--line);color:var(--tx);border-radius:8px;padding:6px 8px;font:inherit;font-size:12.5px}
+.barra{position:fixed;left:0;right:0;bottom:0;z-index:30;background:#100d0d;border-top:1px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom))}
+.barra .in{max-width:720px;margin:0 auto;display:flex;gap:10px;align-items:center}
+.barra .in div{flex:1;font-size:13px;color:var(--mut)}.barra .in div b{display:block;color:#fff;font-size:17px}
+.barra button{border:0;border-radius:14px;padding:14px 16px;font:inherit;font-weight:800;font-size:15px;cursor:pointer}
+.enviar{background:var(--acc);color:#fff}.cerrar{background:var(--ok);color:#fff}
+.enviar:disabled{opacity:.4}
+/* modal */
+.modal{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.72);display:none;align-items:flex-end;justify-content:center}.modal.ver{display:flex}
+.mc{background:var(--bg);width:100%;max-width:560px;max-height:92vh;overflow:auto;border-radius:22px 22px 0 0;padding:20px;border:1px solid var(--line)}
+.mc h3{font-size:1.2rem;font-weight:800;margin-bottom:10px}
+.mc .fila{display:flex;justify-content:space-between;padding:6px 0;font-size:14px;border-bottom:1px solid var(--line)}
+.mc .fila.t{font-size:18px;font-weight:800;border:0;padding-top:12px}
+.mc label{display:block;color:var(--mut);font-size:13px;margin:14px 0 6px}
+.ops{display:flex;gap:7px;flex-wrap:wrap}.ops button{border:1px solid var(--line);background:var(--card);color:var(--tx);border-radius:999px;padding:8px 13px;font:inherit;font-size:13px;cursor:pointer}.ops button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.mc input[type=number]{width:100%;background:var(--card);border:1px solid var(--line);color:var(--tx);border-radius:10px;padding:10px;font:inherit}
+.mc .acc{display:flex;gap:10px;margin-top:18px}.mc .acc button{flex:1;padding:14px;border-radius:14px;font:inherit;font-weight:800;border:0;cursor:pointer}
+.toast{position:fixed;left:50%;top:70px;transform:translateX(-50%);background:var(--ok);color:#fff;padding:10px 16px;border-radius:12px;font-weight:700;z-index:60;display:none}
+.vacio{color:var(--mut);text-align:center;padding:30px 10px}
+</style></head><body>
+<div class="demo">Ejemplo · Modo mesero de su restaurante · <a href="/muestra/restaurante-demo-cocina" target="_blank">abrir la pantalla de cocina →</a> · <a href="/muestra/restaurante-demo-caja" target="_blank">caja</a></div>
+<header><span class="logo">SU RESTAURANTE 🍽️</span><span class="yo" id="yo"></span></header>
+<main class="wrap" id="app"></main>
+<div class="barra" id="barra" style="display:none"><div class="in"><div id="bInfo"></div><button class="cerrar" id="bCerrar">Cerrar cuenta</button><button class="enviar" id="bEnviar">Enviar a cocina</button></div></div>
+<div class="modal" id="mCuenta"><div class="mc" id="mcCuenta"></div></div>
+<div class="toast" id="toast"></div>
+<script>
+const SLUG='restaurante-demo',MESAS=15,MESEROS=["Andrés", "Laura", "Camilo", "Valentina"],MENU=[{"id": "entradas", "e": "🌽", "n": "Entradas", "i": [["Nachos de la casa", 18900], ["Alitas BBQ x8", 24900], ["Alitas picantes x8", 24900], ["Mazorca asada", 9900], ["Guacamole con totopos", 16900]]}, {"id": "tacos", "e": "🌮", "n": "Tacos", "i": [["Tacos de cerdo", 19900], ["Tacos de pollo", 18500], ["Tacos de res", 21500], ["Tacos vegetarianos", 16900]]}, {"id": "platos", "e": "🍛", "n": "Platos fuertes", "i": [["Bandeja de la casa", 29900], ["Pechuga a la plancha", 26500], ["Lomo de cerdo", 27900], ["Plato del mar", 34900]]}, {"id": "burritos", "e": "🌯", "n": "Burritos y quesadillas", "i": [["Burrito de la casa", 27900], ["Burrito de pollo", 25900], ["Quesadilla mixta", 24500]]}, {"id": "compartir", "e": "⭐", "n": "Para compartir", "i": [["Picada para 2", 49900], ["Combo familiar 12 tacos", 79900]]}, {"id": "hamburguesas", "e": "🍔", "n": "Hamburguesas y papas", "i": [["Hamburguesa clásica", 21900], ["Hamburguesa doble queso", 26900], ["Papas cargadas", 19900], ["Salchipapa", 15900]]}, {"id": "bebidas", "e": "🥤", "n": "Bebidas", "i": [["Limonada de coco", 9900], ["Jugo natural", 7900], ["Limonada de hierbabuena", 8900], ["Gaseosa", 5000], ["Agua", 4000]]}, {"id": "licores", "e": "🍺", "n": "Cervezas y cócteles", "i": [["Cerveza nacional", 7500], ["Michelada", 11900], ["Margarita", 24900], ["Mojito", 22900]]}];
+const $=s=>document.querySelector(s),API='/api/muestra/'+SLUG;
+const pesos=v=>'$ '+Math.round(v).toLocaleString('es-CO');
+let yo=null,mesa=null,ab=[],borr={},cat='todos',busca='',cierre={medio:'Efectivo',prop:0,pers:1};
+try{yo=localStorage.getItem('tt_mesero')}catch(e){}
+function toast(t,c){const e=$('#toast');e.textContent=t;e.style.background=c||'var(--ok)';e.style.display='block';clearTimeout(e._t);e._t=setTimeout(()=>e.style.display='none',2200)}
+async function carga(){try{const r=await fetch(API+'/comandas',{cache:'no-store'});const j=await r.json();if(!j.ok)return;ab=j.abiertas;
+ if(!yo)return;if(mesa===null)mesas();else{rondas();barra()}}catch(e){}}
+function deMesa(n){return ab.filter(c=>c.mesa===n)}
+function pinta(){
+ $('#yo').innerHTML=yo?'🙋 '+yo+' <button id="salir">Cambiar</button>':'';
+ if(yo)$('#salir').onclick=()=>{yo=null;try{localStorage.removeItem('tt_mesero')}catch(e){}mesa=null;pinta()};
+ if(!yo)return login();
+ if(mesa===null)return mesas(true);
+ pedido();
+}
+function login(){$('#barra').style.display='none';
+ $('#app').innerHTML='<h2>¿Quién está atendiendo?</h2><p class="sub">Cada mesero entra con su nombre desde su propio celular.</p><div class="meseros">'+MESEROS.map(m=>'<button data-m="'+m+'"><span>🧑‍🍳</span>'+m+'</button>').join('')+'</div>';
+ document.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{yo=b.dataset.m;try{localStorage.setItem('tt_mesero',yo)}catch(e){}pinta()});}
+let firmaM='';
+function mesas(forzar){const fm=JSON.stringify(ab.map(c=>[c.id,c.estado,c.mesa]));if(!forzar&&fm===firmaM&&$('.mesas'))return;firmaM=fm;$('#barra').style.display='none';
+ let h='<h2>Mesas</h2><div class="leyenda"><span><i style="background:var(--card);border:1px solid var(--line)"></i>Libre</span><span><i style="background:var(--acc)"></i>Ocupada</span><span><i style="background:var(--ok)"></i>Pedido listo para llevar</span></div><div class="mesas">';
+ for(let n=1;n<=MESAS;n++){const cs=deMesa(n),tot=cs.reduce((a,c)=>a+c.total,0),lis=cs.filter(c=>c.estado==='lista').length,mz=cs.length?cs[cs.length-1].mesero:'';
+  h+='<div class="mesa '+(lis?'lista':cs.length?'ocu':'')+'" data-n="'+n+'">'+(lis?'<span class="badge">'+lis+' listo</span>':'')+'<b>'+n+'</b><small>'+(cs.length?mz:'Libre')+'</small>'+(cs.length?'<div class="tot">'+pesos(tot)+'</div>':'')+'</div>'}
+ $('#app').innerHTML=h+'</div>';
+ document.querySelectorAll('.mesa').forEach(d=>d.onclick=()=>{mesa=+d.dataset.n;borr={};cat='todos';busca='';pinta();scrollTo(0,0)});}
+let firmaR='';
+function rondas(forzar){const cs=deMesa(mesa),tot=cs.reduce((a,c)=>a+c.total,0),el=$('#rd');if(!el)return;const fi=JSON.stringify(cs.map(c=>[c.id,c.estado]));if(!forzar&&fi===firmaR)return;firmaR=fi;
+ el.innerHTML=cs.length?'<div class="rondas"><div style="font-weight:800;margin-bottom:4px">Ya pedido · '+pesos(tot)+'</div>'+cs.map((c,i)=>'<div class="r"><div class="h"><span>Ronda '+(i+1)+' · '+c.mesero+' · '+new Date(c.creada).toLocaleTimeString('es-CO',{hour:'numeric',minute:'2-digit'})+'</span><span class="est '+c.estado+'">'+{nueva:'En cocina',preparando:'Preparando',lista:'¡Listo! Llevar',entregada:'Entregado'}[c.estado]+'</span></div>'+c.items.map(it=>it.c+' × '+it.n+(it.nota?' <i style="color:var(--am)">('+it.nota+')</i>':'')).join('<br>')+(c.estado==='lista'?'<div style="margin-top:6px"><button class="btn ok" data-ent="'+c.id+'">Marcar entregado</button></div>':'')+'</div>').join('')+'</div>':'';
+ el.querySelectorAll('[data-ent]').forEach(b=>b.onclick=()=>estado(+b.dataset.ent,'entregada'));}
+function pedido(){
+ let h='<div class="top2"><button class="btn" id="volver">← Mesas</button><h2>Mesa '+mesa+'</h2></div><div id="rd"></div>';
+ h+='<input class="buscar" id="busca" placeholder="🔍 Buscar plato o bebida" value="'+busca.replace(/"/g,'')+'"><div class="chips"><button class="chip'+(cat==='todos'?' on':'')+'" data-c="todos">Todos</button>'+MENU.map(c=>'<button class="chip'+(cat===c.id?' on':'')+'" data-c="'+c.id+'">'+c.e+' '+c.n+'</button>').join('')+'</div><div class="lista-p" id="lp"></div>';
+ $('#app').innerHTML=h;rondas(true);lista();
+ $('#volver').onclick=()=>{if(Object.keys(borr).length&&!confirm('Tiene platos sin enviar a cocina. ¿Salir igual?'))return;mesa=null;pinta()};
+ $('#busca').oninput=e=>{busca=e.target.value;lista()};
+ document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{cat=b.dataset.c;document.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x===b));lista()});
+ barra();}
+function lista(){const t=busca.trim().toLowerCase();let h='';
+ MENU.forEach(c=>{if(cat!=='todos'&&cat!==c.id)return;c.i.forEach((p,k)=>{const id=c.id+'|'+k;if(t&&!p[0].toLowerCase().includes(t))return;const b=borr[id];
+  h+='<div class="it"><div class="nm"><b>'+p[0]+'</b><span>'+pesos(p[1])+'</span>'+(b?'<input class="nota" data-nt="'+id+'" placeholder="Nota para cocina (ej: sin cebolla, término medio)" value="'+(b.nota||'').replace(/"/g,'')+'">':'')+'</div><div class="q">'+(b?'<button data-m="'+id+'">−</button><em>'+b.c+'</em>':'')+'<button class="mas" data-p="'+id+'">+</button></div></div>'})});
+ $('#lp').innerHTML=h||'<p class="vacio">No hay platos con ese nombre.</p>';
+ document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{const id=b.dataset.p,[ci,k]=id.split('|'),c=MENU.find(x=>x.id===ci),p=c.i[+k];borr[id]=borr[id]||{n:p[0],p:p[1],c:0,nota:''};borr[id].c++;lista();barra()});
+ document.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{const id=b.dataset.m;if(!borr[id])return;borr[id].c--;if(borr[id].c<=0)delete borr[id];lista();barra()});
+ document.querySelectorAll('[data-nt]').forEach(i=>i.oninput=()=>{if(borr[i.dataset.nt])borr[i.dataset.nt].nota=i.value});}
+function barra(){const its=Object.values(borr),n=its.reduce((a,b)=>a+b.c,0),t=its.reduce((a,b)=>a+b.c*b.p,0),ya=deMesa(mesa).reduce((a,c)=>a+c.total,0);
+ $('#barra').style.display='block';$('#bInfo').innerHTML=n?'<b>'+n+' por enviar · '+pesos(t)+'</b>Mesa '+mesa:'<b>Mesa '+mesa+' · '+pesos(ya)+'</b>'+(ya?'Agregue más o cierre la cuenta':'Toque + para agregar');
+ $('#bEnviar').disabled=!n;$('#bEnviar').style.display=n?'':'none';$('#bCerrar').style.display=(!n&&ya)?'':'none';}
+$('#bEnviar').onclick=async()=>{const items=Object.values(borr).map(b=>({n:b.n,p:b.p,c:b.c,nota:b.nota}));$('#bEnviar').disabled=true;
+ try{const r=await fetch(API+'/comanda',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mesa,mesero:yo,items})});const j=await r.json();
+  if(!j.ok)throw new Error(j.error||'No se pudo enviar');borr={};lista();toast('✓ Enviado a cocina · Mesa '+mesa);await carga();scrollTo({top:0,behavior:'smooth'})}catch(e){toast(e.message,'#b91c1c');$('#bEnviar').disabled=false}};
+async function estado(id,e){try{await fetch(API+'/comanda/'+id+'/estado',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({estado:e})});await carga()}catch(x){}}
+$('#bCerrar').onclick=()=>{cierre={medio:'Efectivo',prop:0,pers:1};cuenta();$('#mCuenta').classList.add('ver')};
+$('#mCuenta').onclick=e=>{if(e.target.id==='mCuenta')$('#mCuenta').classList.remove('ver')};
+function cuenta(){const cs=deMesa(mesa),items={};cs.forEach(c=>c.items.forEach(it=>{const k=it.n+'|'+it.p;items[k]=items[k]||{n:it.n,p:it.p,c:0};items[k].c+=it.c}));
+ const sub=cs.reduce((a,c)=>a+c.total,0),prop=cierre.prop==='10'?Math.round(sub*.1/100)*100:(+cierre.prop||0),tot=sub+prop,per=Math.ceil(tot/cierre.pers/100)*100;
+ $('#mcCuenta').innerHTML='<h3>Cuenta · Mesa '+mesa+'</h3>'+Object.values(items).map(i=>'<div class="fila"><span>'+i.c+' × '+i.n+'</span><span>'+pesos(i.c*i.p)+'</span></div>').join('')+
+ '<div class="fila"><span>Subtotal</span><span>'+pesos(sub)+'</span></div><label>Propina para el equipo (voluntaria)</label><div class="ops" id="oProp"><button data-v="0" class="'+(!cierre.prop||cierre.prop==0?'on':'')+'">Sin propina</button><button data-v="10" class="'+(cierre.prop==='10'?'on':'')+'">10 % · '+pesos(Math.round(sub*.1/100)*100)+'</button></div>'+
+ '<div class="fila t"><span>Total</span><span>'+pesos(tot)+'</span></div><label>¿Cómo paga?</label><div class="ops" id="oMed">'+['Efectivo','Nequi','Bancolombia','Tarjeta','QR Bre-B'].map(m=>'<button class="'+(cierre.medio===m?'on':'')+'">'+m+'</button>').join('')+'</div>'+
+ '<label>Dividir la cuenta entre</label><div class="ops" id="oPer">'+[1,2,3,4,5,6].map(n=>'<button class="'+(cierre.pers===n?'on':'')+'">'+(n===1?'No dividir':n+' personas')+'</button>').join('')+'</div>'+(cierre.pers>1?'<p style="margin-top:8px;font-weight:800">Cada uno paga '+pesos(per)+'</p>':'')+
+ '<div class="acc"><button style="background:var(--card);color:var(--tx);border:1px solid var(--line)" id="cX">Volver</button><button style="background:var(--ok);color:#fff" id="cOk">Cobrar y liberar mesa</button></div>';
+ document.querySelectorAll('#oProp button').forEach(b=>b.onclick=()=>{cierre.prop=b.dataset.v;cuenta()});
+ document.querySelectorAll('#oMed button').forEach(b=>b.onclick=()=>{cierre.medio=b.textContent;cuenta()});
+ document.querySelectorAll('#oPer button').forEach((b,i)=>b.onclick=()=>{cierre.pers=i+1;cuenta()});
+ $('#cX').onclick=()=>$('#mCuenta').classList.remove('ver');
+ $('#cOk').onclick=async()=>{try{const r=await fetch(API+'/mesa/'+mesa+'/cerrar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({medio:cierre.medio,propina:prop,personas:cierre.pers,mesero:yo})});const j=await r.json();if(!j.ok)throw new Error(j.error||'No se pudo cerrar');
+  $('#mCuenta').classList.remove('ver');toast('✓ Mesa '+mesa+' cobrada: '+pesos(tot)+' ('+cierre.medio+')');mesa=null;await carga()}catch(e){toast(e.message,'#b91c1c')}};}
+pinta();carga();setInterval(()=>{if(!document.hidden)carga()},4000);
+</script></body></html>

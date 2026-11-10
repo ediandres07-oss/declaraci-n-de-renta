@@ -2151,6 +2151,8 @@ _MUESTRAS = {"central-san-ignacio": "muestras/central_san_ignacio.html",
              # Taco Tabasco (Bello): su carta real + panel, prospecto del 10-nov-2026
              "taco-tabasco": "muestras/taco_tabasco.html",
              "taco-tabasco-pedidos": "muestras/taco_tabasco_pedidos.html",
+             # Restaurante de demostración (productos y precios inventados) para el video y la campaña
+             "restaurante-demo": "muestras/restaurante_demo.html",
              # Barbería SIN nombre de cliente (6-nov-2026): reservas + recomendador de cortes + panel CRM
              "barberia-ejemplo": "muestras/barberia_ejemplo.html",
              "barberia-ejemplo-panel": "muestras/barberia_ejemplo_panel.html",

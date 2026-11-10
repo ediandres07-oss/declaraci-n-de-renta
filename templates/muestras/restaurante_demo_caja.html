@@ -1,0 +1,85 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Caja · su restaurante</title><meta name="robots" content="noindex"><meta name="theme-color" content="#100d0d">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d0b0b;--card:#171313;--line:#2d2525;--tx:#f5efe9;--mut:#b0a39a;--acc:#e63946;--ok:#2a9d5c;--am:#f4a261;--az:#4ea8de}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font:500 15px/1.4 Montserrat,system-ui,sans-serif;min-height:100vh}
+.demo{background:#000;color:#ffb3ab;font-size:12.5px;text-align:center;padding:7px 10px}.demo a{color:#fff}
+header{display:flex;align-items:center;gap:12px;padding:12px 18px;background:#100d0d;border-bottom:1px solid var(--line);flex-wrap:wrap}
+header .logo{font-weight:900;letter-spacing:.06em;color:var(--acc)}
+header .est{margin-left:auto;font-size:13px;color:var(--mut)}
+.wrap{max-width:1100px;margin:0 auto;padding:16px;display:grid;grid-template-columns:1.2fr 1fr;gap:14px}
+@media(max-width:860px){.wrap{grid-template-columns:1fr}}
+.box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}
+.box h2{font-size:14px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;grid-column:1/-1}
+@media(max-width:860px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kp{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}.kp small{color:var(--mut);font-size:12px}.kp b{display:block;font-size:21px;font-weight:800;margin-top:2px}
+.fila{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:14px}.fila:last-child{border:0}
+.fila span:last-child{font-weight:700}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--tx);border-radius:12px;padding:10px 14px;font:inherit;font-size:14px;font-weight:700;cursor:pointer}
+.btn.p{background:var(--acc);border-color:var(--acc);color:#fff}.btn.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+.ped{border:1px solid var(--line);border-left:5px solid var(--am);border-radius:12px;padding:10px 12px;margin-bottom:10px;background:#1b1622}
+.ped.lista{border-left-color:var(--ok)}.ped.preparando{border-left-color:var(--az)}
+.ped .h{display:flex;justify-content:space-between;font-size:13px;color:var(--mut)}.ped b{color:#fff}
+.ped ul{list-style:none;margin:6px 0;font-size:14px}
+.ped .acc{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;align-items:center}
+.ped select{background:var(--bg);color:var(--tx);border:1px solid var(--line);border-radius:10px;padding:8px;font:inherit;font-size:13px}
+.vacio{color:var(--mut);text-align:center;padding:16px 8px;font-size:13px}
+input[type=number],input[type=text]{width:100%;background:var(--bg);border:1px solid var(--line);color:var(--tx);border-radius:10px;padding:10px;font:inherit;margin:6px 0 10px}
+label{color:var(--mut);font-size:13px}
+.arq{font-size:15px}.arq .t{font-size:18px;font-weight:800}
+.dif.ok{color:#6ee7a0}.dif.mal{color:#ff6b6b}
+.toast{position:fixed;left:50%;top:16px;transform:translateX(-50%);background:var(--ok);color:#fff;padding:10px 16px;border-radius:12px;font-weight:700;z-index:60;display:none}
+</style></head><body>
+<div class="demo">Ejemplo · Caja de su restaurante · <a href="/muestra/restaurante-demo-mesero" target="_blank">mesero</a> · <a href="/muestra/restaurante-demo-cocina" target="_blank">cocina</a> · <a href="/muestra/restaurante-demo" target="_blank">carta</a></div>
+<header><span class="logo">SU RESTAURANTE 🍽️ · CAJA</span><span class="est" id="est">Cargando…</span></header>
+<main class="wrap">
+ <div class="kpis"><div class="kp"><small>Ventas del turno</small><b id="kV">$ 0</b></div><div class="kp"><small>Propinas (del equipo)</small><b id="kP">$ 0</b></div><div class="kp"><small>Domicilios cobrados</small><b id="kD">$ 0</b></div><div class="kp"><small>Cuentas cerradas</small><b id="kC">0</b></div></div>
+ <section class="box"><h2>🛵 Domicilios y para recoger <span id="nP" class="kp" style="padding:2px 10px;font-size:12px">0</span></h2><div id="pend"></div></section>
+ <section class="box" id="turnoBox"></section>
+ <section class="box"><h2>💳 Por forma de pago</h2><div id="medios"></div></section>
+ <section class="box"><h2>🧑‍🍳 Por mesero</h2><div id="meseros"></div></section>
+ <section class="box"><h2>🍽 Mesas abiertas</h2><div id="mesas"></div></section>
+ <section class="box"><h2>⭐ Lo más vendido</h2><div id="platos"></div></section>
+ <section class="box" style="grid-column:1/-1"><h2>📒 Turnos cerrados</h2><div id="hist"></div></section>
+</main>
+<div class="toast" id="toast"></div>
+<script>
+const API='/api/muestra/restaurante-demo',$=s=>document.querySelector(s);
+const pesos=v=>'$ '+Math.round(v||0).toLocaleString('es-CO');
+const hora=ms=>new Date(ms).toLocaleTimeString('es-CO',{hour:'numeric',minute:'2-digit'});
+const ORI={mesa:'Mesas (mesero)',qr:'Mesas (QR del cliente)',domicilio:'Domicilio',recoge:'Para recoger'};
+let D=null,firma='';
+function toast(t,c){const e=$('#toast');e.textContent=t;e.style.background=c||'var(--ok)';e.style.display='block';clearTimeout(e._t);e._t=setTimeout(()=>e.style.display='none',2500)}
+async function post(u,b){const r=await fetch(API+u,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b||{})});const j=await r.json();if(!j.ok)throw new Error(j.error||'No se pudo');return j}
+function filas(o){const k=Object.entries(o||{}).sort((a,b)=>b[1]-a[1]);return k.length?k.map(([n,v])=>'<div class="fila"><span>'+n+'</span><span>'+pesos(v)+'</span></div>').join(''):'<p class="vacio">Todavía no hay ventas en este turno.</p>'}
+function pinta(){const r=D.resumen,t=D.turno;
+ $('#est').textContent=t?'Turno abierto desde las '+hora(t.abierto)+(t.cajero?' · '+t.cajero:''):'Caja cerrada · las ventas son de las últimas 24 horas';
+ $('#kV').textContent=pesos(r.ventas);$('#kP').textContent=pesos(r.propinas);$('#kD').textContent=pesos(r.domicilios);$('#kC').textContent=r.cuentas;
+ $('#medios').innerHTML=filas(r.por_medio)+(Object.keys(r.por_origen||{}).length?'<div style="margin-top:10px;color:var(--mut);font-size:12px">Por canal</div>'+filas(Object.fromEntries(Object.entries(r.por_origen).map(([k,v])=>[ORI[k]||k,v]))):'');
+ $('#meseros').innerHTML=filas(r.por_mesero);
+ $('#platos').innerHTML=r.platos.length?r.platos.map((p,i)=>'<div class="fila"><span>'+(i+1)+'. '+p.n+'</span><span>'+p.c+'</span></div>').join(''):'<p class="vacio">Sin ventas todavía.</p>';
+ $('#mesas').innerHTML=D.mesas.length?D.mesas.map(m=>'<div class="fila"><span>Mesa '+m.mesa+' · '+m.mesero+' · '+m.rondas+' ronda'+(m.rondas>1?'s':'')+'</span><span>'+pesos(m.total)+'</span></div>').join(''):'<p class="vacio">No hay mesas abiertas.</p>';
+ const fp=JSON.stringify(D.pendientes.map(c=>[c.id,c.estado]));
+ if(fp!==firma){firma=fp;$('#nP').textContent=D.pendientes.length;
+  $('#pend').innerHTML=D.pendientes.length?D.pendientes.map(c=>{const cl=c.cliente||{},tot=c.total+(cl.domicilio||0)+(cl.propina||0);
+   return '<div class="ped '+c.estado+'"><div class="h"><span><b>#'+c.id+' · '+(c.origen==='recoge'?'🛍 Recoge':'🛵 Domicilio')+'</b> · '+(cl.nombre||'Cliente')+'</span><span>'+hora(c.creada)+' · '+({nueva:'En cocina',preparando:'Preparando',lista:'¡Listo!'}[c.estado]||c.estado)+'</span></div>'+
+   '<ul>'+c.items.map(it=>'<li>'+it.c+' × '+it.n+'</li>').join('')+'</ul>'+
+   '<div class="h"><span>'+[cl.cel,cl.dir,cl.barrio].filter(Boolean).join(' · ')+'</span></div>'+
+   '<div class="fila"><span>Productos '+pesos(c.total)+(cl.domicilio?' + domicilio '+pesos(cl.domicilio):'')+(cl.propina?' + propina '+pesos(cl.propina):'')+'</span><span>'+pesos(tot)+'</span></div>'+
+   '<div class="acc"><select data-m="'+c.id+'">'+['Efectivo','Nequi','Bancolombia','Tarjeta','QR Bre-B'].map(m=>'<option'+((cl.pago||'').startsWith(m)?' selected':'')+'>'+m+'</option>').join('')+'</select><button class="btn ok" data-cob="'+c.id+'">Cobrado ✓</button></div></div>'}).join(''):'<p class="vacio">Sin pedidos de domicilio. Los que lleguen por la carta aparecen aquí y en la cocina.</p>';
+  document.querySelectorAll('[data-cob]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{const j=await post('/comanda/'+b.dataset.cob+'/cobrar',{medio:document.querySelector('[data-m="'+b.dataset.cob+'"]').value,cajero:(D.turno&&D.turno.cajero)||'Caja'});toast('✓ Pedido #'+b.dataset.cob+' cobrado');firma='';carga()}catch(e){toast(e.message,'#b91c1c');b.disabled=false}})}
+ // turno
+ if(!t){$('#turnoBox').innerHTML='<h2>🔓 Abrir caja</h2><label>Quién abre</label><input type="text" id="tCaj" placeholder="Nombre del cajero" value="Laura"><label>Base en efectivo (sencillo para devueltas)</label><input type="number" id="tBase" value="200000" step="1000" inputmode="numeric"><button class="btn p" id="tAbrir" style="width:100%">Abrir turno</button>';
+  $('#tAbrir').onclick=async()=>{try{await post('/caja/abrir',{cajero:$('#tCaj').value,base:+$('#tBase').value||0});toast('✓ Turno abierto');carga(true)}catch(e){toast(e.message,'#b91c1c')}}}
+ else if(!$('#tCont')){$('#turnoBox').innerHTML='<h2>🔒 Cerrar caja (arqueo)</h2><div class="arq"><div class="fila"><span>Base</span><span>'+pesos(t.base)+'</span></div><div class="fila"><span>Efectivo cobrado en el turno</span><span id="aEf"></span></div><div class="fila t"><span>Debe haber en la caja</span><span id="aEsp"></span></div></div><label>Efectivo contado</label><input type="number" id="tCont" step="1000" inputmode="numeric" placeholder="Cuente billetes y monedas"><div id="aDif" class="arq"></div><button class="btn ok" id="tCerrar" style="width:100%;margin-top:6px">Cerrar turno</button>';
+  $('#tCont').oninput=dif;$('#tCerrar').onclick=async()=>{if(!$('#tCont').value){toast('Escriba el efectivo contado','#b91c1c');return}if(D.mesas.length&&!confirm('Hay '+D.mesas.length+' mesa(s) abiertas. ¿Cerrar el turno igual?'))return;
+   try{const j=await post('/caja/cerrar',{contado:+$('#tCont').value});const d=j.turno.resumen.diferencia;toast('✓ Turno cerrado · '+(d===0?'cuadra exacto':d>0?'sobran '+pesos(d):'faltan '+pesos(-d)),d===0?'var(--ok)':'#b7791f');carga(true)}catch(e){toast(e.message,'#b91c1c')}}}
+ if(t){$('#aEf').textContent=pesos(r.efectivo);$('#aEsp').textContent=pesos(t.base+r.efectivo);dif()}
+ $('#hist').innerHTML=D.historial.length?D.historial.map(h=>{const R=h.resumen||{},d=R.diferencia||0;return '<div class="fila"><span>'+new Date(h.abierto).toLocaleDateString('es-CO',{day:'numeric',month:'short'})+' · '+hora(h.abierto)+'–'+hora(h.cerrado)+' · '+(h.cajero||'—')+' · '+(R.cuentas||0)+' cuentas · ventas '+pesos(R.ventas)+' · propinas '+pesos(R.propinas)+'</span><span class="dif '+(d===0?'ok':'mal')+'">'+(d===0?'Cuadró':d>0?'Sobró '+pesos(d):'Faltó '+pesos(-d))+'</span></div>'}).join(''):'<p class="vacio">Aún no se ha cerrado ningún turno.</p>';}
+function dif(){if(!D||!D.turno||!$('#tCont'))return;const v=$('#tCont').value;if(v===''){$('#aDif').innerHTML='';return}const d=(+v)-(D.turno.base+D.resumen.efectivo);$('#aDif').innerHTML='<div class="fila t"><span>Diferencia</span><span class="dif '+(d===0?'ok':'mal')+'">'+(d===0?'Cuadra exacto ✓':d>0?'Sobran '+pesos(d):'Faltan '+pesos(-d))+'</span></div>'}
+async function carga(rehacer){try{const r=await fetch(API+'/caja',{cache:'no-store'});const j=await r.json();if(!j.ok)return;if(rehacer)$('#turnoBox').innerHTML='';D=j;pinta()}catch(e){}}
+carga();setInterval(()=>{if(!document.hidden)carga()},4000);
+</script></body></html>

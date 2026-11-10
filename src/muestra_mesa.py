@@ -23,6 +23,12 @@ MUESTRAS_MESA = {
                       "plantilla_mesero": "muestras/taco_tabasco_mesero.html",
                       "plantilla_cocina": "muestras/taco_tabasco_cocina.html",
                       "plantilla_caja": "muestras/taco_tabasco_caja.html"},
+    # Restaurante de DEMOSTRACIÓN: productos y precios inventados, sin nombre de cliente (video y campaña)
+    "restaurante-demo": {"nombre": "Su restaurante", "mesas": 15,
+                         "meseros": ["Andrés", "Laura", "Camilo", "Valentina"],
+                         "plantilla_mesero": "muestras/restaurante_demo_mesero.html",
+                         "plantilla_cocina": "muestras/restaurante_demo_cocina.html",
+                         "plantilla_caja": "muestras/restaurante_demo_caja.html"},
 }
 ESTADOS = ("nueva", "preparando", "lista", "entregada")
 TOPE_ABIERTAS = 120          # comandas sin cerrar por muestra
