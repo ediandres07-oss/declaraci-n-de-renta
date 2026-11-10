@@ -17,7 +17,7 @@ header .k{display:flex;gap:10px;margin-left:auto;flex-wrap:wrap}
 .col h2{font-size:14px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;display:flex;justify-content:space-between;margin-bottom:10px}
 .col h2 span{background:var(--card);border-radius:999px;padding:1px 9px;font-size:12px}
 .tk{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--am);border-radius:12px;padding:12px;margin-bottom:10px}
-.tk.preparando{border-left-color:var(--az)}.tk.lista{border-left-color:var(--ok)}
+.tk.preparando{border-left-color:var(--az)}.tk.dom{background:#1b1622}.tk.lista{border-left-color:var(--ok)}
 .tk.nuevo{animation:ent 1s 3}@keyframes ent{50%{box-shadow:0 0 0 4px rgba(244,162,97,.45)}}
 .tk .h{display:flex;justify-content:space-between;align-items:baseline}
 .tk .h b{font-size:20px;font-weight:800}.tk .h small{color:var(--mut);font-size:12px}
@@ -29,7 +29,7 @@ header .k{display:flex;gap:10px;margin-left:auto;flex-wrap:wrap}
 .vacio{color:var(--mut);text-align:center;padding:24px 8px;font-size:13px}
 .son{position:fixed;right:14px;bottom:14px}
 </style></head><body>
-<div class="demo">Muestra · Pantalla de cocina de Taco Tabasco · los pedidos llegan del <a href="/muestra/taco-tabasco-mesero" target="_blank">celular del mesero</a></div>
+<div class="demo">Muestra · Pantalla de cocina de Taco Tabasco · los pedidos llegan del <a href="/muestra/taco-tabasco-mesero" target="_blank">celular del mesero</a> · <a href="/muestra/taco-tabasco-caja" target="_blank">caja</a></div>
 <header><span class="logo">TACO TABASCO 🌮 · COCINA</span><div class="k"><div class="kp">Por preparar<b id="kN">0</b></div><div class="kp">Mesas abiertas<b id="kM">0</b></div><div class="kp">Ventas cobradas<b id="kV">$ 0</b></div><div class="kp">Propinas<b id="kP">$ 0</b></div><button class="btn" id="reini">Reiniciar muestra</button></div></header>
 <div class="cols"><section class="col"><h2>🔔 Nuevas <span id="cN">0</span></h2><div id="lN"></div></section><section class="col"><h2>🔥 Preparando <span id="cP">0</span></h2><div id="lP"></div></section><section class="col"><h2>✅ Listas para llevar <span id="cL">0</span></h2><div id="lL"></div></section></div>
 <button class="btn son" id="son">🔈 Activar sonido</button>
@@ -41,8 +41,9 @@ $('#son').onclick=()=>{sonido=!sonido;$('#son').textContent=sonido?'🔊 Sonido 
 function pita(){try{const c=new (window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=880;g.gain.value=.15;o.start();setTimeout(()=>{o.frequency.value=1175},180);setTimeout(()=>{o.stop();c.close()},420)}catch(e){}}
 function mins(ms){return Math.max(0,Math.floor((Date.now()+dif-ms)/60000))}
 function tk(c){const m=mins(c.creada),cl=m<10?'ok':m<20?'med':'mal',nuevo=!primera&&!vistos.has(c.id);
- return '<div class="tk '+c.estado+(nuevo?' nuevo':'')+'"><div class="h"><b>Mesa '+c.mesa+'</b><small>'+c.mesero+' · #'+c.id+'</small></div><div class="t '+cl+'">⏱ hace '+m+' min</div><ul>'+c.items.map(it=>'<li><b>'+it.c+'×</b>'+it.n+(it.nota?'<i>⚠ '+it.nota+'</i>':'')+'</li>').join('')+'</ul>'+
- (c.estado==='nueva'?'<button data-id="'+c.id+'" data-e="preparando">Empezar a preparar 🔥</button>':c.estado==='preparando'?'<button data-id="'+c.id+'" data-e="lista">¡Listo! Avisar al mesero ✅</button>':'<div style="color:var(--mut);font-size:12.5px">Esperando que el mesero lo lleve</div>')+'</div>'}
+ const cl2=c.cliente||{},tit=c.origen==='domicilio'?'🛵 Domicilio':c.origen==='recoge'?'🛍 Para recoger':'Mesa '+c.mesa+(c.origen==='qr'?' · 📱 QR':''),quien=c.mesa?c.mesero:(cl2.nombre||'Cliente')+(cl2.barrio?' · '+cl2.barrio:'');
+ return '<div class="tk '+c.estado+(nuevo?' nuevo':'')+(c.mesa?'':' dom')+'"><div class="h"><b>'+tit+'</b><small>'+quien+' · #'+c.id+'</small></div><div class="t '+cl+'">⏱ hace '+m+' min</div><ul>'+c.items.map(it=>'<li><b>'+it.c+'×</b>'+it.n+(it.nota?'<i>⚠ '+it.nota+'</i>':'')+'</li>').join('')+'</ul>'+
+ (c.estado==='nueva'?'<button data-id="'+c.id+'" data-e="preparando">Empezar a preparar 🔥</button>':c.estado==='preparando'?'<button data-id="'+c.id+'" data-e="lista">¡Listo! Avisar al mesero ✅</button>':(c.mesa?'<div style="color:var(--mut);font-size:12.5px">Esperando que el mesero lo lleve</div>':'<div style="color:var(--mut);font-size:12.5px">Listo para '+(c.origen==='recoge'?'entregar en el mostrador':'despachar con el domiciliario')+' · se cobra en caja</div>'))+'</div>'}
 async function carga(){try{const r=await fetch(API+'/comandas',{cache:'no-store'}),j=await r.json();if(!j.ok)return;dif=j.ahora-Date.now();
  const A=j.abiertas.filter(c=>c.estado!=='entregada'),N=A.filter(c=>c.estado==='nueva'),P=A.filter(c=>c.estado==='preparando'),L=A.filter(c=>c.estado==='lista');
  if(!primera&&N.some(c=>!vistos.has(c.id))&&sonido)pita();
