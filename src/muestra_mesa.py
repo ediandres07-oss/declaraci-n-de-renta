@@ -404,3 +404,34 @@ def pagina_caja(slug):
     if not cfg or not cfg.get("plantilla_caja"):
         return redirect("/portafolio")
     return render_template(cfg["plantilla_caja"]), 200, {"X-Robots-Tag": "noindex, nofollow"}
+
+
+# --- La carta se instala en el celular como app (PWA) -------------------------------------
+_APP = {"taco-tabasco": ("Taco Tabasco", "#e63946"), "restaurante-demo": ("Su Restaurante", "#f2c84b")}
+
+
+@bp.get("/muestra/<slug>.webmanifest")
+def manifiesto(slug):
+    if slug not in _APP:
+        return redirect("/portafolio")
+    nombre, color = _APP[slug]
+    m = {"name": nombre, "short_name": nombre[:12], "start_url": f"/muestra/{slug}?app=1",
+         "scope": "/muestra/", "display": "standalone", "background_color": "#100d0d",
+         "theme_color": "#100d0d", "lang": "es-CO",
+         "icons": [{"src": f"/static/muestras/{slug}/icono-192.png", "sizes": "192x192", "type": "image/png"},
+                   {"src": f"/static/muestras/{slug}/icono-512.png", "sizes": "512x512", "type": "image/png",
+                    "purpose": "any maskable"}]}
+    return json.dumps(m, ensure_ascii=False), 200, {"Content-Type": "application/manifest+json"}
+
+
+_SW = """self.addEventListener('install',e=>self.skipWaiting());
+self.addEventListener('activate',e=>e.waitUntil(self.clients.claim()));
+self.addEventListener('fetch',e=>{});"""
+
+
+@bp.get("/muestra/<slug>-sw.js")
+def service_worker(slug):
+    if slug not in _APP:
+        return "", 404
+    return _SW, 200, {"Content-Type": "application/javascript", "Cache-Control": "no-cache",
+                      "Service-Worker-Allowed": "/muestra/"}

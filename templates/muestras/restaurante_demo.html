@@ -72,7 +72,7 @@ footer{background:var(--head);color:var(--mut);text-align:center;padding:44px 20
 .fijo.pop{animation:pop .45s}@keyframes pop{40%{filter:brightness(1.35);box-shadow:0 0 0 10px rgba(255,255,255,.18)}}
 :root{--suave:var(--mut);--oro:var(--acc);--oro2:var(--acc2);--negro:var(--dark);--papel:var(--bg);--texto:var(--tx);--crema:var(--card);--vino:var(--acc)}
 .pago{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap}.pago button{border:1px solid var(--line);background:var(--card);color:var(--tx);border-radius:999px;padding:8px 14px;font:inherit;font-size:13px;cursor:pointer}.pago button.on{background:var(--acc);color:#fff;border-color:var(--acc)}#mesaBar .btn{color:#fff}
-</style></head><body class="mesa"><div style="background:#000;color:#ffb3ab;font:500 13px/1.4 system-ui,sans-serif;text-align:center;padding:8px 12px">Su carta con Tributando · <a href="/muestra/restaurante-demo?mesa=5" style="color:#fff;text-decoration:underline">pedir desde la mesa 5</a> · <a href="/muestra/restaurante-demo-mesero" style="color:#fff;text-decoration:underline">modo mesero</a> · <a href="/muestra/restaurante-demo-cocina" style="color:#fff;text-decoration:underline">cocina</a> · <a href="/muestra/restaurante-demo-caja" style="color:#fff;text-decoration:underline">caja →</a></div>
+</style><link rel="manifest" href="/muestra/restaurante-demo.webmanifest"><meta name="theme-color" content="#100d0d"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Su Restaurante"><link rel="apple-touch-icon" href="/static/muestras/restaurante-demo/icono-192.png"></head><body class="mesa"><div style="background:#000;color:#ffb3ab;font:500 13px/1.4 system-ui,sans-serif;text-align:center;padding:8px 12px">Su carta con Tributando · <a href="/muestra/restaurante-demo?mesa=5" style="color:#fff;text-decoration:underline">pedir desde la mesa 5</a> · <a href="/muestra/restaurante-demo-mesero" style="color:#fff;text-decoration:underline">modo mesero</a> · <a href="/muestra/restaurante-demo-cocina" style="color:#fff;text-decoration:underline">cocina</a> · <a href="/muestra/restaurante-demo-caja" style="color:#fff;text-decoration:underline">caja →</a></div>
 <header class="bar"><a class="logo" href="#"><span style="font-weight:900;letter-spacing:.08em;color:#e63946;font-size:1.05rem">SU RESTAURANTE 🍽️</span></a><span style="display:flex;gap:8px"><a class="btn" href="#" id="resBtn1" style="background:transparent;border:1px solid var(--acc);color:var(--acc)">Reservar</a><a class="btn" href="#carta">Pedir</a></span></header>
 <section class="hero3"><div class="tri"><img src="/static/muestras/restaurante-demo/bandeja1.jpg" alt=""><img src="/static/muestras/restaurante-demo/burger1.jpg" alt=""><img src="/static/muestras/restaurante-demo/pastor3.jpg" alt=""></div><div class="cen"><div class="lgh"><span style="font-weight:900;letter-spacing:.08em;color:#f2c84b;font-size:1.05rem">SU RESTAURANTE 🍽️</span></div><h1>Su carta digital,<br><em>con su menú y sus precios.</em></h1><p class="eye">Ejemplo de Tributando · los platos y precios son inventados</p><a class="pedir" href="#carta">Pedido online</a> <a class="pedir" href="#" id="resBtn2" style="background:transparent;border:1px solid #fff">📅 Reservar mesa</a></div></section>
 <div class="pasos">🛒 Toque <b>＋ Agregar</b> · revise su pedido · envíelo por WhatsApp con el total</div>
@@ -119,7 +119,7 @@ const subtotal=()=>carro.reduce((a,l)=>a+l.c*l.p,0);
 function propina(){const b=$('#prop .on'),v=b?b.dataset.v:'0';if(v==='o')return Math.max(0,Math.round(+$('#propO').value||0));return Math.round(subtotal()*(+v)/100/100)*100}
 function domicilio(){const et=$('#entrega .on').textContent;return et==='Domicilio'?+$('#barrio').value:0}
 const selKey=c=>c.replace(/\D/g,'');function selLee(){try{return JSON.parse(localStorage.getItem('rd_sellos')||'{}')}catch(e){return {}}}
-function pintaSellos(){const c=selKey($('#cel').value),b=$('#sellos');if(c.length<10){b.style.display='none';return}const n=(selLee()[c]||0)%10;b.style.display='block';b.innerHTML='🎟 <b>Tarjeta de sellos</b>: '+'●'.repeat(n)+'○'.repeat(10-n)+' '+n+'/10 · con este pedido suma 1. Al completar 10, la siguiente orden de tacos es gratis.'}
+function pintaSellos(){const c=selKey($('#cel').value),b=$('#sellos');if(c.length<10){b.style.display='none';return}const n=(selLee()[c]||0)%10;b.style.display='block';b.innerHTML='🎟 <b>Tarjeta de sellos</b>: '+'●'.repeat(n)+'○'.repeat(10-n)+' '+n+'/10 · con este pedido suma 1. Al completar 10, la siguiente orden es gratis.'}
 function extra(){const o=$('#prop .on')&&$('#prop .on').dataset.v==='o';$('#propO').style.display=o?'block':'none';const et=$('#entrega .on').textContent,rec=et.startsWith('Recojo')||et.startsWith('En la mesa');$('#mesaBox').style.display=et.startsWith('En la mesa')?'block':'none';$('#dir').style.display=$('#lDir').style.display=rec?'none':'';$('#doc').style.display=$('#fe').checked?'block':'none';$('#qrBox').style.display=/Nequi|Bancolombia/.test($('#pago .on').textContent)?'block':'none';const pr=propina(),t=subtotal(),dm=domicilio();$('#domL').style.display=rec?'none':'flex';$('#barrio').style.display=$('#lBar').style.display=rec?'none':'';$('#domV').textContent=dm?'$ '+dm.toLocaleString('es-CO'):'a confirmar';$('#propV').textContent='$ '+pr.toLocaleString('es-CO');$('#totP').textContent=t?m(t+pr+dm):'$ 0';pintaSellos()}
 window.extra=extra;
 {const q=new URLSearchParams(location.search).get('mesa');if(q){$$('#entrega button').forEach(b=>b.classList.toggle('on',b.textContent==='En la mesa'));$('#mesa').value=q;const t=document.createElement('div');t.style.cssText='position:sticky;top:0;z-index:30;background:#25d366;color:#fff;text-align:center;font:700 14px/1.3 system-ui,sans-serif;padding:9px 12px';t.textContent='🍽 Está en la mesa '+q+' · escoja y envíe su pedido desde aquí';document.body.prepend(t);window.MESA=q;pinta();$('#mesaBar').style.display='flex';}}
@@ -149,11 +149,12 @@ $('#enviar').onclick=()=>{if(!carro.length)return;const t=carro.reduce((a,l)=>a+
  let s=(enMesa?'*Pedido de la MESA '+(nMesa||'?')+'*\n\n':'Hola Su Restaurante, quiero hacer este pedido:\n\n')+carro.map(l=>'• '+l.c+' x '+l.n+(l.o?' ('+l.o+')':'')+' — '+m(l.c*l.p)).join('\n')+'\n\n*Total: '+m(t)+'*';
  const nm=$('#nom').value.trim(),d=$('#dir').value.trim(),o=$('#obs').value.trim(),cel=$('#cel').value.trim(),ml=$('#mail').value.trim(),rec=$('#entrega .on').textContent.startsWith('Recojo'),pr=propina();
  const dm=domicilio(),bz=$('#barrio').selectedOptions[0].textContent.split(' · ')[0];
- if(!rec)s+='\nDomicilio ('+bz+'): '+(dm?m(dm):'a confirmar');if(pr)s+='\nPropina: '+m(pr);if(pr||dm)s+='\n*Total a pagar: '+m(t+pr+dm)+'*';
- {const c=selKey(cel);if(c.length>=10){const S=selLee();S[c]=(S[c]||0)+1;try{localStorage.setItem('rd_sellos',JSON.stringify(S))}catch(e){}const n=S[c]%10;s+='\nTarjeta de sellos: '+(n||10)+'/10'+(n===0?' 🎉 ¡la próxima orden de tacos es gratis!':'');}}
+ if(!rec)s+='\nDomicilio ('+bz+'): '+(dm?m(dm):'a confirmar');if(pr)s+='\nPropina: '+m(pr);const cu=window.cuponDesc?window.cuponDesc():0;if(cu)s+='\nCupón primera compra (−20 %): −'+m(cu);if(pr||dm||cu)s+='\n*Total a pagar: '+m(t-cu+pr+dm)+'*';
+ {const c=selKey(cel);if(c.length>=10){const S=selLee();S[c]=(S[c]||0)+1;try{localStorage.setItem('rd_sellos',JSON.stringify(S))}catch(e){}const n=S[c]%10;s+='\nTarjeta de sellos: '+(n||10)+'/10'+(n===0?' 🎉 ¡la próxima orden es gratis!':'');}}
  s+='\n\nEntrega: '+(enMesa?'En la mesa '+(nMesa||'?'):rec?'Recojo en el local':'Domicilio');if(nm)s+='\nNombre: '+nm;if(cel)s+='\nCelular/WhatsApp: '+cel;if(ml)s+='\nCorreo: '+ml;if(d&&!rec)s+='\nDirección: '+d;s+='\nPago: '+$('#pago .on').textContent+(/Nequi|Bancolombia/.test($('#pago .on').textContent)?' (pago con el QR, le mando el comprobante)':'');if($('#fe').checked)s+='\nFactura electrónica: sí'+($('#doc').value.trim()?' · '+$('#doc').value.trim():'');if(o)s+='\nNota: '+o;
  s+='\n\nSigo mi pedido aquí: '+location.origin+'/muestra/restaurante-demo?seguir=1'+(enMesa&&nMesa?'&mesa='+nMesa:'');
  try{const nmz=parseInt(nMesa,10);fetch('/api/muestra/restaurante-demo/comanda',{method:'POST',keepalive:true,headers:{'Content-Type':'application/json'},body:JSON.stringify({mesa:enMesa?(nmz||0):0,origen:enMesa?'qr':(rec?'recoge':'domicilio'),mesero:enMesa?'Cliente (QR)':'',items:carro.map(l=>({n:l.n+(l.o?' ('+l.o+')':''),p:l.p||0,c:l.c})),cliente:{nombre:nm,cel,dir:rec?'':d,barrio:rec?'':bz,pago:$('#pago .on').textContent,propina:pr,domicilio:rec?0:dm,nota:o}})}).catch(()=>{})}catch(e){}
+ if(window.trasPedido)window.trasPedido({nm,cel,d,bz});
  window.open('https://wa.me/'+WA+'?text='+encodeURIComponent(s),'_blank');abre(false);seguir(enMesa?(nMesa||'?'):'')};
 pinta();
 (function(){let M={};try{M=JSON.parse(localStorage.getItem('rd_menu')||'{}')}catch(e){}
@@ -175,4 +176,56 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')MO.classList.remove(
 $$('.prod').forEach(p=>p.addEventListener('click',e=>{if(e.target.closest('button'))return;abreP(p)}));
 $$('.add').forEach(b=>b.addEventListener('click',pop));
 if('IntersectionObserver' in window){const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('vis');io.unobserve(e.target)}}),{rootMargin:'0px 0px -5% 0px'});$$('.prod').forEach(p=>{p.classList.add('rev');io.observe(p)})}
-</script></body></html>
+</script><!-- ADDON-APP-V1 -->
+<style>
+.ad-banner{background:linear-gradient(90deg,#1b5e20,#2e7d32);color:#fff;text-align:center;font:600 13.5px/1.35 Montserrat,system-ui,sans-serif;padding:9px 12px}
+.ad-card{max-width:1100px;margin:14px auto 0;padding:0 16px}
+.ad-card .in{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.ad-card .in div{flex:1;min-width:200px;font-size:14px;color:var(--tx)}.ad-card .in small{display:block;color:var(--mut);font-size:12.5px;margin-top:3px}
+.ad-btn{border:0;border-radius:999px;padding:11px 18px;font:700 14px Montserrat,system-ui,sans-serif;cursor:pointer;background:#f2c84b;color:#111}
+.ad-ins{position:fixed;left:14px;bottom:14px;z-index:40;border:0;border-radius:999px;padding:11px 16px;font:700 13.5px Montserrat,system-ui,sans-serif;background:#fff;color:#111;box-shadow:0 6px 20px rgba(0,0,0,.35);cursor:pointer;display:none}
+.ad-mod{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;padding:18px}.ad-mod.ver{display:flex}
+.ad-mod .mc2{background:var(--bg);color:var(--tx);border:1px solid var(--line);border-radius:20px;max-width:420px;width:100%;overflow:hidden;font-family:Montserrat,system-ui,sans-serif}
+.ad-mod img{width:100%;height:210px;object-fit:cover;display:block}.ad-mod .b{padding:16px}.ad-mod h3{font-size:20px;font-weight:800;margin-bottom:4px}
+.ad-mod p{color:var(--mut);font-size:14px;margin:6px 0 14px}.ad-mod .row{display:flex;gap:10px}.ad-mod .row button{flex:1}
+</style>
+<button class="ad-ins" id="adIns">📲 Instalar la app</button>
+<div class="ad-mod" id="adPromo"><div class="mc2"><img id="adPImg" alt=""><div class="b"><small style="color:#f2c84b;font-weight:800;letter-spacing:.06em">🔥 HOY</small><h3 id="adPNom"></h3><p id="adPTxt"></p><div class="row"><button class="ad-btn" style="background:var(--card);color:var(--tx);border:1px solid var(--line)" id="adPNo">Ver la carta</button><button class="ad-btn" id="adPSi">Agregar</button></div></div></div></div>
+<div class="ad-mod" id="adIos"><div class="mc2"><div class="b"><h3>Instale la app</h3><p>En el iPhone: toque <b>Compartir</b> ⬆️ abajo y luego <b>«Agregar a inicio»</b>. Queda con su ícono, como cualquier app.</p><button class="ad-btn" style="width:100%" id="adIosOk">Entendido</button></div></div></div>
+<script>
+(function(){
+const P='rd',SLUG='restaurante-demo',PCT=20,hoy=new Date().toISOString().slice(0,10);
+const ls=(k,v)=>{try{if(v===undefined)return JSON.parse(localStorage.getItem(P+'_'+k)||'null');localStorage.setItem(P+'_'+k,JSON.stringify(v))}catch(e){return null}};
+const nPed=()=>+(ls('pedidos')||0);
+// 1 · cupón de primera compra (se descuenta solo en el total y en el mensaje de WhatsApp)
+window.cuponDesc=()=>{if(nPed()>0||window.MESA)return 0;const st=carro.reduce((a,l)=>a+l.c*l.p,0);return Math.round(st*PCT/100/100)*100};
+const _pinta=pinta;pinta=function(){_pinta();const cu=window.cuponDesc(),st=subtotal();let el=document.getElementById('adCu');
+ if(!el){el=document.createElement('div');el.id='adCu';el.style.cssText='display:flex;justify-content:space-between;color:#4ade80;font-weight:700;padding:6px 0;font-size:14.5px';const tt=document.getElementById('total');(tt.closest('.tot')||tt.parentElement).before(el)}
+ el.style.display=cu?'flex':'none';el.innerHTML='<span>🎁 Cupón primera compra (−'+PCT+' %)</span><span>−'+m(cu)+'</span>';if(cu)document.getElementById('total').textContent=m(st-cu)};
+window.trasPedido=d=>{ls('pedidos',nPed()+1);ls('ultimo',Object.assign({carro:JSON.parse(JSON.stringify(carro)),f:Date.now()},d||{}))};
+const bar=document.querySelector('header.bar');
+if(nPed()===0&&bar){const b=document.createElement('div');b.className='ad-banner';b.innerHTML='🎁 <b>'+PCT+' % de descuento en su primera compra</b> pidiendo aquí · se aplica solo, sin código';bar.after(b)}
+// 2 · pedir lo mismo de nuevo
+const u=ls('ultimo');const ancla=document.getElementById('carta');
+if(u&&u.carro&&u.carro.length&&ancla){const tot=u.carro.reduce((a,l)=>a+l.c*l.p,0),c=document.createElement('div');c.className='ad-card';
+ c.innerHTML='<div class="in"><div>🔁 <b>¿Lo mismo de la otra vez'+(u.nm?', '+u.nm.split(' ')[0]:'')+'?</b><small>'+u.carro.map(l=>l.c+' × '+l.n).join(' · ')+' · '+m(tot)+'</small></div><button class="ad-btn" id="adRep">Pedir lo mismo</button></div>';
+ ancla.before(c);document.getElementById('adRep').onclick=()=>{carro=JSON.parse(JSON.stringify(u.carro));guarda();
+  const pon=(id,v)=>{const e=document.getElementById(id);if(e&&v&&!e.value)e.value=v};pon('nom',u.nm);pon('cel',u.cel);pon('dir',u.d);pinta();abre(true)}}
+// 3 · promoción del día al abrir (una vez al día)
+const pd=document.querySelector('.prod[data-id="99"]');
+if(pd&&ls('promo')!==hoy&&!new URLSearchParams(location.search).get('seguir')){setTimeout(()=>{const img=pd.querySelector('img');if(img)document.getElementById('adPImg').src=img.src;
+ document.getElementById('adPNom').textContent=pd.dataset.nom+' · '+m(+pd.dataset.p);document.getElementById('adPTxt').textContent=(pd.querySelector('.tx p')||{}).textContent||'';
+ document.getElementById('adPromo').classList.add('ver');ls('promo',hoy)},900)}
+document.getElementById('adPNo').onclick=()=>document.getElementById('adPromo').classList.remove('ver');
+document.getElementById('adPSi').onclick=()=>{document.getElementById('adPromo').classList.remove('ver');pd.querySelector('.add').click()};
+document.getElementById('adPromo').onclick=e=>{if(e.target.id==='adPromo')e.target.classList.remove('ver')};
+// 4 · instalar como app (Android/PC: aviso nativo · iPhone: instrucciones)
+let pide=null;const bi=document.getElementById('adIns'),sol=window.matchMedia('(display-mode: standalone)').matches||navigator.standalone;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();pide=e;if(!sol)bi.style.display='block'});
+const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);if(ios&&!sol)bi.style.display='block';
+bi.onclick=async()=>{if(pide){pide.prompt();await pide.userChoice;pide=null;bi.style.display='none'}else if(ios)document.getElementById('adIos').classList.add('ver')};
+document.getElementById('adIosOk').onclick=()=>document.getElementById('adIos').classList.remove('ver');
+if('serviceWorker' in navigator)navigator.serviceWorker.register('/muestra/'+SLUG+'-sw.js',{scope:'/muestra/'}).catch(()=>{});
+})();
+</script>
+</body></html>
