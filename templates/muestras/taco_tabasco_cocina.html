@@ -1,0 +1,61 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cocina · Taco Tabasco</title><meta name="robots" content="noindex"><meta name="theme-color" content="#100d0d">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d0b0b;--card:#171313;--line:#2d2525;--tx:#f5efe9;--mut:#b0a39a;--acc:#e63946;--ok:#2a9d5c;--am:#f4a261;--az:#4ea8de}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font:500 15px/1.4 Montserrat,system-ui,sans-serif;min-height:100vh}
+.demo{background:#000;color:#ffb3ab;font-size:12.5px;text-align:center;padding:7px 10px}.demo a{color:#fff}
+header{display:flex;align-items:center;gap:12px;padding:12px 18px;background:#100d0d;border-bottom:1px solid var(--line);flex-wrap:wrap}
+header .logo{font-weight:900;letter-spacing:.06em;color:var(--acc)}
+header .k{display:flex;gap:10px;margin-left:auto;flex-wrap:wrap}
+.kp{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px 12px;font-size:12px;color:var(--mut)}.kp b{display:block;color:#fff;font-size:17px}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--tx);border-radius:999px;padding:7px 12px;font:inherit;font-size:12.5px;cursor:pointer}
+.cols{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding:16px}
+@media(max-width:860px){.cols{grid-template-columns:1fr}}
+.col{background:#120f0f;border:1px solid var(--line);border-radius:16px;padding:12px;min-height:200px}
+.col h2{font-size:14px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;display:flex;justify-content:space-between;margin-bottom:10px}
+.col h2 span{background:var(--card);border-radius:999px;padding:1px 9px;font-size:12px}
+.tk{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--am);border-radius:12px;padding:12px;margin-bottom:10px}
+.tk.preparando{border-left-color:var(--az)}.tk.lista{border-left-color:var(--ok)}
+.tk.nuevo{animation:ent 1s 3}@keyframes ent{50%{box-shadow:0 0 0 4px rgba(244,162,97,.45)}}
+.tk .h{display:flex;justify-content:space-between;align-items:baseline}
+.tk .h b{font-size:20px;font-weight:800}.tk .h small{color:var(--mut);font-size:12px}
+.tk .t{font-weight:800;font-size:13px}.t.ok{color:#6ee7a0}.t.med{color:var(--am)}.t.mal{color:#ff6b6b}
+.tk ul{list-style:none;margin:8px 0}.tk li{padding:3px 0;font-size:15px}.tk li b{color:#fff;margin-right:4px}
+.tk li i{display:block;color:var(--am);font-size:12.5px;font-style:normal;margin-left:22px}
+.tk button{width:100%;border:0;border-radius:10px;padding:11px;font:inherit;font-weight:800;cursor:pointer;color:#fff;background:var(--az)}
+.tk.preparando button{background:var(--ok)}
+.vacio{color:var(--mut);text-align:center;padding:24px 8px;font-size:13px}
+.son{position:fixed;right:14px;bottom:14px}
+</style></head><body>
+<div class="demo">Muestra · Pantalla de cocina de Taco Tabasco · los pedidos llegan del <a href="/muestra/taco-tabasco-mesero" target="_blank">celular del mesero</a></div>
+<header><span class="logo">TACO TABASCO 🌮 · COCINA</span><div class="k"><div class="kp">Por preparar<b id="kN">0</b></div><div class="kp">Mesas abiertas<b id="kM">0</b></div><div class="kp">Ventas cobradas<b id="kV">$ 0</b></div><div class="kp">Propinas<b id="kP">$ 0</b></div><button class="btn" id="reini">Reiniciar muestra</button></div></header>
+<div class="cols"><section class="col"><h2>🔔 Nuevas <span id="cN">0</span></h2><div id="lN"></div></section><section class="col"><h2>🔥 Preparando <span id="cP">0</span></h2><div id="lP"></div></section><section class="col"><h2>✅ Listas para llevar <span id="cL">0</span></h2><div id="lL"></div></section></div>
+<button class="btn son" id="son">🔈 Activar sonido</button>
+<script>
+const SLUG='taco-tabasco',API='/api/muestra/'+SLUG,$=s=>document.querySelector(s);
+const pesos=v=>'$ '+Math.round(v).toLocaleString('es-CO');
+let vistos=new Set(),primera=true,sonido=false,ahora=Date.now(),dif=0;
+$('#son').onclick=()=>{sonido=!sonido;$('#son').textContent=sonido?'🔊 Sonido activo':'🔈 Activar sonido';if(sonido)pita()};
+function pita(){try{const c=new (window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=880;g.gain.value=.15;o.start();setTimeout(()=>{o.frequency.value=1175},180);setTimeout(()=>{o.stop();c.close()},420)}catch(e){}}
+function mins(ms){return Math.max(0,Math.floor((Date.now()+dif-ms)/60000))}
+function tk(c){const m=mins(c.creada),cl=m<10?'ok':m<20?'med':'mal',nuevo=!primera&&!vistos.has(c.id);
+ return '<div class="tk '+c.estado+(nuevo?' nuevo':'')+'"><div class="h"><b>Mesa '+c.mesa+'</b><small>'+c.mesero+' · #'+c.id+'</small></div><div class="t '+cl+'">⏱ hace '+m+' min</div><ul>'+c.items.map(it=>'<li><b>'+it.c+'×</b>'+it.n+(it.nota?'<i>⚠ '+it.nota+'</i>':'')+'</li>').join('')+'</ul>'+
+ (c.estado==='nueva'?'<button data-id="'+c.id+'" data-e="preparando">Empezar a preparar 🔥</button>':c.estado==='preparando'?'<button data-id="'+c.id+'" data-e="lista">¡Listo! Avisar al mesero ✅</button>':'<div style="color:var(--mut);font-size:12.5px">Esperando que el mesero lo lleve</div>')+'</div>'}
+async function carga(){try{const r=await fetch(API+'/comandas',{cache:'no-store'}),j=await r.json();if(!j.ok)return;dif=j.ahora-Date.now();
+ const A=j.abiertas.filter(c=>c.estado!=='entregada'),N=A.filter(c=>c.estado==='nueva'),P=A.filter(c=>c.estado==='preparando'),L=A.filter(c=>c.estado==='lista');
+ if(!primera&&N.some(c=>!vistos.has(c.id))&&sonido)pita();
+ $('#lN').innerHTML=N.map(tk).join('')||'<p class="vacio">Sin pedidos nuevos. Cuando el mesero envíe una mesa, aparece aquí al instante.</p>';
+ $('#lP').innerHTML=P.map(tk).join('')||'<p class="vacio">Nada en preparación.</p>';
+ $('#lL').innerHTML=L.map(tk).join('')||'<p class="vacio">Nada esperando.</p>';
+ $('#cN').textContent=N.length;$('#cP').textContent=P.length;$('#cL').textContent=L.length;$('#kN').textContent=N.length+P.length;
+ $('#kM').textContent=new Set(j.abiertas.map(c=>c.mesa)).size;
+ let vend=0,prop=0;const mesasCerr={};j.cerradas.forEach(c=>{const k=c.mesa+'|'+c.cambio;if(!mesasCerr[k]){mesasCerr[k]=1;vend+=(c.pago.total||0);prop+=(c.pago.propina||0)}});
+ $('#kV').textContent=pesos(vend);$('#kP').textContent=pesos(prop);
+ j.abiertas.forEach(c=>vistos.add(c.id));primera=false;
+ document.querySelectorAll('[data-id]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{await fetch(API+'/comanda/'+b.dataset.id+'/estado',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({estado:b.dataset.e})})}catch(e){}carga()});
+}catch(e){}}
+$('#reini').onclick=async()=>{if(!confirm('¿Borrar todas las comandas de la muestra y empezar en ceros?'))return;await fetch(API+'/reiniciar',{method:'POST'});vistos=new Set();primera=true;carga()};
+carga();setInterval(()=>{if(!document.hidden)carga()},3000);
+</script></body></html>

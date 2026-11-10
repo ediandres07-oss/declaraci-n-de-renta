@@ -39,6 +39,7 @@ from src.auth import (AccesoAutorizado, ArchivoExogena, LeadEspera, LeadExogena,
 from src.calendario import fecha_limite
 from src.vencimientos import venc_bp, calendario_publico
 from src import prospectos as prosp_mod   # noqa: E402 — registra las tablas antes de init_auth
+from src import muestra_mesa as muestra_mesa_mod  # noqa: E402 — tabla muestra_comandas antes de init_auth
 from src.documentos import generar_checklist_pdf
 from src.guia_dian import generar_guia_dian_pdf
 
@@ -73,6 +74,9 @@ app.register_blueprint(sismos_bp)
 # Vitrina tributando.co/apps (lo que construye Jarvis; sin datos de clientes)
 from src.apps_publicas import apps_bp  # noqa: E402
 app.register_blueprint(apps_bp)
+
+# Modo mesero + pantalla de cocina de las muestras de restaurantes (10-nov-2026)
+app.register_blueprint(muestra_mesa_mod.bp)
 
 
 # Pre-carga zoneinfo al arranque: si dos hilos lo importan a la vez por primera
