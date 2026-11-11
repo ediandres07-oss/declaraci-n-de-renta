@@ -274,17 +274,18 @@
     {"g":"Gestión anual","ic":ic_imp,"items":["Plan anual de trabajo","Comités COPASST y de convivencia","Cronograma y seguimiento"]}
   ] %}
   {% set gr_pos = [
-    {"g":"Venta rápida","ic":ic_pos,"items":["Pantalla táctil con grid de productos","Buscar y escanear código de barras","Venta simple por monto","Varias ventas en paralelo"]},
-    {"g":"Caja y cobro","ic":ic_conta,"items":["Turnos de caja con arqueo","Cobro con vuelto y pago combinado","Efectivo, tarjetas y transferencia","Movimientos de efectivo (ingresos/retiros)"]},
-    {"g":"Integrado a tu contabilidad","ic":ic_dian,"items":["Cada venta se contabiliza sola","Inventario a costo promedio (kardex)","Tirilla PDF e historial de ventas"]}
+    {"g":"Venta rápida","ic":ic_pos,"items":["Pantalla táctil con fotos de productos","Código de barras con la cámara o lector","Venta por peso (kilo, libra, gramo) y gramera","Adiciones con precio y varias ventas a la vez"]},
+    {"g":"Caja y cobro","ic":ic_conta,"items":["Turnos de caja con arqueo","Efectivo, tarjetas, transferencia y QR Bre-B","Fiado con saldo por cliente y abonos","Dividir la cuenta: partes iguales o por productos"]},
+    {"g":"Recibo, impresora y sin internet","ic":ic_dian,"items":["Recibo por WhatsApp al cliente","Impresora térmica 58/80 mm y cajón monedero","Sigue vendiendo si se cae el internet","Equipos ilimitados: sin cobro por aparato"]},
+    {"g":"Restaurante e inventario","ic":ic_pos,"items":["Mesas, cocina y meseros con PIN (Restaurante y Cadena)","Inventario y pedido sugerido al proveedor","Varias sedes y bodegas (Cadena)"]}
   ] %}
   {% set _addons = [
     {"ic":ic_nom,"nombre":"Nómina electrónica","gancho":"Liquida, provisiona y emite la nómina electrónica a la DIAN.","grupos":gr_nom,
      "tiers":[{"n":"Nómina Básica","t":"Hasta 3 empleados","d":"36 documentos de nómina electrónica al año","p":"$29.900","pa":"$299.000"},{"n":"Nómina Pyme","t":"Hasta 10 empleados","d":"120 documentos de nómina electrónica al año","p":"$49.900","pa":"$499.000","f":true},{"n":"Nómina Plus","t":"Hasta 20 empleados","d":"300 documentos de nómina electrónica al año","p":"$89.900","pa":"$899.000"},{"n":"Nómina Ilimitada","t":"Empleados ilimitados","d":"Documentos de nómina electrónica ilimitados","p":"$129.900","pa":"$1.299.000"}]},
     {"ic":ic_sst,"nombre":"SG-SST","gancho":"Cumple la Resolución 0312 sin consultor: autoevaluación y documentos.","grupos":gr_sst,
      "tiers":[{"n":"SST Esencial","t":"Micro <10 · riesgo I–III","p":"$29.900","pa":"$299.000"},{"n":"SST Pyme","t":"10–50 trabajadores","p":"$59.900","pa":"$599.000","f":true},{"n":"SST Empresarial","t":">50 · o riesgo IV–V","p":"$99.900","pa":"$999.000"}]},
-    {"ic":ic_pos,"nombre":"Punto de venta (POS)","gancho":"Vende rápido con caja táctil; contabiliza e inventario solos.","grupos":gr_pos,
-     "tiers":[{"n":"POS 1 Caja","t":"1 terminal","p":"$29.900","pa":"$299.000"},{"n":"POS Multicaja","t":"Hasta 3 cajas","p":"$49.900","pa":"$499.000","f":true},{"n":"POS Ilimitado","t":"Cajas ilimitadas","p":"$79.900","pa":"$799.000"}]}
+    {"ic":ic_pos,"nombre":"Punto de venta (POS)","gancho":"Caja para tienda, restaurante o cadena: equipos ilimitados, sin cobro por aparato. Sede adicional $19.900/mes. Factura electrónica aparte, según volumen. Precios 2026, se ajustan con el salario mínimo.","grupos":gr_pos,
+     "tiers":[{"n":"POS Tienda","t":"1 sede","d":"Equipos y cajas ilimitados","p":"$49.900","pa":"$499.000"},{"n":"POS Restaurante","t":"Hasta 3 sedes","d":"Mesas, cocina, meseros con PIN, dividir cuenta y adiciones","p":"$89.900","pa":"$899.000","f":true},{"n":"POS Cadena","t":"Hasta 5 sedes y bodegas","d":"Varias sedes y bodegas, equipos ilimitados","p":"$149.900","pa":"$1.499.000"}]}
   ] %}
 
   <header class="hero" style="padding-top:38px">
