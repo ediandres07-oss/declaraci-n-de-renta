@@ -2792,11 +2792,11 @@ LECTOR_VERSION_LATEST = os.environ.get("LECTOR_VERSION", "1.2.3")
 # dentro del Lector). Se puede sobrescribir con la variable de entorno del mismo
 # nombre sin recompilar el servidor. Usa saltos de línea para viñetas.
 LECTOR_NOVEDADES = os.environ.get("LECTOR_NOVEDADES",
-    "• NUEVO: plano para Siigo Pyme (beta). En «Perfil del cliente» escoge «Siigo Pyme (beta)» y el Lector arma la plantilla de importación de movimiento contable de Siigo Pyme, con el comprobante P-001 y el mismo número de cada factura. Haz primero una prueba con dos facturas.\n"
-    "• Claude ahora te entrega el Formulario 300 OFICIAL de la DIAN lleno: pídele «hazme el 300 oficial del bimestre (o cuatrimestre) de este cliente» y lo guarda en los documentos del cliente, listo para revisar y pasar al MUISCA.\n"
-    "• Claude ya arma el plano de Syscafé completo (movimiento + plantilla de terceros) y te da el enlace para abrir cada archivo.\n"
-    "• Plano para ContaI: cada factura se parte por tarifa de IVA y toma las cuentas por tarifa del balance del cliente.\n"
-    "• Recuerda: con «Conectar con Claude» le preguntas por tus clientes en tus palabras (compras por fechas, borrador del 300 y del 350, planos para Siigo, Siigo Pyme, World Office, Helisa, Alegra, Loggro o Contai).")
+    "• NUEVA CARA: el Lector se ve moderno, más limpio y más rápido de leer.\n"
+    "• Aprende las cuentas por CONCEPTO sin subir el balance: la primera vez escoges la auxiliar de cada concepto (arriendo, servicios, honorarios, combustible…) y el Lector la recuerda para todas las facturas que vengan.\n"
+    "• El balance del cliente quedó en un solo lugar: lo subes una vez y ya.\n"
+    "• Con certificado digital, las facturas bajan de la DIAN sin captcha (el token solo busca).\n"
+    "• Recuerda: con «Conectar con Claude» le preguntas por tus clientes en tus palabras (compras por fechas, borrador del 300 y del 350, planos para Siigo, World Office, Syscafé, Helisa, Alegra, Loggro o Contai).")
 
 
 @app.post("/api/lector-suscripcion/crear")
