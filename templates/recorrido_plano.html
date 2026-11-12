@@ -314,7 +314,7 @@
   var actual=null;
   var io=new IntersectionObserver(function(ent){
     ent.forEach(function(e){
-      if(e.isIntersecting){ e.target.classList.add('vista'); }
+      if(e.isIntersecting){ e.target.classList.add('vista'); if(e.target.dataset.piso) dispatchEvent(new CustomEvent('recorrido:paso',{detail:+e.target.dataset.piso+1})); }
       if(e.intersectionRatio>=0.45){ marcar(e.target.id); }
     });
   },{threshold:[0,0.45]});
@@ -396,5 +396,6 @@
   dlg.addEventListener('close',function(){ vid.pause(); });
 })();
 </script>
+<script src="/static/js/medidor.js" defer></script>
 </body>
 </html>

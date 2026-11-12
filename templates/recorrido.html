@@ -444,6 +444,7 @@ function ir(c,p=0){
   if(c>=PISOS.length){ terminar(); return; }
   if(c<0) c=0;
   if(c!==estado.c) acorde(c);
+  if(c!==estado.c) dispatchEvent(new CustomEvent('recorrido:paso',{detail:c+1}));
   estado.c=c; estado.p=p; estado.t=0; aplicarPaso(false); pintarProgreso();
 }
 function siguiente(){ if(estado.p<pasos(estado.c)-1) ir(estado.c,estado.p+1); else ir(estado.c+1,0); }
@@ -600,5 +601,6 @@ document.querySelectorAll('[data-ar]').forEach(b=>b.onclick=async()=>{
 });
 $('#arcerrar').onclick=()=>$('#ar').classList.remove('abierto');
 </script>
+<script src="/static/js/medidor.js" defer></script>
 </body>
 </html>

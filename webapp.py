@@ -40,6 +40,7 @@ from src.calendario import fecha_limite
 from src.vencimientos import venc_bp, calendario_publico
 from src import prospectos as prosp_mod   # noqa: E402 — registra las tablas antes de init_auth
 from src import muestra_mesa as muestra_mesa_mod  # noqa: E402 — tabla muestra_comandas antes de init_auth
+from src import medidor as medidor_mod  # noqa: E402 — tabla eventos_web (medidor sin cookies) antes de init_auth
 from src.documentos import generar_checklist_pdf
 from src.guia_dian import generar_guia_dian_pdf
 
@@ -178,6 +179,9 @@ def _bucle_avisos_vencimientos():
                         n = _purgar_leads_vencidos(30)
                         if n:
                             print(f"[purga] {n} lead(s) del cálculo vencidos borrados")
+                    # Medidor propio: eventos de más de 400 días fuera (la tabla no crece sin fin).
+                    if _candado(f"purga-medidor|{ahora.date().isoformat()}"):
+                        medidor_mod.purgar(400)
         except Exception as exc:  # noqa: BLE001  — el hilo nunca debe morir
             print(f"[avisos-vencimientos] error: {exc}")
         time.sleep(1800)
@@ -217,6 +221,9 @@ def _capturar_origen():
     """Atribución: recuerda de dónde llegó el visitante (ads/instagram/…) en su
     primera visita, para sellarlo luego en leads, muestras y órdenes."""
     if request.method != "GET" or request.path.startswith(("/static", "/api/", "/admin")):
+        return
+    # 12-nov-2026: la portada y el recorrido no ponen cookie; los mide src/medidor.py.
+    if (request.path.rstrip("/") or "/") in medidor_mod.PAGINAS and not session.get("uid"):
         return
     # Bots/crawlers (el preview de Meta/WhatsApp golpea la landing en cada
     # impresión): no tocamos su sesión para que su respuesta quede SIN cookie y
@@ -1636,7 +1643,34 @@ def api_clic():
     return ("", 204)
 
 
+@app.post("/api/visita")
+def api_visita():
+    """Medidor propio (src/medidor.py): un evento de la portada o del recorrido, por
+    sendBeacon. Sin cookie y sin guardar la IP. Nunca falla hacia el visitante."""
+    try:
+        d = request.get_json(silent=True, force=True) or {}
+        ip = (request.headers.get("CF-Connecting-IP")
+              or (request.headers.get("X-Forwarded-For") or "").split(",")[0].strip()
+              or request.remote_addr or "")
+        medidor_mod.registrar(d, ip, request.headers.get("User-Agent") or "")
+    except Exception as e:  # noqa: BLE001
+        db.session.rollback()
+        app.logger.debug("medidor: %s", e)
+    return ("", 204)
+
+
 @app.get("/admin/visitas")
+@autorizado_requerido
+def admin_medidor():
+    """Medidor de la portada y el recorrido 3D: por día, por origen, embudo y dispositivo."""
+    try:
+        dias = max(1, min(int(request.args.get("dias", 30)), 365))
+    except ValueError:
+        dias = 30
+    return render_template("admin_medidor.html", m=medidor_mod.resumen(dias))
+
+
+@app.get("/admin/visitas-anterior")
 @autorizado_requerido
 def admin_visitas():
     """Cuántas personas entran a tributando.co: por día, por página y por origen (últimos 30 días)."""

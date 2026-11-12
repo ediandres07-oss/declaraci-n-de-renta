@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Visitas · Tributando</title>
+<style>
+  :root{--fondo:#0a0c13;--card:#151a26;--borde:#252c3c;--texto:#eef1f6;--suave:#aab3c2;--tenue:#6f7a8c;--oro:#e6c483;--verde:#37d38f;--cian:#5fe1ff}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--fondo);color:var(--texto);font-family:-apple-system,'Segoe UI',Roboto,sans-serif;padding:24px 16px 60px;line-height:1.45}
+  .wrap{max-width:1100px;margin:0 auto}
+  h1{font-size:26px;letter-spacing:-.02em}
+  .sub{color:var(--tenue);font-size:13.5px;margin-top:4px}
+  .sub a{color:var(--oro)}
+  .rango{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap}
+  .rango a{font-size:13px;padding:6px 12px;border-radius:999px;border:1px solid var(--borde);color:var(--suave);text-decoration:none}
+  .rango a.on{background:var(--oro);color:#1e2432;border-color:var(--oro);font-weight:700}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:18px}
+  .kpi{background:var(--card);border:1px solid var(--borde);border-radius:14px;padding:14px 16px}
+  .kpi small{color:var(--tenue);font-size:12px;text-transform:uppercase;letter-spacing:.08em}
+  .kpi b{display:block;font-size:30px;font-variant-numeric:tabular-nums;margin-top:4px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+  .card{background:var(--card);border:1px solid var(--borde);border-radius:14px;padding:16px}
+  .card h2{font-size:15px;margin-bottom:12px}
+  .barra{display:grid;grid-template-columns:minmax(120px,1.2fr) 2fr 56px;gap:10px;align-items:center;font-size:13.5px;margin:7px 0}
+  .barra i{display:block;height:10px;border-radius:5px;background:linear-gradient(90deg,var(--verde),var(--oro));min-width:2px}
+  .barra span:last-child{text-align:right;font-variant-numeric:tabular-nums;color:var(--suave)}
+  .barra .pct{color:var(--tenue);font-size:12px}
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th{text-align:left;color:var(--tenue);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.06em;padding:6px 8px;border-bottom:1px solid var(--borde)}
+  td{padding:7px 8px;border-bottom:1px solid #1c2230;font-variant-numeric:tabular-nums}
+  td.n,th.n{text-align:right}
+  .vacio{color:var(--tenue);font-size:13.5px}
+  .nota{color:var(--tenue);font-size:12.5px;margin-top:16px}
+  @media (max-width:760px){.kpis{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.kpi b{font-size:24px}
+    .barra{grid-template-columns:104px minmax(0,1fr) 34px;gap:8px;font-size:12.5px}
+    th,td{padding:6px 4px}th{font-size:10.5px;letter-spacing:.02em}.card{padding:13px}.kpi small{font-size:10.5px}}
+</style>
+</head>
+<body><div class="wrap">
+  <h1>Visitas de tributando.co</h1>
+  <p class="sub">Portada y recorrido 3D · desde el {{ m.desde.strftime('%d/%m/%Y') }} · sin cookies ni datos personales ·
+    <a href="/admin/visitas-anterior">contador anterior</a></p>
+  <div class="rango">{% for d in (1,7,30,90) %}<a href="?dias={{ d }}" class="{{ 'on' if m.dias==d }}">{{ 'Hoy' if d==1 else d ~ ' días' }}</a>{% endfor %}</div>
+
+  <div class="kpis">
+    <div class="kpi"><small>Personas hoy</small><b>{{ m.hoy_personas }}</b></div>
+    <div class="kpi"><small>Personas · {{ m.dias }} d</small><b>{{ m.total_personas }}</b></div>
+    <div class="kpi"><small>Páginas vistas</small><b>{{ m.total_vistas }}</b></div>
+    <div class="kpi"><small>Tocaron WhatsApp</small><b>{{ m.embudo[3][1] }}</b></div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>Embudo: portada → recorrido → paso 06 → WhatsApp</h2>
+      {% for nombre, n in m.embudo %}
+      <div class="barra"><span>{{ nombre }}</span><i style="width:{{ (n / m.tope * 100)|round(1) }}%"></i><span>{{ n }}</span></div>
+      {% endfor %}
+      <p class="nota">Personas distintas por día (se suman los días). Una persona que abrió el recorrido directo, sin pasar por la portada, cuenta en el paso 2.</p>
+    </div>
+    <div class="card">
+      <h2>Hasta dónde llegan en el recorrido</h2>
+      {% set p1 = (m.pasos[0][1] or 1) %}
+      {% set nombres = ['01 Recolector','02 El programa','03 Lector DIAN','04 Comprobante','05 IVA · 300','06 Retención · 350'] %}
+      {% for n, c in m.pasos %}
+      <div class="barra"><span>{{ nombres[n-1] }}</span><i style="width:{{ (c / p1 * 100)|round(1) if c else 0 }}%"></i><span>{{ c }}</span></div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>De dónde llegan</h2>
+      {% if m.por_origen %}
+      <table><tr><th>Origen</th><th class="n">Vistas</th><th class="n">Personas</th><th class="n">WhatsApp</th></tr>
+        {% for o in m.por_origen %}<tr><td>{{ o.origen }}</td><td class="n">{{ o.vistas }}</td><td class="n">{{ o.personas }}</td><td class="n">{{ o.whatsapp }}</td></tr>{% endfor %}
+      </table>
+      {% else %}<p class="vacio">Todavía no hay visitas en este rango.</p>{% endif %}
+      {% if m.campanas %}
+      <h2 style="margin-top:16px">Campañas (utm)</h2>
+      <table><tr><th>Fuente</th><th>Campaña</th><th class="n">Vistas</th></tr>
+        {% for s, c, n in m.campanas %}<tr><td>{{ s or '—' }}</td><td>{{ c }}</td><td class="n">{{ n }}</td></tr>{% endfor %}
+      </table>
+      {% endif %}
+    </div>
+    <div class="card">
+      <h2>Celular contra computador</h2>
+      {% set td = (m.disp.celular + m.disp.computador) or 1 %}
+      <div class="barra"><span>📱 Celular</span><i style="width:{{ (m.disp.celular / td * 100)|round(1) }}%"></i><span>{{ m.disp.celular }}</span></div>
+      <div class="barra"><span>💻 Computador</span><i style="width:{{ (m.disp.computador / td * 100)|round(1) }}%"></i><span>{{ m.disp.computador }}</span></div>
+      <h2 style="margin-top:18px">Clics</h2>
+      {% set etq = {'ver3d':'▶ Ver cómo funciona en 3D','whatsapp':'WhatsApp 333','ar':'◎ Verlo en tu espacio','lector_win':'Lector para Windows','lector_mac':'Lector para Mac','app':'Probar gratis / demo (app)'} %}
+      {% if m.clics %}
+      <table>{% for b, n in m.clics %}<tr><td>{{ etq.get(b, b) }}</td><td class="n">{{ n }}</td></tr>{% endfor %}</table>
+      {% else %}<p class="vacio">Sin clics todavía.</p>{% endif %}
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:14px">
+    <h2>Por día{% if m.dias > 7 %} <small style="color:var(--tenue);font-weight:400">(solo días con visitas)</small>{% endif %}</h2>
+    <table><tr><th>Día</th><th class="n">Personas</th><th class="n">Portada</th><th class="n">Recorrido</th><th class="n">WhatsApp</th></tr>
+      {% for d in m.por_dia if d.personas or d.whatsapp or m.dias <= 7 %}<tr><td>{{ ['lun','mar','mié','jue','vie','sáb','dom'][d.dia.weekday()] }} {{ d.dia.strftime('%d/%m') }}</td><td class="n">{{ d.personas }}</td><td class="n">{{ d.portada }}</td><td class="n">{{ d.recorrido }}</td><td class="n">{{ d.whatsapp }}</td></tr>{% endfor %}
+    </table>
+  </div>
+  <p class="nota">Cómo se cuenta: cada visita manda un aviso sin cookie. Para no contar dos veces a la misma persona se usa una huella que cambia cada día (no se guarda la IP); por eso una persona que vuelve otro día cuenta otra vez. No cuenta bots ni vistas previas de WhatsApp.</p>
+</div></body>
+</html>
