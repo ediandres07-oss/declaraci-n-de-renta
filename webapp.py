@@ -1459,9 +1459,6 @@ def _al_recorrido(condicional=True):
 
 @app.get("/sas")
 def sas_pagina():
-    _r = _al_recorrido(condicional=False)
-    if _r:
-        return _r
     """Constitución de S.A.S. en línea: borrador gratis y acompañamiento de $300.000."""
     from urllib.parse import quote
     wa = IA_CFG.get("negocio", {}).get("whatsapp") or "573332470715"
@@ -1503,9 +1500,6 @@ def sas_borrador():
 @app.get("/aliados")
 def aliados():
     """Programa de aliados: 20 %% recurrente para contadores que montan empresas."""
-    _r = _al_recorrido(condicional=False)
-    if _r:
-        return _r
     from urllib.parse import quote
     return render_template("aliados.html",
                            whatsapp=(IA_CFG.get("negocio", {}).get("whatsapp") or "573332470715"),
@@ -1534,15 +1528,7 @@ def calendario_2026_publico():
 
 
 # --- SEO: robots + sitemap (para que Google indexe las páginas públicas) ---
-_URLS_PUBLICAS = ["/", "/calendario-tributario-2026", "/contabilidad",
-                  "/links", "/descargar-lector", "/guia-dian",
-                  "/lector-xml-dian", "/plano-contable-siigo",
-                  "/plano-contable-contai", "/plano-contable-world-office",
-                  "/plano-contable-helisa", "/plano-contable-syscafe",
-                  "/iva-descontable-xml-dian", "/descargar-xml-dian",
-                  "/contadores/herramientas",
-                  "/contadores/recorrido",
-                  "/portafolio", "/apps/", "/apps-a-la-medida"]
+_URLS_PUBLICAS = ["/", "/contadores/recorrido", "/privacidad"]
 
 
 @app.get("/robots.txt")
@@ -2917,6 +2903,23 @@ for _seo_slug in _SEO_PAGES:
     app.add_url_rule("/" + _seo_slug,
                      endpoint="seo_" + _seo_slug.replace("-", "_"),
                      view_func=(lambda s=_seo_slug: _seo_view(s)))
+
+# 12-nov-2026, Edison: «todas esas páginas viejas, solamente deja las dos nuevas». Las páginas de
+# marketing viejas responden 301 al recorrido 3D (los enlaces que ya salieron siguen funcionando).
+# NO entran aquí: /contadores, /contadores/lector y /contadores/contabilidad (las usan el Lector de
+# escritorio y la app contable para pagar → 302 condicional en su vista, ver _al_recorrido),
+# /liquidador (herramienta pagada), /guia-dian (soporte a clientes), /descargar-lector*, /privacidad,
+# /muestra/*, /apps/*, ventanería, cotizador de obra, portafolio y demás líneas de negocio aparte.
+_VIEJAS_301 = {"/contadores/herramientas", "/contadores/demo", "/aliados", "/sas", "/contabilidad",
+               "/inicio-anterior", "/pase-gratis", "/vigilante", "/calendario-tributario-2026",
+               "/calendario", "/links", "/enlaces"} | {"/" + _k for _k in _SEO_PAGES}
+
+
+@app.before_request
+def _viejas_al_recorrido():
+    ruta = request.path.rstrip("/") or "/"
+    if request.method in ("GET", "HEAD") and ruta in _VIEJAS_301:
+        return redirect("/contadores/recorrido", code=301)
 
 # Última versión publicada del Lector. Súbela cada vez que recompiles y publiques
 # un instalador nuevo; el Lector la consulta y avisa al contador si está atrasado.
