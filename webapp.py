@@ -1431,8 +1431,37 @@ def vigilante_api():
         ruta.unlink(missing_ok=True)
 
 
+
+# 12-nov-2026, Edison: «esas páginas viejas ya no sirven» → las páginas de venta viejas llevan al
+# recorrido 3D. Redirección 302 (no 301): un 301 queda grabado en el navegador y rompería el pago
+# del que SÍ necesita la página. Se siguen sirviendo (sin redirigir) cuando:
+#   · trae ?comprar=1 o ?plan=… (la app contable manda a pagar con ?plan=; correos de la prueba del Lector),
+#   · viene del Lector de escritorio (referer 127.0.0.1 / localhost → botón «Pagar o cambiar plan»),
+#   · viene de navegar dentro de tributando.co o de la app contable.
+_REFERERS_PROPIOS = ("127.0.0.1", "localhost", "tributando.co", "www.tributando.co",
+                     "contabilidad-tributando.onrender.com")
+
+
+def _al_recorrido(condicional=True):
+    """Devuelve la redirección al recorrido 3D, o None si esta visita debe ver la página."""
+    if condicional:
+        if request.args.get("comprar") or request.args.get("plan"):
+            return None
+        from urllib.parse import urlparse
+        host = (urlparse(request.referrer or "").hostname or "").lower()
+        if host in _REFERERS_PROPIOS:
+            return None
+    r = redirect("/contadores/recorrido", code=302)
+    r.headers["Cache-Control"] = "no-store"
+    r.headers["Vary"] = "Referer"
+    return r
+
+
 @app.get("/sas")
 def sas_pagina():
+    _r = _al_recorrido(condicional=False)
+    if _r:
+        return _r
     """Constitución de S.A.S. en línea: borrador gratis y acompañamiento de $300.000."""
     from urllib.parse import quote
     wa = IA_CFG.get("negocio", {}).get("whatsapp") or "573332470715"
@@ -1474,6 +1503,9 @@ def sas_borrador():
 @app.get("/aliados")
 def aliados():
     """Programa de aliados: 20 %% recurrente para contadores que montan empresas."""
+    _r = _al_recorrido(condicional=False)
+    if _r:
+        return _r
     from urllib.parse import quote
     return render_template("aliados.html",
                            whatsapp=(IA_CFG.get("negocio", {}).get("whatsapp") or "573332470715"),
@@ -1503,12 +1535,12 @@ def calendario_2026_publico():
 
 # --- SEO: robots + sitemap (para que Google indexe las páginas públicas) ---
 _URLS_PUBLICAS = ["/", "/calendario-tributario-2026", "/contabilidad",
-                  "/contadores", "/links", "/descargar-lector", "/guia-dian",
+                  "/links", "/descargar-lector", "/guia-dian",
                   "/lector-xml-dian", "/plano-contable-siigo",
                   "/plano-contable-contai", "/plano-contable-world-office",
                   "/plano-contable-helisa", "/plano-contable-syscafe",
                   "/iva-descontable-xml-dian", "/descargar-xml-dian",
-                  "/contadores/herramientas", "/contadores/lector",
+                  "/contadores/herramientas",
                   "/contadores/recorrido",
                   "/portafolio", "/apps/", "/apps-a-la-medida"]
 
@@ -2050,6 +2082,9 @@ def admin_lector_liberar():
 def contadores_lector():
     """Landing del Lector XML (Tributando Contadores): planes por empresa + pago.
     Al confirmar el pago se crea la suscripción y se entrega la clave de licencia."""
+    _r = _al_recorrido(condicional=True)
+    if _r:
+        return _r
     u = usuario_actual()
     planes = []
     promo = _promo_lector_activa()
@@ -2111,7 +2146,7 @@ def _info_contador_ia() -> str:
             _v = PROMO_LECTOR["vence"]
             lineas.append(f"- Promo vigente: {PROMO_LECTOR['etiqueta']} (hasta {_v.day}/{_v.month}/{_v.year}).")
     except Exception:
-        lineas.append("    · Consulta los planes exactos en la página /contadores/lector.")
+        lineas.append("    · Consulta los planes exactos en la página /contadores/lector?comprar=1.")
     return "\n".join(lineas)
 
 
@@ -2120,6 +2155,9 @@ def contadores():
     """Página mayorista para contadores: pase de temporada (venta por WhatsApp)
     + prueba gratis de 1 declaración de muestra. El acceso pago se habilita
     agregando el correo del contador a config/acceso.yaml."""
+    _r = _al_recorrido(condicional=True)
+    if _r:
+        return _r
     u = usuario_actual()
     muestra_usada = False
     if u is not None:
@@ -2417,6 +2455,9 @@ def contadores_contabilidad():
     """Planes y precios del software de contabilidad para contadores
     (Gratis / Emprende / Contador / Firma). Vitrina pública; el botón lleva
     a la app en contabilidad-tributando.onrender.com."""
+    _r = _al_recorrido(condicional=True)
+    if _r:
+        return _r
     return render_template("planes_contabilidad.html")
 
 
@@ -3080,7 +3121,7 @@ def payu_respuesta():
         "cursor:pointer'>✅ Ya transferí — avisar</button>"
         "<div id='ypMsg' style='font-size:.85rem;color:#1b7f4b;margin-top:6px'></div></div></div><br>"
         "{% endif %}"
-        "<a href='/contadores/lector' style='display:inline-block;margin-top:16px;background:#c8991f;color:#fff;"
+        "<a href='/contadores/lector?comprar=1' style='display:inline-block;margin-top:16px;background:#c8991f;color:#fff;"
         "padding:12px 22px;border-radius:10px;text-decoration:none;font-weight:600'>Volver</a></body></html>",
         t=titulo, m=msg, pagada=pagada, rechazada=rechazada, valor=valor, ref=ref,
         banco=PAGO.get("banco", ""), tipo_cuenta=PAGO.get("tipo", ""),
@@ -3286,7 +3327,7 @@ def epayco_respuesta():
         "cursor:pointer'>✅ Ya transferí — avisar</button>"
         "<div id='ypMsg' style='font-size:.85rem;color:#1b7f4b;margin-top:6px'></div></div></div><br>"
         "{% endif %}"
-        "<a href='/contadores/lector' style='display:inline-block;margin-top:16px;background:#c8991f;color:#fff;"
+        "<a href='/contadores/lector?comprar=1' style='display:inline-block;margin-top:16px;background:#c8991f;color:#fff;"
         "padding:12px 22px;border-radius:10px;text-decoration:none;font-weight:600'>Volver</a></body></html>",
         t=titulo, m=msg, pagada=pagada, rechazada=rechazada, valor=valor, ref=ref,
         banco=PAGO.get("banco", ""), tipo_cuenta=PAGO.get("tipo", ""),

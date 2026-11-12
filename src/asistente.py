@@ -195,7 +195,7 @@ discriminado, y arma el PLANO CONTABLE listo para importar en Siigo, Contai, Wor
 de IVA (formulario 300) y de retención en la fuente (formulario 350), ficha del cliente con lector de RUT \
 (detecta NIT, nombre y responsabilidades), calendario de tareas y vencimientos DIAN 2026 por cliente, \
 buscador tributario con IA y auditorías de acuses y de balance.
-   - Se paga por suscripción según el número de empresas (planes en /contadores/lector), mensual o anual.
+   - Se paga por suscripción según el número de empresas (planes en tributando.co/contadores/lector?comprar=1), mensual o anual.
 
 3) LA APP DE CONTABILIDAD Y NÓMINA (software contable en la nube, tipo ERP-lite; alternativa a Siigo/Alegra):
    - Recibe AUTOMÁTICAMENTE las facturas electrónicas de la DIAN y las CAUSA por ti en partida doble, sin \

@@ -423,7 +423,7 @@ def metricas_negocio() -> dict:
 
 SITIO = "https://tributando.co"
 _DESCARGA_LECTOR = SITIO + "/descargar-lector"
-_PLANES_LECTOR = SITIO + "/contadores/lector"
+_PLANES_LECTOR = SITIO + "/contadores/lector?comprar=1"
 _ONBOARDING_PASOS = [1, 7, 20, 28]
 
 

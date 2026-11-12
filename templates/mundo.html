@@ -177,6 +177,42 @@ html.sin3d body{background:radial-gradient(80% 60% at 70% 30%,rgba(55,211,143,.1
   .escena{min-height:170vh}
 }
 @media (prefers-reduced-motion:reduce){.palabra,.lead,.dato,.acciones{transition:none}.grano{animation:none}}
+/* 12-nov-2026: acceso al recorrido 3D (/contadores/recorrido) */
+.boton.r3d{background:linear-gradient(100deg,var(--oro),#fff1cf 50%,var(--oro));color:#1c1606;box-shadow:0 0 0 0 rgba(230,196,131,.5);animation:r3dLate 2.6s infinite}
+.boton.r3d:hover{box-shadow:0 12px 34px rgba(230,196,131,.4)}
+@keyframes r3dLate{0%{box-shadow:0 0 0 0 rgba(230,196,131,.45)}100%{box-shadow:0 0 0 18px rgba(230,196,131,0)}}
+.vitrina3d{position:relative;z-index:10;min-height:100vh;display:flex;align-items:center;padding:12vh clamp(16px,7vw,110px)}
+.v3d{display:grid;grid-template-columns:minmax(280px,.8fr) 1.2fr;gap:clamp(24px,5vw,70px);align-items:center;width:100%;max-width:1320px;margin:0 auto;color:var(--txt);text-decoration:none}
+.v3d h2{font-size:clamp(38px,5.4vw,80px)}
+.v3d .lead{opacity:1;transform:none}
+.v3d .acciones{opacity:1;transform:none;justify-content:flex-start}
+.v3d .nota{margin-top:14px;font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.08em;color:var(--tenue)}
+.v3d-esc{position:relative;aspect-ratio:16/11;perspective:1300px;perspective-origin:50% 40%}
+.v3d-mundo{position:absolute;inset:0;transform-style:preserve-3d;transform:rotateX(9deg) rotateY(-20deg);animation:v3dGira 14s ease-in-out infinite alternate}
+@keyframes v3dGira{0%{transform:rotateX(10deg) rotateY(-26deg)}100%{transform:rotateX(6deg) rotateY(-8deg)}}
+.holo{position:absolute;transform-style:preserve-3d;animation:v3dFlota 6s ease-in-out infinite alternate}
+.holo img{display:block;width:100%;height:auto;border-radius:10px;border:1px solid rgba(230,196,131,.55);
+  box-shadow:0 0 0 1px rgba(95,225,255,.12),0 0 30px rgba(95,225,255,.18),0 30px 60px -20px rgba(0,0,0,.9);opacity:.92;transition:transform .8s cubic-bezier(.2,.8,.2,1)}
+.holo:nth-child(even) img{border-color:rgba(95,225,255,.55)}
+.holo::after{content:"";position:absolute;inset:0;border-radius:10px;pointer-events:none;
+  background:repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0 1px,transparent 1px 3px),linear-gradient(115deg,transparent 35%,rgba(255,255,255,.14) 48%,transparent 60%);
+  background-size:auto,250% 100%;animation:v3dBarre 5s linear infinite}
+@keyframes v3dBarre{0%{background-position:0 0,120% 0}100%{background-position:0 0,-120% 0}}
+@keyframes v3dFlota{0%{translate:0 -6px}100%{translate:0 8px}}
+.v3d:hover .holo img{transform:translateZ(40px)}
+.v3d-luz{position:absolute;inset:0;overflow:visible;transform:translateZ(10px)}
+.v3d-luz path{fill:none;stroke:url(#v3dGrad);stroke-width:2;stroke-dasharray:6 10;animation:v3dFluye 3s linear infinite;filter:drop-shadow(0 0 6px rgba(95,225,255,.8))}
+@keyframes v3dFluye{to{stroke-dashoffset:-160}}
+.v3d-play{position:absolute;left:50%;top:50%;width:84px;height:84px;margin:-42px 0 0 -42px;border-radius:50%;display:grid;place-items:center;font-size:26px;
+  background:rgba(230,196,131,.92);color:#1c1606;box-shadow:0 0 0 10px rgba(230,196,131,.18),0 20px 50px rgba(0,0,0,.6);transform:translateZ(260px);animation:r3dLate 2.6s infinite}
+@media (max-width:760px){
+  .vitrina3d{padding:10vh 16px}
+  .v3d{grid-template-columns:1fr}
+  .v3d-esc{order:-1}
+  .v3d .acciones{justify-content:center}.v3d{text-align:center}.v3d .lead{margin-left:auto;margin-right:auto}
+  .v3d-play{width:68px;height:68px;margin:-34px 0 0 -34px;font-size:22px}
+}
+@media (prefers-reduced-motion:reduce){.v3d-mundo,.holo,.holo::after,.v3d-luz path,.boton.r3d,.v3d-play{animation:none}}
 </style>
 </head>
 <body>
@@ -196,6 +232,7 @@ html.sin3d body{background:radial-gradient(80% 60% at 70% 30%,rgba(55,211,143,.1
       <div class="etiqueta">Tributando · 2026</div>
       <h1 class="partir">Contabilidad que se <em>mueve sola.</em></h1>
       <p class="lead">Cada factura que se emite en Colombia pasa por la DIAN. Nosotros la tomamos ahí y la convertimos en libros, impuestos y decisiones. Baje despacio.</p>
+      <div class="acciones"><a class="boton r3d" href="/contadores/recorrido">▶ Ver cómo funciona en 3D</a></div>
       <div class="vivo" id="vivo" hidden><i></i><span>Hoy Tributando ha leído <b id="cHoy">0</b> facturas · <b id="cMes">0</b> este mes</span></div>
     </div></div>
     <div class="bajar">BAJE</div>
@@ -262,6 +299,32 @@ html.sin3d body{background:radial-gradient(80% 60% at 70% 30%,rgba(55,211,143,.1
     </div></div>
   </section>
 
+  <section class="vitrina3d" id="recorrido3d" aria-label="Recorrido 3D">
+    <a class="v3d" href="/contadores/recorrido">
+      <div class="texto">
+        <div class="etiqueta">Recorrido 3D</div>
+        <h2>Entre a Tributando <em>por dentro.</em></h2>
+        <p class="lead">Las pantallas reales de la app flotando en el espacio: la DIAN, la contabilidad, el comprobante, el IVA y la retención. Dos minutos, avanza solo. Y en el celular, véalo flotando en su propia habitación.</p>
+        <div class="acciones"><span class="boton r3d">▶ Ver el recorrido 3D</span></div>
+        <div class="nota">2 MIN · REALIDAD AUMENTADA EN EL CELULAR · EMPRESA DE EJEMPLO</div>
+      </div>
+      <div class="v3d-esc" aria-hidden="true">
+        <div class="v3d-mundo">
+          <div class="holo" style="left:10%;top:4%;width:56%;transform:translateZ(-140px);animation-delay:-1s"><img src="/static/recorrido/r2-programa.jpg" alt="" loading="lazy" decoding="async"></div>
+          <div class="holo" style="left:72%;top:0;width:25%;transform:translateZ(-70px) rotateY(-10deg);animation-delay:-3s"><img src="/static/recorrido/r6-retencion.jpg" alt="" loading="lazy" decoding="async"></div>
+          <div class="holo" style="left:0;top:56%;width:50%;transform:translateZ(40px) rotateY(8deg);animation-delay:-2s"><img src="/static/recorrido/r1-recolector.jpg" alt="" loading="lazy" decoding="async"></div>
+          <div class="holo" style="left:30%;top:40%;width:62%;transform:translateZ(130px);animation-delay:-4s"><img src="/static/recorrido/r4-comprobante.jpg" alt="" loading="lazy" decoding="async"></div>
+          <div class="holo" style="left:76%;top:34%;width:23%;transform:translateZ(210px) rotateY(-14deg);animation-delay:-5s"><img src="/static/recorrido/r5-iva.jpg" alt="" loading="lazy" decoding="async"></div>
+          <svg class="v3d-luz" viewBox="0 0 160 110" preserveAspectRatio="none">
+            <defs><linearGradient id="v3dGrad" x1="0" x2="1"><stop offset="0" stop-color="#5fe1ff"/><stop offset="1" stop-color="#e6c483"/></linearGradient></defs>
+            <path d="M8 104 C 30 80, 20 60, 40 52 S 70 30, 62 18 S 110 8, 140 14 S 150 50, 138 62 S 90 70, 100 86"/>
+          </svg>
+          <span class="v3d-play">▶</span>
+        </div>
+      </div>
+    </a>
+  </section>
+
   <section class="escena centro abajo" data-nombre="TRIBUTANDO">
     <div class="fijo"><div class="texto">
       <div class="etiqueta">05 · Conózcalo</div>
@@ -276,7 +339,7 @@ html.sin3d body{background:radial-gradient(80% 60% at 70% 30%,rgba(55,211,143,.1
 </main>
 
 <footer class="pie">
-  <nav class="enlaces"><a href="/contadores/lector">Lector XML DIAN</a><a href="{{ app_url }}/descargador.zip">Descargador</a><a href="/contadores">Para contadores</a><a href="/liquidador">Liquidador de renta</a><a href="/sas">Crear su SAS</a><a href="/aliados">Aliados</a><a href="/privacidad">Privacidad</a><a href="mailto:contacto@tributando.co">contacto@tributando.co</a></nav>
+  <nav class="enlaces"><a href="/privacidad">Privacidad</a><a href="mailto:contacto@tributando.co">contacto@tributando.co</a></nav>
   <span>© 2026 Tributando · Medellín, Colombia</span>
   <span>Cifras y conversación de ejemplo. Su factura no se guarda en ningún lado. <a href="/">Volver al inicio</a></span>
 </footer>
