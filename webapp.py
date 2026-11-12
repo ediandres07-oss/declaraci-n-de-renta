@@ -1509,6 +1509,7 @@ _URLS_PUBLICAS = ["/", "/calendario-tributario-2026", "/contabilidad",
                   "/plano-contable-helisa", "/plano-contable-syscafe",
                   "/iva-descontable-xml-dian", "/descargar-xml-dian",
                   "/contadores/herramientas", "/contadores/lector",
+                  "/contadores/recorrido",
                   "/portafolio", "/apps/", "/apps-a-la-medida"]
 
 
@@ -2417,6 +2418,97 @@ def contadores_contabilidad():
     (Gratis / Emprende / Contador / Firma). Vitrina pública; el botón lleva
     a la app en contabilidad-tributando.onrender.com."""
     return render_template("planes_contabilidad.html")
+
+
+# 12-nov-2026: recorrido inmersivo (estilo web inmobiliaria 2026) por el flujo real de
+# Tributando. Capturas SOLO de la empresa demo COMERCIALIZADORA LA MUESTRA (nunca clientes).
+# Cada punto: (x %, y %, título, frase). Las imágenes viven en static/recorrido/.
+RECORRIDO_PISOS = [
+    {"id": "recolector", "corto": "Recolector", "img": "r1-recolector.jpg", "k1": 0.75, "w": 1800, "h": 635,
+     "kicker": "Descargar de la DIAN",
+     "titulo": "Las facturas bajan solas de la DIAN",
+     "texto": "Pegas el enlace del correo de la DIAN y el Recolector trae compras, ventas, "
+              "nómina y documento soporte del mes, directo a la contabilidad.",
+     "video": "/static/video/recolector-contabilidad.mp4",
+     "puntos": [
+         (16.7, 81, "El enlace de la DIAN", "Pegas el enlace que la DIAN le manda al correo de tu cliente. Nada más."),
+         (42, 44, "Qué traer", "Eliges qué bajar: compras, ventas, nómina electrónica y documento soporte, por fechas."),
+         (50, 83, "Buscar y descargar", "Primero busca en la DIAN; luego descarga y envía todo a la nube con un clic."),
+         (83.3, 45, "100 % listo", "En el ejemplo: 48 documentos en 13 segundos."),
+         (79.8, 88, "Ya contabilizadas", "Al terminar, cada documento ya quedó contabilizado en la empresa."),
+     ]},
+    {"id": "programa", "corto": "El programa", "img": "r2-programa.jpg", "k1": 0.8, "w": 1800, "h": 1125,
+     "kicker": "El programa contable",
+     "titulo": "Así se ve la contabilidad por dentro",
+     "texto": "Un tablero por empresa con el libro en tiempo real: balance, utilidad, cartera, "
+              "proveedores, impuestos y vencimientos.",
+     "puntos": [
+         (11, 40, "Todo el menú contable", "Ingresos, gastos, inventario, bancos, impuestos y reportes en un solo lugar."),
+         (40, 37.8, "Empresa lista en pasos", "Saldos iniciales, parametrización y facturas de la DIAN: la app te guía."),
+         (32, 68.4, "Cifras al día", "Activo, pasivo y utilidad salen del libro al instante, sin correr procesos."),
+         (70, 89.5, "Estado de resultados", "Ingresos, costos y gastos del año, siempre actualizados."),
+         (14.5, 72.7, "El asistente de Tributando", "Le preguntas «¿cómo va el IVA?» y te responde con los libros de la empresa."),
+     ]},
+    {"id": "lector", "corto": "Lector DIAN", "img": "r3-lector.jpg", "k1": 0.62, "w": 1600, "h": 1088,
+     "kicker": "Cada factura, leída",
+     "titulo": "Cada factura llega leída, con su IVA",
+     "texto": "El Lector muestra las facturas electrónicas de la empresa con tercero, subtotal, IVA "
+              "y total, y en qué va su contabilización.",
+     "puntos": [
+         (22, 3.6, "Filtros", "Compras, ventas, pendientes o causadas: ves solo lo que necesitas."),
+         (48, 16.5, "Planos para otros programas", "¿Llevas la contabilidad en otro lado? Exporta el plano para Siigo, World Office, Helisa o genérico."),
+         (62, 42.5, "El IVA del XML", "Subtotal e IVA salen del XML de la factura. Nadie los digita."),
+         (95, 55, "Estado de cada factura", "En verde, contabilizada. En rojo, falta un dato y la app te dice cuál."),
+     ]},
+    {"id": "comprobante", "corto": "Comprobante", "img": "r4-comprobante.jpg", "k1": 0.56, "w": 1800, "h": 408,
+     "kicker": "De la factura al asiento",
+     "titulo": "Cada factura queda como comprobante contable",
+     "texto": "Partida doble con su cuenta, su tercero y su IVA. Ejemplo: el arriendo de la bodega "
+              "de la empresa demo.",
+     "puntos": [
+         (25, 55, "Débito al gasto", "512010 Arrendamientos, por la base de la factura."),
+         (27.5, 67, "Débito al IVA descontable", "El IVA de la compra va a la 2408 y alimenta el formulario 300."),
+         (66, 55, "El tercero", "Cada línea con NIT y nombre del proveedor: lista para la exógena."),
+         (84, 79, "Crédito al proveedor", "220505 Proveedores nacionales, por el total a pagar."),
+         (60, 92, "Siempre cuadra", "Débitos iguales a créditos en cada comprobante."),
+     ]},
+    {"id": "iva", "corto": "IVA · 300", "img": "r5-iva.jpg", "k1": 0.5, "w": 700, "h": 988,
+     "kicker": "Formulario 300",
+     "titulo": "El borrador del IVA se arma solo",
+     "texto": "Del libro sale el 300 del bimestre, casilla por casilla. Lo descargas en PDF oficial, "
+              "réplica o Excel.",
+     "puntos": [
+         (46, 16.5, "PDF oficial, réplica o Excel", "Descargas el borrador en el formato que prefieras para revisarlo."),
+         (60, 32.6, "Ingresos gravados (28)", "Salen de las ventas contabilizadas del bimestre."),
+         (65, 42.7, "Compras al 19 % (51)", "Salen de las facturas de compra que bajaron de la DIAN."),
+         (67.5, 58, "IVA descontable (72)", "Suma del IVA de cada comprobante de compra."),
+         (63, 94, "Total a pagar (88)", "En el ejemplo: $1.589.350 del bimestre mayo–junio."),
+     ]},
+    {"id": "retencion", "corto": "Retención · 350", "img": "r6-retencion.jpg", "k1": 0.5, "w": 700, "h": 660,
+     "kicker": "Formulario 350",
+     "titulo": "Y la retención en la fuente, mes a mes",
+     "texto": "El 350 se arma con lo que de verdad se retuvo en el mes: concepto, base y tarifa. "
+              "Y el certificado para cada tercero.",
+     "puntos": [
+         (46, 24.8, "PDF oficial, réplica o Excel", "El 350 del mes listo para revisar y presentar."),
+         (36, 49.7, "Concepto y tarifa", "Cada renglón con la tarifa con la que se practicó: aquí, 11 %."),
+         (57, 49.7, "Base", "La base sale del comprobante donde se practicó la retención."),
+         (60, 75, "Total retenido", "El valor del mes, listo para el formulario."),
+         (76, 92, "Cuadra solo", "Base × tarifa = retenido, renglón por renglón."),
+     ]},
+]
+
+
+@app.get("/recorrido")
+@app.get("/contadores/recorrido")
+def recorrido():
+    """Recorrido inmersivo de pantalla completa por Tributando (Recolector → programa →
+    Lector → comprobante → IVA 300 → retención 350) con puntos clicables."""
+    # ?plano=1 → respaldo liviano (scroll con capturas) para equipos sin WebGL o lentos.
+    plantilla = "recorrido_plano.html" if request.args.get("plano") else "recorrido.html"
+    return render_template(plantilla, pisos=RECORRIDO_PISOS,
+                           whatsapp="573332470715",
+                           app_url="https://contabilidad-tributando.onrender.com")
 
 
 @app.post("/api/pase-contador/crear")

@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Recorrido por Tributando | Contabilidad que se hace sola</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Entra a Tributando por dentro: las facturas bajan de la DIAN, quedan contabilizadas con su débito, crédito, tercero e IVA, y salen solos los borradores del 300 y el 350.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://tributando.co/contadores/recorrido">
+<meta property="og:title" content="Recorre Tributando por dentro">
+<meta property="og:description" content="De la factura de la DIAN al formulario 300 y 350, en seis paradas. Toca los puntos y entra a cada pantalla.">
+<meta property="og:image" content="https://tributando.co/static/recorrido/r2-programa.jpg">
+<meta name="theme-color" content="#0a0c13">
+<link rel="preload" as="image" href="/static/recorrido/r1-recolector.jpg">
+<style>
+  :root{
+    --fondo:#0a0c13; --navy:#1e2432; --card:#161b28; --oro:#e6c483; --oro2:#c9a25a;
+    --verde:#37d38f; --texto:#f3f5f8; --suave:#c2c9d4; --tenue:#8b93a1;
+    --borde:rgba(230,196,131,.22); --nav:188px; --barra:58px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-snap-type:y proximity;scroll-behavior:smooth;background:var(--fondo)}
+  body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;color:var(--texto);background:var(--fondo);
+    line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:
+    radial-gradient(900px 520px at 85% -10%,rgba(230,196,131,.10),transparent 60%),
+    radial-gradient(800px 480px at 0% 100%,rgba(55,211,143,.06),transparent 60%),
+    linear-gradient(160deg,#0e1220,#0a0c13)}
+  a{color:inherit;text-decoration:none}
+  button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+
+  /* ---------- barra superior ---------- */
+  .top{position:fixed;top:0;left:0;right:0;height:var(--barra);z-index:30;display:flex;align-items:center;
+    gap:12px;padding:0 22px;background:linear-gradient(180deg,rgba(10,12,19,.92),rgba(10,12,19,.55) 70%,transparent);
+    backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+  .top .marca{font-weight:750;font-size:17px;letter-spacing:-.01em}
+  .top .marca span{color:var(--oro)}
+  .top .etq{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--tenue);border-left:1px solid #2a3142;padding-left:12px}
+  .top .der{margin-left:auto;display:flex;gap:10px;align-items:center}
+  .top .der a{font-size:13px;color:var(--suave);padding:7px 12px;border-radius:999px;border:1px solid #2a3142}
+  .top .der a.oro{background:var(--oro);color:var(--navy);border-color:var(--oro);font-weight:700}
+  .prog{position:fixed;top:0;left:0;height:2px;width:0;background:linear-gradient(90deg,var(--oro2),var(--oro));z-index:31;transition:width .2s}
+
+  /* ---------- selector de piso ---------- */
+  .pisos{position:fixed;left:18px;top:50%;transform:translateY(-50%);z-index:25;width:calc(var(--nav) - 24px)}
+  .pisos ol{list-style:none;position:relative;display:flex;flex-direction:column;gap:4px}
+  .pisos ol::before{content:"";position:absolute;left:17px;top:14px;bottom:14px;width:1px;background:#2a3142}
+  .pisos button{display:flex;align-items:center;gap:10px;width:100%;padding:6px 8px 6px 0;text-align:left;
+    color:var(--tenue);font-size:13px;border-radius:10px;transition:color .25s}
+  .pisos .num{position:relative;flex:none;width:35px;height:28px;display:grid;place-items:center;font-size:11px;
+    font-weight:700;letter-spacing:.04em;border:1px solid #2a3142;background:var(--fondo);border-radius:8px;transition:all .3s}
+  .pisos button:hover{color:var(--suave)}
+  .pisos button.on{color:var(--texto)}
+  .pisos button.on .num{background:var(--oro);color:var(--navy);border-color:var(--oro);box-shadow:0 0 0 4px rgba(230,196,131,.15)}
+  .pisos button.hecho .num{border-color:var(--oro2);color:var(--oro)}
+  .pisos .tit{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pisos .cap{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--tenue);margin:0 0 10px 2px}
+
+  /* ---------- escenas ---------- */
+  .esc{min-height:100vh;min-height:100svh;scroll-snap-align:start;position:relative;display:grid;align-items:center;
+    padding:calc(var(--barra) + 14px) 34px 30px calc(var(--nav) + 26px)}
+  .esc .in{display:grid;grid-template-columns:minmax(260px,330px) 1fr;gap:38px;align-items:center;max-width:1380px;width:100%;margin:0 auto}
+  .txt .kick{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--oro);font-weight:650;margin-bottom:12px;display:flex;gap:10px;align-items:center}
+  .txt .kick b{font-size:34px;letter-spacing:-.02em;line-height:1;color:transparent;-webkit-text-stroke:1px var(--oro2)}
+  .txt h2{font-size:clamp(26px,3.1vw,40px);line-height:1.12;letter-spacing:-.02em;font-weight:760;text-wrap:balance}
+  .txt p{color:var(--suave);margin-top:14px;font-size:16px;text-wrap:pretty}
+  .txt .acc{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+  .bt{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:12px;font-size:14px;font-weight:650;
+    border:1px solid var(--borde);color:var(--oro);transition:background .2s,transform .2s}
+  .bt:hover{background:rgba(230,196,131,.08);transform:translateY(-1px)}
+  .bt.lleno{background:var(--oro);color:var(--navy);border-color:var(--oro)}
+  .bt.lleno:hover{background:#efd29a}
+
+  .escena{display:flex;flex-direction:column;align-items:center;gap:14px;min-width:0}
+  .marco{position:relative;width:min(100%, calc(72svh * var(--ar)));aspect-ratio:var(--ar);border-radius:16px;overflow:hidden;
+    border:1px solid var(--borde);background:#0d1018;
+    box-shadow:0 40px 90px -40px rgba(0,0,0,.9),0 0 0 6px rgba(255,255,255,.02)}
+  .lienzo{position:absolute;inset:0;--z:1;transform:scale(var(--z));transition:transform .9s cubic-bezier(.2,.75,.2,1),transform-origin .9s cubic-bezier(.2,.75,.2,1)}
+  .lienzo img{display:block;width:100%;height:100%;object-fit:cover;user-select:none;-webkit-user-drag:none}
+  .marco::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(transparent 60%,rgba(10,12,19,.18))}
+
+  .pt{position:absolute;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;z-index:2;
+    background:var(--oro);color:var(--navy);font-size:12px;font-weight:800;display:grid;place-items:center;
+    box-shadow:0 4px 14px rgba(0,0,0,.45);transform:scale(calc(1 / var(--z)));
+    transition:transform .9s cubic-bezier(.2,.75,.2,1),background .2s,opacity .5s;opacity:0}
+  .pt::before{content:"";position:absolute;inset:-7px;border-radius:50%;border:2px solid rgba(230,196,131,.75);animation:latido 2.2s ease-out infinite}
+  .pt.on{width:58px;height:58px;margin:-29px 0 0 -29px;background:transparent;color:transparent;
+    box-shadow:0 0 0 2px #fff,0 0 0 6px rgba(230,196,131,.55),0 0 0 9999px rgba(8,10,16,.42)}
+  .pt.on::before{animation:none;opacity:0}
+  @keyframes latido{0%{transform:scale(.7);opacity:1}100%{transform:scale(1.6);opacity:0}}
+
+  .nota{width:min(100%,720px);display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;
+    background:rgba(22,27,40,.82);border:1px solid #262e40;min-height:64px}
+  .nota .n{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:rgba(230,196,131,.14);
+    color:var(--oro);font-size:12px;font-weight:800}
+  .nota .c{flex:1;min-width:0}
+  .nota .c b{display:block;font-size:14.5px}
+  .nota .c span{color:var(--suave);font-size:14px}
+  .nota .fl{flex:none;display:flex;gap:6px}
+  .nota .fl button{width:36px;height:36px;border-radius:10px;border:1px solid #2a3142;color:var(--oro);font-size:17px}
+  .nota .fl button:hover{background:rgba(230,196,131,.08)}
+  .nota .fl button.sig{width:auto;padding:0 12px;font-size:13px;font-weight:650;background:var(--oro);color:var(--navy);border-color:var(--oro)}
+  .nota.vacia .c b{color:var(--oro)}
+
+  /* entrada de cada escena */
+  .esc .txt>*{opacity:0;transform:translateY(18px);transition:opacity .7s,transform .7s cubic-bezier(.2,.75,.2,1)}
+  .esc .marco{opacity:0;transform:scale(.94) translateY(16px);filter:blur(6px);transition:opacity .9s,transform 1.1s cubic-bezier(.2,.75,.2,1),filter .9s}
+  .esc .nota{opacity:0;transition:opacity .8s .5s}
+  .esc.vista .txt>*{opacity:1;transform:none}
+  .esc.vista .txt>*:nth-child(2){transition-delay:.08s}.esc.vista .txt>*:nth-child(3){transition-delay:.16s}.esc.vista .txt>*:nth-child(4){transition-delay:.24s}
+  .esc.vista .marco{opacity:1;transform:none;filter:none}
+  .esc.vista .nota{opacity:1}
+  .esc.vista .pt{opacity:1}
+
+  /* ---------- portada ---------- */
+  .portada .in{grid-template-columns:1.05fr .95fr}
+  .portada h1{font-size:clamp(34px,5vw,62px);line-height:1.04;letter-spacing:-.03em;font-weight:780;text-wrap:balance}
+  .portada h1 em{font-style:normal;color:var(--oro)}
+  .portada .lead{color:var(--suave);font-size:17px;margin-top:18px;max-width:46ch}
+  .edificio{display:flex;flex-direction:column;gap:8px;perspective:900px}
+  .edificio a{display:flex;align-items:center;gap:14px;padding:13px 16px;border-radius:14px;background:rgba(22,27,40,.75);
+    border:1px solid #262e40;transition:transform .35s cubic-bezier(.2,.75,.2,1),border-color .3s,background .3s}
+  .edificio a:hover{transform:translateX(-8px);border-color:var(--borde);background:rgba(30,36,50,.9)}
+  .edificio .num{font-size:22px;font-weight:800;color:transparent;-webkit-text-stroke:1px var(--oro);width:40px;flex:none}
+  .edificio .t{flex:1}
+  .edificio .t b{display:block;font-size:15px}.edificio .t span{font-size:13px;color:var(--tenue)}
+  .edificio img{width:74px;height:44px;object-fit:cover;object-position:top left;border-radius:8px;border:1px solid #2a3142;flex:none}
+  .bajar{position:absolute;bottom:22px;left:calc(50% + var(--nav)/2);transform:translateX(-50%);font-size:12px;color:var(--tenue);
+    letter-spacing:.14em;text-transform:uppercase;display:flex;flex-direction:column;align-items:center;gap:6px}
+  .bajar i{width:1px;height:34px;background:linear-gradient(var(--oro),transparent);animation:baja 1.8s ease-in-out infinite}
+  @keyframes baja{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+  /* ---------- final ---------- */
+  .final .in{grid-template-columns:1fr;max-width:860px;text-align:center}
+  .final h2{font-size:clamp(30px,4.4vw,52px);line-height:1.08;letter-spacing:-.03em;font-weight:780;text-wrap:balance}
+  .final p.lead{color:var(--suave);font-size:17px;margin:16px auto 0;max-width:52ch}
+  .ctas{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:28px}
+  .ctas .bt{padding:14px 22px;font-size:15px}
+  .ctas .bt.wa{background:#25d366;border-color:#25d366;color:#08240f}
+  .desc{margin-top:30px;padding:20px;border-radius:16px;border:1px solid #262e40;background:rgba(22,27,40,.6)}
+  .desc h3{font-size:15px;margin-bottom:4px}.desc p{color:var(--tenue);font-size:13.5px}
+  .desc .ctas{margin-top:14px}
+  .pie{margin-top:26px;font-size:13px;color:var(--tenue)}
+  .pie a{color:var(--suave);text-decoration:underline;text-underline-offset:3px}
+
+  /* ---------- video ---------- */
+  dialog{margin:auto;border:0;padding:0;background:#000;border-radius:16px;overflow:hidden;width:min(94vw,1100px);box-shadow:0 40px 120px rgba(0,0,0,.8)}
+  dialog::backdrop{background:rgba(5,6,10,.82);backdrop-filter:blur(4px)}
+  dialog video{display:block;width:100%;max-height:82vh;background:#000}
+  dialog .cerrar{position:absolute;top:10px;right:10px;width:38px;height:38px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:18px;z-index:2}
+
+  /* ---------- celular ---------- */
+  @media (max-width:900px){
+    :root{--barra:52px}
+    html{scroll-snap-type:none}
+    .top{padding:0 14px}.top .etq{display:none}.top .der a:not(.oro){display:none}
+    .pisos{left:0;right:0;top:auto;bottom:0;transform:none;width:auto;background:rgba(10,12,19,.94);
+      border-top:1px solid #1d2331;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:8px 10px calc(8px + env(safe-area-inset-bottom))}
+    .pisos .cap{display:none}
+    .pisos ol{flex-direction:row;overflow-x:auto;gap:6px;scrollbar-width:none}
+    .pisos ol::-webkit-scrollbar{display:none}
+    .pisos ol::before{display:none}
+    .pisos button{width:auto;padding:4px 10px 4px 4px;border:1px solid #232a3a;border-radius:999px;font-size:12.5px}
+    .pisos button.on{border-color:var(--oro)}
+    .pisos .num{width:26px;height:26px;border-radius:50%;font-size:10px;border:0;background:#1a2030}
+    .esc{min-height:auto;padding:calc(var(--barra) + 26px) 16px 46px}
+    .esc .in,.portada .in{grid-template-columns:1fr;gap:20px}
+    .txt h2{font-size:26px}.txt p{font-size:15px}
+    .marco{width:100%;aspect-ratio:auto;height:auto;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;
+      scrollbar-width:thin;scroll-behavior:smooth}
+    .lienzo{position:relative;inset:auto;width:var(--mw,100%);aspect-ratio:var(--ar);transform:none !important}
+    .pt{transform:none !important;width:28px;height:28px;margin:-14px 0 0 -14px}
+    .pt.on{width:52px;height:52px;margin:-26px 0 0 -26px}
+    .marco.ancho::before{content:"Desliza ⟷";position:sticky;left:0;float:left;z-index:3;margin:8px;padding:3px 9px;border-radius:999px;
+      font-size:11px;background:rgba(10,12,19,.75);color:var(--oro);width:max-content;margin-bottom:-28px}
+    .nota{width:100%}
+    .nota .fl button.sig span{display:none}
+    .portada{min-height:100svh}
+    .portada .lead{font-size:15.5px}
+    .edificio img{display:none}
+    .bajar{display:none}
+    .final{padding-bottom:110px}
+    .ctas .bt{width:100%;justify-content:center}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation:none !important;transition:none !important}
+    html{scroll-behavior:auto}
+  }
+</style>
+</head>
+<body>
+<div class="prog" id="prog"></div>
+
+<header class="top">
+  <a class="marca" href="/contadores">Tributando<span>.co</span></a>
+  <span class="etq">Recorrido por dentro</span>
+  <div class="der">
+    <a href="/contadores/contabilidad">Planes</a>
+    <a href="/contadores/lector">Lector</a>
+    <a class="oro" href="{{ app_url }}" target="_blank" rel="noopener">Probar gratis</a>
+  </div>
+</header>
+
+<nav class="pisos" aria-label="Paradas del recorrido">
+  <div class="cap">Paradas</div>
+  <ol>
+    {% for p in pisos %}
+    <li><button type="button" data-ir="{{ p.id }}"><span class="num">0{{ loop.index }}</span><span class="tit">{{ p.corto }}</span></button></li>
+    {% endfor %}
+    <li><button type="button" data-ir="empezar"><span class="num">→</span><span class="tit">Empezar</span></button></li>
+  </ol>
+</nav>
+
+<main>
+  <section class="esc portada vista" id="inicio">
+    <div class="in">
+      <div class="txt">
+        <div class="kick">Recorrido · Tributando por dentro</div>
+        <h1>Entra a la contabilidad <em>antes de comprarla</em></h1>
+        <p class="lead">Seis paradas, del correo de la DIAN al formulario 350. Toca los puntos dorados y entra a cada pantalla. Todo con la empresa de ejemplo COMERCIALIZADORA LA MUESTRA.</p>
+        <div class="acc">
+          <a class="bt lleno" href="#{{ pisos[0].id }}">Empezar el recorrido ↓</a>
+          <a class="bt" href="#empezar">Ir a los precios y la prueba</a>
+        </div>
+      </div>
+      <div class="edificio">
+        {% for p in pisos|reverse %}
+        <a href="#{{ p.id }}"><span class="num">0{{ pisos|length - loop.index0 }}</span>
+          <span class="t"><b>{{ p.kicker }}</b><span>{{ p.titulo }}</span></span>
+          <img src="/static/recorrido/{{ p.img }}" alt="" loading="lazy"></a>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="bajar">Desliza<i></i></div>
+  </section>
+
+  {% set anchos = {"recolector": 760, "programa": 640, "lector": 700, "comprobante": 920} %}
+  {% for p in pisos %}
+  <section class="esc" id="{{ p.id }}" data-piso="{{ loop.index0 }}">
+    <div class="in">
+      <div class="txt">
+        <div class="kick"><b>0{{ loop.index }}</b> {{ p.kicker }}</div>
+        <h2>{{ p.titulo }}</h2>
+        <p>{{ p.texto }}</p>
+        {% if p.video %}
+        <div class="acc"><button class="bt" type="button" data-video="{{ p.video }}">▶ Ver el video completo (1:46)</button></div>
+        {% endif %}
+      </div>
+      <div class="escena">
+        <div class="marco{% if anchos.get(p.id) %} ancho{% endif %}" style="--ar:{{ p.w }}/{{ p.h }}">
+          <div class="lienzo" style="--ar:{{ p.w }}/{{ p.h }};{% if anchos.get(p.id) %}--mw:{{ anchos[p.id] }}px{% endif %}">
+            <img src="/static/recorrido/{{ p.img }}" width="{{ p.w }}" height="{{ p.h }}"
+                 alt="{{ p.titulo }} — captura de Tributando con la empresa de ejemplo" {% if not loop.first %}loading="lazy"{% endif %} decoding="async">
+            {% for x, y, t, f in p.puntos %}
+            <button class="pt" type="button" style="left:{{ x }}%;top:{{ y }}%;transition-delay:{{ 0.35 + loop.index0 * 0.09 }}s"
+                    data-i="{{ loop.index0 }}" data-t="{{ t }}" data-f="{{ f }}" aria-label="{{ t }}">{{ loop.index }}</button>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="nota vacia" aria-live="polite">
+          <span class="n">✦</span>
+          <span class="c"><b>Toca un punto dorado</b><span>o usa «Siguiente» para recorrer la pantalla.</span></span>
+          <span class="fl">
+            <button type="button" class="ant" aria-label="Punto anterior">‹</button>
+            <button type="button" class="sig" aria-label="Siguiente punto"><span>Siguiente</span> ›</button>
+          </span>
+        </div>
+      </div>
+    </div>
+  </section>
+  {% endfor %}
+
+  <section class="esc final" id="empezar">
+    <div class="in">
+      <div class="txt">
+        <div class="kick" style="justify-content:center">Fin del recorrido</div>
+        <h2>Ahora pruébalo con tus propias empresas</h2>
+        <p class="lead">Prueba 1 mes gratis con 1 empresa. Conectas la DIAN, bajan las facturas y ves el IVA y la retención armados en minutos.</p>
+        <div class="ctas">
+          <a class="bt lleno" href="{{ app_url }}" target="_blank" rel="noopener">Probar gratis →</a>
+          <a class="bt wa" href="https://wa.me/{{ whatsapp }}?text={{ 'Hola, vi el recorrido de Tributando y quiero más información.'|urlencode }}" target="_blank" rel="noopener">WhatsApp 333 247 0715</a>
+          <a class="bt" href="{{ app_url }}/demo" target="_blank" rel="noopener">Entrar a la demo</a>
+        </div>
+        <div class="desc">
+          <h3>¿Llevas la contabilidad en Siigo, World Office, Helisa o Alegra?</h3>
+          <p>Descarga el Lector: baja los XML de la DIAN y te entrega el plano listo para tu programa.</p>
+          <div class="ctas">
+            <a class="bt" href="/descargar-lector">⬇ Lector para Windows</a>
+            <a class="bt" href="/descargar-lector-mac">⬇ Lector para Mac</a>
+          </div>
+        </div>
+        <p class="pie"><a href="/contadores/contabilidad">Planes de contabilidad</a> · <a href="/contadores/lector">Planes del Lector</a> · <a href="#inicio">Volver al inicio</a></p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<dialog id="video">
+  <button class="cerrar" type="button" aria-label="Cerrar video">✕</button>
+  <video controls playsinline preload="none" poster="/static/video/recolector-contabilidad.jpg"></video>
+</dialog>
+
+<script>
+(function(){
+  var escenas=[].slice.call(document.querySelectorAll('.esc'));
+  var botones=[].slice.call(document.querySelectorAll('.pisos button'));
+  var movil=matchMedia('(max-width:900px)');
+
+  // selector de piso
+  botones.forEach(function(b){ b.addEventListener('click',function(){
+    var d=document.getElementById(b.dataset.ir); if(d) d.scrollIntoView({behavior:'smooth'});
+  });});
+
+  // qué escena está en pantalla
+  var actual=null;
+  var io=new IntersectionObserver(function(ent){
+    ent.forEach(function(e){
+      if(e.isIntersecting){ e.target.classList.add('vista'); }
+      if(e.intersectionRatio>=0.45){ marcar(e.target.id); }
+    });
+  },{threshold:[0,0.45]});
+  escenas.forEach(function(s){ io.observe(s); });
+  function marcar(id){
+    if(actual===id) return; actual=id;
+    var pasado=true;
+    botones.forEach(function(b){
+      var on=b.dataset.ir===id; if(on) pasado=false;
+      b.classList.toggle('on',on); b.classList.toggle('hecho',pasado&&!on);
+      if(on&&movil.matches){ b.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'}); }
+    });
+  }
+  var prog=document.getElementById('prog');
+  addEventListener('scroll',function(){
+    var h=document.documentElement; prog.style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%';
+  },{passive:true});
+
+  // puntos de cada escena
+  document.querySelectorAll('.esc[data-piso]').forEach(function(sec){
+    var lienzo=sec.querySelector('.lienzo'), marco=sec.querySelector('.marco');
+    var pts=[].slice.call(sec.querySelectorAll('.pt'));
+    var nota=sec.querySelector('.nota'), n=nota.querySelector('.n'), c=nota.querySelector('.c');
+    var cur=-1;
+    function ver(i){
+      if(i<0||i>=pts.length){ cerrar(); return; }
+      cur=i; var p=pts[i];
+      pts.forEach(function(q){ q.classList.toggle('on',q===p); });
+      nota.classList.remove('vacia');
+      n.textContent=(i+1)+'/'+pts.length;
+      c.innerHTML='<b></b><span></span>';
+      c.firstChild.textContent=p.dataset.t; c.lastChild.textContent=p.dataset.f;
+      if(movil.matches){
+        var x=p.offsetLeft-marco.clientWidth/2;
+        marco.scrollTo({left:Math.max(0,x),behavior:'smooth'});
+      }else{
+        lienzo.style.transformOrigin=p.style.left+' '+p.style.top;
+        var img=lienzo.querySelector('img');
+        var z=Math.min(1.6,Math.max(1.25,img.naturalWidth/img.clientWidth));
+        lienzo.style.setProperty('--z', z.toFixed(2));
+      }
+    }
+    function cerrar(){
+      cur=-1; pts.forEach(function(q){ q.classList.remove('on'); });
+      lienzo.style.setProperty('--z',1);
+      nota.classList.add('vacia'); n.textContent='✦';
+      c.innerHTML='<b>Toca un punto dorado</b><span>o usa «Siguiente» para recorrer la pantalla.</span>';
+    }
+    pts.forEach(function(p,i){ p.addEventListener('click',function(ev){ ev.stopPropagation(); cur===i?cerrar():ver(i); }); });
+    lienzo.addEventListener('click',function(ev){ if(ev.target===lienzo.querySelector('img')&&cur>=0) cerrar(); });
+    nota.querySelector('.ant').addEventListener('click',function(){ ver(cur<=0?pts.length-1:cur-1); });
+    nota.querySelector('.sig').addEventListener('click',function(){
+      if(cur===pts.length-1){ cerrar(); var sig=sec.nextElementSibling; if(sig) sig.scrollIntoView({behavior:'smooth'}); }
+      else ver(cur+1);
+    });
+    sec._ver=ver; sec._cur=function(){return cur;}; sec._n=pts.length;
+  });
+
+  // teclado: ↓/↑ cambian de parada; → recorre los puntos
+  addEventListener('keydown',function(e){
+    if(document.querySelector('dialog[open]')) return;
+    var i=escenas.findIndex(function(s){return s.id===actual;});
+    if(e.key==='ArrowDown'||e.key==='PageDown'){ e.preventDefault(); if(escenas[i+1]) escenas[i+1].scrollIntoView({behavior:'smooth'}); }
+    else if(e.key==='ArrowUp'||e.key==='PageUp'){ e.preventDefault(); if(escenas[i-1]) escenas[i-1].scrollIntoView({behavior:'smooth'}); }
+    else if(e.key==='ArrowRight'&&escenas[i]&&escenas[i]._ver){ e.preventDefault(); escenas[i].querySelector('.sig').click(); }
+    else if(e.key==='ArrowLeft'&&escenas[i]&&escenas[i]._ver){ e.preventDefault(); escenas[i].querySelector('.ant').click(); }
+  });
+
+  // video del Recolector (carga solo al abrirlo)
+  var dlg=document.getElementById('video'), vid=dlg.querySelector('video');
+  document.querySelectorAll('[data-video]').forEach(function(b){ b.addEventListener('click',function(){
+    if(!vid.src) vid.src=b.dataset.video;
+    if(dlg.showModal) dlg.showModal(); else dlg.setAttribute('open','');
+    var pr=vid.play(); if(pr&&pr.catch) pr.catch(function(){});
+  });});
+  function cerrarVideo(){ vid.pause(); if(dlg.close) dlg.close(); else dlg.removeAttribute('open'); }
+  dlg.querySelector('.cerrar').addEventListener('click',cerrarVideo);
+  dlg.addEventListener('click',function(e){ if(e.target===dlg) cerrarVideo(); });
+  dlg.addEventListener('close',function(){ vid.pause(); });
+})();
+</script>
+</body>
+</html>
