@@ -1,380 +1,110 @@
 <!doctype html>
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>CRM tributario gratis para contadores · Tributando</title>
-<meta name="description" content="Gratis para contadores: sube tu Excel de clientes y ve en un tablero los vencimientos DIAN de cada uno (retención, IVA, renta, Simple, exógena), qué falta presentar y qué falta cobrar.">
-<meta property="og:title" content="CRM tributario gratis para contadores">
-<meta property="og:description" content="Sube tu Excel de clientes y mira en un tablero los vencimientos DIAN, lo presentado y lo que falta cobrar.">
-<meta property="og:image" content="https://tributando.co/apps/crm-contadores/portada.png">
+<title>CRM gratis para contadores en Excel · Tributando</title>
+<meta name="description" content="Gratis para contadores: un Excel con tus clientes, los vencimientos DIAN calculados por el NIT, tu embudo de prospectos y la cartera de honorarios.">
+<meta property="og:title" content="CRM gratis para contadores (Excel)">
+<meta property="og:description" content="Clientes, vencimientos DIAN por NIT, prospectos y honorarios en un solo Excel. Gratis.">
+<meta property="og:image" content="https://tributando.co/apps/crm-contadores/tablero.png">
 <meta property="og:url" content="https://tributando.co/apps/crm-contadores/">
 <meta property="og:type" content="website">
 <meta name="theme-color" content="#13261F">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
-:root{--bg:#f3f5f4;--card:#fff;--line:#dde3e0;--ink:#13261F;--muted:#5d6b64;--mint:#37D38F;--mint-soft:#DFF7EA;--gold:#C9A75A;--gold-soft:#f7f0de;--oro:#E0C584;
---ok:#16825a;--warn:#b86e00;--warn-soft:#fdf1dd;--bad:#b3372f;--bad-soft:#fbe7e4;--info:#2f5fb3;--info-soft:#e6eefb;--idle:#7b8781;--idle-soft:#eef1ef;
---sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;--mono:"IBM Plex Mono",ui-monospace,Menlo,monospace}
-*{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.45;margin:0}
-.top{background:#13261F;color:#fff}
-.top .in{max-width:1400px;margin:0 auto;padding:14px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.marca{font-family:Georgia,serif;font-size:22px;color:var(--oro);font-weight:700;text-decoration:none}
-.top .lema{font-size:.72rem;letter-spacing:.14em;color:var(--mint);text-transform:uppercase}
-.top .esp{flex:1}
-.wrap{max-width:1400px;margin:0 auto;padding:18px 16px 40px;display:flex;flex-direction:column;gap:14px}
-h1{margin:0;font-size:1.45rem;font-weight:700}
-.eyebrow{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
-.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
-.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto}
-.tab{appearance:none;background:none;border:0;border-bottom:3px solid transparent;padding:9px 14px;font:600 .9rem var(--sans);color:var(--muted);cursor:pointer;white-space:nowrap}
-.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--mint)}
-.barra{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-.kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 12px;display:flex;flex-direction:column;min-width:120px}
-.kpi b{font-size:1.15rem}.kpi span{font-size:.72rem;color:var(--muted)}
-.kpi.res{background:#13261F;border-color:#13261F}.kpi.res b{color:#37D38F}.kpi.res span{color:#cfe3da}
-.kpi.btnk{cursor:pointer}.kpi.btnk:hover{border-color:var(--mint)}.kpi.on{outline:2px solid var(--mint)}
-input.buscar,select.fil{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:7px 10px;font:500 .85rem var(--sans)}
-input.buscar{flex:1 1 220px;min-width:0;max-width:340px}
-.tablero{display:flex;gap:12px;overflow-x:auto;align-items:flex-start;padding-bottom:6px}
-.col{background:var(--card);border:1px solid var(--line);border-radius:12px;display:flex;flex-direction:column;flex:0 0 260px;max-height:68vh}
-.col.sobre{outline:2px dashed var(--mint);outline-offset:-2px;background:var(--mint-soft)}
-.col h3{margin:0;padding:10px 14px 4px;font-size:.88rem;font-weight:700;display:flex;align-items:center;gap:8px}
-.col h3 small{font-weight:600;color:var(--muted);font-family:var(--mono)}
-.col .tot{padding:0 14px 6px;font-size:.72rem;color:var(--muted);font-family:var(--mono)}
-.col .raya{height:3px;margin:0 14px 10px;border-radius:2px}
-.cards{display:flex;flex-direction:column;gap:5px;overflow-y:auto;padding:0 8px 10px}
-.tj{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:7px 9px;cursor:pointer;display:flex;flex-direction:column;gap:3px}
-.tj:hover{border-color:var(--ink)}.tj.arr{opacity:.4}
-.tj .n{font-weight:600;font-size:.82rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:flex;align-items:center;gap:6px}
-.tj .s{font-size:.7rem;color:var(--muted)}
-.dot{width:8px;height:8px;border-radius:50%;flex:0 0 8px;display:inline-block}
-.chips{display:flex;gap:4px;flex-wrap:wrap}
-.chip{display:inline-flex;border-radius:999px;padding:1px 8px;font-size:.66rem;font-weight:600;white-space:nowrap}
-.c-ok{background:var(--mint-soft);color:var(--ok)}.c-bad{background:var(--bad-soft);color:var(--bad)}.c-warn{background:var(--warn-soft);color:var(--warn)}.c-idle{background:var(--idle-soft);color:var(--idle)}.c-info{background:var(--info-soft);color:var(--info)}.c-gold{background:var(--gold-soft);color:#8a6d2f}
-.vacio{font-size:.75rem;color:var(--muted);text-align:center;padding:10px;border:1px dashed var(--line);border-radius:8px}
-.panel{position:fixed;top:0;right:0;bottom:0;width:min(440px,100vw);background:var(--card);border-left:1px solid var(--line);box-shadow:-12px 0 40px rgba(0,0,0,.12);transform:translateX(105%);transition:transform .2s ease;z-index:20;display:flex;flex-direction:column}
-.panel.abierto{transform:none}
-.panel header{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
-.panel header h2{margin:0;font-size:1.05rem}
-.panel .cuerpo{padding:14px 16px;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
-.fila{display:flex;justify-content:space-between;gap:10px;font-size:.85rem;border-bottom:1px solid var(--line);padding-bottom:6px}
-.fila span{color:var(--muted)}
-label.l{font-size:.72rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
-.campo,textarea{width:100%;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:7px 9px;font:500 .88rem var(--sans)}
-textarea{min-height:64px;resize:vertical}
-.obl{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;font-size:.8rem}
-.obl label{display:flex;gap:6px;align-items:center}
-.btn{appearance:none;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:7px 13px;font:600 .82rem var(--sans);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
-.btn:hover{border-color:var(--ink)}
-.btn.pri{background:#13261F;border-color:#13261F;color:var(--oro)}
-.btn.wa{background:#25D366;border-color:#25D366;color:#063}
-.btn.peligro{color:var(--bad)}
-.btn:focus-visible,.tab:focus-visible,.tj:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--mint);outline-offset:2px}
-.aviso{font-size:.78rem;color:var(--muted)}
-.velo{position:fixed;inset:0;background:rgba(0,0,0,.28);z-index:15;display:none}.velo.on{display:block}
-.drop{border:2px dashed var(--line);border-radius:12px;padding:16px;text-align:center;cursor:pointer;background:var(--card)}.drop:hover,.drop.sobre{border-color:var(--mint);background:var(--mint-soft)}
-/* publicidad */
-.promo{background:#13261F;border-radius:14px;color:#fff;padding:16px 18px;display:grid;grid-template-columns:1.2fr repeat(3,1fr) auto;gap:14px;align-items:center}
-.promo h4{margin:0;font-family:Georgia,serif;color:var(--oro);font-size:1.05rem}
-.promo p{margin:2px 0 0;font-size:.78rem;color:#cfe3da}
-.promo .pz{border-left:1px solid #2c4a3e;padding-left:14px}
-.promo .pz b{display:block;color:var(--mint);font-size:1.15rem;font-family:var(--mono)}
-.promo .pz span{font-size:.76rem;color:#e6efe9}
-.promo .btn{background:var(--oro);border-color:var(--oro);color:#13261F}
-@media (max-width:900px){.promo{grid-template-columns:1fr 1fr}.promo .pz{border-left:0;padding-left:0}.promo h4,.promo>div:first-child{grid-column:1/-1}}
-/* registro */
-.gate{position:fixed;inset:0;background:rgba(10,20,16,.72);z-index:40;display:flex;align-items:center;justify-content:center;padding:16px}
-.gate[hidden],[hidden]{display:none!important}
-.gate .caja{background:var(--card);border-radius:16px;max-width:460px;width:100%;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.35)}
-.gate .cab{background:#13261F;padding:18px 22px}
-.gate .cab .marca{font-size:24px}.gate .cab p{margin:4px 0 0;color:var(--mint);font-size:.75rem;letter-spacing:.12em;text-transform:uppercase}
-.gate .cu{padding:18px 22px;display:flex;flex-direction:column;gap:8px}
-.gate h2{margin:0 0 4px;font-size:1.15rem}
-.gate ul{margin:0 0 6px;padding-left:18px;color:var(--muted);font-size:.85rem}
-.err{color:var(--bad);font-size:.8rem;min-height:1em}
-footer{max-width:1400px;margin:0 auto;padding:0 16px 40px;color:var(--muted);font-size:.78rem;line-height:1.6}
-footer a{color:var(--ok)}
+:root{--v:#13261F;--m:#37D38F;--o:#E0C584;--t:#22303f;--g:#5b6b63;--c:#F3F6F4;--b:#DDE5E0}
+*{box-sizing:border-box}body{margin:0;background:#fff;color:var(--t);font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+.hero{background:var(--v);color:#fff;padding:34px 16px 30px}
+.in{max-width:1080px;margin:0 auto}
+.marca{font-family:Georgia,serif;color:var(--o);font-weight:bold;font-size:18px;letter-spacing:.3px}
+.marca small{display:block;font-family:Arial,sans-serif;color:var(--m);font-size:11px;letter-spacing:1.6px;font-weight:600;margin-top:2px}
+h1{font-family:Georgia,serif;font-size:clamp(28px,4.4vw,42px);line-height:1.12;margin:22px 0 10px;color:#fff}
+h1 span{color:var(--o)}
+.lead{font-size:17px;line-height:1.55;color:#d9e6df;max-width:700px;margin:0}
+.chip{display:inline-block;background:rgba(55,211,143,.14);color:var(--m);border:1px solid rgba(55,211,143,.4);border-radius:999px;padding:4px 12px;font-size:12.5px;font-weight:700;margin-top:16px}
+.grid{display:grid;grid-template-columns:1.25fr 1fr;gap:26px;align-items:start;margin-top:-10px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.foto{background:#fff;border:1px solid var(--b);border-radius:14px;overflow:hidden;box-shadow:0 18px 40px rgba(19,38,31,.14);margin-top:26px}
+.foto img{display:block;width:100%;height:auto}
+.caja{background:#fff;border:1px solid var(--b);border-radius:14px;padding:22px;box-shadow:0 18px 40px rgba(19,38,31,.10);margin-top:26px}
+.caja h2{margin:0 0 4px;font-size:20px;color:var(--v)}
+.caja p{margin:0 0 12px;color:var(--g);font-size:14px;line-height:1.5}
+label{display:block;font-size:13px;color:var(--g);margin:10px 0 4px;font-weight:600}
+input{width:100%;border:1px solid var(--b);border-radius:9px;padding:11px 12px;font-size:15px;color:var(--t)}
+input:focus{outline:2px solid var(--m);border-color:var(--m)}
+.btn{display:block;width:100%;margin-top:16px;background:var(--v);color:var(--o);border:0;border-radius:10px;padding:14px;font-size:16px;font-weight:800;cursor:pointer;text-align:center;text-decoration:none}
+.btn:hover{filter:brightness(1.15)}.btn[disabled]{opacity:.55;cursor:default}
+.nota{font-size:12px;color:var(--g);margin-top:10px;line-height:1.45}
+.ok{background:#E9F9F1;border:1px solid #B9EBD3;color:#1c7a50;border-radius:10px;padding:12px;margin-top:14px;font-size:14px;display:none}
+.err{color:#9b2c22;font-size:13px;margin-top:8px;min-height:1em}
+.sec{max-width:1080px;margin:40px auto 0;padding:0 16px}
+.sec h2{font-family:Georgia,serif;color:var(--v);font-size:24px;margin:0 0 14px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.card{background:var(--c);border-radius:12px;padding:16px;border-left:4px solid var(--m)}
+.card b{display:block;color:var(--v);font-size:15.5px;margin-bottom:5px}
+.card span{color:var(--g);font-size:14px;line-height:1.5}
+.cta{background:var(--v);color:#fff;border-radius:14px;padding:24px;margin:40px auto 0;max-width:1048px;display:flex;gap:18px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+.cta b{color:var(--o);font-size:19px;display:block;margin-bottom:4px}.cta span{color:#d9e6df;font-size:14.5px}
+.cta a{background:var(--m);color:var(--v);font-weight:800;border-radius:10px;padding:12px 18px;text-decoration:none;white-space:nowrap}
+footer{max-width:1080px;margin:30px auto 40px;padding:0 16px;color:var(--g);font-size:12.5px;line-height:1.6}
+footer a{color:#1c7a50}
 </style></head><body>
+<header class="hero"><div class="in">
+ <div class="marca">Tributando<small>CONTABILIDAD · IMPUESTOS · FACTURACIÓN</small></div>
+ <h1>CRM gratis para contadores, <span>en Excel</span></h1>
+ <p class="lead">Tus clientes, los vencimientos DIAN de cada uno (se calculan solos con el NIT), las empresas que te piden cotización y lo que te deben de honorarios. Todo en un archivo, sin pagar nada.</p>
+ <span class="chip">Calendario DIAN 2026 incluido · Excel, Google Sheets y LibreOffice</span>
+</div></header>
 
-<div class="top"><div class="in">
-  <a class="marca" href="https://tributando.co">Tributando</a>
-  <span class="lema">CRM tributario · gratis para contadores</span>
-  <span class="esp"></span>
-  <button class="btn pri" id="bNuevo">+ Cliente</button>
-  <button class="btn" id="bImportar">Importar Excel</button>
-  <button class="btn" id="bExportar">Descargar Excel</button>
-</div></div>
-
-<div class="wrap">
+<div class="in" style="padding:0 16px">
+ <div class="grid">
   <div>
-    <div class="eyebrow" id="saludo">Tu oficina contable</div>
-    <h1>Vencimientos, presentaciones y cobros de tus clientes</h1>
+  <div class="foto" style="display:flex;justify-content:center;background:#13261F"><video controls preload="none" playsinline poster="portada.jpg" src="video.mp4" style="width:100%;max-width:360px;display:block;aspect-ratio:9/16"></video></div>
+  <div class="foto"><img src="tablero.png" alt="Tablero del CRM para contadores: clientes activos, honorarios, vencimientos DIAN de los próximos días, prospectos y cartera pendiente" width="1200" height="760"></div>
   </div>
-
-  <section class="promo" aria-label="Servicios de Tributando para tus clientes">
-    <div><h4>Lleva a tus clientes en Tributando</h4><p>Por empresa, solo el módulo que necesita. Nosotros los habilitamos ante la DIAN.</p></div>
-    <div class="pz"><b>$69.900<small style="font-size:.6em">/mes</small></b><span>Contabilidad en la nube por empresa, alimentada con las facturas de la DIAN</span></div>
-    <div class="pz"><b>$230.000<small style="font-size:.6em">/año</small></b><span>Facturación electrónica · desde, con 120 documentos</span></div>
-    <div class="pz"><b>$120.000<small style="font-size:.6em">/año</small></b><span>Nómina electrónica · desde, para que tú la liquides</span></div>
-    <a class="btn" target="_blank" rel="noopener" id="promoWa" href="https://wa.me/573332470715?text=Hola%2C%20vengo%20del%20CRM%20gratis%20para%20contadores%20y%20quiero%20cotizar%20Tributando%20para%20mis%20clientes">Cotizar por WhatsApp</a>
-  </section>
-
-  <div class="tabs" role="tablist" aria-label="Vistas">
-    <button class="tab" role="tab" id="t-mes" aria-selected="true">Vencimientos del mes · empresas</button>
-    <button class="tab" role="tab" id="t-renta" aria-selected="false">Renta 2025 · personas</button>
-    <button class="tab" role="tab" id="t-cli" aria-selected="false">Clientes</button>
-  </div>
-  <div class="barra" id="kpis"></div>
-  <div class="barra">
-    <input class="buscar" id="buscar" type="search" placeholder="Buscar nombre, NIT o cédula…" aria-label="Buscar">
-    <select class="fil" id="filMes" aria-label="Mes de vencimiento"></select>
-    <select class="fil" id="filOb" aria-label="Impuesto"><option value="">Todos los impuestos</option></select>
-    <select class="fil" id="filCobro" aria-label="Cobro"><option value="">Todo cobro</option><option value="por_cobrar">Por cobrar</option><option value="cobrado">Cobrado</option><option value="no_aplica">No aplica</option></select>
-    <span class="aviso" id="aviso"></span>
-  </div>
-  <div id="tablero" class="tablero"></div>
-  <p class="aviso" id="ayuda">Arrastra una tarjeta a otra columna para cambiar su estado, o tócala para ver el detalle, el cobro, la nota y mandarle el recordatorio por WhatsApp al cliente. Las fechas salen del calendario tributario DIAN 2026 según el último dígito del NIT.</p>
+  <form class="caja" id="f" novalidate>
+   <h2>Descárgalo gratis</h2>
+   <p>Déjanos tus datos y la descarga empieza de una. Cuando la DIAN publique el calendario 2027, te enviamos la versión nueva.</p>
+   <label for="nom">Nombre</label><input id="nom" autocomplete="name" required>
+   <label for="co">Correo</label><input id="co" type="email" autocomplete="email" required>
+   <label for="wa">WhatsApp</label><input id="wa" type="tel" autocomplete="tel" placeholder="300 000 0000">
+   <button class="btn" id="b" type="submit">Descargar el CRM (Excel)</button>
+   <div class="err" id="e"></div>
+   <div class="ok" id="ok">¡Listo! Revisa tus descargas. Si no empezó, <a id="dl2" href="crm-para-contadores-tributando.xlsx" download>haz clic aquí</a>. Si te sirve, compártelo con tus colegas.</div>
+   <p class="nota">Usamos tus datos solo para enviarte la actualización y novedades para contadores. Te das de baja cuando quieras.</p>
+  </form>
+ </div>
 </div>
 
-<footer>
-  Tus clientes se guardan <b>solo en este navegador</b> (no se suben a ningún servidor). Descarga el Excel de vez en cuando como respaldo o para pasarlo a otro computador.
-  · Calendario: Decreto de plazos 2026 (DIAN). Verifica siempre en el calendario oficial. · Hecho por <a href="https://tributando.co">Tributando</a> · WhatsApp <a href="https://wa.me/573332470715">333 247 0715</a>
-</footer>
+<section class="sec">
+ <h2>Qué trae</h2>
+ <div class="cards">
+  <div class="card"><b>Vencimientos por NIT</b><span>Escribes el NIT y escoges tipo, IVA, retención y exógena: el próximo vencimiento sale solo. En rojo lo que vence en 5 días; en ámbar, en 15.</span></div>
+  <div class="card"><b>Embudo de prospectos</b><span>Primer contacto, reunión, propuesta, negociación, ganado o perdido. Valor del embudo, valor ponderado, tasa de cierre y acciones atrasadas.</span></div>
+  <div class="card"><b>Honorarios y cartera</b><span>Anotas lo que te paga cada cliente por mes y el CRM te dice cuánto te deben y a quién cobrarle.</span></div>
+  <div class="card"><b>Tablero de los lunes</b><span>Clientes activos, honorarios del mes y del año, vencimientos de la semana y cartera pendiente, en una sola pantalla.</span></div>
+ </div>
+</section>
 
-<div class="velo" id="velo"></div>
-<aside class="panel" id="panel" aria-label="Detalle">
-  <header><div><div class="eyebrow" id="pTipo"></div><h2 id="pNombre"></h2></div><button class="btn" id="pCerrar" aria-label="Cerrar">✕</button></header>
-  <div class="cuerpo" id="pCuerpo"></div>
-</aside>
-<input type="file" id="archivo" accept=".xlsx,.xls,.csv" hidden>
-
-<div class="gate" id="gate" hidden>
-  <div class="caja">
-    <div class="cab"><span class="marca">Tributando</span><p>CRM tributario gratis para contadores</p></div>
-    <div class="cu">
-      <h2>Organiza a todos tus clientes en un tablero</h2>
-      <ul>
-        <li>Sube tu Excel de clientes (nombre, NIT o cédula, celular).</li>
-        <li>Te salen solos los vencimientos DIAN de cada uno: retención, IVA, renta, Simple y exógena.</li>
-        <li>Marca lo presentado, lo pagado y lo que falta cobrar; recuérdale al cliente por WhatsApp.</li>
-      </ul>
-      <label class="l" for="gNom">Tu nombre o el de tu oficina</label><input class="campo" id="gNom" autocomplete="name">
-      <label class="l" for="gCor">Correo</label><input class="campo" id="gCor" type="email" autocomplete="email">
-      <label class="l" for="gWa">WhatsApp</label><input class="campo" id="gWa" type="tel" autocomplete="tel" placeholder="300 123 4567">
-      <div class="err" id="gErr"></div>
-      <button class="btn pri" id="gOk" style="justify-content:center;padding:11px">Entrar gratis</button>
-      <span class="aviso">Gratis, sin tarjeta. Tus clientes no salen de tu computador.</span>
-    </div>
-  </div>
+<div class="cta">
+ <div><b>¿Quieres que esto se llene solo?</b><span>Con Tributando para contadores, las facturas de la DIAN de tus clientes se causan solas y los vencimientos, el IVA, la retención y la cartera salen sin digitar.</span></div>
+ <a href="https://tributando.co/contadores/herramientas">Ver las herramientas</a>
 </div>
+
+<footer>Calendario: Calendario Tributario DIAN 2026 y Resolución 000227 de 2025 (exógena). Verifica siempre contra la fuente oficial.<br>
+Tributando · <a href="https://tributando.co">tributando.co</a> · WhatsApp <a href="https://wa.me/573332470715">333 247 0715</a></footer>
 
 <script>
-const CAL={"renta_pn":{"digitos":2,"periodos":[{"etiqueta":"Declaración y pago","fechas":{"01-02":"2026-08-12","03-04":"2026-08-13","05-06":"2026-08-14","07-08":"2026-08-18","09-10":"2026-08-19","11-12":"2026-08-20","13-14":"2026-08-21","15-16":"2026-08-24","17-18":"2026-08-25","19-20":"2026-08-26","21-22":"2026-08-27","23-24":"2026-08-28","25-26":"2026-08-31","27-28":"2026-09-01","29-30":"2026-09-02","31-32":"2026-09-03","33-34":"2026-09-04","35-36":"2026-09-07","37-38":"2026-09-08","39-40":"2026-09-09","41-42":"2026-09-10","43-44":"2026-09-11","45-46":"2026-09-14","47-48":"2026-09-15","49-50":"2026-09-16","51-52":"2026-09-17","53-54":"2026-09-18","55-56":"2026-09-21","57-58":"2026-09-22","59-60":"2026-09-23","61-62":"2026-09-24","63-64":"2026-09-25","65-66":"2026-09-28","67-68":"2026-10-01","69-70":"2026-10-02","71-72":"2026-10-05","73-74":"2026-10-06","75-76":"2026-10-07","77-78":"2026-10-08","79-80":"2026-10-09","81-82":"2026-10-13","83-84":"2026-10-14","85-86":"2026-10-15","87-88":"2026-10-16","89-90":"2026-10-19","91-92":"2026-10-20","93-94":"2026-10-21","95-96":"2026-10-22","97-98":"2026-10-23","99-00":"2026-10-26"}}]},"renta_pj":{"digitos":1,"periodos":[{"etiqueta":"Declaración y pago 1ª cuota","fechas":{"1":"2026-05-12","2":"2026-05-13","3":"2026-05-14","4":"2026-05-15","5":"2026-05-19","6":"2026-05-20","7":"2026-05-21","8":"2026-05-22","9":"2026-05-25","0":"2026-05-26"}},{"etiqueta":"Pago 2ª cuota","fechas":{"1":"2026-07-09","2":"2026-07-10","3":"2026-07-14","4":"2026-07-15","5":"2026-07-16","6":"2026-07-17","7":"2026-07-21","8":"2026-07-22","9":"2026-07-23","0":"2026-07-24"}}]},"renta_gc":{"digitos":1,"periodos":[{"etiqueta":"Pago 1ª cuota","fechas":{"1":"2026-02-10","2":"2026-02-11","3":"2026-02-12","4":"2026-02-13","5":"2026-02-16","6":"2026-02-17","7":"2026-02-18","8":"2026-02-19","9":"2026-02-20","0":"2026-02-23"}},{"etiqueta":"Declaración y pago 2ª cuota","fechas":{"1":"2026-04-13","2":"2026-04-14","3":"2026-04-15","4":"2026-04-16","5":"2026-04-20","6":"2026-04-21","7":"2026-04-22","8":"2026-04-23","9":"2026-04-24","0":"2026-04-27"}},{"etiqueta":"Pago 3ª cuota","fechas":{"1":"2026-06-10","2":"2026-06-11","3":"2026-06-12","4":"2026-06-16","5":"2026-06-17","6":"2026-06-18","7":"2026-06-19","8":"2026-06-22","9":"2026-06-23","0":"2026-06-24"}}]},"iva_bimestral":{"digitos":1,"periodos":[{"etiqueta":"Ene–Feb","fechas":{"1":"2026-03-10","2":"2026-03-11","3":"2026-03-12","4":"2026-03-13","5":"2026-03-16","6":"2026-03-17","7":"2026-03-18","8":"2026-03-19","9":"2026-03-20","0":"2026-03-24"}},{"etiqueta":"Mar–Abr","fechas":{"1":"2026-05-12","2":"2026-05-13","3":"2026-05-14","4":"2026-05-15","5":"2026-05-19","6":"2026-05-20","7":"2026-05-21","8":"2026-05-22","9":"2026-05-25","0":"2026-05-26"}},{"etiqueta":"May–Jun","fechas":{"1":"2026-07-09","2":"2026-07-10","3":"2026-07-14","4":"2026-07-15","5":"2026-07-16","6":"2026-07-17","7":"2026-07-21","8":"2026-07-22","9":"2026-07-23","0":"2026-07-24"}},{"etiqueta":"Jul–Ago","fechas":{"1":"2026-09-09","2":"2026-09-10","3":"2026-09-11","4":"2026-09-14","5":"2026-09-15","6":"2026-09-16","7":"2026-09-17","8":"2026-09-18","9":"2026-09-21","0":"2026-09-22"}},{"etiqueta":"Sep–Oct","fechas":{"1":"2026-11-11","2":"2026-11-12","3":"2026-11-13","4":"2026-11-17","5":"2026-11-18","6":"2026-11-19","7":"2026-11-20","8":"2026-11-23","9":"2026-11-24","0":"2026-11-25"}},{"etiqueta":"Nov–Dic","fechas":{"1":"2027-01-13","2":"2027-01-14","3":"2027-01-15","4":"2027-01-18","5":"2027-01-19","6":"2027-01-20","7":"2027-01-21","8":"2027-01-22","9":"2027-01-25","0":"2027-01-26"}}]},"iva_cuatrimestral":{"digitos":1,"periodos":[{"etiqueta":"Ene–Abr","fechas":{"1":"2026-05-12","2":"2026-05-13","3":"2026-05-14","4":"2026-05-15","5":"2026-05-19","6":"2026-05-20","7":"2026-05-21","8":"2026-05-22","9":"2026-05-25","0":"2026-05-26"}},{"etiqueta":"May–Ago","fechas":{"1":"2026-09-09","2":"2026-09-10","3":"2026-09-11","4":"2026-09-14","5":"2026-09-15","6":"2026-09-16","7":"2026-09-17","8":"2026-09-18","9":"2026-09-21","0":"2026-09-22"}},{"etiqueta":"Sep–Dic","fechas":{"1":"2027-01-13","2":"2027-01-14","3":"2027-01-15","4":"2027-01-18","5":"2027-01-19","6":"2027-01-20","7":"2027-01-21","8":"2027-01-22","9":"2027-01-25","0":"2027-01-26"}}]},"retefuente":{"digitos":1,"periodos":[{"etiqueta":"Enero","fechas":{"1":"2026-02-10","2":"2026-02-11","3":"2026-02-12","4":"2026-02-13","5":"2026-02-16","6":"2026-02-17","7":"2026-02-18","8":"2026-02-19","9":"2026-02-20","0":"2026-02-23"}},{"etiqueta":"Febrero","fechas":{"1":"2026-03-10","2":"2026-03-11","3":"2026-03-12","4":"2026-03-13","5":"2026-03-16","6":"2026-03-17","7":"2026-03-18","8":"2026-03-19","9":"2026-03-20","0":"2026-03-24"}},{"etiqueta":"Marzo","fechas":{"1":"2026-04-13","2":"2026-04-14","3":"2026-04-15","4":"2026-04-16","5":"2026-04-20","6":"2026-04-21","7":"2026-04-22","8":"2026-04-23","9":"2026-04-24","0":"2026-04-27"}},{"etiqueta":"Abril","fechas":{"1":"2026-05-12","2":"2026-05-13","3":"2026-05-14","4":"2026-05-15","5":"2026-05-19","6":"2026-05-20","7":"2026-05-21","8":"2026-05-22","9":"2026-05-25","0":"2026-05-26"}},{"etiqueta":"Mayo","fechas":{"1":"2026-06-10","2":"2026-06-11","3":"2026-06-12","4":"2026-06-16","5":"2026-06-17","6":"2026-06-18","7":"2026-06-19","8":"2026-06-22","9":"2026-06-23","0":"2026-06-24"}},{"etiqueta":"Junio","fechas":{"1":"2026-07-09","2":"2026-07-10","3":"2026-07-14","4":"2026-07-15","5":"2026-07-16","6":"2026-07-17","7":"2026-07-21","8":"2026-07-22","9":"2026-07-23","0":"2026-07-24"}},{"etiqueta":"Julio","fechas":{"1":"2026-08-12","2":"2026-08-13","3":"2026-08-14","4":"2026-08-18","5":"2026-08-19","6":"2026-08-20","7":"2026-08-21","8":"2026-08-24","9":"2026-08-25","0":"2026-08-26"}},{"etiqueta":"Agosto","fechas":{"1":"2026-09-09","2":"2026-09-10","3":"2026-09-11","4":"2026-09-14","5":"2026-09-15","6":"2026-09-16","7":"2026-09-17","8":"2026-09-18","9":"2026-09-21","0":"2026-09-22"}},{"etiqueta":"Septiembre","fechas":{"1":"2026-10-09","2":"2026-10-13","3":"2026-10-14","4":"2026-10-15","5":"2026-10-16","6":"2026-10-19","7":"2026-10-20","8":"2026-10-21","9":"2026-10-22","0":"2026-10-23"}},{"etiqueta":"Octubre","fechas":{"1":"2026-11-11","2":"2026-11-12","3":"2026-11-13","4":"2026-11-17","5":"2026-11-18","6":"2026-11-19","7":"2026-11-20","8":"2026-11-23","9":"2026-11-24","0":"2026-11-25"}},{"etiqueta":"Noviembre","fechas":{"1":"2026-12-10","2":"2026-12-11","3":"2026-12-14","4":"2026-12-15","5":"2026-12-16","6":"2026-12-17","7":"2026-12-18","8":"2026-12-21","9":"2026-12-22","0":"2026-12-23"}},{"etiqueta":"Diciembre","fechas":{"1":"2027-01-13","2":"2027-01-14","3":"2027-01-15","4":"2027-01-18","5":"2027-01-19","6":"2027-01-20","7":"2027-01-21","8":"2027-01-22","9":"2027-01-25","0":"2027-01-26"}}]},"rst":{"digitos":1,"periodos":[{"etiqueta":"Consolidada anual","fechas":{"1-2":"2026-04-20","3-4":"2026-04-21","5-6":"2026-04-22","7-8":"2026-04-23","9-0":"2026-04-24"}},{"etiqueta":"Consolidada de IVA","fechas":{"1-2":"2026-02-16","3-4":"2026-02-17","5-6":"2026-02-18","7-8":"2026-02-19","9-0":"2026-02-20"}}]},"rst_anticipos":{"digitos":1,"periodos":[{"etiqueta":"Ene–Feb","fechas":{"1":"2026-05-12","2":"2026-05-13","3":"2026-05-14","4":"2026-05-15","5":"2026-05-19","6":"2026-05-20","7":"2026-05-21","8":"2026-05-22","9":"2026-05-25","0":"2026-05-26"}},{"etiqueta":"Mar–Abr","fechas":{"1":"2026-06-10","2":"2026-06-11","3":"2026-06-12","4":"2026-06-16","5":"2026-06-17","6":"2026-06-18","7":"2026-06-19","8":"2026-06-22","9":"2026-06-23","0":"2026-06-24"}},{"etiqueta":"May–Jun","fechas":{"1":"2026-07-09","2":"2026-07-10","3":"2026-07-14","4":"2026-07-15","5":"2026-07-16","6":"2026-07-17","7":"2026-07-21","8":"2026-07-22","9":"2026-07-23","0":"2026-07-24"}},{"etiqueta":"Jul–Ago","fechas":{"1":"2026-09-09","2":"2026-09-10","3":"2026-09-11","4":"2026-09-14","5":"2026-09-15","6":"2026-09-16","7":"2026-09-17","8":"2026-09-18","9":"2026-09-21","0":"2026-09-22"}},{"etiqueta":"Sep–Oct","fechas":{"1":"2026-11-11","2":"2026-11-12","3":"2026-11-13","4":"2026-11-17","5":"2026-11-18","6":"2026-11-19","7":"2026-11-20","8":"2026-11-23","9":"2026-11-24","0":"2026-11-25"}},{"etiqueta":"Nov–Dic","fechas":{"1":"2027-01-13","2":"2027-01-14","3":"2027-01-15","4":"2027-01-18","5":"2027-01-19","6":"2027-01-20","7":"2027-01-21","8":"2027-01-22","9":"2027-01-25","0":"2027-01-26"}}]},"exogena":{"digitos":2,"periodos":[{"etiqueta":"Presentación AG2025","fechas":{"01-05":"2026-05-14","06-10":"2026-05-15","11-15":"2026-05-19","16-20":"2026-05-20","21-25":"2026-05-21","26-30":"2026-05-22","31-35":"2026-05-25","36-40":"2026-05-26","41-45":"2026-05-27","46-50":"2026-05-28","51-55":"2026-05-29","56-60":"2026-06-01","61-65":"2026-06-02","66-70":"2026-06-03","71-75":"2026-06-04","76-80":"2026-06-05","81-85":"2026-06-09","86-90":"2026-06-10","91-95":"2026-06-11","96-00":"2026-06-12"}}]},"exogena_gc":{"digitos":1,"periodos":[{"etiqueta":"Presentación AG2025","fechas":{"1":"2026-04-28","2":"2026-04-29","3":"2026-05-04","4":"2026-05-05","5":"2026-05-06","6":"2026-05-07","7":"2026-05-08","8":"2026-05-11","9":"2026-05-12","0":"2026-05-13"}}]},"impuesto_consumo":{"digitos":1,"periodos":[{"etiqueta":"Ene–Feb","fechas":{"1":"2026-03-10","2":"2026-03-11","3":"2026-03-12","4":"2026-03-13","5":"2026-03-16","6":"2026-03-17","7":"2026-03-18","8":"2026-03-19","9":"2026-03-20","0":"2026-03-24"}},{"etiqueta":"Mar–Abr","fechas":{"1":"2026-05-12","2":"2026-05-13","3":"2026-05-14","4":"2026-05-15","5":"2026-05-19","6":"2026-05-20","7":"2026-05-21","8":"2026-05-22","9":"2026-05-25","0":"2026-05-26"}},{"etiqueta":"May–Jun","fechas":{"1":"2026-07-09","2":"2026-07-10","3":"2026-07-14","4":"2026-07-15","5":"2026-07-16","6":"2026-07-17","7":"2026-07-21","8":"2026-07-22","9":"2026-07-23","0":"2026-07-24"}},{"etiqueta":"Jul–Ago","fechas":{"1":"2026-09-09","2":"2026-09-10","3":"2026-09-11","4":"2026-09-14","5":"2026-09-15","6":"2026-09-16","7":"2026-09-17","8":"2026-09-18","9":"2026-09-21","0":"2026-09-22"}},{"etiqueta":"Sep–Oct","fechas":{"1":"2026-11-11","2":"2026-11-12","3":"2026-11-13","4":"2026-11-17","5":"2026-11-18","6":"2026-11-19","7":"2026-11-20","8":"2026-11-23","9":"2026-11-24","0":"2026-11-25"}},{"etiqueta":"Nov–Dic","fechas":{"1":"2027-01-13","2":"2027-01-14","3":"2027-01-15","4":"2027-01-18","5":"2027-01-19","6":"2027-01-20","7":"2027-01-21","8":"2027-01-22","9":"2027-01-25","0":"2027-01-26"}}]},"ica_bogota":{"digitos":1,"periodos":[{"etiqueta":"Ene–Feb","fechas":{"todos":"2026-04-10"}},{"etiqueta":"Mar–Abr","fechas":{"todos":"2026-06-12"}},{"etiqueta":"May–Jun","fechas":{"todos":"2026-08-21"}},{"etiqueta":"Jul–Ago","fechas":{"todos":"2026-10-09"}},{"etiqueta":"Sep–Oct","fechas":{"todos":"2026-12-11"}},{"etiqueta":"Nov–Dic","fechas":{"todos":"2027-02-12"}}]},"reteica_bogota":{"digitos":1,"periodos":[{"etiqueta":"Ene–Feb","fechas":{"todos":"2026-03-20"}},{"etiqueta":"Mar–Abr","fechas":{"todos":"2026-05-22"}},{"etiqueta":"May–Jun","fechas":{"todos":"2026-07-17"}},{"etiqueta":"Jul–Ago","fechas":{"todos":"2026-09-18"}},{"etiqueta":"Sep–Oct","fechas":{"todos":"2026-11-20"}},{"etiqueta":"Nov–Dic","fechas":{"todos":"2027-01-15"}}]},"patrimonio":{"digitos":1,"periodos":[{"etiqueta":"Declaración y pago 1ª cuota","fechas":{"1":"2026-05-12","2":"2026-05-13","3":"2026-05-14","4":"2026-05-15","5":"2026-05-19","6":"2026-05-20","7":"2026-05-21","8":"2026-05-22","9":"2026-05-25","0":"2026-05-26"}},{"etiqueta":"Pago 2ª cuota","fechas":{"todos":"2026-09-14"}}]}};
-const OBS=[['renta_pn','Renta persona natural'],['renta_pj','Renta persona jurídica'],['renta_gc','Renta gran contribuyente'],['iva_bimestral','IVA bimestral'],['iva_cuatrimestral','IVA cuatrimestral'],['retefuente','Retención en la fuente (350)'],['rst','Régimen Simple anual'],['rst_anticipos','Simple: anticipos bimestrales'],['exogena','Exógena'],['exogena_gc','Exógena gran contribuyente'],['impuesto_consumo','Impuesto al consumo'],['ica_bogota','ICA Bogotá'],['reteica_bogota','ReteICA Bogotá'],['patrimonio','Impuesto al patrimonio']];
-const CORTO={renta_pn:'Renta PN',renta_pj:'Renta PJ',renta_gc:'Renta GC',iva_bimestral:'IVA',iva_cuatrimestral:'IVA cuatr.',retefuente:'Retención 350',rst:'Simple anual',rst_anticipos:'Simple anticipo',exogena:'Exógena',exogena_gc:'Exógena GC',impuesto_consumo:'Consumo',ica_bogota:'ICA Bogotá',reteica_bogota:'ReteICA Bog.',patrimonio:'Patrimonio'};
-const TIPOS=[['natural','Persona natural'],['juridica','Persona jurídica'],['gran','Gran contribuyente'],['rst','Régimen Simple']];
-const SUG={natural:['renta_pn'],juridica:['renta_pj','iva_bimestral','retefuente','exogena'],gran:['renta_gc','iva_bimestral','retefuente','exogena_gc'],rst:['rst','rst_anticipos','exogena']};
-const EMES=[['pendiente','Pendiente','var(--idle)'],['revisar','Por revisar','var(--warn)'],['listo','Listo para presentar','var(--info)'],['presentado','Presentado','var(--mint)'],['pagado','Pagado','var(--ok)']];
-const ERENTA=[['pendiente','Pendiente','var(--idle)'],['proceso','En proceso','var(--warn)'],['presentada','Presentada','var(--info)'],['pagada','Pagada','var(--ok)'],['no_declara','No declara','var(--gold)']];
-const COB=[['por_cobrar','Por cobrar','c-bad'],['cobrado','Cobrado','c-ok'],['no_aplica','No aplica','c-idle']];
-const MESES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-const K='crm-contadores-v1',KL='crm-contadores-lead';
-const $=id=>document.getElementById(id);
-const peso=v=>v==null||v===''||isNaN(+v)?'—':'$'+Math.round(+v).toLocaleString('es-CO');
-const hoyISO=(()=>{const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)})();
-const dias=f=>Math.round((new Date(f+'T12:00:00')-new Date(hoyISO+'T12:00:00'))/864e5);
-const fcorta=f=>{if(!f)return'—';const d=new Date(f+'T12:00:00');return isNaN(d)?f:d.toLocaleDateString('es-CO',{day:'numeric',month:'short'})};
-const soloDig=s=>String(s||'').replace(/\D/g,'');
-const uid=()=>Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4);
-function cargar(){try{return JSON.parse(localStorage.getItem(K))||{}}catch(e){return{}}}
-let S=cargar();S.clientes=S.clientes||[];S.tareas=S.tareas||{};S.renta=S.renta||{};
-function guardar(){try{localStorage.setItem(K,JSON.stringify(S))}catch(e){$('aviso').textContent='No se pudo guardar en este navegador.'}}
-let vista='mes',q='',abierto=null;
-
-/* ---------- calendario: misma regla que la app de Tributando ---------- */
-function aplica(clave,dig,ancho){if(clave==='todos')return true;const tope=10**ancho,v=dig!==0?dig:tope;
-  if(clave.includes('-')){let[a,b]=clave.split('-').map(Number);if(a===0)a=tope;if(b===0)b=tope;return a<=v&&v<=b}
-  let e=Number(clave);if(e===0)e=tope;return v===e}
-function vencimientos(c){const out=[];const d=soloDig(c.nit);
-  (c.obligs||[]).forEach(ob=>{const o=CAL[ob];if(!o)return;const an=+o.digitos||1;if(d.length<an)return;const dig=+d.slice(-an);
-    (o.periodos||[]).forEach(p=>{for(const[k,f]of Object.entries(p.fechas||{})){if(aplica(String(k),dig,an)){out.push({ob,etiqueta:p.etiqueta,fecha:String(f).slice(0,10)});break}}})});
-  return out.sort((a,b)=>a.fecha.localeCompare(b.fecha))}
-function tipoPorNit(nit){const d=soloDig(nit);return d.length>=9&&/^[89]/.test(d)?'juridica':'natural'}
-function dvDe(nit){const d=soloDig(nit).slice(0,15);if(!d)return'';const P=[3,7,13,17,19,23,29,37,41,43,47,53,59,67,71];let s=0;
-  d.split('').reverse().forEach((x,i)=>s+=+x*P[i]);const r=s%11;return r>1?11-r:r}
-
-/* ---------- tareas del mes ---------- */
-function tareasMes(mes){const L=[];S.clientes.forEach(c=>vencimientos(c).forEach(v=>{if(v.ob==='renta_pn')return;if(mes&&v.fecha.slice(5,7)!==mes)return;
-  const id=c.id+'|'+v.ob+'|'+v.etiqueta;const t=S.tareas[id]||{};L.push({id,c,ob:v.ob,etiqueta:v.etiqueta,vence:v.fecha,estado:t.estado||'pendiente',cobro:t.cobro||'por_cobrar',nota:t.nota||'',valor:t.valor})}));return L}
-function rentaLista(){const L=[];S.clientes.forEach(c=>{if(!(c.obligs||[]).includes('renta_pn'))return;const v=vencimientos({nit:c.nit,obligs:['renta_pn']})[0];const r=S.renta[c.id]||{};
-  L.push({id:c.id,c,ob:'renta_pn',etiqueta:'AG2025',vence:v?v.fecha:'',estado:r.estado||'pendiente',cobro:r.cobro||'por_cobrar',nota:r.nota||'',valor:r.valor})});return L}
-
-/* ---------- vista ---------- */
-function llenarMeses(){const s=$('filMes');s.replaceChildren();const o0=document.createElement('option');o0.value='';o0.textContent='Todos los meses';s.appendChild(o0);
-  MESES.forEach((m,i)=>{const o=document.createElement('option');o.value=String(i+1).padStart(2,'0');o.textContent='Vencen en '+m;s.appendChild(o)});
-  s.value=hoyISO.slice(5,7);
-  OBS.filter(o=>o[0]!=='renta_pn').forEach(([k,t])=>{const o=document.createElement('option');o.value=k;o.textContent=t;$('filOb').appendChild(o)})}
-function abrirTab(k){vista=k;['mes','renta','cli'].forEach(x=>$('t-'+x).setAttribute('aria-selected',String(x===k)));
-  $('filMes').hidden=$('filOb').hidden=(k!=='mes');$('filCobro').hidden=(k==='cli');cerrar();render();try{localStorage.setItem('crm-tab',k)}catch(e){}}
-function filas(){const fc=$('filCobro').value,fo=$('filOb').value;
-  let L=vista==='mes'?tareasMes($('filMes').value):rentaLista();
-  return L.filter(t=>(!q||((t.c.nombre||'')+' '+(t.c.nit||'')).toLowerCase().includes(q))&&(!fc||t.cobro===fc)&&(!fo||vista!=='mes'||t.ob===fo))}
-function kpis(L){const Kp=$('kpis');Kp.replaceChildren();
-  const add=(v,t,res,fil)=>{const d=document.createElement('div');d.className='kpi'+(res?' res':'');const b=document.createElement('b');b.className='num';b.textContent=v;const s=document.createElement('span');s.textContent=t;d.append(b,s);
-    if(fil!==undefined){d.classList.add('btnk');if($('filCobro').value===fil&&fil!=='')d.classList.add('on');d.onclick=()=>{$('filCobro').value=$('filCobro').value===fil?'':fil;render()}}Kp.appendChild(d)};
-  if(vista==='cli'){add(S.clientes.length,'clientes',true);add(S.clientes.filter(c=>c.tipo==='natural').length,'personas naturales');add(S.clientes.filter(c=>c.tipo!=='natural').length,'empresas');return}
-  const cerr=vista==='mes'?['presentado','pagado']:['presentada','pagada','no_declara'];const ab=L.filter(t=>!cerr.includes(t.estado));
-  const cobrado=L.filter(t=>t.cobro==='cobrado').reduce((s,t)=>s+(+t.valor||0),0);
-  add(peso(cobrado),'cobrado en esta vista',true);add(L.length,vista==='mes'?'declaraciones':'declarantes');add(ab.length,'por presentar');
-  add(ab.filter(t=>t.vence&&dias(t.vence)>=0&&dias(t.vence)<=3).length,'vencen en 3 días');add(ab.filter(t=>t.vence&&dias(t.vence)<0).length,'vencidas sin presentar');
-  add(L.filter(t=>t.cobro==='por_cobrar'&&t.estado!=='no_declara').length,'por cobrar · ver','por_cobrar')}
-function render(){
-  const T=$('tablero');T.replaceChildren();
-  if(!S.clientes.length){kpis([]);const v=document.createElement('div');v.className='drop';v.style.flex='1';
-    v.innerHTML='<b>Empieza subiendo tu Excel de clientes</b><br><span class="aviso">Columnas: nombre, NIT o cédula, celular (opcional: correo, tipo, impuestos). Arrástralo aquí o tócalo.</span><br><br>';
-    const b1=document.createElement('button');b1.className='btn pri';b1.textContent='Subir Excel';b1.onclick=e=>{e.stopPropagation();$('archivo').click()};
-    const b2=document.createElement('button');b2.className='btn';b2.textContent='Descargar plantilla';b2.style.marginLeft='6px';b2.onclick=e=>{e.stopPropagation();plantilla()};
-    const b3=document.createElement('button');b3.className='btn';b3.textContent='Probar con 6 clientes de ejemplo';b3.style.marginLeft='6px';b3.onclick=e=>{e.stopPropagation();ejemplo()};
-    v.append(b1,b2,b3);v.onclick=()=>$('archivo').click();soltar(v);T.appendChild(v);return}
-  if(vista==='cli'){kpis([]);return listaClientes(T)}
-  const L=filas();kpis(L);
-  $('aviso').textContent=(q||$('filCobro').value||$('filOb').value)?L.length+' resultado(s)':'';
-  (vista==='mes'?EMES:ERENTA).forEach(([k,t,color])=>{
-    const items=L.filter(x=>x.estado===k).sort((a,b)=>(a.vence||'9').localeCompare(b.vence||'9')||(a.c.nombre||'').localeCompare(b.c.nombre||''));
-    const col=document.createElement('section');col.className='col';col.setAttribute('aria-label',t);
-    const h=document.createElement('h3');const dot=document.createElement('span');dot.className='dot';dot.style.cssText='width:10px;height:10px;background:'+color;h.append(dot,document.createTextNode(t));
-    const sm=document.createElement('small');sm.textContent=items.length;h.appendChild(sm);
-    const tot=document.createElement('div');tot.className='tot';tot.textContent=items.filter(x=>x.cobro==='por_cobrar').length+' por cobrar';
-    const r=document.createElement('div');r.className='raya';r.style.background=color;
-    const cards=document.createElement('div');cards.className='cards';
-    if(!items.length){const v=document.createElement('div');v.className='vacio';v.textContent='Sin tarjetas';cards.appendChild(v)}
-    items.forEach(x=>cards.appendChild(tarjeta(x)));col.append(h,tot,r,cards);
-    col.addEventListener('dragover',e=>{e.preventDefault();col.classList.add('sobre')});
-    col.addEventListener('dragleave',()=>col.classList.remove('sobre'));
-    col.addEventListener('drop',e=>{e.preventDefault();col.classList.remove('sobre');const id=e.dataTransfer.getData('text/plain');if(id)poner(id,{estado:k})});
-    T.appendChild(col)});
-}
-function tarjeta(x){const d=document.createElement('article');d.className='tj';d.tabIndex=0;d.draggable=true;
-  const n=document.createElement('div');n.className='n';const dt=document.createElement('span');dt.className='dot';
-  dt.style.background=x.estado==='no_declara'||x.cobro==='no_aplica'?'var(--idle)':x.cobro==='cobrado'?'var(--ok)':'var(--bad)';dt.title=x.cobro==='cobrado'?'Cobrado':x.cobro==='no_aplica'?'No aplica':'Por cobrar';
-  const nm=document.createElement('span');nm.textContent=x.c.nombre||'—';nm.style.cssText='overflow:hidden;text-overflow:ellipsis';n.append(dt,nm);
-  const ch=document.createElement('div');ch.className='chips';const chip=(t,cl)=>{const s=document.createElement('span');s.className='chip '+cl;s.textContent=t;ch.appendChild(s)};
-  if(vista==='mes')chip(CORTO[x.ob]+' · '+x.etiqueta,'c-info');
-  if(x.vence){const cerr=['presentado','pagado','presentada','pagada','no_declara'].includes(x.estado);const n2=dias(x.vence);
-    chip(fcorta(x.vence)+(cerr?'':n2<0?' · venció':n2===0?' · hoy':' · en '+n2+'d'),cerr?'c-ok':n2<0?'c-bad':n2<=3?'c-warn':'c-idle')}
-  if(x.valor)chip(peso(x.valor),'c-gold');if(x.nota)chip('📝','c-idle');
-  d.append(n,ch);
-  d.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',x.id);d.classList.add('arr')});d.addEventListener('dragend',()=>d.classList.remove('arr'));
-  d.onclick=()=>abrirTarea(x.id);d.onkeydown=e=>{if(e.key==='Enter')abrirTarea(x.id)};return d}
-function poner(id,cambios){if(vista==='renta'){S.renta[id]=Object.assign(S.renta[id]||{},cambios)}else{S.tareas[id]=Object.assign(S.tareas[id]||{},cambios)}guardar();render();if(abierto===id)abrirTarea(id)}
-function listaClientes(T){const box=document.createElement('div');box.style.cssText='flex:1;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:auto';
-  const tb=document.createElement('table');tb.style.cssText='width:100%;border-collapse:collapse;font-size:.82rem';
-  const hd=document.createElement('tr');['Cliente','NIT / cédula','Tipo','Impuestos','Próximo vencimiento','Celular'].forEach(t=>{const th=document.createElement('th');th.textContent=t;th.style.cssText='text-align:left;padding:8px 10px;color:var(--muted);border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--card)';hd.appendChild(th)});tb.appendChild(hd);
-  S.clientes.filter(c=>!q||((c.nombre||'')+' '+(c.nit||'')).toLowerCase().includes(q)).sort((a,b)=>(a.nombre||'').localeCompare(b.nombre||'')).forEach(c=>{
-    const tr=document.createElement('tr');tr.style.cursor='pointer';tr.onclick=()=>abrirCliente(c.id);
-    const prox=vencimientos(c).find(v=>v.fecha>=hoyISO);
-    [c.nombre,(c.nit||'')+(c.nit?'-'+dvDe(c.nit):''),(TIPOS.find(t=>t[0]===c.tipo)||['',''])[1],(c.obligs||[]).map(o=>CORTO[o]).join(', '),prox?CORTO[prox.ob]+' · '+fcorta(prox.fecha):'—',c.tel||'—'].forEach(v=>{const td=document.createElement('td');td.textContent=v||'—';td.style.cssText='padding:8px 10px;border-bottom:1px solid var(--line)';tr.appendChild(td)});
-    tb.appendChild(tr)});box.appendChild(tb);T.appendChild(box)}
-
-/* ---------- panel ---------- */
-function cerrar(){$('panel').classList.remove('abierto');$('velo').classList.remove('on');abierto=null}
-function base(tit,nom){$('pTipo').textContent=tit;$('pNombre').textContent=nom;const B=$('pCuerpo');B.replaceChildren();$('panel').classList.add('abierto');$('velo').classList.add('on');return B}
-function fila(B,k,v){const f=document.createElement('div');f.className='fila';const a=document.createElement('span');a.textContent=k;const b=document.createElement('b');b.className='num';b.textContent=v;f.append(a,b);B.appendChild(f)}
-function lab(B,t){const l=document.createElement('label');l.className='l';l.textContent=t;B.appendChild(l)}
-function sel(B,t,opc,val,fn){lab(B,t);const s=document.createElement('select');s.className='campo';opc.forEach(([k,tx])=>{const o=document.createElement('option');o.value=k;o.textContent=tx;if(k===val)o.selected=true;s.appendChild(o)});s.onchange=()=>fn(s.value);B.appendChild(s);return s}
-function waLink(tel,txt){let d=soloDig(tel);if(d.length===10)d='57'+d;return d?'https://wa.me/'+d+'?text='+encodeURIComponent(txt):''}
-function abrirTarea(id){const L=vista==='mes'?tareasMes(''):rentaLista();const x=L.find(t=>t.id===id);if(!x)return;abierto=id;
-  const B=base(vista==='mes'?CORTO[x.ob]+' · '+x.etiqueta:'Renta AG2025 · formulario 210',x.c.nombre);
-  fila(B,vista==='mes'?'NIT':'Cédula',(x.c.nit||'—')+(x.c.nit?'-'+dvDe(x.c.nit):''));
-  fila(B,'Vence',x.vence?fcorta(x.vence)+' ('+(dias(x.vence)<0?'venció hace '+(-dias(x.vence))+' días':dias(x.vence)===0?'hoy':'en '+dias(x.vence)+' días')+')':'—');
-  sel(B,'Estado',vista==='mes'?EMES:ERENTA,x.estado,v=>poner(id,{estado:v}));
-  sel(B,'Cobro',COB,x.cobro,v=>poner(id,{cobro:v}));
-  lab(B,'Honorario de esta declaración');const iv=document.createElement('input');iv.className='campo num';iv.inputMode='numeric';iv.placeholder='Ej.: 150000';iv.value=x.valor||'';iv.onchange=()=>poner(id,{valor:soloDig(iv.value)});B.appendChild(iv);
-  lab(B,'Nota');const ta=document.createElement('textarea');ta.value=x.nota;ta.placeholder='Ej.: falta el extracto de octubre; llamar el lunes';B.appendChild(ta);
-  const g=document.createElement('button');g.className='btn pri';g.textContent='Guardar nota';g.onclick=()=>{poner(id,{nota:ta.value});g.textContent='Guardada ✓'};B.appendChild(g);
-  const txt=vista==='mes'?`Hola ${x.c.nombre}, te recuerdo que ${OBS.find(o=>o[0]===x.ob)[1].toLowerCase()} (${x.etiqueta}) vence el ${fcorta(x.vence)}. ¿Me envías la información para dejarla lista?`:`Hola ${x.c.nombre}, tu declaración de renta del año 2025 vence el ${fcorta(x.vence)}. ¿Me envías los certificados para dejarla lista?`;
-  const w=waLink(x.c.tel,txt);if(w){const a=document.createElement('a');a.className='btn wa';a.href=w;a.target='_blank';a.rel='noopener';a.textContent='Recordarle por WhatsApp';B.appendChild(a)}
-  else{const p=document.createElement('p');p.className='aviso';p.textContent='Agrega el celular del cliente para mandarle el recordatorio por WhatsApp.';B.appendChild(p)}
-  const e=document.createElement('button');e.className='btn';e.textContent='Editar cliente';e.onclick=()=>abrirCliente(x.c.id);B.appendChild(e)}
-function abrirCliente(id){const nuevo=!id;const c=nuevo?{id:uid(),nombre:'',nit:'',tipo:'juridica',obligs:SUG.juridica.slice(),tel:'',correo:''}:Object.assign({},S.clientes.find(x=>x.id===id));if(!c.id)return;
-  const B=base(nuevo?'Nuevo cliente':'Cliente',nuevo?'Agregar cliente':c.nombre);
-  const inp=(t,k,ph,tipo)=>{lab(B,t);const i=document.createElement('input');i.className='campo';i.value=c[k]||'';i.placeholder=ph||'';if(tipo)i.type=tipo;i.oninput=()=>c[k]=i.value;B.appendChild(i);return i};
-  inp('Nombre o razón social','nombre','');const iN=inp('NIT o cédula (sin dígito de verificación)','nit','900123456');
-  iN.onchange=()=>{if(nuevo&&c.nit){c.tipo=tipoPorNit(c.nit);sT.value=c.tipo;c.obligs=SUG[c.tipo].slice();pintarObl()}};
-  inp('Celular / WhatsApp','tel','300 123 4567','tel');inp('Correo','correo','','email');
-  const sT=sel(B,'Tipo',TIPOS,c.tipo,v=>{c.tipo=v;c.obligs=SUG[v].slice();pintarObl()});
-  lab(B,'Impuestos que presenta');const ob=document.createElement('div');ob.className='obl';B.appendChild(ob);
-  function pintarObl(){ob.replaceChildren();OBS.forEach(([k,t])=>{const l=document.createElement('label');const x=document.createElement('input');x.type='checkbox';x.checked=(c.obligs||[]).includes(k);
-    x.onchange=()=>{c.obligs=(c.obligs||[]).filter(o=>o!==k);if(x.checked)c.obligs.push(k)};l.append(x,document.createTextNode(t));ob.appendChild(l)})}
-  pintarObl();
-  const g=document.createElement('button');g.className='btn pri';g.textContent=nuevo?'Agregar cliente':'Guardar cambios';
-  g.onclick=()=>{if(!c.nombre.trim()){g.textContent='Falta el nombre';return}const i=S.clientes.findIndex(x=>x.id===c.id);if(i>=0)S.clientes[i]=c;else S.clientes.push(c);guardar();cerrar();render()};B.appendChild(g);
-  if(!nuevo){const v=vencimientos(c).filter(v=>v.fecha>=hoyISO).slice(0,6);if(v.length){lab(B,'Próximos vencimientos');v.forEach(x=>fila(B,CORTO[x.ob]+' · '+x.etiqueta,fcorta(x.fecha)))}
-    const del=document.createElement('button');del.className='btn peligro';del.textContent='Quitar cliente';
-    del.onclick=()=>{if(del.dataset.ok){S.clientes=S.clientes.filter(x=>x.id!==c.id);guardar();cerrar();render()}else{del.dataset.ok=1;del.textContent='Toca otra vez para quitarlo'}};B.appendChild(del)}}
-
-/* ---------- Excel ---------- */
-const norm=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim();
-function columna(h,pal){return h.findIndex(x=>pal.some(p=>norm(x).includes(p)))}
-function obligsDeTexto(t,tipo){t=norm(t);if(!t)return SUG[tipo].slice();const o=[];
-  if(/renta/.test(t))o.push(tipo==='natural'?'renta_pn':tipo==='gran'?'renta_gc':'renta_pj');
-  if(/cuatri/.test(t))o.push('iva_cuatrimestral');else if(/iva/.test(t))o.push('iva_bimestral');
-  if(/rete|350|fuente/.test(t)&&!/reteica/.test(t))o.push('retefuente');if(/reteica/.test(t))o.push('reteica_bogota');
-  if(/simple|rst/.test(t)){o.push('rst','rst_anticipos')}if(/exogena|informacion exogena|medios/.test(t))o.push(tipo==='gran'?'exogena_gc':'exogena');
-  if(/consumo/.test(t))o.push('impuesto_consumo');if(/\bica\b/.test(t))o.push('ica_bogota');if(/patrimonio/.test(t))o.push('patrimonio');
-  if(tipo==='juridica'&&!o.includes('renta_pj'))o.unshift('renta_pj');if(tipo==='gran'&&!o.includes('renta_gc'))o.unshift('renta_gc');if(tipo==='rst'&&!o.includes('rst'))o.unshift('rst');
-  return o.length?[...new Set(o)]:SUG[tipo].slice()}
-function tipoDeTexto(t,nit){t=norm(t);if(/gran/.test(t))return'gran';if(/simple|rst/.test(t))return'rst';if(/jurid|empresa|sas|ltda|sociedad/.test(t))return'juridica';if(/natural|persona/.test(t))return'natural';return tipoPorNit(nit)}
-function importar(file){const r=new FileReader();r.onload=e=>{try{
-  const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});const ws=wb.Sheets[wb.SheetNames[0]];const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
-  let hi=rows.findIndex(r=>r.some(x=>/nombre|razon|cliente/.test(norm(x)))&&r.some(x=>/nit|cedula|documento|identifica/.test(norm(x))));if(hi<0)hi=0;
-  const h=rows[hi].map(String);const cN=columna(h,['nombre','razon','cliente']),cD=columna(h,['nit','cedula','documento','identifica']),cT=columna(h,['celular','whatsapp','telefono','movil']),
-    cC=columna(h,['correo','email','e-mail']),cTi=columna(h,['tipo']),cO=columna(h,['impuesto','obligac','responsab','declara']);
-  if(cN<0||cD<0){alert('No encontré las columnas de nombre y NIT/cédula. Usa la plantilla.');return}
-  let n=0,rep=0;rows.slice(hi+1).forEach(r=>{const nombre=String(r[cN]||'').trim(),nit=soloDig(String(r[cD]||'').split('-')[0]);if(!nombre||!nit)return;
-    const tipo=tipoDeTexto(cTi>=0?r[cTi]:'',nit);const c={id:uid(),nombre,nit,tipo,obligs:obligsDeTexto(cO>=0?r[cO]:'',tipo),tel:cT>=0?String(r[cT]):'',correo:cC>=0?String(r[cC]):''};
-    const i=S.clientes.findIndex(x=>soloDig(x.nit)===nit);if(i>=0){c.id=S.clientes[i].id;S.clientes[i]=c;rep++}else{S.clientes.push(c);n++}});
-  guardar();render();$('aviso').textContent=n+' cliente(s) nuevos'+(rep?' y '+rep+' actualizados':'')+'.';
-  fetch('/api/apps/lead',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.assign(leer(KL)||{},{app:'crm-contadores',nota:'Importó Excel: '+(n+rep)+' clientes'}))}).catch(()=>{});
- }catch(err){alert('No pude leer el archivo: '+err.message)}};r.readAsArrayBuffer(file)}
-function plantilla(){const ws=XLSX.utils.aoa_to_sheet([['Nombre','NIT o cédula','Celular','Correo','Tipo','Impuestos'],
-  ['Ferretería El Tornillo SAS','901234567','3001234567','gerencia@eltornillo.co','Jurídica','Renta, IVA, Retención, Exógena'],
-  ['María Pérez','43123456','3109876543','','Natural','Renta'],
-  ['Panadería La Espiga','1036123458','3205551234','','Simple','Simple, Exógena']]);
-  ws['!cols']=[{wch:30},{wch:15},{wch:13},{wch:26},{wch:12},{wch:34}];const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Clientes');XLSX.writeFile(wb,'Plantilla clientes - Tributando.xlsx')}
-function exportar(){const wb=XLSX.utils.book_new();
-  const cl=[['Nombre','NIT o cédula','DV','Celular','Correo','Tipo','Impuestos']].concat(S.clientes.map(c=>[c.nombre,c.nit,dvDe(c.nit),c.tel,c.correo,(TIPOS.find(t=>t[0]===c.tipo)||['',''])[1],(c.obligs||[]).map(o=>CORTO[o]).join(', ')]));
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(cl),'Clientes');
-  const v=[['Cliente','NIT','Impuesto','Periodo','Vence','Estado','Cobro','Honorario','Nota']];
-  S.clientes.forEach(c=>vencimientos(c).forEach(x=>{const t=x.ob==='renta_pn'?(S.renta[c.id]||{}):(S.tareas[c.id+'|'+x.ob+'|'+x.etiqueta]||{});
-    v.push([c.nombre,c.nit,OBS.find(o=>o[0]===x.ob)[1],x.etiqueta,x.fecha,t.estado||'pendiente',t.cobro||'por_cobrar',t.valor?+t.valor:'',t.nota||''])}));
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(v),'Vencimientos 2026');XLSX.writeFile(wb,'CRM tributario - '+hoyISO+'.xlsx')}
-function ejemplo(){[['Ferretería El Tornillo SAS','901234567','juridica'],['Distribuciones Andina SAS','900765432','juridica'],['Panadería La Espiga','1036123458','rst'],
-  ['María Pérez','43123456','natural'],['Carlos Gómez','71654329','natural'],['Transportes Rápidos SAS','901555330','juridica']].forEach(([n,d,t])=>S.clientes.push({id:uid(),nombre:n,nit:d,tipo:t,obligs:SUG[t].slice(),tel:'',correo:'',ejemplo:true}));guardar();render()}
-function soltar(el){el.addEventListener('dragover',e=>{e.preventDefault();el.classList.add('sobre')});el.addEventListener('dragleave',()=>el.classList.remove('sobre'));
-  el.addEventListener('drop',e=>{e.preventDefault();el.classList.remove('sobre');const f=e.dataTransfer.files[0];if(f)importar(f)})}
-
-/* ---------- registro ---------- */
-function leer(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
-function registro(){const L=leer(KL);if(L&&L.correo){$('saludo').textContent=L.nombre||'Tu oficina contable';return}$('gate').hidden=false;$('gNom').focus()}
-$('gOk').onclick=async()=>{const nombre=$('gNom').value.trim(),correo=$('gCor').value.trim().toLowerCase(),whatsapp=$('gWa').value.trim();
-  if(!nombre){$('gErr').textContent='Escribe tu nombre.';return}if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(correo)){$('gErr').textContent='Revisa el correo.';return}
-  if(soloDig(whatsapp).length<10){$('gErr').textContent='Escribe tu WhatsApp (10 dígitos).';return}
-  $('gOk').disabled=true;$('gOk').textContent='Entrando…';
-  try{await fetch('/api/apps/lead',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({app:'crm-contadores',nombre,correo,whatsapp,nota:'Entró al CRM tributario gratis'})})}catch(e){}
-  try{localStorage.setItem(KL,JSON.stringify({nombre,correo,whatsapp}))}catch(e){}
-  $('gate').hidden=true;$('saludo').textContent=nombre;render()};
-
-/* ---------- arranque ---------- */
-$('t-mes').onclick=()=>abrirTab('mes');$('t-renta').onclick=()=>abrirTab('renta');$('t-cli').onclick=()=>abrirTab('cli');
-$('buscar').oninput=e=>{q=e.target.value.trim().toLowerCase();render()};
-['filMes','filOb','filCobro'].forEach(i=>$(i).onchange=render);
-$('pCerrar').onclick=cerrar;$('velo').onclick=cerrar;document.addEventListener('keydown',e=>{if(e.key==='Escape')cerrar()});
-$('bNuevo').onclick=()=>abrirCliente(null);$('bImportar').onclick=()=>$('archivo').click();$('bExportar').onclick=()=>S.clientes.length?exportar():plantilla();
-$('archivo').onchange=e=>{const f=e.target.files[0];if(f)importar(f);e.target.value=''};
-soltar(document.querySelector('.wrap'));
-llenarMeses();try{const t=localStorage.getItem('crm-tab');if(t)vista=t}catch(e){}
-abrirTab(vista);registro();
+(function(){
+ var f=document.getElementById('f'),b=document.getElementById('b'),e=document.getElementById('e');
+ function bajar(){var a=document.createElement('a');a.href='crm-para-contadores-tributando.xlsx';a.download='CRM para contadores - Tributando.xlsx';document.body.appendChild(a);a.click();a.remove();}
+ f.addEventListener('submit',function(ev){
+  ev.preventDefault();e.textContent='';
+  var nom=document.getElementById('nom').value.trim(),co=document.getElementById('co').value.trim(),wa=document.getElementById('wa').value.trim();
+  if(!nom){e.textContent='Escribe tu nombre.';return;}
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(co)){e.textContent='Revisa el correo.';return;}
+  b.disabled=true;b.textContent='Preparando…';
+  fetch('/api/apps/lead',{method:'POST',headers:{'Content-Type':'application/json'},
+   body:JSON.stringify({app:'crm-contadores',nombre:nom,correo:co,whatsapp:wa,nota:'Descargó el CRM para contadores (Excel)'})})
+   .catch(function(){}).then(function(){bajar();document.getElementById('ok').style.display='block';b.disabled=false;b.textContent='Descargar otra vez';});
+ });
+})();
 </script>
 </body></html>
