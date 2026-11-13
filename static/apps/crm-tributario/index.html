@@ -73,6 +73,9 @@ textarea{min-height:64px;resize:vertical}
 .btn:focus-visible,.tab:focus-visible,.tj:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--mint);outline-offset:2px}
 .aviso{font-size:.78rem;color:var(--muted)}
 .velo{position:fixed;inset:0;background:rgba(0,0,0,.28);z-index:15;display:none}.velo.on{display:block}
+.soltar{position:fixed;inset:0;z-index:50;background:rgba(19,38,31,.82);display:flex;align-items:center;justify-content:center;pointer-events:none}
+.soltar>div{border:3px dashed var(--mint);border-radius:18px;padding:40px 50px;text-align:center;color:#fff;display:flex;flex-direction:column;gap:8px}
+.soltar b{font-size:1.5rem;color:var(--oro);font-family:Georgia,serif}.soltar span{color:#cfe3da}
 .drop{border:2px dashed var(--line);border-radius:12px;padding:16px;text-align:center;cursor:pointer;background:var(--card)}.drop:hover,.drop.sobre{border-color:var(--mint);background:var(--mint-soft)}
 /* publicidad */
 .promo{background:#13261F;border-radius:14px;color:#fff;padding:16px 18px;display:grid;grid-template-columns:1.2fr repeat(3,1fr) auto;gap:14px;align-items:center}
@@ -102,7 +105,7 @@ footer a{color:var(--ok)}
   <span class="lema">CRM tributario · gratis para contadores</span>
   <span class="esp"></span>
   <button class="btn pri" id="bNuevo">+ Cliente</button>
-  <button class="btn" id="bImportar">Importar Excel</button>
+  <button class="btn" id="bImportar" title="También puedes arrastrar el Excel a la página">Importar Excel (o arrástralo)</button>
   <button class="btn" id="bExportar">Descargar Excel</button>
 </div></div>
 
@@ -134,7 +137,7 @@ footer a{color:var(--ok)}
     <span class="aviso" id="aviso"></span>
   </div>
   <div id="tablero" class="tablero"></div>
-  <p class="aviso" id="ayuda">Arrastra una tarjeta a otra columna para cambiar su estado, o tócala para ver el detalle, el cobro, la nota y mandarle el recordatorio por WhatsApp al cliente. Las fechas salen del calendario tributario DIAN 2026 según el último dígito del NIT.</p>
+  <p class="aviso" id="ayuda">Arrastra una tarjeta a otra columna para cambiar su estado, o tócala para ver el detalle, el cobro, la nota y mandarle el recordatorio por WhatsApp al cliente. Las fechas salen del calendario tributario DIAN 2026 según el último dígito del NIT. Para cargar o actualizar clientes, <b>arrastra tu Excel</b> a cualquier parte de la página.</p>
 </div>
 
 <footer>
@@ -148,6 +151,7 @@ footer a{color:var(--ok)}
   <div class="cuerpo" id="pCuerpo"></div>
 </aside>
 <input type="file" id="archivo" accept=".xlsx,.xls,.csv" hidden>
+<div class="soltar" id="soltar" hidden><div><b>Suelta aquí tu Excel de clientes</b><span>Nombre, NIT o cédula y celular. Los que ya estén se actualizan.</span></div></div>
 
 <div class="gate" id="gate" hidden>
   <div class="caja">
@@ -353,7 +357,14 @@ function exportar(){const wb=XLSX.utils.book_new();
 function ejemplo(){[['Ferretería El Tornillo SAS','901234567','juridica'],['Distribuciones Andina SAS','900765432','juridica'],['Panadería La Espiga','1036123458','rst'],
   ['María Pérez','43123456','natural'],['Carlos Gómez','71654329','natural'],['Transportes Rápidos SAS','901555330','juridica']].forEach(([n,d,t])=>S.clientes.push({id:uid(),nombre:n,nit:d,tipo:t,obligs:SUG[t].slice(),tel:'',correo:'',ejemplo:true}));guardar();render()}
 function soltar(el){el.addEventListener('dragover',e=>{e.preventDefault();el.classList.add('sobre')});el.addEventListener('dragleave',()=>el.classList.remove('sobre'));
-  el.addEventListener('drop',e=>{e.preventDefault();el.classList.remove('sobre');const f=e.dataTransfer.files[0];if(f)importar(f)})}
+  el.addEventListener('drop',e=>{e.preventDefault();e.stopPropagation();el.classList.remove('sobre');ocultarSoltar();const f=e.dataTransfer.files[0];if(f)importar(f)})}
+/* arrastrar el Excel a cualquier parte de la página */
+let cuenta=0;const conArchivo=e=>e.dataTransfer&&[...e.dataTransfer.types].includes('Files');
+function ocultarSoltar(){cuenta=0;$('soltar').hidden=true}
+document.addEventListener('dragenter',e=>{if(!conArchivo(e))return;cuenta++;$('soltar').hidden=false});
+document.addEventListener('dragleave',e=>{if(!conArchivo(e))return;if(--cuenta<=0)ocultarSoltar()});
+document.addEventListener('dragover',e=>{if(conArchivo(e))e.preventDefault()});
+document.addEventListener('drop',e=>{if(!conArchivo(e))return;e.preventDefault();ocultarSoltar();const f=e.dataTransfer.files[0];if(f)importar(f)});
 
 /* ---------- registro ---------- */
 function leer(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
@@ -373,7 +384,6 @@ $('buscar').oninput=e=>{q=e.target.value.trim().toLowerCase();render()};
 $('pCerrar').onclick=cerrar;$('velo').onclick=cerrar;document.addEventListener('keydown',e=>{if(e.key==='Escape')cerrar()});
 $('bNuevo').onclick=()=>abrirCliente(null);$('bImportar').onclick=()=>$('archivo').click();$('bExportar').onclick=()=>S.clientes.length?exportar():plantilla();
 $('archivo').onchange=e=>{const f=e.target.files[0];if(f)importar(f);e.target.value=''};
-soltar(document.querySelector('.wrap'));
 llenarMeses();try{const t=localStorage.getItem('crm-tab');if(t)vista=t}catch(e){}
 abrirTab(vista);registro();
 </script>
