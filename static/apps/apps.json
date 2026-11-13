@@ -16,5 +16,11 @@
     "nombre": "Sismos en Vivo",
     "descripcion": "Monitor mundial de sismos con USGS, EMSC en vivo y el Servicio Geológico Colombiano; alertas, réplicas y energía liberada.",
     "fecha": "2026-10-15"
+  },
+  {
+    "slug": "crm-contadores",
+    "nombre": "CRM para contadores (Excel)",
+    "descripcion": "Gratis: clientes con vencimientos DIAN por NIT, embudo de prospectos, honorarios y cartera en un Excel.",
+    "fecha": "2026-11-13"
   }
 ]

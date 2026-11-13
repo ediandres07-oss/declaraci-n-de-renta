@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CRM gratis para contadores en Excel · Tributando</title>
+<meta name="description" content="Gratis para contadores: un Excel con tus clientes, los vencimientos DIAN calculados por el NIT, tu embudo de prospectos y la cartera de honorarios.">
+<meta property="og:title" content="CRM gratis para contadores (Excel)">
+<meta property="og:description" content="Clientes, vencimientos DIAN por NIT, prospectos y honorarios en un solo Excel. Gratis.">
+<meta property="og:image" content="https://tributando.co/apps/crm-contadores/tablero.png">
+<meta property="og:url" content="https://tributando.co/apps/crm-contadores/">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#13261F">
+<style>
+:root{--v:#13261F;--m:#37D38F;--o:#E0C584;--t:#22303f;--g:#5b6b63;--c:#F3F6F4;--b:#DDE5E0}
+*{box-sizing:border-box}body{margin:0;background:#fff;color:var(--t);font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+.hero{background:var(--v);color:#fff;padding:34px 16px 30px}
+.in{max-width:1080px;margin:0 auto}
+.marca{font-family:Georgia,serif;color:var(--o);font-weight:bold;font-size:18px;letter-spacing:.3px}
+.marca small{display:block;font-family:Arial,sans-serif;color:var(--m);font-size:11px;letter-spacing:1.6px;font-weight:600;margin-top:2px}
+h1{font-family:Georgia,serif;font-size:clamp(28px,4.4vw,42px);line-height:1.12;margin:22px 0 10px;color:#fff}
+h1 span{color:var(--o)}
+.lead{font-size:17px;line-height:1.55;color:#d9e6df;max-width:700px;margin:0}
+.chip{display:inline-block;background:rgba(55,211,143,.14);color:var(--m);border:1px solid rgba(55,211,143,.4);border-radius:999px;padding:4px 12px;font-size:12.5px;font-weight:700;margin-top:16px}
+.grid{display:grid;grid-template-columns:1.25fr 1fr;gap:26px;align-items:start;margin-top:-10px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.foto{background:#fff;border:1px solid var(--b);border-radius:14px;overflow:hidden;box-shadow:0 18px 40px rgba(19,38,31,.14);margin-top:26px}
+.foto img{display:block;width:100%;height:auto}
+.caja{background:#fff;border:1px solid var(--b);border-radius:14px;padding:22px;box-shadow:0 18px 40px rgba(19,38,31,.10);margin-top:26px}
+.caja h2{margin:0 0 4px;font-size:20px;color:var(--v)}
+.caja p{margin:0 0 12px;color:var(--g);font-size:14px;line-height:1.5}
+label{display:block;font-size:13px;color:var(--g);margin:10px 0 4px;font-weight:600}
+input{width:100%;border:1px solid var(--b);border-radius:9px;padding:11px 12px;font-size:15px;color:var(--t)}
+input:focus{outline:2px solid var(--m);border-color:var(--m)}
+.btn{display:block;width:100%;margin-top:16px;background:var(--v);color:var(--o);border:0;border-radius:10px;padding:14px;font-size:16px;font-weight:800;cursor:pointer;text-align:center;text-decoration:none}
+.btn:hover{filter:brightness(1.15)}.btn[disabled]{opacity:.55;cursor:default}
+.nota{font-size:12px;color:var(--g);margin-top:10px;line-height:1.45}
+.ok{background:#E9F9F1;border:1px solid #B9EBD3;color:#1c7a50;border-radius:10px;padding:12px;margin-top:14px;font-size:14px;display:none}
+.err{color:#9b2c22;font-size:13px;margin-top:8px;min-height:1em}
+.sec{max-width:1080px;margin:40px auto 0;padding:0 16px}
+.sec h2{font-family:Georgia,serif;color:var(--v);font-size:24px;margin:0 0 14px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.card{background:var(--c);border-radius:12px;padding:16px;border-left:4px solid var(--m)}
+.card b{display:block;color:var(--v);font-size:15.5px;margin-bottom:5px}
+.card span{color:var(--g);font-size:14px;line-height:1.5}
+.cta{background:var(--v);color:#fff;border-radius:14px;padding:24px;margin:40px auto 0;max-width:1048px;display:flex;gap:18px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+.cta b{color:var(--o);font-size:19px;display:block;margin-bottom:4px}.cta span{color:#d9e6df;font-size:14.5px}
+.cta a{background:var(--m);color:var(--v);font-weight:800;border-radius:10px;padding:12px 18px;text-decoration:none;white-space:nowrap}
+footer{max-width:1080px;margin:30px auto 40px;padding:0 16px;color:var(--g);font-size:12.5px;line-height:1.6}
+footer a{color:#1c7a50}
+</style></head><body>
+<header class="hero"><div class="in">
+ <div class="marca">Tributando<small>CONTABILIDAD · IMPUESTOS · FACTURACIÓN</small></div>
+ <h1>CRM gratis para contadores, <span>en Excel</span></h1>
+ <p class="lead">Tus clientes, los vencimientos DIAN de cada uno (se calculan solos con el NIT), las empresas que te piden cotización y lo que te deben de honorarios. Todo en un archivo, sin pagar nada.</p>
+ <span class="chip">Calendario DIAN 2026 incluido · Excel, Google Sheets y LibreOffice</span>
+</div></header>
+
+<div class="in" style="padding:0 16px">
+ <div class="grid">
+  <div class="foto"><img src="tablero.png" alt="Tablero del CRM para contadores: clientes activos, honorarios, vencimientos DIAN de los próximos días, prospectos y cartera pendiente" width="1200" height="760"></div>
+  <form class="caja" id="f" novalidate>
+   <h2>Descárgalo gratis</h2>
+   <p>Déjanos tus datos y la descarga empieza de una. Cuando la DIAN publique el calendario 2027, te enviamos la versión nueva.</p>
+   <label for="nom">Nombre</label><input id="nom" autocomplete="name" required>
+   <label for="co">Correo</label><input id="co" type="email" autocomplete="email" required>
+   <label for="wa">WhatsApp</label><input id="wa" type="tel" autocomplete="tel" placeholder="300 000 0000">
+   <button class="btn" id="b" type="submit">Descargar el CRM (Excel)</button>
+   <div class="err" id="e"></div>
+   <div class="ok" id="ok">¡Listo! Revisa tus descargas. Si no empezó, <a id="dl2" href="crm-para-contadores-tributando.xlsx" download>haz clic aquí</a>. Si te sirve, compártelo con tus colegas.</div>
+   <p class="nota">Usamos tus datos solo para enviarte la actualización y novedades para contadores. Te das de baja cuando quieras.</p>
+  </form>
+ </div>
+</div>
+
+<section class="sec">
+ <h2>Qué trae</h2>
+ <div class="cards">
+  <div class="card"><b>Vencimientos por NIT</b><span>Escribes el NIT y escoges tipo, IVA, retención y exógena: el próximo vencimiento sale solo. En rojo lo que vence en 5 días; en ámbar, en 15.</span></div>
+  <div class="card"><b>Embudo de prospectos</b><span>Primer contacto, reunión, propuesta, negociación, ganado o perdido. Valor del embudo, valor ponderado, tasa de cierre y acciones atrasadas.</span></div>
+  <div class="card"><b>Honorarios y cartera</b><span>Anotas lo que te paga cada cliente por mes y el CRM te dice cuánto te deben y a quién cobrarle.</span></div>
+  <div class="card"><b>Tablero de los lunes</b><span>Clientes activos, honorarios del mes y del año, vencimientos de la semana y cartera pendiente, en una sola pantalla.</span></div>
+ </div>
+</section>
+
+<div class="cta">
+ <div><b>¿Quieres que esto se llene solo?</b><span>Con Tributando para contadores, las facturas de la DIAN de tus clientes se causan solas y los vencimientos, el IVA, la retención y la cartera salen sin digitar.</span></div>
+ <a href="https://tributando.co/contadores/herramientas">Ver las herramientas</a>
+</div>
+
+<footer>Calendario: Calendario Tributario DIAN 2026 y Resolución 000227 de 2025 (exógena). Verifica siempre contra la fuente oficial.<br>
+Tributando · <a href="https://tributando.co">tributando.co</a> · WhatsApp <a href="https://wa.me/573332470715">333 247 0715</a></footer>
+
+<script>
+(function(){
+ var f=document.getElementById('f'),b=document.getElementById('b'),e=document.getElementById('e');
+ function bajar(){var a=document.createElement('a');a.href='crm-para-contadores-tributando.xlsx';a.download='CRM para contadores - Tributando.xlsx';document.body.appendChild(a);a.click();a.remove();}
+ f.addEventListener('submit',function(ev){
+  ev.preventDefault();e.textContent='';
+  var nom=document.getElementById('nom').value.trim(),co=document.getElementById('co').value.trim(),wa=document.getElementById('wa').value.trim();
+  if(!nom){e.textContent='Escribe tu nombre.';return;}
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(co)){e.textContent='Revisa el correo.';return;}
+  b.disabled=true;b.textContent='Preparando…';
+  fetch('/api/apps/lead',{method:'POST',headers:{'Content-Type':'application/json'},
+   body:JSON.stringify({app:'crm-contadores',nombre:nom,correo:co,whatsapp:wa,nota:'Descargó el CRM para contadores (Excel)'})})
+   .catch(function(){}).then(function(){bajar();document.getElementById('ok').style.display='block';b.disabled=false;b.textContent='Descargar otra vez';});
+ });
+})();
+</script>
+</body></html>
