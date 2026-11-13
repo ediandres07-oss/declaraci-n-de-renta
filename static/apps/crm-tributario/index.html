@@ -157,17 +157,19 @@ footer a{color:var(--ok)}
   <div class="caja">
     <div class="cab"><span class="marca">Tributando</span><p>CRM tributario gratis para contadores</p></div>
     <div class="cu">
-      <h2>Organiza a todos tus clientes en un tablero</h2>
-      <ul>
+      <h2 id="gTit">Guarda tu tablero y recibe los avisos</h2>
+      <p class="aviso" id="gSub" style="margin:0 0 6px">Te escribimos antes de cada vencimiento de tus clientes y te mandamos la versión 2027 cuando salga el calendario DIAN.</p>
+      <ul hidden>
         <li>Sube tu Excel de clientes (nombre, NIT o cédula, celular).</li>
         <li>Te salen solos los vencimientos DIAN de cada uno: retención, IVA, renta, Simple y exógena.</li>
         <li>Marca lo presentado, lo pagado y lo que falta cobrar; recuérdale al cliente por WhatsApp.</li>
       </ul>
       <label class="l" for="gNom">Tu nombre o el de tu oficina</label><input class="campo" id="gNom" autocomplete="name">
       <label class="l" for="gCor">Correo</label><input class="campo" id="gCor" type="email" autocomplete="email">
-      <label class="l" for="gWa">WhatsApp</label><input class="campo" id="gWa" type="tel" autocomplete="tel" placeholder="300 123 4567">
+      <label class="l" for="gWa">WhatsApp (opcional)</label><input class="campo" id="gWa" type="tel" autocomplete="tel" placeholder="300 123 4567">
       <div class="err" id="gErr"></div>
-      <button class="btn pri" id="gOk" style="justify-content:center;padding:11px">Entrar gratis</button>
+      <button class="btn pri" id="gOk" style="justify-content:center;padding:11px">Guardar y seguir</button>
+      <button class="btn" id="gNo" style="justify-content:center">Ahora no</button>
       <span class="aviso">Gratis, sin tarjeta. Tus clientes no salen de tu computador.</span>
     </div>
   </div>
@@ -340,7 +342,8 @@ function importar(file){const r=new FileReader();r.onload=e=>{try{
     const tipo=tipoDeTexto(cTi>=0?r[cTi]:'',nit);const c={id:uid(),nombre,nit,tipo,obligs:obligsDeTexto(cO>=0?r[cO]:'',tipo),tel:cT>=0?String(r[cT]):'',correo:cC>=0?String(r[cC]):''};
     const i=S.clientes.findIndex(x=>soloDig(x.nit)===nit);if(i>=0){c.id=S.clientes[i].id;S.clientes[i]=c;rep++}else{S.clientes.push(c);n++}});
   guardar();render();$('aviso').textContent=n+' cliente(s) nuevos'+(rep?' y '+rep+' actualizados':'')+'.';
-  fetch('/api/apps/lead',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.assign(leer(KL)||{},{app:'crm-tributario',nota:'Importó Excel: '+(n+rep)+' clientes'}))}).catch(()=>{});
+  beaconUso();const L0=leer(KL);if(L0&&L0.correo){fetch('/api/apps/lead',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.assign({},L0,{app:'crm-tributario',nota:'Importó Excel: '+(n+rep)+' clientes'}))}).catch(()=>{})}
+  else if(n+rep>0)setTimeout(()=>pedirDatos('Ya tienes '+S.clientes.length+' clientes en el tablero. ¿Te avisamos antes de cada vencimiento?'),900);
  }catch(err){alert('No pude leer el archivo: '+err.message)}};r.readAsArrayBuffer(file)}
 function plantilla(){const ws=XLSX.utils.aoa_to_sheet([['Nombre','NIT o cédula','Celular','Correo','Tipo','Impuestos'],
   ['Ferretería El Tornillo SAS','901234567','3001234567','gerencia@eltornillo.co','Jurídica','Renta, IVA, Retención, Exógena'],
@@ -355,7 +358,7 @@ function exportar(){const wb=XLSX.utils.book_new();
     v.push([c.nombre,c.nit,OBS.find(o=>o[0]===x.ob)[1],x.etiqueta,x.fecha,t.estado||'pendiente',t.cobro||'por_cobrar',t.valor?+t.valor:'',t.nota||''])}));
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(v),'Vencimientos 2026');XLSX.writeFile(wb,'CRM tributario - '+hoyISO+'.xlsx')}
 function ejemplo(){[['Ferretería El Tornillo SAS','901234567','juridica'],['Distribuciones Andina SAS','900765432','juridica'],['Panadería La Espiga','1036123458','rst'],
-  ['María Pérez','43123456','natural'],['Carlos Gómez','71654329','natural'],['Transportes Rápidos SAS','901555330','juridica']].forEach(([n,d,t])=>S.clientes.push({id:uid(),nombre:n,nit:d,tipo:t,obligs:SUG[t].slice(),tel:'',correo:'',ejemplo:true}));guardar();render()}
+  ['María Pérez','43123456','natural'],['Carlos Gómez','71654329','natural'],['Transportes Rápidos SAS','901555330','juridica']].forEach(([n,d,t])=>S.clientes.push({id:uid(),nombre:n,nit:d,tipo:t,obligs:SUG[t].slice(),tel:'',correo:'',ejemplo:true}));guardar();render();beaconUso()}
 function soltar(el){el.addEventListener('dragover',e=>{e.preventDefault();el.classList.add('sobre')});el.addEventListener('dragleave',()=>el.classList.remove('sobre'));
   el.addEventListener('drop',e=>{e.preventDefault();e.stopPropagation();el.classList.remove('sobre');ocultarSoltar();const f=e.dataTransfer.files[0];if(f)importar(f)})}
 /* arrastrar el Excel a cualquier parte de la página */
@@ -368,21 +371,25 @@ document.addEventListener('drop',e=>{if(!conArchivo(e))return;e.preventDefault()
 
 /* ---------- registro ---------- */
 function leer(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
-function registro(){const L=leer(KL);if(L&&L.correo){$('saludo').textContent=L.nombre||'Tu oficina contable';return}$('gate').hidden=false;$('gNom').focus()}
+function registro(){const L=leer(KL);if(L&&L.correo)$('saludo').textContent=L.nombre||'Tu oficina contable'}
+let gDespues=null,gYaPidio=false;
+function pedirDatos(titulo,despues){const L=leer(KL);if((L&&L.correo)||(gYaPidio&&!despues)){if(despues)despues();return}gYaPidio=true;gDespues=despues||null;if(titulo)$('gTit').textContent=titulo;$('gErr').textContent='';$('gate').hidden=false;$('gNom').focus()}
+function cerrarGate(){$('gate').hidden=true;const f=gDespues;gDespues=null;if(f)f()}
+$('gNo').onclick=cerrarGate;
+function beaconUso(){try{navigator.sendBeacon('/api/clic',new Blob([JSON.stringify({b:'app_uso',r:location.pathname})],{type:'application/json'}))}catch(e){}}
 $('gOk').onclick=async()=>{const nombre=$('gNom').value.trim(),correo=$('gCor').value.trim().toLowerCase(),whatsapp=$('gWa').value.trim();
   if(!nombre){$('gErr').textContent='Escribe tu nombre.';return}if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(correo)){$('gErr').textContent='Revisa el correo.';return}
-  if(soloDig(whatsapp).length<10){$('gErr').textContent='Escribe tu WhatsApp (10 dígitos).';return}
-  $('gOk').disabled=true;$('gOk').textContent='Entrando…';
-  try{await fetch('/api/apps/lead',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({app:'crm-tributario',nombre,correo,whatsapp,nota:'Entró al CRM tributario gratis'})})}catch(e){}
+  $('gOk').disabled=true;$('gOk').textContent='Guardando…';
+  try{await fetch('/api/apps/lead',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({app:'crm-tributario',nombre,correo,whatsapp,nota:'Usa el CRM tributario: '+S.clientes.length+' clientes'})})}catch(e){}
   try{localStorage.setItem(KL,JSON.stringify({nombre,correo,whatsapp}))}catch(e){}
-  $('gate').hidden=true;$('saludo').textContent=nombre;render()};
+  $('gOk').disabled=false;$('gOk').textContent='Guardar y seguir';$('saludo').textContent=nombre;render();cerrarGate()};
 
 /* ---------- arranque ---------- */
 $('t-mes').onclick=()=>abrirTab('mes');$('t-renta').onclick=()=>abrirTab('renta');$('t-cli').onclick=()=>abrirTab('cli');
 $('buscar').oninput=e=>{q=e.target.value.trim().toLowerCase();render()};
 ['filMes','filOb','filCobro'].forEach(i=>$(i).onchange=render);
 $('pCerrar').onclick=cerrar;$('velo').onclick=cerrar;document.addEventListener('keydown',e=>{if(e.key==='Escape')cerrar()});
-$('bNuevo').onclick=()=>abrirCliente(null);$('bImportar').onclick=()=>$('archivo').click();$('bExportar').onclick=()=>S.clientes.length?exportar():plantilla();
+$('bNuevo').onclick=()=>abrirCliente(null);$('bImportar').onclick=()=>$('archivo').click();$('bExportar').onclick=()=>S.clientes.length?pedirDatos('Antes de descargar: ¿te mandamos los avisos de vencimiento?',exportar):plantilla();
 $('archivo').onchange=e=>{const f=e.target.files[0];if(f)importar(f);e.target.value=''};
 llenarMeses();try{const t=localStorage.getItem('crm-tab');if(t)vista=t}catch(e){}
 abrirTab(vista);registro();

@@ -1612,7 +1612,7 @@ def admin_dashboard():
 
 _BOTONES_CLIC = {"prueba_app", "asesoria", "asesoria_enviada", "whatsapp", "pase_gratis",
                  "lector", "descargador", "contadores", "contabilidad", "entrar", "calendario",
-                 "vencimientos_wa", "vigilante", "otro"}
+                 "vencimientos_wa", "vigilante", "app_descarga", "app_uso", "otro"}
 
 
 @app.post("/api/clic")

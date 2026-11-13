@@ -61,14 +61,20 @@ footer a{color:#1c7a50}
   </div>
   <form class="caja" id="f" novalidate>
    <h2>Descárgalo gratis</h2>
-   <p>Déjanos tus datos y la descarga empieza de una. Cuando la DIAN publique el calendario 2027, te enviamos la versión nueva.</p>
-   <label for="nom">Nombre</label><input id="nom" autocomplete="name" required>
-   <label for="co">Correo</label><input id="co" type="email" autocomplete="email" required>
-   <label for="wa">WhatsApp</label><input id="wa" type="tel" autocomplete="tel" placeholder="300 000 0000">
-   <button class="btn" id="b" type="submit">Descargar el CRM (Excel)</button>
-   <div class="err" id="e"></div>
-   <div class="ok" id="ok">¡Listo! Revisa tus descargas. Si no empezó, <a id="dl2" href="crm-para-contadores-tributando.xlsx" download>haz clic aquí</a>. Si te sirve, compártelo con tus colegas.</div>
-   <p class="nota">Usamos tus datos solo para enviarte la actualización y novedades para contadores. Te das de baja cuando quieras.</p>
+   <p>Sin registro: tocas el botón y el Excel se descarga de una.</p>
+   <a class="btn" id="bajar" href="crm-para-contadores-tributando.xlsx" download="CRM para contadores - Tributando.xlsx">Descargar el CRM (Excel)</a>
+   <div id="despues" style="display:none">
+    <div class="ok" style="display:block">¡Listo! Revisa tus descargas. Si te sirve, compártelo con tus colegas.</div>
+    <h2 style="margin-top:18px;font-size:17px">¿Te mandamos la versión 2027?</h2>
+    <p>Cuando la DIAN publique el calendario 2027 te enviamos el Excel actualizado. Opcional.</p>
+    <label for="nom">Nombre</label><input id="nom" autocomplete="name">
+    <label for="co">Correo</label><input id="co" type="email" autocomplete="email">
+    <label for="wa">WhatsApp</label><input id="wa" type="tel" autocomplete="tel" placeholder="300 000 0000">
+    <button class="btn" id="b" type="submit">Avísame</button>
+    <div class="err" id="e"></div>
+    <p class="nota">Usamos tus datos solo para enviarte la actualización y novedades para contadores. Te das de baja cuando quieras.</p>
+   </div>
+   <p class="nota" style="margin-top:14px">¿Lo prefieres en línea, con tablero y recordatorios por WhatsApp? <a href="/apps/crm-tributario/?utm_source=crm-excel">Abre el CRM tributario gratis</a>.</p>
   </form>
  </div>
 </div>
@@ -94,16 +100,18 @@ Tributando · <a href="https://tributando.co">tributando.co</a> · WhatsApp <a h
 <script>
 (function(){
  var f=document.getElementById('f'),b=document.getElementById('b'),e=document.getElementById('e');
- function bajar(){var a=document.createElement('a');a.href='crm-para-contadores-tributando.xlsx';a.download='CRM para contadores - Tributando.xlsx';document.body.appendChild(a);a.click();a.remove();}
+ document.getElementById('bajar').addEventListener('click',function(){
+  document.getElementById('despues').style.display='block';
+  try{navigator.sendBeacon('/api/clic',new Blob([JSON.stringify({b:'app_descarga',r:location.pathname})],{type:'application/json'}))}catch(x){}
+ });
  f.addEventListener('submit',function(ev){
   ev.preventDefault();e.textContent='';
   var nom=document.getElementById('nom').value.trim(),co=document.getElementById('co').value.trim(),wa=document.getElementById('wa').value.trim();
-  if(!nom){e.textContent='Escribe tu nombre.';return;}
   if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(co)){e.textContent='Revisa el correo.';return;}
-  b.disabled=true;b.textContent='Preparando…';
+  b.disabled=true;b.textContent='Enviando…';
   fetch('/api/apps/lead',{method:'POST',headers:{'Content-Type':'application/json'},
-   body:JSON.stringify({app:'crm-contadores',nombre:nom,correo:co,whatsapp:wa,nota:'Descargó el CRM para contadores (Excel)'})})
-   .catch(function(){}).then(function(){bajar();document.getElementById('ok').style.display='block';b.disabled=false;b.textContent='Descargar otra vez';});
+   body:JSON.stringify({app:'crm-contadores',nombre:nom,correo:co,whatsapp:wa,nota:'Descargó el CRM (Excel) y pidió la versión 2027'})})
+   .catch(function(){}).then(function(){b.textContent='¡Listo, te avisamos!';});
  });
 })();
 </script>
