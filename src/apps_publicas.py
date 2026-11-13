@@ -95,6 +95,7 @@ def apps_lead():
     wa = re.sub(r"[^0-9+ ]", "", d.get("whatsapp") or "")[:20]
     nota = f"{nombre} · WhatsApp {wa} · {(d.get('nota') or '')[:200]} · {datetime.now():%Y-%m-%d %H:%M}"
     p = db.session.get(Prospecto, correo)
+    nuevo = p is None
     if p is None:
         p = Prospecto(email=correo, segmento="contador", razon_social=nombre, origen=f"app-{app_}",
                       estado="lead", municipio="Bogotá" if "bogota" in app_ else "", nota=nota[:500])
@@ -106,6 +107,33 @@ def apps_lead():
     except Exception:                                            # noqa: BLE001
         db.session.rollback()
         return jsonify(ok=False), 500
+    if nuevo:  # 13-nov (Edison: «me avisas quién lo utiliza»): aviso por Telegram y correo
+        _avisar_lead(app_, nombre, correo, wa, (d.get("nota") or "")[:200])
     resp = jsonify(ok=True)
     resp.headers["X-Robots-Tag"] = "noindex"
     return resp
+
+
+def _avisar_lead(app_: str, nombre: str, correo: str, wa: str, nota: str) -> None:
+    """Le avisa a Edison (Telegram + correo a ediandres07) cuando alguien nuevo usa una app gratis."""
+    import html as _h
+    texto = (f"🆕 Nuevo usuario de la app gratis «{app_}»\n{nombre or '—'}\n{correo}\n"
+             f"WhatsApp: {wa or '—'}\n{nota}")
+    try:
+        from src import gerente
+        gerente._telegram_enviar(texto)
+    except Exception:  # noqa: BLE001
+        pass
+    try:
+        from src.correo import enviar_email
+        wa_link = "".join(c for c in wa if c.isdigit())
+        if len(wa_link) == 10:
+            wa_link = "57" + wa_link
+        enviar_email("ediandres07@gmail.com", f"🆕 {nombre or correo} usa la app gratis «{app_}»",
+                     "<div style='font-family:Arial,sans-serif;font-size:14px'>"
+                     f"<p><b>{_h.escape(nombre or '—')}</b> empezó a usar <b>tributando.co/apps/{_h.escape(app_)}</b>.</p>"
+                     f"<p>Correo: {_h.escape(correo)}<br>WhatsApp: {_h.escape(wa or '—')}"
+                     + (f" · <a href='https://wa.me/{wa_link}'>escribirle</a>" if wa_link else "")
+                     + f"<br>{_h.escape(nota)}</p><p style='color:#777'>Quedó en el CRM de prospectos como «lead».</p></div>")
+    except Exception:  # noqa: BLE001
+        pass
