@@ -19,8 +19,8 @@
   },
   {
     "slug": "crm-contadores",
-    "nombre": "CRM para contadores (Excel)",
-    "descripcion": "Gratis: clientes con vencimientos DIAN por NIT, embudo de prospectos, honorarios y cartera en un Excel.",
+    "nombre": "CRM tributario para contadores",
+    "descripcion": "Gratis: sube tu Excel de clientes y ve en un tablero los vencimientos DIAN de cada uno, lo presentado y lo que falta cobrar.",
     "fecha": "2026-11-13"
   }
 ]
