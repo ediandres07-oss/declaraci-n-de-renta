@@ -18,15 +18,15 @@
     "fecha": "2026-10-15"
   },
   {
-    "slug": "crm-tributario",
-    "nombre": "CRM tributario en línea",
-    "descripcion": "Gratis: arrastra tu Excel de clientes y maneja en un tablero los vencimientos DIAN, lo presentado y lo que falta cobrar.",
-    "fecha": "2026-11-13"
-  },
-  {
     "slug": "crm-contadores",
     "nombre": "CRM para contadores (Excel)",
     "descripcion": "Gratis: clientes con vencimientos DIAN por NIT, embudo de prospectos, honorarios y cartera en un Excel.",
+    "fecha": "2026-11-13"
+  },
+  {
+    "slug": "crm-tributario",
+    "nombre": "CRM tributario en línea",
+    "descripcion": "Gratis: arrastra tu Excel de clientes y maneja en un tablero los vencimientos DIAN, lo presentado y lo que falta cobrar.",
     "fecha": "2026-11-13"
   }
 ]
