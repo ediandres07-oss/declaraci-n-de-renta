@@ -34,6 +34,17 @@ footer{color:var(--m);font-size:12.5px;margin-top:30px;line-height:1.6}a{color:v
 <div class="tarjeta" style="padding:0;overflow:hidden">
  <video controls preload="none" playsinline poster="portada.png" src="video.mp4" style="width:100%;display:block;aspect-ratio:16/9;background:#000"></video>
 </div>
+<div class="tarjeta" id="crmGratis" style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;border-color:#37d38f;background:linear-gradient(135deg,#13261F,#0e1a16)">
+ <div style="flex:1 1 320px">
+  <div style="font-size:12px;letter-spacing:.12em;color:#E0C584;font-weight:700">TAMBIÉN GRATIS PARA CONTADORES</div>
+  <div style="font-size:20px;font-weight:800;margin:4px 0 6px">CRM tributario: todos tus clientes y sus vencimientos DIAN en un tablero</div>
+  <div class="sub">Arrastras tu Excel de clientes y salen solos los vencimientos 2026 de cada NIT (retención, IVA, renta, Simple y exógena). Marcas lo presentado, lo pagado y lo que te deben, y le recuerdas al cliente por WhatsApp.</div>
+ </div>
+ <div style="display:flex;flex-direction:column;gap:8px">
+  <a class="btn" href="/apps/crm-tributario/?utm_source=exogena-bogota" style="text-decoration:none;text-align:center">Abrir el CRM gratis</a>
+  <a class="btn btn2" href="/apps/crm-contadores/?utm_source=exogena-bogota" style="text-decoration:none;text-align:center;font-size:13px;padding:9px 14px">Prefiero el Excel</a>
+ </div>
+</div>
 <div class="tarjeta pasos">
  <div class="paso"><b>1.</b> Sube los XML de compras del año (un ZIP, varios ZIP o los .xml sueltos).</div>
  <div class="paso"><b>2.</b> Revisa: deja solo proveedores de Bogotá, suma por proveedor, aplica el tope de 4 UVT y quita lo que la norma excluye.</div>
@@ -234,7 +245,7 @@ $("bajar").onclick=function(){
   var nProv=provs.filter(function(p){return p.ok}).length;
   fetch("/api/apps/lead",{method:"POST",headers:{"Content-Type":"application/json"},
     body:JSON.stringify({app:"exogena-bogota",nombre:nom,correo:co,whatsapp:wa,nota:"Exógena Bogotá art. 2 · "+nProv+" proveedores"})})
-    .catch(function(){}).then(function(){ excel(); $("l_msg").innerHTML='<span class="ok">¡Listo! Revisa tus descargas. Si te sirvió, compártela con tus colegas.</span>'; b.disabled=false; });
+    .catch(function(){}).then(function(){ excel(); $("l_msg").innerHTML='<span class="ok">¡Listo! Revisa tus descargas. Si te sirvió, compártela con tus colegas.</span><br><span class="sub">¿Ya probaste el <a href="/apps/crm-tributario/?utm_source=exogena-bogota"><b>CRM tributario gratis</b></a>? Todos tus clientes y sus vencimientos DIAN en un tablero.</span>'; b.disabled=false; });
 };
 })();
 </script>
