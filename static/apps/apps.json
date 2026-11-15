@@ -28,5 +28,11 @@
     "nombre": "CRM tributario en línea",
     "descripcion": "Gratis: arrastra tu Excel de clientes y maneja en un tablero los vencimientos DIAN, lo presentado y lo que falta cobrar.",
     "fecha": "2026-11-13"
+  },
+  {
+    "slug": "software-a-la-medida",
+    "nombre": "Software a la medida",
+    "descripcion": "Sistemas para ventanerías, restaurantes, tiendas y empresas de servicios sobre la base de Tributando",
+    "fecha": "2026-11-15"
   }
 ]

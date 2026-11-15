@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Software a la medida para su empresa sobre la base de Tributando: ventanería y carpintería, restaurantes y tiendas, empresas de servicios.">
+<style>body{margin:0}[hidden]{display:none!important}</style>
+<title>Software a la medida Tributando</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: bandas horizontales; arriba la promesa, en el centro tres paquetes por tipo de negocio (cada uno con un ejemplo real de lo que hace), abajo cómo trabajamos y el contacto. Marca Tributando: verde noche y menta. */
+:root{
+  --fondo:#F4F8F6; --tinta:#13261F; --suave:#4C6B5F; --linea:#D5E3DC; --tarjeta:#FFFFFF;
+  --menta:#1F9E66; --menta-suave:#E3F5EC; --banda:#13261F; --banda-texto:#E7F2EC;
+  --display:"Sora",ui-sans-serif,system-ui,sans-serif;
+  --cuerpo:"Inter",ui-sans-serif,system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--fondo:#0E1C17;--tinta:#E7F2EC;--suave:#9DB8AC;--linea:#24443A;--tarjeta:#13261F;--menta:#37D38F;--menta-suave:#173A2D;--banda:#0A1511;--banda-texto:#E7F2EC;color-scheme:dark}}
+:root[data-theme="dark"]{--fondo:#0E1C17;--tinta:#E7F2EC;--suave:#9DB8AC;--linea:#24443A;--tarjeta:#13261F;--menta:#37D38F;--menta-suave:#173A2D;--banda:#0A1511;--banda-texto:#E7F2EC;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--fondo);color:var(--tinta);font:16px/1.6 var(--cuerpo);margin:0}
+.ancho{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--display);margin:0;line-height:1.15;text-wrap:balance}
+h1{font-size:clamp(2rem,5vw,3.2rem);letter-spacing:-.02em}
+h2{font-size:clamp(1.4rem,3vw,1.9rem)}
+h3{font-size:1.15rem}
+p{margin:0;max-width:64ch}
+.etiqueta{font:500 .74rem var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--menta)}
+.hero{background:var(--banda);color:var(--banda-texto)}
+.hero .ancho{padding-block:56px 48px;display:grid;gap:18px}
+.hero p{color:#B9D3C7;font-size:1.12rem}
+.hero .etiqueta{color:#37D38F}
+.puntos{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:10px}
+.puntos div{border-top:2px solid #2E5A4A;padding-top:12px;display:grid;gap:4px}
+.puntos b{color:#fff;font-family:var(--display)}
+.puntos span{color:#B9D3C7;font-size:.94rem}
+@media (max-width:760px){.puntos{grid-template-columns:1fr}}
+main .ancho{padding-block:48px 64px;display:grid;gap:56px}
+.paquetes{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;align-items:start}
+@media (max-width:900px){.paquetes{grid-template-columns:1fr}}
+.paq{background:var(--tarjeta);border:1px solid var(--linea);border-radius:12px;padding:22px;display:grid;gap:14px;min-width:0}
+.paq ul{margin:0;padding-left:18px;display:grid;gap:6px;color:var(--suave);font-size:.95rem}
+.paq li b{color:var(--tinta);font-weight:600}
+.ejemplo{background:var(--menta-suave);border-radius:8px;padding:12px 14px;font-size:.9rem;display:grid;gap:4px}
+.ejemplo span{font:500 .7rem var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--menta)}
+.otro{border:1.5px dashed var(--linea);border-radius:12px;padding:20px 22px;display:grid;gap:8px}
+.otro p{color:var(--suave)}
+.pasos{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;counter-reset:p;list-style:none;margin:0;padding:0}
+@media (max-width:860px){.pasos{grid-template-columns:1fr 1fr}}
+@media (max-width:480px){.pasos{grid-template-columns:1fr}}
+.pasos li{display:grid;gap:6px;padding-top:12px;border-top:2px solid var(--linea)}
+.pasos li::before{counter-increment:p;content:"Paso " counter(p);font:500 .72rem var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--menta)}
+.pasos p{color:var(--suave);font-size:.94rem}
+.cierre{background:var(--banda);color:var(--banda-texto)}
+.cierre .ancho{padding-block:44px;display:grid;gap:14px;justify-items:start}
+.cierre p{color:#B9D3C7}
+.numero{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.numero output{font:600 1.35rem var(--mono);color:#fff;user-select:all}
+button{font:600 .92rem var(--cuerpo);background:#37D38F;color:#0E1C17;border:0;border-radius:10px;padding:10px 16px;cursor:pointer}
+button:focus-visible{outline:2px solid #fff;outline-offset:3px}
+.pie{font-size:.82rem;color:#8FB0A2}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="ancho">
+    <span class="etiqueta">Tributando · Software para empresas</span>
+    <h1>El programa que su empresa necesita, sobre una base que ya funciona.</h1>
+    <p>Hacemos el sistema a la medida de su negocio, pero no empezamos de cero: partimos de módulos que ya usan empresas en Colombia. Por eso sale más rápido, cuesta menos y llega conectado a su contabilidad y a la DIAN.</p>
+    <div class="puntos">
+      <div><b>Más rápido</b><span>Se adapta lo que ya existe; no se programa todo desde el principio.</span></div>
+      <div><b>Todo conectado</b><span>Ventas, cobro, inventario, contabilidad y factura electrónica en el mismo sistema.</span></div>
+      <div><b>Funciona por sí solo</b><span>Es un sistema contable y de ventas normal. No depende de ninguna inteligencia artificial.</span></div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="ancho">
+    <section aria-labelledby="t-paq" style="display:grid;gap:22px">
+      <span class="etiqueta">Paquetes por tipo de negocio</span>
+      <h2 id="t-paq">Elija el que más se parece a su empresa</h2>
+      <div class="paquetes">
+        <article class="paq">
+          <h3>Talleres de ventanería y carpintería</h3>
+          <ul>
+            <li><b>Cotizador por medidas</b> con su lista de precios de perfiles, vidrio y accesorios</li>
+            <li><b>Despiece automático</b> de cada ventana o mueble</li>
+            <li><b>Vista 3D</b> para que el cliente vea el diseño antes de aprobar</li>
+            <li>Cotización en PDF y por enlace; la <b>factura electrónica</b> sale de la cotización</li>
+          </ul>
+          <div class="ejemplo"><span>Así funciona</span>«Ventana de 1,50 × 1,20 m, sistema 5020, vidrio claro de 4 mm»: el asistente la cotiza por voz con precio y despiece.</div>
+        </article>
+        <article class="paq">
+          <h3>Restaurantes y tiendas</h3>
+          <ul>
+            <li><b>Punto de venta</b> en tablet o computador, con factura electrónica POS</li>
+            <li><b>Mesas y comandas</b> para restaurante</li>
+            <li><b>Fiado</b>: quién debe y cuánto, con sus abonos</li>
+            <li>Cierre de caja e inventario que se descuenta solo</li>
+          </ul>
+          <div class="ejemplo"><span>Así funciona</span>«¿Cuánto vendí hoy y quién me debe?»: lo pregunta por WhatsApp y le responde con las cifras del día.</div>
+        </article>
+        <article class="paq">
+          <h3>Empresas de servicios</h3>
+          <ul>
+            <li><b>CRM de WhatsApp</b>: todos los chats en un solo lugar, para varios asesores</li>
+            <li>La IA <b>califica cada cliente</b> (caliente, tibio o frío) y resume la conversación</li>
+            <li><b>Embudo de ventas</b> y seguimientos con fecha y aviso cuando se vencen</li>
+            <li>Contabilidad por <b>líneas de negocio</b> y cobro de cartera</li>
+          </ul>
+          <div class="ejemplo"><span>Así funciona</span>«¿A quién tengo que llamar hoy?»: le dice qué clientes tienen seguimiento vencido y qué quedó pendiente con cada uno.</div>
+        </article>
+      </div>
+      <div class="otro">
+        <h3>Su empresa no depende de la inteligencia artificial</h3>
+        <p>La contabilidad, la factura electrónica, el punto de venta, la nómina, el cotizador y el CRM funcionan como cualquier programa. El asistente que contesta por voz o por WhatsApp es un extra que le ahorra tiempo; si un día no lo usa, su empresa sigue trabajando igual.</p>
+      </div>
+      <div class="otro">
+        <h3>¿Su negocio es otro?</h3>
+        <p>También lo hacemos. Cuéntenos cómo trabaja hoy (en papel, en Excel o con otro programa) y le proponemos el sistema sobre la misma base.</p>
+      </div>
+    </section>
+
+    <section aria-labelledby="t-como" style="display:grid;gap:22px">
+      <span class="etiqueta">Cómo trabajamos</span>
+      <h2 id="t-como">De la primera visita al sistema funcionando</h2>
+      <ol class="pasos">
+        <li><h3>Diagnóstico</h3><p>Vemos cómo trabaja su empresa hoy y qué le quita tiempo.</p></li>
+        <li><h3>Demostración</h3><p>Le mostramos el sistema con datos de ejemplo de su tipo de negocio.</p></li>
+        <li><h3>Montaje</h3><p>Lo adaptamos, cargamos su información y capacitamos a su equipo.</p></li>
+        <li><h3>Acompañamiento</h3><p>Soporte y mejoras cada mes; la contabilidad la podemos llevar nosotros.</p></li>
+      </ol>
+    </section>
+  </div>
+</main>
+
+<section class="cierre" aria-labelledby="t-cot">
+  <div class="ancho">
+    <h2 id="t-cot">Cotice su sistema</h2>
+    <p>Un valor de montaje y una mensualidad, según su empresa. Escríbanos por WhatsApp y le agendamos el diagnóstico.</p>
+    <div class="numero"><output id="num">+57 333 247 0715</output><button id="copiar" type="button">Copiar número</button></div>
+    <p class="pie">Tributando · Edison Monsalve, Contador Público · Medellín</p>
+  </div>
+</section>
+<script>
+document.getElementById('copiar').addEventListener('click',async e=>{
+  const b=e.currentTarget;
+  try{await navigator.clipboard.writeText('+573332470715');b.textContent='Número copiado'}
+  catch(_){const r=document.createRange();r.selectNodeContents(document.getElementById('num'));const s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent='Selecciónelo y cópielo'}
+  setTimeout(()=>{b.textContent='Copiar número'},2500);
+});
+</script>
+</body>
+</html>
