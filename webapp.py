@@ -872,6 +872,40 @@ def asesor_responder():
     return jsonify({"respuesta": r or ""})
 
 
+@app.get("/api/matrix/prospectos")
+def api_matrix_prospectos():
+    """Para el tablero «Matrix» de Edison (contabilidad /matrix, 16-nov-2026):
+    cuántos prospectos hay, a cuántos se les envió, quién abrió el portafolio
+    (los últimos) y en qué etapa va cada uno. Solo lectura. Protegido con
+    JARVIS_TOKEN (la misma llave de la app contable y la Raspberry); sin él: 404."""
+    import hmac as _hmac
+    tk = os.environ.get("JARVIS_TOKEN", "").strip()
+    if not tk:
+        abort(404)
+    if not _hmac.compare_digest(request.headers.get("X-Jarvis-Token", ""), tk):
+        return jsonify({"error": "forbidden"}), 403
+    from datetime import timedelta as _td
+    P = prosp_mod.Prospecto
+    r = prosp_mod.resumen()
+    hace7 = datetime.utcnow() - _td(days=7)
+    vieron = (P.query.filter(P.visto_en.isnot(None)).order_by(P.visto_en.desc()).limit(25).all())
+    enviados = sum(int(v.get("enviado", 0) or 0) for v in r["por_segmento"].values())
+    pendientes = sum(int(v.get("pendiente", 0) or 0) for v in r["por_segmento"].values())
+    return jsonify({
+        "enviados": enviados, "pendientes": pendientes,
+        "vieron": r["vieron_portafolio"],
+        "vieron_7d": P.query.filter(P.visto_en >= hace7).count(),
+        "respondieron": int(r["por_etapa"].get("respondio", 0) or 0),
+        "propuestas": int(r["por_etapa"].get("propuesta", 0) or 0),
+        "clientes": int(r["por_etapa"].get("cliente", 0) or 0),
+        "encendido": r["encendido"], "por_dia": r["por_dia"],
+        "ultimos": [{"nombre": (p.razon_social or p.email.split("@")[0])[:80],
+                     "municipio": p.municipio or "", "etapa": p.etapa or "",
+                     "visitas": int(p.visitas or 0), "segmento": p.segmento or "",
+                     "visto": p.visto_en.isoformat() + "Z" if p.visto_en else ""}
+                    for p in vieron]})
+
+
 @app.post("/api/guia")
 def api_guia():
     """Captura el correo para la lista de espera y entrega la guía-obsequio.
