@@ -1,0 +1,649 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#16243a">
+<title>Tributando móvil · demo</title>
+<meta property="og:title" content="Tributando móvil · su negocio en el celular (demo)">
+<meta property="og:description" content="Facture, cobre, pague a proveedores, apruebe la nómina y vea sus impuestos desde el celular. Por detrás, todo queda contabilizado en Tributando.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--pri:#16243a;--pri2:#24395a;--pri3:#0d1626;--oro:#b8913f;--oro2:#e0c584;--bg:#f3f4f7;--card:#fff;--ink:#141a24;--mut:#6b7483;--line:#e5e8ee;--ok:#1d8f62;--okbg:#e8f5ef;--bad:#b4473e;--badbg:#fbeeec;--warn:#9a6b12;--warnbg:#fbf3e2}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{background:#e7e9ee;color:var(--ink);font:15px/1.45 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased}
+button{font:inherit}
+.top{max-width:760px;margin:0 auto;padding:18px 16px 4px;text-align:center}
+.top b{color:var(--oro);letter-spacing:.16em;font-size:11px}
+.top h1{font-size:19px;margin:6px 0 3px;letter-spacing:-.2px}.top p{color:var(--mut);font-size:13px;margin:0}
+.phone{width:min(390px,100vw);height:min(820px,calc(100vh - 110px));min-height:640px;background:var(--bg);border-radius:38px;margin:14px auto 18px;position:relative;overflow:hidden;box-shadow:0 30px 70px rgba(20,26,36,.28),0 0 0 10px #10151f;display:flex;flex-direction:column}
+@media(max-width:430px){.top{display:none}.phone{width:100vw;border-radius:0;margin:0;height:100vh;height:100dvh;min-height:560px;box-shadow:none}}
+.scr{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:96px;display:none;scrollbar-width:none}.scr::-webkit-scrollbar{display:none}.scr.on{display:block}
+.scr.sinnav{padding-bottom:24px}
+.ico{width:22px;height:22px;flex:none}
+/* encabezados */
+.head{background:var(--pri);color:#fff;padding:22px 20px 24px;position:relative;overflow:hidden}
+.head:after{content:"";position:absolute;right:-60px;top:-80px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(224,197,132,.18),rgba(224,197,132,0) 70%)}
+.head .r{display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1}
+.logo{font-weight:700;letter-spacing:.12em;font-size:13px;display:flex;gap:9px;align-items:center}
+.logo i{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--oro2),var(--oro));color:var(--pri);display:grid;place-items:center;font-style:normal;font-weight:700;letter-spacing:0;font-size:15px}
+.btnr{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.1);display:grid;place-items:center;cursor:pointer;border:0;color:#fff}
+.btnr .ico{width:19px;height:19px}
+.hola{margin-top:20px;font-size:14px;opacity:.75;position:relative;z-index:1}
+.lbl{color:var(--mut);font-size:13px}
+.head .lbl{color:rgba(255,255,255,.65);margin-top:14px;display:flex;align-items:center;gap:8px;position:relative;z-index:1}
+.saldo{font-size:34px;font-weight:700;letter-spacing:-1px;margin:2px 0 4px;position:relative;z-index:1;font-variant-numeric:tabular-nums}
+.saldo small{font-size:18px;font-weight:600;opacity:.7}
+.cuentas{display:flex;gap:8px;margin-top:12px;position:relative;z-index:1;overflow-x:auto;scrollbar-width:none}
+.cuentas div{flex:none;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:8px 11px;font-size:12px}
+.cuentas div span{display:block;opacity:.6;font-size:11px}.cuentas div b{font-weight:600}
+body.oculto .mt{filter:blur(7px);user-select:none}
+.back{background:var(--pri);color:#fff;padding:18px 20px 22px}
+.back .x{cursor:pointer;font-size:14px;opacity:.8;display:inline-flex;align-items:center;gap:4px}
+.back .x .ico{width:18px;height:18px}
+.back h2{margin:14px 0 2px;font-size:23px;letter-spacing:-.4px;font-weight:700}
+.back .sub{opacity:.7;font-size:13px}
+.back .big{font-size:30px;font-weight:700;letter-spacing:-.8px;margin-top:10px;font-variant-numeric:tabular-nums}
+/* bloques */
+.sec{background:var(--card);margin:12px 14px 0;padding:18px;border-radius:20px}
+.sec.flat{margin:0;border-radius:0}
+.ttl{display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:15px;margin-bottom:8px}
+.ttl a{font-size:13px;color:var(--oro);font-weight:600;cursor:pointer}
+.tres{display:grid;gap:10px;margin:12px 14px 0}
+.tarj{background:var(--card);border-radius:20px;padding:16px 18px;cursor:pointer;display:flex;align-items:center;gap:14px}
+.tarj .ic{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;flex:none}
+.tarj .tx{flex:1;min-width:0}.tarj .tx span{color:var(--mut);font-size:13px;display:block}.tarj .tx b{font-size:19px;font-weight:700;letter-spacing:-.3px;font-variant-numeric:tabular-nums}
+.tarj .tx small{display:block;font-size:12px;color:var(--mut);margin-top:1px}
+.tarj .chev{color:#b9bfca}
+.ic-oro{background:#f6efdf;color:var(--oro)}.ic-azul{background:#e9edf4;color:var(--pri)}.ic-ok{background:var(--okbg);color:var(--ok)}.ic-bad{background:var(--badbg);color:var(--bad)}
+.imp{background:linear-gradient(135deg,#1b2c47,#16243a);color:#fff;border-radius:20px;padding:18px;cursor:default;position:relative;overflow:hidden}
+.imp .r1{display:flex;justify-content:space-between;align-items:flex-start}
+.imp span{font-size:13px;opacity:.7}.imp b{display:block;font-size:22px;font-weight:700;letter-spacing:-.4px;margin-top:2px;font-variant-numeric:tabular-nums}
+.imp .fecha{background:rgba(224,197,132,.15);color:var(--oro2);border-radius:20px;padding:4px 10px;font-size:12px;font-weight:600;white-space:nowrap}
+.imp .btn{background:var(--oro2);color:var(--pri);margin-top:14px;padding:12px}
+.imp.pagado .fecha{background:rgba(29,143,98,.2);color:#8fdcbb}
+.accesos{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;background:var(--card);margin:12px 14px 0;padding:16px 8px;border-radius:20px}
+.acc{text-align:center;font-size:12px;cursor:pointer;color:var(--ink)}
+.acc span{display:grid;place-items:center;width:50px;height:50px;margin:0 auto 7px;border-radius:16px;background:var(--bg);color:var(--pri)}
+.acc span .ico{width:22px;height:22px}
+.it{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--line);cursor:default}
+.it.clic{cursor:pointer}
+.it:last-child{border-bottom:0}
+.it .ic{width:40px;height:40px;border-radius:13px;background:var(--bg);color:var(--pri);display:grid;place-items:center;flex:none}
+.it .ic .ico{width:20px;height:20px}
+.it .tx{flex:1;min-width:0}.it .tx b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:14px;font-weight:600;line-height:1.3}.it .tx small{color:var(--mut);font-size:12px}
+.it .m{font-weight:600;font-size:14px;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}.pos{color:var(--ok)}
+.it .m small{display:block;font-weight:500;margin-top:2px}
+.tag{display:inline-block;font-size:11px;font-weight:600;border-radius:20px;padding:2px 8px}
+.t-bad{background:var(--badbg);color:var(--bad)}.t-warn{background:var(--warnbg);color:var(--warn)}.t-ok{background:var(--okbg);color:var(--ok)}.t-mut{background:var(--bg);color:var(--mut)}
+/* barra inferior */
+.nav{position:absolute;left:0;right:0;bottom:0;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);padding:8px 4px calc(10px + env(safe-area-inset-bottom));z-index:4}
+.nav button{background:none;border:0;color:#8a92a0;font-size:11px;cursor:pointer;padding:4px 0;font-weight:500}
+.nav button span{display:flex;justify-content:center;margin-bottom:3px}.nav button.on{color:var(--pri);font-weight:600}
+.nav button.on span{color:var(--oro)}
+/* formularios y botones */
+label{display:block;font-size:13px;color:var(--mut);margin:14px 0 6px}
+input,select{width:100%;background:var(--bg);border:1px solid var(--line);color:var(--ink);border-radius:14px;padding:14px;font-size:16px;font-family:inherit;outline:none}
+input:focus,select:focus{border-color:var(--oro)}
+.btn{display:flex;justify-content:center;align-items:center;gap:8px;width:100%;background:var(--pri);color:#fff;border:0;border-radius:16px;padding:16px;font-weight:600;font-size:15px;margin-top:16px;cursor:pointer}
+.btn .ico{width:20px;height:20px}
+.btn.oro{background:linear-gradient(135deg,var(--oro2),var(--oro));color:var(--pri)}
+.btn.claro{background:var(--bg);color:var(--pri)}
+.btn.ok{background:var(--ok)}
+.btn:disabled{opacity:.45;cursor:default}
+.fila2{display:flex;gap:10px}.fila2 .btn{flex:1}
+.res div{display:flex;justify-content:space-between;gap:12px;padding:6px 0;font-size:14px;font-variant-numeric:tabular-nums}.res div>span:last-child{white-space:nowrap}
+.res .t{border-top:1px solid var(--line);margin-top:6px;padding-top:12px;font-weight:700;font-size:16px}
+.res .neg{color:var(--bad)}
+.note{font-size:12px;color:var(--mut);margin-top:10px;line-height:1.5}
+.toast{position:absolute;left:16px;right:16px;bottom:92px;background:var(--pri3);color:#fff;border-radius:14px;padding:13px 14px;font-weight:500;font-size:13px;display:flex;gap:10px;align-items:center;z-index:9;opacity:0;transform:translateY(10px);transition:.25s;pointer-events:none;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.toast.on{opacity:1;transform:none}
+.toast .ico{color:var(--oro2);width:20px;height:20px}
+/* bienvenida */
+.bien{background:radial-gradient(120% 70% at 85% 5%,#2a4670 0%,#16243a 50%,#0d1626 100%);color:#fff;min-height:100%;display:flex;flex-direction:column;padding:40px 26px 34px;position:relative;overflow:hidden}
+.bien .ola{position:absolute;left:-10%;right:-10%;top:30%;height:260px;opacity:.85}
+.bien h2{font-size:34px;line-height:1.1;margin:30px 0 12px;font-weight:700;letter-spacing:-.8px}
+.bien p{opacity:.7;font-size:15px;margin:0;max-width:290px}
+.bien .pie{margin-top:auto;position:relative;text-align:center}
+.huella{width:86px;height:86px;border-radius:50%;border:1px solid rgba(224,197,132,.45);display:grid;place-items:center;margin:0 auto 12px;color:var(--oro2);cursor:pointer;background:rgba(224,197,132,.06);transition:.3s}
+.huella .ico{width:40px;height:40px}
+.huella.leyendo{box-shadow:0 0 0 10px rgba(224,197,132,.12),0 0 0 22px rgba(224,197,132,.05);background:rgba(224,197,132,.18)}
+.bien .link{display:inline-block;margin-top:16px;font-size:14px;opacity:.8;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.pin{display:flex;gap:14px;justify-content:center;margin:12px 0 18px}.pin i{width:13px;height:13px;border-radius:50%;border:1.5px solid rgba(255,255,255,.5)}.pin i.f{background:var(--oro2);border-color:var(--oro2)}
+.tecl{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:270px;margin:0 auto}
+.tecl button{background:rgba(255,255,255,.06);border:0;color:#fff;font-size:22px;padding:13px 0;border-radius:16px;cursor:pointer}
+.tecl button.v{background:none;font-size:13px;opacity:.75}
+/* pasos facturar */
+.pasos{display:flex;gap:6px;margin-top:14px}.pasos i{flex:1;height:4px;border-radius:4px;background:rgba(255,255,255,.18)}.pasos i.on{background:var(--oro2)}
+.opc{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:16px;padding:13px 14px;margin-top:10px;cursor:pointer;background:#fff}
+.opc.on{border-color:var(--oro);box-shadow:0 0 0 3px rgba(184,145,63,.15)}
+.opc .tx{flex:1;min-width:0}.opc .tx b{display:block;font-size:14px;font-weight:600}.opc .tx small{color:var(--mut);font-size:12px}
+.radio{width:20px;height:20px;border-radius:50%;border:1.5px solid #c6ccd6;flex:none;display:grid;place-items:center}
+.opc.on .radio{border-color:var(--oro)}.opc.on .radio:after{content:"";width:10px;height:10px;border-radius:50%;background:var(--oro)}
+.prod{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--line)}
+.prod:last-child{border-bottom:0}
+.prod .tx{flex:1;min-width:0}.prod .tx b{display:block;font-size:14px;font-weight:600}.prod .tx small{color:var(--mut);font-size:12px}
+.cant{display:flex;align-items:center;gap:6px}
+.cant button{width:34px;height:34px;border-radius:11px;border:1px solid var(--line);background:#fff;color:var(--pri);cursor:pointer;display:grid;place-items:center;font-size:18px;line-height:1}
+.cant span{min-width:22px;text-align:center;font-weight:600;font-variant-numeric:tabular-nums}
+.barratotal{position:sticky;bottom:-96px;background:var(--card);margin:12px 14px 0;border-radius:20px;padding:16px 18px}
+/* factura enviada */
+.okcirc{width:74px;height:74px;border-radius:50%;background:rgba(29,143,98,.18);color:#8fdcbb;display:grid;place-items:center;margin:8px auto 0}
+.okcirc .ico{width:36px;height:36px}
+.estado{display:inline-flex;align-items:center;gap:6px;background:var(--okbg);color:var(--ok);border-radius:20px;padding:4px 11px;font-weight:600;font-size:12px}
+.estado:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--ok)}
+.kv div{display:flex;justify-content:space-between;gap:10px;padding:7px 0;font-size:14px;border-bottom:1px solid var(--line)}
+.kv div:last-child{border-bottom:0}.kv span{color:var(--mut)}.kv b{font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px}
+/* modal */
+.velo{position:absolute;inset:0;background:rgba(13,22,38,.55);z-index:8;display:none;align-items:flex-end}
+.velo.on{display:flex}
+.hoja{background:#fff;width:100%;border-radius:26px 26px 0 0;padding:10px 20px calc(24px + env(safe-area-inset-bottom));max-height:92%;overflow-y:auto;animation:sube .25s ease}
+@keyframes sube{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}
+.hoja .asa{width:40px;height:5px;border-radius:5px;background:#d9dde4;margin:0 auto 14px}
+.hoja h3{margin:0 0 4px;font-size:19px;letter-spacing:-.3px}
+.hoja p{margin:0;color:var(--mut);font-size:14px}
+.qr{display:block;margin:16px auto 8px;width:200px;height:200px;padding:12px;border:1px solid var(--line);border-radius:18px;background:#fff}
+.paso-acuse{display:flex;gap:12px;align-items:flex-start;padding:10px 0}
+.paso-acuse .n{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font-size:12px;font-weight:600;color:var(--mut);flex:none}
+.paso-acuse.ok .n{background:var(--ok);border-color:var(--ok);color:#fff}
+.paso-acuse .tx b{display:block;font-size:14px}.paso-acuse .tx small{color:var(--mut);font-size:12px}
+.grafica text{font-size:10px;fill:#8a92a0;font-family:inherit}
+.leyenda{display:flex;gap:16px;font-size:12px;color:var(--mut);margin:2px 0 6px}.leyenda i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.vacio{text-align:center;color:var(--mut);font-size:13px;padding:18px 0}
+.resumen3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.resumen3 div{background:rgba(255,255,255,.07);border-radius:12px;padding:9px 10px;font-size:11px}
+.resumen3 div span{opacity:.65;display:block}.resumen3 div b{font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}
+.av{width:40px;height:40px;border-radius:50%;background:#e9edf4;color:var(--pri);display:grid;place-items:center;font-weight:600;font-size:13px;flex:none}
+.foot{color:var(--mut);font-size:12.5px;text-align:center;padding:0 16px 24px;max-width:560px;margin:0 auto;line-height:1.55}.foot a{color:var(--pri2);font-weight:600}
+@media(max-width:430px){.foot{padding:16px}}
+.seg{display:flex;background:var(--bg);border-radius:14px;padding:3px;margin-bottom:6px}
+.seg button{flex:1;background:none;border:0;color:var(--mut);padding:9px;border-radius:11px;font-size:13px;cursor:pointer;font-weight:500}
+.seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.sw{width:44px;height:26px;border-radius:26px;background:#d3d8e0;position:relative;cursor:pointer;flex:none;transition:.2s}
+.sw:after{content:"";position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.sw.on{background:var(--ok)}.sw.on:after{left:21px}
+.cargando{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:gira .8s linear infinite}
+@keyframes gira{to{transform:rotate(360deg)}}
+</style></head><body>
+<div class="top"><b>TRIBUTANDO · DEMO</b><h1>Tributando móvil: su negocio en el celular</h1><p>Toque los botones: todo funciona, con datos de ejemplo.</p></div>
+
+<div class="phone" id="phone">
+
+ <!-- 1. BIENVENIDA -->
+ <section class="scr on sinnav" id="s-bien" style="padding-bottom:0">
+  <div class="bien">
+   <svg class="ola" viewBox="0 0 400 260" preserveAspectRatio="none"><defs><linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#b8913f" stop-opacity="0"/><stop offset=".5" stop-color="#e0c584" stop-opacity=".8"/><stop offset="1" stop-color="#b8913f" stop-opacity="0"/></linearGradient></defs>
+    <path d="M0 150 C 90 90, 170 210, 260 130 S 380 80, 400 120" fill="none" stroke="url(#g1)" stroke-width="1.4"/>
+    <path d="M0 170 C 100 110, 180 230, 270 150 S 380 100, 400 140" fill="none" stroke="url(#g1)" stroke-width="1" opacity=".6"/>
+    <path d="M0 190 C 110 130, 190 250, 280 170 S 380 120, 400 160" fill="none" stroke="url(#g1)" stroke-width=".8" opacity=".35"/></svg>
+   <div class="logo" style="position:relative"><i>T</i>TRIBUTANDO</div>
+   <h2 style="position:relative">Su negocio,<br>en su bolsillo.</h2>
+   <p style="position:relative">Facture, cobre, pague y apruebe la nómina desde el celular. Su contabilidad se hace sola por detrás.</p>
+   <div class="pie" id="bienPie">
+    <div style="font-size:14px;opacity:.75;margin-bottom:14px">Hola, Andrés</div>
+    <div class="huella" id="huella" onclick="huella()"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 11v3a8 8 0 0 1-1.5 4.7"/><path d="M8.5 12a3.5 3.5 0 0 1 7 0v1.5a12 12 0 0 1-.8 4.3"/><path d="M5.5 15.5A9 9 0 0 1 5 12a7 7 0 0 1 12.3-4.6"/><path d="M18.6 10A7 7 0 0 1 19 12v1.5a15 15 0 0 1-.4 3.5"/><path d="M7.5 19.5A11 11 0 0 0 8.5 15"/><path d="M6 4.6A10 10 0 0 1 18 4.6"/></svg></div>
+    <div style="font-size:13px;opacity:.6" id="huellaTx">Toque para entrar con su huella</div>
+    <span class="link" onclick="verPin()">Entrar con código</span>
+   </div>
+   <div class="pie" id="pinPie" style="display:none">
+    <div style="font-size:14px;opacity:.8">Escriba su código de 4 números</div>
+    <div class="pin" id="pinDots"><i></i><i></i><i></i><i></i></div>
+    <div class="tecl" id="tecl"></div>
+    <span class="link" onclick="verHuella()">Usar huella</span>
+   </div>
+  </div>
+ </section>
+
+ <!-- 2. INICIO -->
+ <section class="scr" id="s-inicio">
+  <div class="head">
+   <div class="r"><div class="logo"><i>T</i>TRIBUTANDO</div>
+    <div style="display:flex;gap:8px"><button class="btnr" onclick="ojo()" aria-label="Ocultar montos" id="btnOjo"></button><button class="btnr" onclick="ir('perfil')" aria-label="Perfil" data-i="user"></button></div></div>
+   <div class="hola">Buenos días, Andrés · Ferretería El Roble S.A.S.</div>
+   <div class="lbl">Plata en bancos</div>
+   <div class="saldo mt" id="totBancos"></div>
+   <div class="cuentas" id="cuentas"></div>
+  </div>
+  <div class="tres">
+   <div class="tarj" onclick="ir('cobrar')"><div class="ic ic-ok" data-i="in"></div><div class="tx"><span>Te deben</span><b class="mt" id="tTeDeben"></b><small id="tTeDebenS"></small></div><span class="chev" data-i="chev"></span></div>
+   <div class="tarj" onclick="ir('pagar')"><div class="ic ic-bad" data-i="out"></div><div class="tx"><span>Debes</span><b class="mt" id="tDebes"></b><small id="tDebesS"></small></div><span class="chev" data-i="chev"></span></div>
+   <div class="imp" id="impCard">
+    <div class="r1"><div><span>Próximo impuesto</span><div style="font-weight:600;margin-top:2px">IVA · bimestre septiembre–octubre</div></div><div class="fecha" id="impFecha">Vence 26 de nov.</div></div>
+    <b class="mt" id="impValor"></b>
+    <button class="btn" id="impBtn" onclick="pagarImpuesto()"><span data-i="bank"></span>Pagar con PSE</button>
+   </div>
+  </div>
+  <div class="accesos">
+   <div class="acc" onclick="nuevaFactura()"><span data-i="doc"></span>Facturar</div>
+   <div class="acc" onclick="ir('pagar')"><span data-i="out"></span>Por pagar</div>
+   <div class="acc" onclick="ir('nom')"><span data-i="team"></span>Nómina</div>
+   <div class="acc" onclick="ir('prov')"><span data-i="truck"></span>Proveedores</div>
+  </div>
+  <div class="sec">
+   <div class="ttl">Ventas y gastos<span class="lbl" style="font-weight:400">últimos 6 meses</span></div>
+   <div class="leyenda"><span><i style="background:var(--pri)"></i>Ventas</span><span><i style="background:var(--oro2)"></i>Gastos</span></div>
+   <svg class="grafica" id="graf" viewBox="0 0 320 170" width="100%"></svg>
+   <div class="note" id="grafNota"></div>
+  </div>
+  <div class="sec" style="margin-bottom:6px">
+   <div class="ttl">Últimos movimientos</div>
+   <div id="movs"></div>
+  </div>
+ </section>
+
+ <!-- 3. FACTURAR -->
+ <section class="scr" id="s-fac">
+  <div class="back"><div class="x" onclick="pasoAtras()"><span data-i="back"></span><span id="facAtrasTx">Inicio</span></div><h2 id="facTit">¿A quién le vende?</h2><div class="sub" id="facSub">Paso 1 de 3 · Cliente</div><div class="pasos"><i class="on" id="pa1"></i><i id="pa2"></i><i id="pa3"></i></div></div>
+  <div id="fp1">
+   <div class="sec">
+    <input id="busCli" placeholder="Buscar por nombre o NIT" oninput="pintaClientes()">
+    <div id="listaCli"></div>
+    <div class="opc" onclick="toggleNuevoCli()"><div class="ic ic-azul" style="width:36px;height:36px;border-radius:12px;display:grid;place-items:center" data-i="plus"></div><div class="tx"><b>Cliente nuevo</b><small>Con nombre y NIT o cédula</small></div></div>
+    <div id="nuevoCli" style="display:none">
+     <label>Nombre o razón social</label><input id="ncNom" placeholder="Ej.: Constructora Los Pinos S.A.S.">
+     <label>NIT o cédula</label><input id="ncNit" inputmode="numeric" placeholder="Ej.: 901.234.567-8">
+     <label>Celular (para mandarle la factura)</label><input id="ncTel" inputmode="tel" placeholder="300 000 0000">
+    </div>
+   </div>
+   <div style="padding:0 14px"><button class="btn" onclick="paso2()">Siguiente</button></div>
+  </div>
+  <div id="fp2" style="display:none">
+   <div class="sec">
+    <div class="seg"><button class="on" id="modoProd" onclick="modo('prod')">Productos</button><button id="modoVal" onclick="modo('val')">Valor libre</button></div>
+    <div id="listaProd"></div>
+    <div id="valLibre" style="display:none">
+     <label>¿Qué vende?</label><input id="vlDesc" value="Servicio de corte y doblado de lámina">
+     <label>Valor antes de IVA</label><input id="vlVal" inputmode="numeric" value="850.000" oninput="fmtInput(this);calcFac()">
+    </div>
+   </div>
+   <div class="sec">
+    <div class="res" id="facRes2"></div>
+    <button class="btn" id="btnPaso3" onclick="paso3()">Siguiente</button>
+   </div>
+  </div>
+  <div id="fp3" style="display:none">
+   <div class="sec">
+    <div class="kv" id="facResumen"></div>
+   </div>
+   <div class="sec">
+    <div class="ttl" style="margin-bottom:2px">Forma de pago</div>
+    <div class="opc on" id="fpCred" onclick="formaPago('cred')"><span class="radio"></span><div class="tx"><b>Crédito a 30 días</b><small>Queda en «Te deben» hasta que le paguen</small></div></div>
+    <div class="opc" id="fpCont" onclick="formaPago('cont')"><span class="radio"></span><div class="tx"><b>De contado</b><small>Ya le pagaron por transferencia o Bre-B</small></div></div>
+   </div>
+   <div class="sec">
+    <div class="res" id="facRes3"></div>
+    <button class="btn oro" id="btnEmitir" onclick="emitir()"><span data-i="send"></span>Emitir factura electrónica</button>
+    <div class="note">Se envía a la DIAN para validación y al cliente por WhatsApp y correo.</div>
+   </div>
+  </div>
+ </section>
+
+ <!-- FACTURA ENVIADA -->
+ <section class="scr" id="s-fe">
+  <div class="back" style="text-align:center;padding-bottom:26px">
+   <div class="okcirc" data-i="check"></div>
+   <h2 id="feTit">Factura FE-0000 enviada a la DIAN</h2>
+   <div class="sub" id="feSub"></div>
+   <div class="big mt" id="feTot"></div>
+  </div>
+  <div class="sec">
+   <div class="ttl">Estado DIAN <span class="estado">Aceptada</span></div>
+   <div class="kv" id="feKv"></div>
+  </div>
+  <div class="sec">
+   <div class="fila2"><button class="btn ok" style="margin-top:0" onclick="compartirWA()"><span data-i="chat"></span>WhatsApp</button><button class="btn claro" style="margin-top:0" onclick="verQR()"><span data-i="qr"></span>QR de pago</button></div>
+   <button class="btn claro" onclick="ir('cobrar')">Ver en «Te deben»</button>
+   <div class="note">El asiento contable (venta, IVA generado y cartera) ya quedó registrado en Tributando.</div>
+  </div>
+ </section>
+
+ <!-- 4. TE DEBEN -->
+ <section class="scr" id="s-cobrar">
+  <div class="back"><div class="x" onclick="ir('inicio')"><span data-i="back"></span>Inicio</div><h2>Te deben</h2><div class="sub" id="cobSub"></div><div class="big mt" id="cobTot"></div></div>
+  <div class="sec"><div id="listaCob"></div></div>
+  <div style="padding:0 14px"><button class="btn oro" onclick="nuevaFactura()"><span data-i="plus"></span>Nueva factura</button></div>
+ </section>
+
+ <!-- 5. POR PAGAR -->
+ <section class="scr" id="s-pagar">
+  <div class="back"><div class="x" onclick="ir('inicio')"><span data-i="back"></span>Inicio</div><h2>Por pagar</h2><div class="sub">Facturas de proveedores que llegaron de la DIAN</div><div class="big mt" id="pagTot"></div></div>
+  <div class="sec"><div class="seg"><button class="on" id="pf1" onclick="filtroPag('pend')">Pendientes</button><button id="pf2" onclick="filtroPag('pag')">Pagadas</button></div><div id="listaPag"></div></div>
+ </section>
+
+ <!-- DETALLE FACTURA PROVEEDOR -->
+ <section class="scr" id="s-pdet">
+  <div class="back"><div class="x" onclick="ir(volverPdet)"><span data-i="back"></span>Volver</div><h2 id="pdNom"></h2><div class="sub" id="pdSub"></div><div class="big mt" id="pdNeto"></div><div class="sub">neto a pagar</div></div>
+  <div class="sec"><div class="kv" id="pdKv"></div></div>
+  <div class="sec"><div class="res" id="pdRes"></div>
+   <div class="note">La retención en la fuente no se le paga al proveedor: usted la declara y la paga a la DIAN en el formulario 350.</div>
+   <button class="btn" id="pdPagar" onclick="pedirPago()"><span data-i="bank"></span>Pagar</button>
+   <button class="btn claro" id="pdAcuse" onclick="abrirAcuse()"><span data-i="check"></span>Dar acuse de recibido</button>
+  </div>
+ </section>
+
+ <!-- 6. PROVEEDORES -->
+ <section class="scr" id="s-prov">
+  <div class="back"><div class="x" onclick="ir('inicio')"><span data-i="back"></span>Inicio</div><h2>Proveedores</h2><div class="sub">Lo que le debe a cada uno</div><div class="big mt" id="provTot"></div></div>
+  <div class="sec"><div id="listaProv"></div></div>
+ </section>
+ <section class="scr" id="s-provdet">
+  <div class="back"><div class="x" onclick="ir('prov')"><span data-i="back"></span>Proveedores</div><h2 id="pvNom"></h2><div class="sub" id="pvNit"></div><div class="big mt" id="pvTot"></div><div class="sub">pendiente por pagar</div></div>
+  <div class="sec"><div class="kv" id="pvKv"></div></div>
+  <div class="sec"><div class="ttl">Sus facturas</div><div id="pvFacs"></div></div>
+ </section>
+
+ <!-- 7. NÓMINA -->
+ <section class="scr" id="s-nom">
+  <div class="back"><div class="x" onclick="ir('inicio')"><span data-i="back"></span>Inicio</div><h2>Nómina</h2><div class="sub">Segunda quincena de noviembre · paga el 30 de nov.</div>
+   <div class="resumen3"><div><span>Devengado</span><b class="mt" id="nDev"></b></div><div><span>Deducciones</span><b class="mt" id="nDed"></b></div><div><span>Neto a pagar</span><b class="mt" id="nNet"></b></div></div>
+  </div>
+  <div class="sec"><div class="ttl">Empleados <span id="nEstado" class="tag t-warn">Por aprobar</span></div><div id="listaEmp"></div></div>
+  <div style="padding:0 14px"><button class="btn oro" id="btnNom" onclick="pedirNomina()"><span data-i="check"></span>Aprobar y pagar quincena</button>
+  <div class="note" style="text-align:center">Incluye nómina electrónica a la DIAN y aportes de seguridad social en la PILA del mes.</div></div>
+ </section>
+ <section class="scr" id="s-desp">
+  <div class="back"><div class="x" onclick="ir('nom')"><span data-i="back"></span>Nómina</div><h2 id="dNom"></h2><div class="sub" id="dCar"></div><div class="big mt" id="dNet"></div><div class="sub">neto de la quincena</div></div>
+  <div class="sec"><div class="ttl">Desprendible de pago</div><div class="res" id="dRes"></div></div>
+  <div style="padding:0 14px"><button class="btn claro" onclick="toast('Desprendible enviado por WhatsApp al empleado')"><span data-i="chat"></span>Enviar por WhatsApp</button></div>
+ </section>
+
+ <!-- 8. PERFIL -->
+ <section class="scr" id="s-perfil">
+  <div class="back"><div class="x" onclick="ir('inicio')"><span data-i="back"></span>Inicio</div>
+   <div style="display:flex;gap:14px;align-items:center;margin-top:16px"><div class="logo"><i style="width:52px;height:52px;border-radius:16px;font-size:20px">FR</i></div><div><div style="font-weight:700;font-size:18px">Ferretería El Roble S.A.S.</div><div class="sub">NIT 901.482.317-5 · Régimen ordinario</div></div></div></div>
+  <div class="sec"><div class="ttl">Su empresa</div><div class="kv">
+   <div><span>Representante</span><b>Andrés Felipe Restrepo</b></div>
+   <div><span>Dirección</span><b>Cra. 52 # 48-20, Itagüí</b></div>
+   <div><span>Responsabilidades</span><b>IVA bimestral · Retención</b></div>
+   <div><span>Facturación electrónica</span><b>Habilitada · prefijo FE</b></div></div></div>
+  <div class="sec"><div class="ttl">Tu contador: Tributando</div>
+   <div class="it"><div class="ic" data-i="shield"></div><div class="tx"><b>Equipo contable Tributando</b><small>Revisa su contabilidad cada mes y le presenta los impuestos</small></div></div>
+   <a class="btn ok" href="https://wa.me/573332470715" target="_blank" rel="noopener" style="text-decoration:none"><span data-i="chat"></span>Escribirle por WhatsApp</a></div>
+  <div class="sec"><div class="ttl">Seguridad</div>
+   <div class="it"><div class="ic" data-i="finger"></div><div class="tx"><b>Entrar con huella</b><small>En este celular</small></div><div class="sw on" onclick="this.classList.toggle('on');toast(this.classList.contains('on')?'Huella activada':'Huella desactivada')"></div></div>
+   <div class="it"><div class="ic" data-i="eye"></div><div class="tx"><b>Ocultar montos al abrir</b><small>Útil en lugares públicos</small></div><div class="sw" onclick="this.classList.toggle('on');toast('Preferencia guardada')"></div></div>
+   <div class="it clic" onclick="toast('Le llegó un código por SMS para cambiar su clave')"><div class="ic" data-i="lock"></div><div class="tx"><b>Cambiar código de entrada</b><small>4 números</small></div><span class="chev" data-i="chev" style="color:#b9bfca"></span></div>
+   <div class="it clic" onclick="salir()"><div class="ic ic-bad" data-i="logout"></div><div class="tx"><b>Cerrar sesión</b></div></div>
+  </div>
+ </section>
+
+ <div class="velo" id="velo" onclick="if(event.target===this)cerrar()"><div class="hoja" id="hoja"></div></div>
+ <div class="toast" id="toast"><span data-i="check"></span><span id="toastTx"></span></div>
+ <nav class="nav" id="nav" style="display:none">
+  <button id="n-inicio" onclick="ir('inicio')"><span data-i="home"></span>Inicio</button>
+  <button id="n-fac" onclick="nuevaFactura()"><span data-i="doc"></span>Facturar</button>
+  <button id="n-pagar" onclick="ir('pagar')"><span data-i="out"></span>Por pagar</button>
+  <button id="n-nom" onclick="ir('nom')"><span data-i="team"></span>Nómina</button>
+  <button id="n-perfil" onclick="ir('perfil')"><span data-i="user"></span>Perfil</button>
+ </nav>
+</div>
+
+<div class="foot">Demo de Tributando con datos de ejemplo. Por detrás, cada factura, pago y nómina queda contabilizado solo en Tributando.<br><a href="https://wa.me/573332470715" target="_blank" rel="noopener">Escríbanos por WhatsApp</a></div>
+
+<script>
+/* ---------- íconos de línea ---------- */
+const P={
+ home:'<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>',
+ doc:'<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/>',
+ out:'<path d="M7 17L17 7M9 7h8v8"/>',
+ in:'<path d="M17 7L7 17M15 17H7V9"/>',
+ team:'<circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M16 4.5a3 3 0 0 1 0 6M18 14a5 5 0 0 1 3 6"/>',
+ user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+ truck:'<path d="M3 6h11v10H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="18" r="1.8"/><circle cx="17" cy="18" r="1.8"/>',
+ chev:'<path d="M9 6l6 6-6 6"/>',
+ back:'<path d="M15 6l-6 6 6 6"/>',
+ bank:'<path d="M3 10l9-6 9 6M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"/>',
+ eye:'<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+ eyeoff:'<path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4M6.6 6.6A17 17 0 0 0 2 12s3.6 7 10 7a9.6 9.6 0 0 0 5.4-1.6"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/>',
+ plus:'<path d="M12 5v14M5 12h14"/>',
+ check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+ send:'<path d="M21 3L10 14M21 3l-7 18-4-7-7-4z"/>',
+ chat:'<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>',
+ qr:'<path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h2v2h-2zM18 14h2M14 18h2v2M18 18h2v2"/>',
+ shield:'<path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
+ lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+ logout:'<path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/>',
+ finger:'<path d="M12 11v3a8 8 0 0 1-1.5 4.7"/><path d="M8.5 12a3.5 3.5 0 0 1 7 0v1.5a12 12 0 0 1-.8 4.3"/><path d="M5.5 15.5A9 9 0 0 1 5 12a7 7 0 0 1 12.3-4.6"/><path d="M6 4.6A10 10 0 0 1 18 4.6"/>',
+ bell:'<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/>',
+ tax:'<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/>',
+ cart:'<path d="M3 4h2l2.4 11h10.2L20 8H6.2"/><circle cx="9" cy="19" r="1.5"/><circle cx="17" cy="19" r="1.5"/>',
+ clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'
+};
+function ic(n,c){return `<svg class="ico${c?' '+c:''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${P[n]||''}</svg>`}
+function iconos(r){(r||document).querySelectorAll('[data-i]').forEach(e=>{if(!e.dataset.done){e.innerHTML=ic(e.dataset.i)+e.innerHTML;e.dataset.done=1}})}
+
+/* ---------- utilidades ---------- */
+const $=id=>document.getElementById(id);
+const fmt=v=>'$'+Math.round(v).toLocaleString('es-CO').replace(/,/g,'.');
+const num=s=>+String(s).replace(/[^\d]/g,'')||0;
+function fmtInput(el){const n=num(el.value);el.value=n?n.toLocaleString('es-CO').replace(/,/g,'.'):''}
+let tT;function toast(t,i){$('toastTx').textContent=t;const s=$('toast').firstElementChild;s.innerHTML=ic(i||'check');$('toast').classList.add('on');clearTimeout(tT);tT=setTimeout(()=>$('toast').classList.remove('on'),2600)}
+function hoja(html){$('hoja').innerHTML='<div class="asa"></div>'+html;$('velo').classList.add('on');iconos($('hoja'))}
+function cerrar(){$('velo').classList.remove('on')}
+const HOY=new Date(2026,10,17);
+const MES=['ene.','feb.','mar.','abr.','may.','jun.','jul.','ago.','sep.','oct.','nov.','dic.'];
+function fechaD(d){const f=new Date(HOY);f.setDate(f.getDate()+d);return f.getDate()+' de '+MES[f.getMonth()]}
+function etiqueta(d){if(d<0)return `<span class="tag t-bad">Vencida hace ${-d} día${d==-1?'':'s'}</span>`;if(d==0)return '<span class="tag t-warn">Vence hoy</span>';if(d<=7)return `<span class="tag t-warn">Vence en ${d} día${d==1?'':'s'}</span>`;return `<span class="tag t-mut">Vence en ${d} días</span>`}
+const ini=n=>n.split(' ').filter(w=>w.length>2).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+
+/* ---------- datos de ejemplo ---------- */
+const bancos=[{n:'Bancolombia',d:'Ahorros ·4521',v:48230500},{n:'Davivienda',d:'Corriente ·0987',v:21345800}];
+const clientes=[
+ {n:'Constructora Altos del Sur S.A.S.',nit:'900.874.221-3',tel:'310 555 0142'},
+ {n:'Obras y Acabados del Valle S.A.S.',nit:'901.203.558-1',tel:'315 555 0198'},
+ {n:'Inmobiliaria Prado Verde S.A.S.',nit:'900.556.903-7',tel:'300 555 0177'},
+ {n:'Juan Carlos Mejía Ruiz',nit:'CC 71.845.336',tel:'321 555 0110'},
+ {n:'Mantenimientos Industriales JR Ltda.',nit:'811.042.675-2',tel:'318 555 0133'}];
+let cartera=[
+ {fe:'FE-1041',c:0,v:8925000,d:-12,em:'6 de oct.'},
+ {fe:'FE-1046',c:1,v:4284000,d:5,em:'23 de oct.'},
+ {fe:'FE-1049',c:2,v:2618000,d:18,em:'5 de nov.'},
+ {fe:'FE-1050',c:3,v:714000,d:25,em:'12 de nov.'}];
+const proveedores=[
+ {n:'Distribuidora Ferretera Nacional S.A.S.',nit:'860.512.448-9',tel:'604 555 2210',plazo:'30 días'},
+ {n:'Cementos del Valle S.A.',nit:'890.300.117-4',tel:'602 555 8800',plazo:'30 días'},
+ {n:'Aceros y Tubos de Colombia S.A.S.',nit:'900.218.640-5',tel:'601 555 7731',plazo:'45 días'},
+ {n:'Pinturas Andinas S.A.S.',nit:'830.115.962-0',tel:'604 555 4416',plazo:'30 días'},
+ {n:'Transportes La Ruta Ltda.',nit:'811.009.384-6',tel:'604 555 3092',plazo:'15 días'}];
+/* r = tarifa de retención en la fuente: compras 2,5 %, transporte de carga 1 % */
+let porPagar=[
+ {id:1,p:1,num:'CV-88231',base:7840000,r:.025,rc:'Compras 2,5 %',d:-4,em:'19 de oct.',acuse:0,pag:false},
+ {id:2,p:0,num:'DFN-45102',base:5216000,r:.025,rc:'Compras 2,5 %',d:2,em:'20 de oct.',acuse:0,pag:false},
+ {id:3,p:4,num:'TLR-3318',base:1180000,r:.01,rc:'Transporte de carga 1 %',d:3,em:'5 de nov.',acuse:2,pag:false},
+ {id:4,p:2,num:'ATC-20914',base:9365000,r:.025,rc:'Compras 2,5 %',d:11,em:'14 de oct.',acuse:3,pag:false},
+ {id:5,p:3,num:'PA-7745',base:3428000,r:.025,rc:'Compras 2,5 %',d:16,em:'2 de nov.',acuse:0,pag:false},
+ {id:6,p:0,num:'DFN-45377',base:2954000,r:.025,rc:'Compras 2,5 %',d:24,em:'10 de nov.',acuse:0,pag:false},
+ {id:7,p:1,num:'CV-87610',base:6120000,r:.025,rc:'Compras 2,5 %',d:-30,em:'3 de sep.',acuse:3,pag:true}];
+const IVA=.19;
+const ivaDe=f=>f.p==4?0:Math.round(f.base*IVA); // transporte de carga: excluido de IVA
+const retDe=f=>Math.round(f.base*f.r);
+const netoDe=f=>f.base+ivaDe(f)-retDe(f);
+const productos=[
+ {n:'Cemento gris uso general 50 kg',u:'bulto',v:32500},
+ {n:'Varilla corrugada 1/2" × 6 m',u:'unidad',v:28900},
+ {n:'Pintura vinilo tipo 1, galón',u:'galón',v:64000},
+ {n:'Tubo PVC presión 1/2" × 6 m',u:'unidad',v:12400},
+ {n:'Teja fibrocemento N.º 6',u:'unidad',v:46800},
+ {n:'Tornillo drywall 6×1" (caja ×100)',u:'caja',v:9800}];
+/* nómina: SMMLV 2026 $1.750.905 · auxilio de transporte $249.095 */
+const SMMLV=1750905,AUX=249095;
+const empleados=[
+ {n:'Luis Fernando Gómez',c:'Jefe de bodega',s:2800000},
+ {n:'Diana Marcela Ríos',c:'Cajera',s:1900000},
+ {n:'Jhon Edwar Cardona',c:'Vendedor de mostrador',s:1950000},
+ {n:'Yuliana Andrea Pérez',c:'Auxiliar administrativa',s:2100000},
+ {n:'Carlos Mario Zapata',c:'Conductor y entregas',s:SMMLV}];
+let nominaPagada=false;
+let movs=[
+ {i:'in',t:'Pago FE-1038 · Mantenimientos JR',d:'Hoy, 9:12 a. m.',v:3570000},
+ {i:'out',t:'Pago a Pinturas Andinas S.A.S.',d:'Ayer',v:-2865000},
+ {i:'cart',t:'Venta de contado FE-1050',d:'12 de nov.',v:1249500},
+ {i:'tax',t:'Retención en la fuente octubre',d:'12 de nov.',v:-1184000},
+ {i:'team',t:'Nómina 1.ª quincena noviembre',d:'15 de nov.',v:-4932000}];
+const meses=['Jun','Jul','Ago','Sep','Oct','Nov'];
+const ventas=[41.2,38.6,45.9,43.1,52.4,36.8],gastos=[33.5,34.9,36.2,35.0,39.8,27.1];
+let imp={v:6842000,pagado:false};
+let nFE=1050;
+
+/* ---------- navegación ---------- */
+const NAVSIN=['bien'];
+function ir(s){document.querySelectorAll('.scr').forEach(e=>e.classList.remove('on'));const sc=$('s-'+s);sc.classList.add('on');sc.scrollTop=0;
+ document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('on'));
+ const mapa={inicio:'inicio',fac:'fac',fe:'fac',pagar:'pagar',pdet:'pagar',nom:'nom',desp:'nom',perfil:'perfil',cobrar:'inicio',prov:'inicio',provdet:'inicio'};
+ const nb=$('n-'+mapa[s]);if(nb)nb.classList.add('on');
+ $('nav').style.display=NAVSIN.includes(s)?'none':'grid';cerrar();pinta()}
+
+/* ---------- entrada ---------- */
+let pin='';
+function huella(){const h=$('huella');h.classList.add('leyendo');$('huellaTx').textContent='Leyendo huella…';setTimeout(()=>{h.classList.remove('leyendo');$('huellaTx').textContent='Toque para entrar con su huella';ir('inicio')},900)}
+function verPin(){$('bienPie').style.display='none';$('pinPie').style.display='block';pin='';dots()}
+function verHuella(){$('pinPie').style.display='none';$('bienPie').style.display='block'}
+function dots(){[...$('pinDots').children].forEach((d,i)=>d.classList.toggle('f',i<pin.length))}
+function tecla(k){if(k=='<'){pin=pin.slice(0,-1)}else if(pin.length<4){pin+=k}dots();if(pin.length==4)setTimeout(()=>{pin='';dots();verHuella();ir('inicio')},250)}
+$('tecl').innerHTML=['1','2','3','4','5','6','7','8','9','','0','<'].map(k=>k===''?'<span></span>':`<button class="${k=='<'?'v':''}" onclick="tecla('${k}')">${k=='<'?'Borrar':k}</button>`).join('');
+function salir(){toast('Sesión cerrada');ir('bien')}
+
+/* ---------- inicio ---------- */
+let oculto=false;
+function ojo(){oculto=!oculto;document.body.classList.toggle('oculto',oculto);$('btnOjo').innerHTML=ic(oculto?'eyeoff':'eye')}
+const totBancos=()=>bancos.reduce((a,b)=>a+b.v,0);
+const totCartera=()=>cartera.reduce((a,b)=>a+b.v,0);
+const pendientes=()=>porPagar.filter(f=>!f.pag);
+const totDebes=()=>pendientes().reduce((a,f)=>a+netoDe(f),0);
+function pinta(){
+$('totBancos').innerHTML=fmt(totBancos());
+ $('cuentas').innerHTML=bancos.map(b=>`<div><span>${b.n} · ${b.d}</span><b class="mt">${fmt(b.v)}</b></div>`).join('');
+ const venc=cartera.filter(c=>c.d<0);
+ $('tTeDeben').textContent=fmt(totCartera());
+ $('tTeDebenS').textContent=cartera.length+' facturas'+(venc.length?' · '+venc.length+' vencida'+(venc.length>1?'s':''):'');
+ const pv=pendientes().filter(f=>f.d<0),pr=pendientes().filter(f=>f.d>=0&&f.d<=7);
+ $('tDebes').textContent=fmt(totDebes());
+ $('tDebesS').textContent=pendientes().length+' facturas'+(pv.length?' · '+pv.length+' vencida'+(pv.length>1?'s':''):'')+(pr.length?' · '+pr.length+' esta semana':'');
+ $('impValor').textContent=fmt(imp.v);
+ $('impCard').classList.toggle('pagado',imp.pagado);
+ $('impFecha').textContent=imp.pagado?'Pagado hoy':'Vence 26 de nov.';
+ $('impBtn').style.display=imp.pagado?'none':'flex';
+ grafica();
+ $('movs').innerHTML=movs.slice(0,6).map(m=>`<div class="it"><div class="ic">${ic(m.i)}</div><div class="tx"><b>${m.t}</b><small>${m.d}</small></div><div class="m mt ${m.v>0?'pos':''}">${m.v>0?'+':'−'}${fmt(Math.abs(m.v))}</div></div>`).join('');
+ // te deben
+ $('cobTot').textContent=fmt(totCartera());
+ $('cobSub').textContent=cartera.length?`${cartera.length} facturas por cobrar`:'Nadie le debe. Todo está al día.';
+ $('listaCob').innerHTML=cartera.length?[...cartera].sort((a,b)=>a.d-b.d).map(c=>{const cl=clientes[c.c];return `<div style="border-bottom:1px solid var(--line);padding:14px 0">
+  <div class="it" style="padding:0;border:0"><div class="av">${ini(cl.n)}</div><div class="tx"><b>${cl.n}</b><small>${c.fe} · ${c.em}</small></div><div class="m mt">${fmt(c.v)}<small>${etiqueta(c.d)}</small></div></div>
+  <div class="fila2" style="margin-top:10px"><button class="btn claro" style="margin:0;padding:11px;font-size:13px" onclick="recordar('${c.fe}')">${ic('chat')}Recordar por WhatsApp</button><button class="btn" style="margin:0;padding:11px;font-size:13px" onclick="marcarPagada('${c.fe}')">${ic('check')}Marcar pagada</button></div></div>`}).join(''):'<div class="vacio">Sin facturas por cobrar.</div>';
+ // por pagar
+ $('pagTot').textContent=fmt(totDebes());
+ const lista=porPagar.filter(f=>filtro=='pend'?!f.pag:f.pag).sort((a,b)=>a.d-b.d);
+ $('listaPag').innerHTML=lista.length?lista.map(f=>itemPag(f,'pagar')).join(''):'<div class="vacio">No hay facturas aquí.</div>';
+ // proveedores
+ $('provTot').textContent=fmt(totDebes());
+ $('listaProv').innerHTML=proveedores.map((p,i)=>{const fs=pendientes().filter(f=>f.p==i),t=fs.reduce((a,f)=>a+netoDe(f),0);return `<div class="it clic" onclick="verProv(${i})"><div class="av">${ini(p.n)}</div><div class="tx"><b>${p.n}</b><small>${fs.length?fs.length+' factura'+(fs.length>1?'s':'')+' pendiente'+(fs.length>1?'s':''):'Al día'}</small></div><div class="m mt">${t?fmt(t):'<span class="tag t-ok">$0</span>'}</div></div>`}).join('');
+ // nómina
+ const tn=empleados.map(liq);
+ $('nDev').textContent=fmt(tn.reduce((a,l)=>a+l.dev,0));$('nDed').textContent=fmt(tn.reduce((a,l)=>a+l.ded,0));$('nNet').textContent=fmt(tn.reduce((a,l)=>a+l.net,0));
+ $('nEstado').className='tag '+(nominaPagada?'t-ok':'t-warn');$('nEstado').textContent=nominaPagada?'Pagada':'Por aprobar';
+ $('btnNom').disabled=nominaPagada;$('btnNom').innerHTML=ic('check')+(nominaPagada?'Quincena pagada':'Aprobar y pagar quincena');
+ $('listaEmp').innerHTML=empleados.map((e,i)=>{const l=tn[i];return `<div class="it clic" onclick="verDesp(${i})"><div class="av">${ini(e.n)}</div><div class="tx"><b>${e.n}</b><small>${e.c}</small></div><div class="m mt">${fmt(l.net)}<small style="color:var(--mut)">ver desprendible</small></div></div>`}).join('');
+}
+function itemPag(f,origen){const p=proveedores[f.p];return `<div class="it clic" onclick="verPdet(${f.id},'${origen}')"><div class="av">${ini(p.n)}</div><div class="tx"><b>${p.n}</b><small>${f.num} · ${f.pag?'pagada':f.acuse==3?'aceptada':'recibida '+f.em}</small></div><div class="m mt">${fmt(netoDe(f))}<small>${f.pag?'<span class="tag t-ok">Pagada</span>':etiqueta(f.d)}</small></div></div>`}
+function grafica(){const W=320,H=170,b=22,top=10,max=60,cw=(W-30)/6;let s='';
+ for(let g=0;g<=60;g+=20){const y=H-b-(g/max)*(H-b-top);s+=`<line x1="28" x2="${W}" y1="${y}" y2="${y}" stroke="#eceef2"/><text x="0" y="${y+3}">${g}M</text>`}
+ meses.forEach((m,i)=>{const x=30+i*cw+cw/2,hv=(ventas[i]/max)*(H-b-top),hg=(gastos[i]/max)*(H-b-top);
+  s+=`<rect x="${x-13}" y="${H-b-hv}" width="12" height="${hv}" rx="3" fill="#16243a"><title>Ventas ${m}: $${ventas[i].toLocaleString('es-CO')} millones</title></rect><rect x="${x+1}" y="${H-b-hg}" width="12" height="${hg}" rx="3" fill="#e0c584"><title>Gastos ${m}: $${gastos[i].toLocaleString('es-CO')} millones</title></rect><text x="${x}" y="${H-6}" text-anchor="middle">${m}${i==5?'*':''}</text>`});
+ $('graf').innerHTML=s;
+ $('grafNota').textContent='Octubre fue su mejor mes: vendió $52,4 millones y le quedaron $12,6 millones. *Noviembre va hasta hoy.'}
+function pagarImpuesto(){hoja(`<h3>Pagar IVA con PSE</h3><p>Bimestre septiembre–octubre · formulario 300 ya presentado por su contador.</p>
+ <div class="kv" style="margin-top:14px"><div><span>Valor</span><b>${fmt(imp.v)}</b></div><div><span>Recibo 490</span><b class="mono">4910038827415</b></div><div><span>Desde</span><b>Bancolombia ·4521</b></div><div><span>Vence</span><b>26 de noviembre</b></div></div>
+ <button class="btn oro" onclick="confirmarImpuesto(this)">${ic('bank')}Ir a PSE y pagar</button><button class="btn claro" onclick="cerrar()">Ahora no</button>`)}
+function confirmarImpuesto(b){b.innerHTML='<span class="cargando"></span> Conectando con PSE…';b.disabled=true;setTimeout(()=>{bancos[0].v-=imp.v;imp.pagado=true;movs.unshift({i:'tax',t:'Pago IVA sep–oct · PSE',d:'Hoy',v:-imp.v});cerrar();pinta();toast('Impuesto pagado · recibo guardado en Tributando')},1300)}
+
+/* ---------- facturar ---------- */
+let fac={};
+function nuevaFactura(){fac={c:null,nuevo:false,modo:'prod',cant:productos.map(()=>0),forma:'cred'};$('busCli').value='';$('nuevoCli').style.display='none';ir('fac');paso(1);pintaClientes();pintaProd()}
+function paso(n){fac.paso=n;[1,2,3].forEach(i=>{$('fp'+i).style.display=i==n?'block':'none';$('pa'+i).classList.toggle('on',i<=n)});
+ $('facTit').textContent=['','¿A quién le vende?','¿Qué le vende?','Revise y emita'][n];
+ $('facSub').textContent=['','Paso 1 de 3 · Cliente','Paso 2 de 3 · Productos o valor','Paso 3 de 3 · Confirmar'][n];
+ $('facAtrasTx').textContent=n==1?'Inicio':'Atrás';$('s-fac').scrollTop=0;calcFac()}
+function pasoAtras(){if(fac.paso>1)paso(fac.paso-1);else ir('inicio')}
+function pintaClientes(){const q=$('busCli').value.toLowerCase();$('listaCli').innerHTML=clientes.map((c,i)=>({c,i})).filter(o=>!q||o.c.n.toLowerCase().includes(q)||o.c.nit.includes(q)).map(({c,i})=>`<div class="opc ${fac.c===i?'on':''}" onclick="elegirCli(${i})"><span class="radio"></span><div class="tx"><b>${c.n}</b><small>${c.nit.startsWith('CC')?c.nit:'NIT '+c.nit}</small></div></div>`).join('')||'<div class="vacio">No aparece. Créelo como cliente nuevo.</div>'}
+function elegirCli(i){fac.c=i;fac.nuevo=false;$('nuevoCli').style.display='none';pintaClientes()}
+function toggleNuevoCli(){fac.nuevo=true;fac.c=null;pintaClientes();$('nuevoCli').style.display='block';$('ncNom').focus()}
+function paso2(){if(fac.nuevo){const n=$('ncNom').value.trim(),t=$('ncNit').value.trim();if(!n||!t){toast('Escriba el nombre y el NIT o cédula','bell');return}clientes.push({n,nit:t,tel:$('ncTel').value||'—'});fac.c=clientes.length-1;fac.nuevo=false;$('ncNom').value=$('ncNit').value=$('ncTel').value='';$('nuevoCli').style.display='none'}
+ if(fac.c===null){toast('Elija un cliente','bell');return}paso(2)}
+function modo(m){fac.modo=m;$('modoProd').classList.toggle('on',m=='prod');$('modoVal').classList.toggle('on',m=='val');$('listaProd').style.display=m=='prod'?'block':'none';$('valLibre').style.display=m=='val'?'block':'none';calcFac()}
+function pintaProd(){$('listaProd').innerHTML=productos.map((p,i)=>`<div class="prod"><div class="tx"><b>${p.n}</b><small>${fmt(p.v)} por ${p.u} + IVA</small></div><div class="cant"><button onclick="cant(${i},-1)" aria-label="Quitar">−</button><span id="q${i}">${fac.cant[i]}</span><button onclick="cant(${i},1)" aria-label="Agregar">+</button></div></div>`).join('')}
+function cant(i,d){fac.cant[i]=Math.max(0,fac.cant[i]+(d>0&&fac.cant[i]>=10?10:d));$('q'+i).textContent=fac.cant[i];calcFac()}
+function lineas(){if(fac.modo=='val'){const v=num($('vlVal').value);return v?[{n:$('vlDesc').value||'Venta',q:1,v}]:[]}return productos.map((p,i)=>({n:p.n,q:fac.cant[i],v:p.v})).filter(l=>l.q>0)}
+function totales(){const sub=lineas().reduce((a,l)=>a+l.q*l.v,0),iva=Math.round(sub*IVA);return{sub,iva,tot:sub+iva}}
+function calcFac(){if(!fac.cant)return;const t=totales();const r=`<div><span>Subtotal</span><span>${fmt(t.sub)}</span></div><div><span>IVA 19 %</span><span>${fmt(t.iva)}</span></div><div class="t"><span>Total</span><span>${fmt(t.tot)}</span></div>`;$('facRes2').innerHTML=r;$('facRes3').innerHTML=r;$('btnPaso3').disabled=!t.sub}
+function paso3(){if(!totales().sub)return;const c=clientes[fac.c];
+ $('facResumen').innerHTML=`<div><span>Cliente</span><b>${c.n}</b></div><div><span>NIT / cédula</span><b>${c.nit}</b></div>`+lineas().map(l=>`<div><span>${l.q} × ${l.n}</span><b>${fmt(l.q*l.v)}</b></div>`).join('');paso(3)}
+function formaPago(f){fac.forma=f;$('fpCred').classList.toggle('on',f=='cred');$('fpCont').classList.toggle('on',f=='cont')}
+function emitir(){const b=$('btnEmitir');b.disabled=true;b.innerHTML='<span class="cargando"></span> Enviando a la DIAN…';
+ setTimeout(()=>{nFE++;const t=totales(),c=clientes[fac.c],fe='FE-'+nFE;
+  const cufe=[...Array(96)].map(()=>'0123456789abcdef'[Math.floor(Math.random()*16)]).join('');
+  if(fac.forma=='cred'){cartera.push({fe,c:fac.c,v:t.tot,d:30,em:'hoy'})}else{bancos[0].v+=t.tot;movs.unshift({i:'cart',t:'Venta de contado '+fe,d:'Hoy',v:t.tot})}
+  fac.ult={fe,t,c,cufe};
+  $('feTit').textContent=`Factura ${fe} enviada a la DIAN`;$('feSub').textContent=c.n;$('feTot').textContent=fmt(t.tot);
+  $('feKv').innerHTML=`<div><span>Número</span><b>${fe}</b></div><div><span>Fecha</span><b>17 de nov. de 2026, ${new Date().toLocaleTimeString('es-CO',{hour:'numeric',minute:'2-digit'})}</b></div><div><span>Subtotal</span><b>${fmt(t.sub)}</b></div><div><span>IVA 19 %</span><b>${fmt(t.iva)}</b></div><div><span>Forma de pago</span><b>${fac.forma=='cred'?'Crédito · vence '+fechaD(30):'Contado'}</b></div><div><span>CUFE</span><b class="mono">${cufe.slice(0,8)}…${cufe.slice(-6)}</b></div>`;
+  b.disabled=false;b.innerHTML=ic('send')+'Emitir factura electrónica';ir('fe');toast('Factura '+fe+' aceptada por la DIAN')},1600)}
+function compartirWA(){const u=fac.ult;toast(u?`Factura ${u.fe} enviada por WhatsApp a ${u.c.n.split(' ')[0]}`:'Factura enviada por WhatsApp','chat')}
+function qrSVG(seed){let s=seed,r=()=>(s=(s*9301+49297)%233280)/233280;const N=29,c=6;let o='';
+ const fin=(x,y)=>`<rect x="${x*c}" y="${y*c}" width="${7*c}" height="${7*c}" fill="#16243a"/><rect x="${x*c+c}" y="${y*c+c}" width="${5*c}" height="${5*c}" fill="#fff"/><rect x="${x*c+2*c}" y="${y*c+2*c}" width="${3*c}" height="${3*c}" fill="#16243a"/>`;
+ for(let y=0;y<N;y++)for(let x=0;x<N;x++){const enF=(x<8&&y<8)||(x>N-9&&y<8)||(x<8&&y>N-9);if(!enF&&r()>.52)o+=`<rect x="${x*c}" y="${y*c}" width="${c}" height="${c}" fill="#16243a"/>`}
+ o+=`<rect x="${11*c}" y="${11*c}" width="${7*c}" height="${7*c}" rx="6" fill="#fff"/><rect x="${12*c}" y="${12*c}" width="${5*c}" height="${5*c}" rx="5" fill="#b8913f"/><text x="${14.5*c}" y="${15.4*c}" text-anchor="middle" font-size="16" font-weight="700" fill="#16243a" font-family="Inter,sans-serif">T</text>`;
+ return `<svg class="qr" viewBox="0 0 ${N*c} ${N*c}" shape-rendering="crispEdges">${fin(0,0)}${fin(N-7,0)}${fin(0,N-7)}${o}</svg>`}
+function verQR(){const u=fac.ult;hoja(`<h3 style="text-align:center">Paga con Bre-B</h3><p style="text-align:center">Su cliente escanea este código desde la app de su banco.</p>${qrSVG(nFE*7+3)}
+ <div style="text-align:center;font-weight:700;font-size:22px">${u?fmt(u.t.tot):''}</div><div style="text-align:center;color:var(--mut);font-size:13px">${u?u.fe+' · Ferretería El Roble S.A.S.':''}<br>Llave Bre-B: @ferreteriaelroble</div>
+ <button class="btn ok" onclick="cerrar();toast('QR de pago enviado por WhatsApp','chat')">${ic('chat')}Enviar QR por WhatsApp</button><button class="btn claro" onclick="cerrar()">Listo</button>`)}
+
+/* ---------- te deben ---------- */
+function recordar(fe){const c=cartera.find(x=>x.fe==fe),cl=clientes[c.c];toast(`Recordatorio de ${fe} enviado a ${cl.n.split(' ').slice(0,2).join(' ')} por WhatsApp`,'chat')}
+function marcarPagada(fe){const c=cartera.find(x=>x.fe==fe),cl=clientes[c.c];
+ hoja(`<h3>¿Ya le pagaron ${fe}?</h3><p>${cl.n}</p><div class="kv" style="margin-top:12px"><div><span>Valor</span><b>${fmt(c.v)}</b></div></div><label>¿A qué banco le llegó?</label><select id="selBanco">${bancos.map((b,i)=>`<option value="${i}">${b.n} · ${b.d}</option>`).join('')}</select>
+ <button class="btn" onclick="confPagada('${fe}')">${ic('check')}Sí, marcar pagada</button><button class="btn claro" onclick="cerrar()">Cancelar</button>`)}
+function confPagada(fe){const i=cartera.findIndex(x=>x.fe==fe),c=cartera[i],b=+$('selBanco').value;bancos[b].v+=c.v;cartera.splice(i,1);movs.unshift({i:'in',t:'Pago '+fe+' · '+clientes[c.c].n.split(' ').slice(0,2).join(' '),d:'Hoy',v:c.v});cerrar();pinta();toast(fmt(c.v)+' sumados a '+bancos[b].n+' · recibo de caja en Tributando')}
+
+/* ---------- por pagar ---------- */
+let filtro='pend',volverPdet='pagar',actual=null;
+function filtroPag(f){filtro=f;$('pf1').classList.toggle('on',f=='pend');$('pf2').classList.toggle('on',f=='pag');pinta()}
+const ACUSES=[['030','Acuse de recibo de la factura','Le confirma a la DIAN que la factura le llegó'],['032','Recibo del bien o servicio','La mercancía o el servicio se recibió'],['033','Aceptación expresa','Está de acuerdo con la factura']];
+function verPdet(id,origen){actual=porPagar.find(f=>f.id==id);volverPdet=origen||'pagar';const f=actual,p=proveedores[f.p];
+ $('pdNom').textContent=p.n;$('pdSub').textContent=f.num+' · emitida '+f.em;$('pdNeto').textContent=fmt(netoDe(f));
+ $('pdKv').innerHTML=`<div><span>Proveedor</span><b>${p.n}</b></div><div><span>NIT</span><b>${p.nit}</b></div><div><span>Vencimiento</span><b>${f.pag?'<span class="tag t-ok">Pagada</span>':fechaD(f.d)+' '+etiqueta(f.d)}</b></div><div><span>Acuse DIAN</span><b>${f.acuse==3?'<span class="tag t-ok">Aceptada (033)</span>':f.acuse?'<span class="tag t-warn">'+ACUSES[f.acuse-1][0]+' enviado</span>':'<span class="tag t-mut">Sin acuse</span>'}</b></div>`;
+ $('pdRes').innerHTML=`<div><span>Valor antes de IVA</span><span>${fmt(f.base)}</span></div><div><span>IVA${ivaDe(f)?' 19 %':' (excluido)'}</span><span>${fmt(ivaDe(f))}</span></div><div class="neg"><span>Retención en la fuente (${f.rc.toLowerCase()})</span><span>−${fmt(retDe(f))}</span></div><div class="t"><span>Neto a pagar</span><span>${fmt(netoDe(f))}</span></div>`;
+ $('pdPagar').style.display=f.pag?'none':'flex';$('pdAcuse').style.display=f.acuse==3?'none':'flex';ir('pdet')}
+function pedirPago(){const f=actual,p=proveedores[f.p];hoja(`<h3>Confirmar pago</h3><p>${p.n} · ${f.num}</p><div class="kv" style="margin-top:12px"><div><span>Neto a pagar</span><b>${fmt(netoDe(f))}</b></div><div><span>Retención que usted guarda</span><b>${fmt(retDe(f))}</b></div></div>
+ <label>Pagar desde</label><select id="selBancoP">${bancos.map((b,i)=>`<option value="${i}">${b.n} · ${b.d} · ${fmt(b.v)}</option>`).join('')}</select>
+ <button class="btn" onclick="confPago(this)">${ic('bank')}Pagar ${fmt(netoDe(f))}</button><button class="btn claro" onclick="cerrar()">Cancelar</button>`)}
+function confPago(b){const f=actual,bi=+$('selBancoP').value;b.disabled=true;b.innerHTML='<span class="cargando"></span> Procesando pago…';setTimeout(()=>{bancos[bi].v-=netoDe(f);f.pag=true;movs.unshift({i:'out',t:'Pago a '+proveedores[f.p].n,d:'Hoy',v:-netoDe(f)});cerrar();verPdet(f.id,volverPdet);toast('Pago registrado en la contabilidad')},1100)}
+function abrirAcuse(){const f=actual;hoja(`<h3>Acuse de recibido ante la DIAN</h3><p>${proveedores[f.p].n} · ${f.num}</p><div id="pasosAcuse" style="margin-top:10px">${ACUSES.map((a,i)=>`<div class="paso-acuse ${f.acuse>i?'ok':''}" id="ac${i}"><div class="n">${f.acuse>i?ic('check'):a[0]}</div><div class="tx"><b>${a[0]} · ${a[1]}</b><small>${a[2]}</small></div></div>`).join('')}</div>
+ <div class="note">Al dar la aceptación (033), la factura queda lista para descontar el IVA y, si el proveedor quiere, para negociarla como título valor.</div>
+ <button class="btn ok" id="btnAcuse" onclick="enviarAcuse()">${ic('send')}Sí, confirmar y enviar a la DIAN</button><button class="btn claro" onclick="cerrar()">Cancelar</button>`)}
+function enviarAcuse(){const f=actual,b=$('btnAcuse');b.disabled=true;b.innerHTML='<span class="cargando"></span> Enviando eventos…';let i=f.acuse;
+ const sig=()=>{if(i>=3){f.acuse=3;setTimeout(()=>{cerrar();verPdet(f.id,volverPdet);toast('Eventos 030, 032 y 033 aceptados por la DIAN')},500);return}
+  const el=$('ac'+i);el.classList.add('ok');el.querySelector('.n').innerHTML=ic('check');i++;setTimeout(sig,550)};setTimeout(sig,450)}
+
+/* ---------- proveedores ---------- */
+function verProv(i){const p=proveedores[i],fs=porPagar.filter(f=>f.p==i).sort((a,b)=>a.d-b.d),pend=fs.filter(f=>!f.pag);
+ $('pvNom').textContent=p.n;$('pvNit').textContent='NIT '+p.nit;$('pvTot').textContent=fmt(pend.reduce((a,f)=>a+netoDe(f),0));
+ $('pvKv').innerHTML=`<div><span>Teléfono</span><b>${p.tel}</b></div><div><span>Plazo de pago</span><b>${p.plazo}</b></div><div><span>Compras este año</span><b>${fmt(fs.reduce((a,f)=>a+f.base,0)*5.4)}</b></div>`;
+ $('pvFacs').innerHTML=fs.map(f=>itemPag(f,'provdet')).join('')||'<div class="vacio">Sin facturas.</div>';ir('provdet')}
+
+/* ---------- nómina ---------- */
+function liq(e){const q=Math.round(e.s/2),aux=e.s<=2*SMMLV?Math.round(AUX/2):0,salud=Math.round(q*.04),pens=Math.round(q*.04);const dev=q+aux,ded=salud+pens;return{q,aux,salud,pens,dev,ded,net:dev-ded}}
+function verDesp(i){const e=empleados[i],l=liq(e);$('dNom').textContent=e.n;$('dCar').textContent=e.c+' · salario '+fmt(e.s)+' al mes';$('dNet').textContent=fmt(l.net);
+ $('dRes').innerHTML=`<div style="color:var(--mut);font-size:12px;font-weight:600">DEVENGADO</div><div><span>Salario 15 días</span><span>${fmt(l.q)}</span></div><div><span>Auxilio de transporte</span><span>${fmt(l.aux)}</span></div>
+ <div style="color:var(--mut);font-size:12px;font-weight:600;margin-top:8px">DEDUCCIONES</div><div class="neg"><span>Salud 4 %</span><span>−${fmt(l.salud)}</span></div><div class="neg"><span>Pensión 4 %</span><span>−${fmt(l.pens)}</span></div>
+ <div class="t"><span>Neto a pagar</span><span>${fmt(l.net)}</span></div><div><span>Estado</span><span>${nominaPagada?'<span class="tag t-ok">Pagada</span>':'<span class="tag t-warn">Por aprobar</span>'}</span></div>`;ir('desp')}
+function pedirNomina(){const tn=empleados.map(liq),net=tn.reduce((a,l)=>a+l.net,0);hoja(`<h3>Aprobar y pagar la quincena</h3><p>${empleados.length} empleados · segunda quincena de noviembre</p>
+ <div class="kv" style="margin-top:12px"><div><span>Neto a pagar</span><b>${fmt(net)}</b></div><div><span>Sale de</span><b>${bancos[0].n} · ${bancos[0].d}</b></div><div><span>Se envía</span><b>Nómina electrónica a la DIAN</b></div></div>
+ <button class="btn oro" onclick="confNomina(this,${net})">${ic('check')}Sí, aprobar y pagar</button><button class="btn claro" onclick="cerrar()">Cancelar</button>`)}
+function confNomina(b,net){b.disabled=true;b.innerHTML='<span class="cargando" style="border-color:rgba(22,36,58,.3);border-top-color:#16243a"></span> Pagando…';setTimeout(()=>{bancos[0].v-=net;nominaPagada=true;movs.unshift({i:'team',t:'Nómina 2.ª quincena noviembre',d:'Hoy',v:-net});cerrar();pinta();toast('Nómina aprobada · desprendibles enviados por WhatsApp')},1300)}
+
+/* ---------- arranque ---------- */
+iconos();$('btnOjo').innerHTML=ic('eye');pinta();
+</script>
+</body></html>
