@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>App de clientes · Dominio (demo)</title>
+<meta property="og:title" content="App de clientes para Dominio · demo">
+<meta property="og:description" content="Así se vería la app de Dominio para sus clientes: giros internacionales, inversiones y facturas en el celular.">
+<style>
+:root{--bg:#0d1217;--card:#151d26;--card2:#1b2530;--line:#26323f;--ink:#eef3f7;--mut:#8fa1b3;--acc:#c8a45c;--ok:#3fbf87;--warn:#e0a84a}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:#0a0e12;color:var(--ink);font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center}
+.top{max-width:760px;width:100%;padding:18px 16px 8px;text-align:center}
+.top b{color:var(--acc);letter-spacing:.12em;font-size:12px}
+.top h1{font-size:20px;margin:6px 0 4px}
+.top p{color:var(--mut);font-size:13px;margin:0}
+.phone{width:min(390px,100vw);height:min(800px,calc(100vh - 110px));min-height:620px;background:var(--bg);border-radius:34px;border:1px solid var(--line);margin:12px auto 24px;position:relative;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.6);display:flex;flex-direction:column}
+@media(max-width:430px){.phone{border-radius:0;border:0;margin:0;height:calc(100vh - 92px);min-height:560px}}
+.scr{flex:1;overflow-y:auto;padding:18px 16px 90px;display:none}
+.scr.on{display:block}
+.hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.logo{display:flex;align-items:center;gap:8px;font-weight:700;letter-spacing:.06em}
+.logo i{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--acc),#8c6d2f);display:grid;place-items:center;font-style:normal;color:#111;font-size:15px}
+.av{width:34px;height:34px;border-radius:50%;background:var(--card2);display:grid;place-items:center;font-size:13px;color:var(--mut)}
+.hola{color:var(--mut);font-size:13px}
+.big{background:linear-gradient(145deg,#1f2a36,#141b23);border:1px solid var(--line);border-radius:20px;padding:18px}
+.big .lbl{color:var(--mut);font-size:12px;text-transform:uppercase;letter-spacing:.08em}
+.big .amt{font-size:30px;font-weight:700;margin:4px 0}
+.big .sub{font-size:13px;color:var(--ok)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.mini{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
+.mini .lbl{color:var(--mut);font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+.mini .v{font-size:17px;font-weight:700;margin-top:2px}
+.acts{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0}
+.act{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 4px;text-align:center;font-size:11px;color:var(--mut);cursor:pointer}
+.act span{display:block;font-size:20px;margin-bottom:4px}
+h3{font-size:14px;margin:18px 0 8px;color:var(--mut);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.it{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}
+.it .ic{width:34px;height:34px;border-radius:10px;background:var(--card2);display:grid;place-items:center;flex:none}
+.it .tx{flex:1;min-width:0}.it .tx b{display:block;font-size:14px;font-weight:600}.it .tx small{color:var(--mut);font-size:12px}
+.it .m{font-weight:700;font-size:14px;text-align:right}.pos{color:var(--ok)}.neg{color:var(--ink)}
+.tag{font-size:10px;padding:2px 7px;border-radius:20px;background:#22303d;color:var(--mut)}
+.tag.ok{background:#173a2b;color:var(--ok)}.tag.w{background:#3a2f17;color:var(--warn)}
+.nav{position:absolute;left:0;right:0;bottom:0;background:#0f151b;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);padding:8px 4px calc(10px + env(safe-area-inset-bottom))}
+.nav button{background:none;border:0;color:var(--mut);font-size:10px;cursor:pointer;padding:4px 0}
+.nav button span{display:block;font-size:19px;margin-bottom:2px}
+.nav button.on{color:var(--acc)}
+label{display:block;font-size:12px;color:var(--mut);margin:12px 0 5px}
+input,select{width:100%;background:var(--card);border:1px solid var(--line);color:var(--ink);border-radius:12px;padding:12px;font-size:15px}
+.btn{display:block;width:100%;background:var(--acc);color:#111;border:0;border-radius:14px;padding:14px;font-weight:700;font-size:15px;margin-top:16px;cursor:pointer}
+.btn.sec{background:var(--card2);color:var(--ink)}
+.res{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:12px;font-size:14px}
+.res div{display:flex;justify-content:space-between;padding:3px 0}.res .t{border-top:1px solid var(--line);margin-top:6px;padding-top:8px;font-weight:700}
+.note{font-size:11px;color:var(--mut);margin-top:10px}
+.toast{position:absolute;left:16px;right:16px;bottom:84px;background:var(--ok);color:#06140d;border-radius:12px;padding:12px;font-weight:600;font-size:13px;display:none}
+svg text{fill:var(--mut);font-size:9px}
+.seg{display:flex;background:var(--card);border-radius:12px;padding:3px;margin-bottom:12px}
+.seg button{flex:1;background:none;border:0;color:var(--mut);padding:8px;border-radius:9px;font-size:13px;cursor:pointer}
+.seg button.on{background:var(--card2);color:var(--ink)}
+.foot{color:var(--mut);font-size:12px;text-align:center;padding:0 16px 24px;max-width:760px}
+.foot a{color:var(--acc)}
+.fac{background:#fff;color:#1b1b1b;border-radius:12px;padding:14px;font-size:12px;margin-top:10px}
+.fac h4{margin:0 0 4px;font-size:13px}.fac .r{display:flex;justify-content:space-between;padding:2px 0}
+</style></head><body>
+<div class="top"><b>TRIBUTANDO · DEMO</b><h1>Así se vería la app de Dominio para sus clientes</h1><p>Giros internacionales, inversiones y facturas en el celular. Toque los botones: todo funciona con datos de ejemplo.</p></div>
+
+<div class="phone">
+ <!-- INICIO -->
+ <section class="scr on" id="s-inicio">
+  <div class="hdr"><div class="logo"><i>D</i>DOMINIO</div><div class="av">CR</div></div>
+  <div class="hola">Hola, Carlos 👋</div>
+  <div class="big" style="margin-top:10px"><div class="lbl">Tu saldo total</div><div class="amt" id="saldoTot">USD 48.250,00</div><div class="sub">▲ USD 1.284,60 de rendimientos este año</div></div>
+  <div class="row2"><div class="mini"><div class="lbl">Disponible</div><div class="v" id="disp">USD 12.400</div></div><div class="mini"><div class="lbl">Invertido</div><div class="v">USD 35.850</div></div></div>
+  <div class="acts">
+   <div class="act" onclick="ir('giros')"><span>↗</span>Enviar giro</div>
+   <div class="act" onclick="ir('giros');setSeg('rec')"><span>↙</span>Recibir</div>
+   <div class="act" onclick="ir('inv')"><span>📈</span>Invertir</div>
+   <div class="act" onclick="ir('fac')"><span>🧾</span>Facturas</div>
+  </div>
+  <h3>Movimientos recientes</h3>
+  <div id="movs"></div>
+ </section>
+
+ <!-- GIROS -->
+ <section class="scr" id="s-giros">
+  <div class="hdr"><div class="logo"><i>D</i>Giros</div></div>
+  <div class="seg"><button class="on" id="b-env" onclick="setSeg('env')">Enviar al exterior</button><button id="b-rec" onclick="setSeg('rec')">Recibir del exterior</button></div>
+  <div id="f-env">
+   <label>Beneficiario</label><select id="ben"><option>Proveedor Shenzhen Ltd. · China</option><option>Miami Supplies LLC · EE. UU.</option><option>Nuevo beneficiario…</option></select>
+   <label>Monto a enviar (USD)</label><input id="monto" type="number" value="5000" oninput="calc()">
+   <div class="res" id="cal"></div>
+   <button class="btn" onclick="enviar()">Confirmar giro</button>
+   <div class="note">Al confirmar, la app genera sola la factura electrónica de la comisión y deja el giro amarrado a esa factura.</div>
+  </div>
+  <div id="f-rec" style="display:none">
+   <div class="res"><div><span>Su cuenta para recibir</span><b>DOMINIO · Ref. CR-0147</b></div><div><span>Moneda</span><b>USD / EUR</b></div><div><span>Tiempo de abono</span><b>1–2 días hábiles</b></div></div>
+   <button class="btn sec" onclick="toast('Instrucciones de pago enviadas a su correo')">Compartir instrucciones de pago</button>
+   <h3>Recibidos</h3>
+   <div class="it"><div class="ic">↙</div><div class="tx"><b>Cliente Panamá S.A.</b><small>12 nov · Factura FE-2381</small></div><div class="m pos">+USD 8.400</div></div>
+   <div class="it"><div class="ic">↙</div><div class="tx"><b>Distribuidora Quito</b><small>28 oct · Factura FE-2350</small></div><div class="m pos">+USD 3.150</div></div>
+  </div>
+ </section>
+
+ <!-- INVERSIONES -->
+ <section class="scr" id="s-inv">
+  <div class="hdr"><div class="logo"><i>D</i>Inversiones</div></div>
+  <div class="big"><div class="lbl">Portafolio administrado</div><div class="amt">USD 35.850,00</div><div class="sub">▲ 3,7 % en lo corrido del año</div></div>
+  <svg viewBox="0 0 340 130" style="width:100%;margin:12px 0" aria-label="Evolución del saldo invertido">
+   <polyline fill="none" stroke="#c8a45c" stroke-width="2.5" points="10,110 40,104 70,99 100,96 130,88 160,84 190,78 220,70 250,66 280,58 310,50 330,44"/>
+   <polyline fill="rgba(200,164,92,.12)" stroke="none" points="10,110 40,104 70,99 100,96 130,88 160,84 190,78 220,70 250,66 280,58 310,50 330,44 330,120 10,120"/>
+   <text x="10" y="128">Ene</text><text x="160" y="128">Jun</text><text x="315" y="128">Nov</text>
+  </svg>
+  <h3>Estado de cuenta</h3>
+  <div class="it"><div class="ic">＋</div><div class="tx"><b>Aporte</b><small>02 ene 2026</small></div><div class="m">USD 30.000</div></div>
+  <div class="it"><div class="ic">＋</div><div class="tx"><b>Aporte</b><small>15 jun 2026</small></div><div class="m">USD 5.000</div></div>
+  <div class="it"><div class="ic">%</div><div class="tx"><b>Rendimientos abonados</b><small>ene–oct 2026 · son suyos</small></div><div class="m pos">+USD 1.284,60</div></div>
+  <div class="it"><div class="ic">🧾</div><div class="tx"><b>Comisión de administración</b><small>Factura FE-2366 · oct</small></div><div class="m">−USD 434,60</div></div>
+  <div class="it"><div class="ic">=</div><div class="tx"><b>Saldo a hoy</b><small>17 nov 2026</small></div><div class="m">USD 35.850</div></div>
+  <button class="btn sec" onclick="toast('Estado de cuenta en PDF descargado')">Descargar estado de cuenta (PDF)</button>
+  <div class="note">Cada movimiento queda con su soporte y su factura: el historial completo no se pierde.</div>
+ </section>
+
+ <!-- FACTURAS -->
+ <section class="scr" id="s-fac">
+  <div class="hdr"><div class="logo"><i>D</i>Facturas</div></div>
+  <div id="facs"></div>
+  <div id="facDet"></div>
+ </section>
+
+ <!-- PERFIL -->
+ <section class="scr" id="s-per">
+  <div class="hdr"><div class="logo"><i>D</i>Mi perfil</div></div>
+  <div class="res"><div><span>Cliente</span><b>Carlos Restrepo</b></div><div><span>Documento</span><b>CC ••• 4521</b></div><div><span>Asesor</span><b>Juliana · Dominio</b></div></div>
+  <h3>Documentos</h3>
+  <div class="it"><div class="ic">📄</div><div class="tx"><b>Contrato de mandato</b><small>Firmado 02 ene 2026</small></div><span class="tag ok">Vigente</span></div>
+  <div class="it"><div class="ic">🛡</div><div class="tx"><b>Debida diligencia (SAGRILAFT)</b><small>Actualizada 10 ene 2026</small></div><span class="tag ok">Al día</span></div>
+  <div class="it"><div class="ic">🧾</div><div class="tx"><b>Certificado de rendimientos 2025</b><small>Para su declaración de renta</small></div><span class="tag">PDF</span></div>
+  <button class="btn sec" onclick="toast('Le escribimos por WhatsApp en un momento')">Hablar con mi asesor</button>
+ </section>
+
+ <div class="toast" id="toast"></div>
+ <nav class="nav">
+  <button class="on" id="n-inicio" onclick="ir('inicio')"><span>⌂</span>Inicio</button>
+  <button id="n-giros" onclick="ir('giros')"><span>⇄</span>Giros</button>
+  <button id="n-inv" onclick="ir('inv')"><span>📈</span>Invertir</button>
+  <button id="n-fac" onclick="ir('fac')"><span>🧾</span>Facturas</button>
+  <button id="n-per" onclick="ir('per')"><span>☺</span>Perfil</button>
+ </nav>
+</div>
+
+<div class="foot">Demo hecha por <b>Tributando</b> para Dominio, con datos de ejemplo. Por detrás, cada giro, comisión e inversión queda contabilizado solo en Tributando. ¿Preguntas? <a href="https://wa.me/573332470715">WhatsApp 333 247 0715</a></div>
+
+<script>
+const fmt=v=>'USD '+v.toLocaleString('es-CO',{minimumFractionDigits:2,maximumFractionDigits:2});
+const COM=0.015,IVA=0.19;let nFac=2382,disp=12400;
+const movs=[
+ {i:'↙',t:'Recibido · Cliente Panamá S.A.',d:'12 nov',v:8400},
+ {i:'↗',t:'Giro · Miami Supplies LLC',d:'05 nov',v:-2600},
+ {i:'%',t:'Rendimientos octubre',d:'31 oct',v:142.3},
+ {i:'↙',t:'Recibido · Distribuidora Quito',d:'28 oct',v:3150}];
+const facs=[
+ {n:'FE-2381',c:'Comisión giro recibido Panamá',v:126,iva:23.94,d:'12 nov 2026',e:'Aceptada DIAN'},
+ {n:'FE-2366',c:'Comisión administración portafolio',v:365.21,iva:69.39,d:'31 oct 2026',e:'Aceptada DIAN'},
+ {n:'FE-2350',c:'Comisión giro recibido Quito',v:47.25,iva:8.98,d:'28 oct 2026',e:'Aceptada DIAN'}];
+function pinta(){
+ document.getElementById('movs').innerHTML=movs.map(m=>`<div class="it"><div class="ic">${m.i}</div><div class="tx"><b>${m.t}</b><small>${m.d}</small></div><div class="m ${m.v>0?'pos':'neg'}">${m.v>0?'+':'−'}${fmt(Math.abs(m.v))}</div></div>`).join('');
+ document.getElementById('facs').innerHTML='<h3>Facturas de comisión</h3>'+facs.map((f,k)=>`<div class="it" style="cursor:pointer" onclick="verFac(${k})"><div class="ic">🧾</div><div class="tx"><b>${f.n} · ${f.c}</b><small>${f.d}</small></div><div><div class="m">${fmt(f.v+f.iva)}</div><span class="tag ok">${f.e}</span></div></div>`).join('');
+ document.getElementById('disp').textContent='USD '+disp.toLocaleString('es-CO');
+}
+function verFac(k){const f=facs[k];document.getElementById('facDet').innerHTML=`<div class="fac"><h4>Factura electrónica ${f.n}</h4><div class="r"><span>Emisor</span><b>DOMINIO (ejemplo)</b></div><div class="r"><span>Concepto</span><span>${f.c}</span></div><div class="r"><span>Base</span><span>${fmt(f.v)}</span></div><div class="r"><span>IVA 19 %</span><span>${fmt(f.iva)}</span></div><div class="r"><b>Total</b><b>${fmt(f.v+f.iva)}</b></div><div class="r"><span>Estado</span><span>${f.e}</span></div><div class="r"><span>CUFE</span><span>a8f3…c21e</span></div></div>`}
+function calc(){const m=+document.getElementById('monto').value||0,c=m*COM,i=c*IVA;document.getElementById('cal').innerHTML=`<div><span>Monto del giro</span><span>${fmt(m)}</span></div><div><span>Comisión Dominio (1,5 %)</span><span>${fmt(c)}</span></div><div><span>IVA de la comisión (19 %)</span><span>${fmt(i)}</span></div><div class="t"><span>Total a debitar</span><span>${fmt(m+c+i)}</span></div>`}
+function enviar(){const m=+document.getElementById('monto').value||0;if(!m)return;const c=m*COM,i=c*IVA,b=document.getElementById('ben').value.split(' · ')[0];nFac++;
+ facs.unshift({n:'FE-'+nFac,c:'Comisión giro a '+b,v:c,iva:i,d:'hoy',e:'Aceptada DIAN'});movs.unshift({i:'↗',t:'Giro · '+b,d:'hoy',v:-(m+c+i)});disp=Math.max(0,disp-(m+c+i));pinta();
+ toast('Giro enviado ✓ · factura FE-'+nFac+' generada');setTimeout(()=>{ir('fac');verFac(0)},1600)}
+function setSeg(s){document.getElementById('f-env').style.display=s=='env'?'':'none';document.getElementById('f-rec').style.display=s=='rec'?'':'none';document.getElementById('b-env').classList.toggle('on',s=='env');document.getElementById('b-rec').classList.toggle('on',s=='rec')}
+function ir(s){document.querySelectorAll('.scr').forEach(e=>e.classList.remove('on'));document.getElementById('s-'+s).classList.add('on');document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('on'));document.getElementById('n-'+s).classList.add('on');document.getElementById('s-'+s).scrollTop=0}
+function toast(t){const e=document.getElementById('toast');e.textContent=t;e.style.display='block';setTimeout(()=>e.style.display='none',2200)}
+pinta();calc();
+</script>
+</body></html>
