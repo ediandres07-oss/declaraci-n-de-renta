@@ -63,12 +63,47 @@ input,select{width:100%;background:var(--bg);border:1px solid var(--line);color:
 .seg{display:flex;background:var(--bg);border-radius:14px;padding:3px;margin-bottom:6px}
 .seg button{flex:1;background:none;border:0;color:var(--mut);padding:9px;border-radius:11px;font-size:13px;cursor:pointer}
 .seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.bien{background:radial-gradient(120% 70% at 80% 10%,#2b4a78 0%,#16243a 55%,#0d1626 100%);color:#fff;min-height:100%;display:flex;flex-direction:column;padding:34px 26px 30px;position:relative;overflow:hidden}
+.bien .ola{position:absolute;left:-10%;right:-10%;top:38%;height:240px;opacity:.9}
+.bien h2{font-size:34px;line-height:1.1;margin:26px 0 10px;font-weight:700;letter-spacing:-.5px}
+.bien p{opacity:.75;font-size:14px;margin:0;max-width:280px}
+.bien .pie{margin-top:auto;position:relative}
+.bien .btn{background:var(--oro);color:var(--pri)}
+.bien .link{display:block;text-align:center;margin-top:14px;font-size:13px;opacity:.85;cursor:pointer}
+.ok-in{border-color:#9fd8bf!important}.err-in{border-color:#e3a0a0!important;background:#fdf5f5!important}
+.ayuda{font-size:12px;color:var(--mut);margin-top:5px}.ayuda.err{color:#b3473f}
+.aviso{border:1px solid #f0c9c4;background:#fdf6f5;color:#8c3a33;border-radius:12px;padding:10px 12px;font-size:13px;display:none;margin-top:10px}
+.leyenda{display:flex;gap:14px;font-size:12px;color:var(--mut);margin:4px 0 8px}.leyenda i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.prog{display:flex;gap:10px;overflow-x:auto}.prog .pc{flex:none;width:150px;border:1px solid var(--line);border-radius:16px;padding:12px}
+.prog .pc b{display:block;font-size:13px;margin-top:6px}.prog .pc small{color:var(--mut);font-size:11px}.prog .pc .v{font-weight:700;margin-top:4px}
 </style></head><body>
 <div class="top"><b>TRIBUTANDO · DEMO</b><h1>Así se vería la app de Dominio para sus clientes</h1><p>Toque los botones: todo funciona, con datos de ejemplo.</p></div>
 
 <div class="phone">
+ <!-- BIENVENIDA -->
+ <section class="scr on" id="s-bien" style="padding-bottom:0">
+  <div class="bien"><svg class="ola" viewBox="0 0 400 240" preserveAspectRatio="none"><defs><linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#b8913f" stop-opacity="0"/><stop offset=".5" stop-color="#e0c584" stop-opacity=".9"/><stop offset="1" stop-color="#b8913f" stop-opacity="0"/></linearGradient><linearGradient id="g2" x1="0" x2="1"><stop offset="0" stop-color="#7fa6e0" stop-opacity="0"/><stop offset=".5" stop-color="#9dbcf0" stop-opacity=".55"/><stop offset="1" stop-color="#7fa6e0" stop-opacity="0"/></linearGradient></defs><path d="M0 150 C 110 60, 220 230, 400 90" stroke="url(#g1)" stroke-width="2.2" fill="none"/><path d="M0 170 C 120 90, 230 240, 400 115" stroke="url(#g2)" stroke-width="1.4" fill="none"/><path d="M0 190 C 130 120, 240 250, 400 140" stroke="url(#g2)" stroke-width="1" fill="none" opacity=".6"/></svg><div class="logo"><i>D</i>DOMINIO</div>
+   <h2>Su capital,<br>en orden.</h2><p>Giros al exterior con su factura, portafolios de inversión y estados de cuenta, en un solo lugar.</p>
+   <div class="pie"><button class="btn" onclick="ir('reg')">Abrir mi cuenta</button><span class="link" onclick="ir('inicio')">Ya tengo cuenta · Entrar</span></div></div>
+ </section>
+
+ <!-- REGISTRO -->
+ <section class="scr" id="s-reg">
+  <div class="back"><div class="x" onclick="ir('bien')">‹ Volver</div><h2>Abra su cuenta</h2><div style="opacity:.8;font-size:13px">Empecemos por lo básico.</div></div>
+  <div class="sec">
+   <div class="aviso" id="regAviso">No pudimos crear la cuenta. Revise los campos marcados.</div>
+   <label>Nombre o razón social</label><input id="rN" value="Carlos Restrepo">
+   <label>Cédula o NIT</label><input id="rD" inputmode="numeric" value="71.234.567">
+   <label>Correo</label><input id="rC" value="carlos@empresa">
+   <div class="ayuda" id="rCa">Le enviamos ahí su estado de cuenta.</div>
+   <label>Celular</label><input id="rT" inputmode="tel" value="+57 300 123 4567">
+   <label style="display:flex;gap:8px;align-items:flex-start;color:var(--ink)"><input type="checkbox" id="rOk" style="width:auto;margin-top:2px" checked> Acepto el tratamiento de datos y el contrato de mandato.</label>
+   <button class="btn" onclick="registrar()">Crear cuenta</button>
+   <div class="note">Sus datos van cifrados y solo se usan para abrir su cuenta. Nada de publicidad sin su permiso.</div></div>
+ </section>
+
  <!-- INICIO -->
- <section class="scr on" id="s-inicio">
+ <section class="scr" id="s-inicio">
   <div class="head"><div class="r"><div class="logo"><i>D</i>DOMINIO</div><div style="display:flex;gap:8px"><div class="ico" onclick="ojo()"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></div><div class="ico" onclick="ir('per')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></div></div></div><div class="hola">Buenas tardes, Carlos</div></div>
   <div class="sec"><div class="lbl">Saldo total</div><div class="monto vivo" id="tot">USD 48.250,00</div><div class="gan" id="ganHoy">+ USD 3,92 rendidos hoy</div></div>
   <div class="chips">
@@ -79,6 +114,8 @@ input,select{width:100%;background:var(--bg);border:1px solid var(--line);color:
    <div class="chip" onclick="toast('Le escribe su asesora Juliana')"><span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg></span>Asesor</div>
   </div>
   <div class="sec"><div class="ttl">Portafolios de inversión<a onclick="ir('inv')">Ver todos</a></div><div class="cajas" id="cajasHome"></div></div>
+  <div class="sec"><div class="ttl">Entradas y salidas<a onclick="ir('ana')">Ver análisis</a></div><div class="leyenda"><span><i style="background:var(--pri)"></i>Entradas</span><span><i style="background:var(--oro)"></i>Salidas</span></div><div id="graMini"></div></div>
+  <div class="sec"><div class="ttl">Pagos programados</div><div class="prog" id="progHome"></div></div>
   <div class="sec"><div class="ttl">Movimientos</div><div id="movs"></div></div>
  </section>
 
@@ -142,8 +179,16 @@ input,select{width:100%;background:var(--bg);border:1px solid var(--line);color:
   </div>
  </section>
 
+ <!-- ANALISIS -->
+ <section class="scr" id="s-ana">
+  <div class="back"><div class="x" onclick="ir('inicio')">‹ Inicio</div><h2>Análisis</h2><div style="opacity:.8;font-size:13px">Últimos 6 meses · USD</div></div>
+  <div class="sec"><div class="seg"><button class="on" id="segE" onclick="anaVer('e')">Entradas</button><button id="segS" onclick="anaVer('s')">Salidas</button></div>
+   <div class="lbl" id="anaL" style="margin-top:8px"></div><div class="monto" id="anaT"></div><div id="graBig"></div></div>
+  <div class="sec"><div class="ttl">Pagos programados</div><div id="progAll"></div><button class="btn sec2" onclick="toast('Nuevo pago programado: elija beneficiario, monto y fecha')">Programar un pago</button></div>
+ </section>
+
  <div class="toast" id="toast"></div>
- <nav class="nav">
+ <nav class="nav" id="nav" style="display:none">
   <button class="on" id="n-inicio" onclick="ir('inicio')"><span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9H3z"/></svg></span>Inicio</button>
   <button id="n-inv" onclick="ir('inv')"><span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12A9 9 0 1 1 12 3v9z"/><path d="M15 3.5A9 9 0 0 1 20.5 9H15z"/></svg></span>Portafolios</button>
   <button id="n-giro" onclick="ir('giro')"><span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h12l-3-3M17 17H5l3 3"/></svg></span>Giros</button>
@@ -187,11 +232,28 @@ function verFac(k){const f=facs[k];document.getElementById('facDet').innerHTML=`
 function calc(){const m=+document.getElementById('monto').value||0,c=m*COM,i=c*IVA;document.getElementById('cal').innerHTML=`<div><span>Envía</span><span>${fmt(m)}</span></div><div><span>Comisión (1,5 %)</span><span>${fmt(c)}</span></div><div><span>IVA de la comisión</span><span>${fmt(i)}</span></div><div class="t"><span>Total</span><span>${fmt(m+c+i)}</span></div>`}
 function enviar(){const m=+document.getElementById('monto').value||0;if(!m)return;const c=m*COM,i=c*IVA,b=document.getElementById('ben').value.split(' · ')[0];nFac++;facs.unshift({n:'FE-'+nFac,c:'Comisión giro a '+b,v:c,iva:i,d:'hoy'});movs.unshift({i:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg>`,t:'Giro · '+b,d:'hoy',v:-(m+c+i)});disp=Math.max(0,disp-(m+c+i));pinta();toast('Enviado ✓ · factura FE-'+nFac+' generada');setTimeout(()=>{ir('fac');verFac(0)},1500)}
 function crearCaja(){const n=document.getElementById('ncN').value||'Mi portafolio',m=+document.getElementById('ncM').value||1000,a=+document.getElementById('ncA').value||0;cajas.push({e:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 12h18"/></svg>`,n,v:a,m,ini:'hoy',mov:[['Abono','hoy','+'+a.toLocaleString('es-CO')]]});disp=Math.max(0,disp-a);pinta();toast('Portafolio creado ✓');setTimeout(()=>ir('inv'),900)}
-function ir(s){document.querySelectorAll('.scr').forEach(e=>e.classList.remove('on'));document.getElementById('s-'+s).classList.add('on');document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('on'));const n=document.getElementById('n-'+s);if(n)n.classList.add('on');document.getElementById('s-'+s).scrollTop=0}
+function ir(s){document.querySelectorAll('.scr').forEach(e=>e.classList.remove('on'));document.getElementById('s-'+s).classList.add('on');document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('on'));const n=document.getElementById('n-'+s);if(n)n.classList.add('on');document.getElementById('nav').style.display=(s=='bien'||s=='reg')?'none':'grid';document.getElementById('s-'+s).scrollTop=0}
 function ojo(){oculto=!oculto;pinta()}
 function toast(t){const e=document.getElementById('toast');e.textContent=t;e.style.display='block';setTimeout(()=>e.style.display='none',2200)}
 // el rendimiento se ve crecer en vivo (acelerado para la demo)
 setInterval(()=>{cajas.forEach(c=>c.v+=c.v*DIA/40);pinta()},1500);
+
+const MESES=['Jun','Jul','Ago','Sep','Oct','Nov'],ENT=[14.2,9.8,16.5,12.1,18.4,8.4],SAL=[10.6,11.9,9.4,13.8,12.2,5.3];
+const prog=[{n:'Shenzhen Parts Ltd.',d:'20 nov',v:6200,f:'Giro · mensual'},{n:'Madrid Trading S.L.',d:'28 nov',v:3150,f:'Giro · única vez'},{n:'Abono Patrimonio familiar',d:'01 dic',v:1000,f:'Portafolio · mensual'}];
+let anaModo='e';
+function barras(alto,soloUno){const W=320,H=alto,pad=22,mx=20,bw=soloUno?26:12,step=(W-pad)/6;let g='';for(let k=0;k<=2;k++){const y=8+(H-30)*(k/2);g+=`<line x1="${pad}" x2="${W}" y1="${y}" y2="${y}" stroke="#e6e8ee"/><text x="0" y="${y+4}" font-size="10" fill="#6d7685">${mx-k*mx/2}k</text>`}
+MESES.forEach((m,i)=>{const x=pad+step*i+step/2,h1=ENT[i]/mx*(H-30),h2=SAL[i]/mx*(H-30),b=H-22;
+ if(!soloUno||anaModo=='e')g+=`<rect x="${soloUno?x-bw/2:x-bw-2}" y="${b-h1}" width="${bw}" height="${h1}" rx="4" fill="#16243a"/>`;
+ if(!soloUno||anaModo=='s')g+=`<rect x="${soloUno?x-bw/2:x+2}" y="${b-h2}" width="${bw}" height="${h2}" rx="4" fill="#b8913f"/>`;
+ g+=`<text x="${x}" y="${H-6}" font-size="11" fill="#6d7685" text-anchor="middle">${m}</text>`});
+return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block">${g}</svg>`}
+function anaVer(m){anaModo=m;document.getElementById('segE').classList.toggle('on',m=='e');document.getElementById('segS').classList.toggle('on',m=='s');const a=m=='e'?ENT:SAL;document.getElementById('anaL').textContent=m=='e'?'Total recibido en 6 meses':'Total enviado en 6 meses';document.getElementById('anaT').textContent=fmt(a.reduce((x,y)=>x+y,0)*1000);document.getElementById('graBig').innerHTML=barras(200,true)}
+function progHTML(){document.getElementById('progHome').innerHTML=prog.map(p=>`<div class="pc"><div class="em" style="color:var(--oro)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg></div><b>${p.n}</b><small>${p.d} · ${p.f}</small><div class="v">${fmt(p.v)}</div></div>`).join('');
+document.getElementById('progAll').innerHTML=prog.map(p=>`<div class="it"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg></div><div class="tx"><b>${p.n}</b><small>${p.d} · ${p.f}</small></div><div class="m">${fmt(p.v)}</div></div>`).join('')}
+function registrar(){const c=document.getElementById('rC'),ok=/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(c.value),av=document.getElementById('regAviso'),a=document.getElementById('rCa');
+ if(!ok){c.classList.add('err-in');a.className='ayuda err';a.textContent='Falta el final del correo, por ejemplo carlos@empresa.com';av.style.display='block';return}
+ c.classList.remove('err-in');c.classList.add('ok-in');a.className='ayuda';a.textContent='Correo correcto.';av.style.display='none';toast('Cuenta creada ✓ · su asesora Juliana lo contactará');setTimeout(()=>ir('inicio'),1300)}
+document.getElementById('graMini').innerHTML=barras(150,false);progHTML();anaVer('e');
 pinta();calc();
 </script>
 </body></html>
