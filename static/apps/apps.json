@@ -34,5 +34,11 @@
     "nombre": "Software a la medida",
     "descripcion": "Sistemas para ventanerías, restaurantes, tiendas y empresas de servicios sobre la base de Tributando",
     "fecha": "2026-11-15"
+  },
+  {
+    "slug": "fechas-dian",
+    "nombre": "Fechas DIAN · botón gratis",
+    "descripcion": "Botón para Chrome: elige el rango de fechas en «Descargar listados» de la DIAN cuando el calendario no te deja.",
+    "fecha": "2026-11-18"
   }
 ]
