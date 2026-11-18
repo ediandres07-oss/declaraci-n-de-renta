@@ -4,7 +4,7 @@
 <meta name="robots" content="noindex,nofollow">
 <title>App de clientes · Dominio (demo)</title>
 <meta property="og:title" content="App de clientes para Dominio · demo">
-<meta property="og:description" content="Así se vería la app de Dominio: cajitas de inversión que rinden cada día, giros internacionales y facturas en el celular.">
+<meta property="og:description" content="Así se vería la app de Dominio: portafolios de inversión que rinden cada día, giros internacionales y facturas en el celular.">
 <style>
 :root{--pri:#16243a;--pri2:#24395a;--oro:#b8913f;--bg:#f4f5f8;--card:#fff;--ink:#141a24;--mut:#6d7685;--line:#e6e8ee;--ok:#1f9d6b}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -28,23 +28,23 @@ body{margin:0;background:#e9ebf0;color:var(--ink);font:15px/1.45 -apple-system,B
 .gan{color:var(--ok);font-size:13px;font-weight:600}
 .chips{display:flex;gap:14px;overflow-x:auto;padding:4px 20px 14px;background:var(--card);margin-bottom:10px}
 .chip{flex:none;text-align:center;font-size:12px;color:var(--ink);cursor:pointer;width:68px}
-.chip span{display:grid;place-items:center;width:58px;height:58px;margin:0 auto 6px;border-radius:50%;background:var(--bg);font-size:20px}
+.chip span{display:grid;place-items:center;width:56px;height:56px;margin:0 auto 6px;border-radius:16px;background:var(--bg);color:var(--pri)}
 .ttl{display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:16px;margin-bottom:10px}
 .ttl a{font-size:13px;color:var(--pri2);font-weight:600;cursor:pointer}
 .cajas{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .caja{border:1px solid var(--line);border-radius:16px;padding:13px;cursor:pointer;position:relative;overflow:hidden}
-.caja .em{font-size:20px}.caja b{display:block;font-size:14px;margin-top:6px}
+.caja .em{color:var(--oro)}.caja b{display:block;font-size:14px;margin-top:6px}
 .caja .v{font-weight:700;font-size:16px;margin-top:2px}.caja small{color:var(--ok);font-size:11px;font-weight:600}
 .caja .bar{height:5px;border-radius:5px;background:var(--bg);margin-top:8px}.caja .bar i{display:block;height:100%;border-radius:5px;background:var(--oro)}
 .caja.nueva{display:grid;place-items:center;color:var(--mut);border-style:dashed;min-height:120px;font-size:13px}
 .it{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
 .it:last-child{border-bottom:0}
-.it .ic{width:38px;height:38px;border-radius:50%;background:var(--bg);display:grid;place-items:center;flex:none}
+.it .ic{width:38px;height:38px;border-radius:12px;background:var(--bg);color:var(--pri);display:grid;place-items:center;flex:none}
 .it .tx{flex:1;min-width:0}.it .tx b{display:block;font-size:14px;font-weight:600}.it .tx small{color:var(--mut);font-size:12px}
 .it .m{font-weight:700;font-size:14px;text-align:right}.pos{color:var(--ok)}
 .nav{position:absolute;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);padding:8px 4px calc(10px + env(safe-area-inset-bottom))}
 .nav button{background:none;border:0;color:var(--mut);font-size:11px;cursor:pointer;padding:4px 0}
-.nav button span{display:block;font-size:19px;margin-bottom:2px}.nav button.on{color:var(--pri)}
+.nav button span{display:flex;justify-content:center;margin-bottom:2px}.nav button.on{color:var(--pri)}
 .nav button.on span{transform:scale(1.1)}
 .back{background:var(--pri);color:#fff;padding:18px 20px 22px}
 .back .x{cursor:pointer;font-size:14px;opacity:.85}
@@ -69,29 +69,29 @@ input,select{width:100%;background:var(--bg);border:1px solid var(--line);color:
 <div class="phone">
  <!-- INICIO -->
  <section class="scr on" id="s-inicio">
-  <div class="head"><div class="r"><div class="logo"><i>D</i>DOMINIO</div><div style="display:flex;gap:8px"><div class="ico" onclick="ojo()">👁</div><div class="ico" onclick="ir('per')">☺</div></div></div><div class="hola">Hola, Carlos</div></div>
+  <div class="head"><div class="r"><div class="logo"><i>D</i>DOMINIO</div><div style="display:flex;gap:8px"><div class="ico" onclick="ojo()"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></div><div class="ico" onclick="ir('per')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></div></div></div><div class="hola">Buenas tardes, Carlos</div></div>
   <div class="sec"><div class="lbl">Saldo total</div><div class="monto vivo" id="tot">USD 48.250,00</div><div class="gan" id="ganHoy">+ USD 3,92 rendidos hoy</div></div>
   <div class="chips">
-   <div class="chip" onclick="ir('giro')"><span>↗</span>Enviar al exterior</div>
-   <div class="chip" onclick="ir('recibir')"><span>↙</span>Recibir</div>
-   <div class="chip" onclick="ir('nueva')"><span>＋</span>Nueva cajita</div>
-   <div class="chip" onclick="ir('fac')"><span>🧾</span>Facturas</div>
-   <div class="chip" onclick="toast('Le escribe su asesora Juliana')"><span>💬</span>Asesor</div>
+   <div class="chip" onclick="ir('giro')"><span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg></span>Enviar al exterior</div>
+   <div class="chip" onclick="ir('recibir')"><span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 7L7 17M15 17H7V9"/></svg></span>Recibir</div>
+   <div class="chip" onclick="ir('nueva')"><span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></span>Nuevo portafolio</div>
+   <div class="chip" onclick="ir('fac')"><span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/></svg></span>Facturas</div>
+   <div class="chip" onclick="toast('Le escribe su asesora Juliana')"><span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg></span>Asesor</div>
   </div>
-  <div class="sec"><div class="ttl">Cajitas de inversión<a onclick="ir('inv')">Ver todas</a></div><div class="cajas" id="cajasHome"></div></div>
+  <div class="sec"><div class="ttl">Portafolios de inversión<a onclick="ir('inv')">Ver todos</a></div><div class="cajas" id="cajasHome"></div></div>
   <div class="sec"><div class="ttl">Movimientos</div><div id="movs"></div></div>
  </section>
 
  <!-- CAJITAS -->
  <section class="scr" id="s-inv">
-  <div class="back"><div class="x" onclick="ir('inicio')">‹ Inicio</div><h2>Cajitas de inversión</h2><div style="opacity:.8;font-size:13px">Su plata trabajando, separada por metas</div></div>
-  <div class="sec"><div class="lbl">Total en cajitas</div><div class="monto vivo" id="totCaj"></div><div class="gan">Rinden 9,2 % efectivo anual · se suma cada día</div></div>
+  <div class="back"><div class="x" onclick="ir('inicio')">‹ Inicio</div><h2>Portafolios de inversión</h2><div style="opacity:.8;font-size:13px">Su capital administrado, por objetivo</div></div>
+  <div class="sec"><div class="lbl">Total invertido</div><div class="monto vivo" id="totCaj"></div><div class="gan">Rinden 9,2 % efectivo anual · se suma cada día</div></div>
   <div class="sec"><div class="cajas" id="cajasAll"></div></div>
  </section>
 
  <!-- DETALLE CAJITA -->
  <section class="scr" id="s-caja">
-  <div class="back"><div class="x" onclick="ir('inv')">‹ Cajitas</div><h2 id="cjT"></h2><div style="opacity:.8;font-size:13px" id="cjM"></div></div>
+  <div class="back"><div class="x" onclick="ir('inv')">‹ Portafolios</div><h2 id="cjT"></h2><div style="opacity:.8;font-size:13px" id="cjM"></div></div>
   <div class="sec"><div class="lbl">Saldo</div><div class="monto vivo" id="cjV"></div><div class="gan" id="cjG"></div>
    <div class="caja" style="border:0;padding:0;margin-top:8px;cursor:default"><div class="bar"><i id="cjB"></i></div></div><div class="note" id="cjP"></div>
    <div style="display:flex;gap:10px"><button class="btn" style="flex:1" onclick="toast('Abono en proceso: queda en su estado de cuenta')">Abonar</button><button class="btn sec2" style="flex:1" onclick="toast('Retiro solicitado: llega en 1 día hábil')">Retirar</button></div></div>
@@ -100,11 +100,11 @@ input,select{width:100%;background:var(--bg);border:1px solid var(--line);color:
 
  <!-- NUEVA CAJITA -->
  <section class="scr" id="s-nueva">
-  <div class="back"><div class="x" onclick="ir('inicio')">‹ Inicio</div><h2>Nueva cajita</h2></div>
+  <div class="back"><div class="x" onclick="ir('inicio')">‹ Inicio</div><h2>Nuevo portafolio</h2></div>
   <div class="sec"><label>Nombre</label><input id="ncN" value="Expansión 2027">
    <label>Meta (USD)</label><input id="ncM" type="number" value="20000">
    <label>Primer abono (USD)</label><input id="ncA" type="number" value="2000">
-   <button class="btn" onclick="crearCaja()">Crear cajita</button>
+   <button class="btn" onclick="crearCaja()">Crear portafolio</button>
    <div class="note">La plata queda a su nombre con contrato de mandato. Dominio cobra solo su comisión de administración, con factura electrónica.</div></div>
  </section>
 
@@ -135,38 +135,38 @@ input,select{width:100%;background:var(--bg);border:1px solid var(--line);color:
  <section class="scr" id="s-per">
   <div class="back"><div class="x" onclick="ir('inicio')">‹ Inicio</div><h2>Carlos Restrepo</h2><div style="opacity:.8;font-size:13px">Cliente desde enero 2026 · Asesora: Juliana</div></div>
   <div class="sec">
-   <div class="it"><div class="ic">📄</div><div class="tx"><b>Contrato de mandato</b><small>Firmado 02 ene 2026 · vigente</small></div></div>
-   <div class="it"><div class="ic">🛡</div><div class="tx"><b>Debida diligencia (SAGRILAFT)</b><small>Al día · 10 ene 2026</small></div></div>
-   <div class="it"><div class="ic">🧾</div><div class="tx"><b>Certificado de rendimientos 2025</b><small>Para su declaración de renta</small></div></div>
-   <div class="it"><div class="ic">🔒</div><div class="tx"><b>Seguridad</b><small>Huella o Face ID para entrar</small></div></div>
+   <div class="it"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/></svg></div><div class="tx"><b>Contrato de mandato</b><small>Firmado 02 ene 2026 · vigente</small></div></div>
+   <div class="it"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg></div><div class="tx"><b>Debida diligencia (SAGRILAFT)</b><small>Al día · 10 ene 2026</small></div></div>
+   <div class="it"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/></svg></div><div class="tx"><b>Certificado de rendimientos 2025</b><small>Para su declaración de renta</small></div></div>
+   <div class="it"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div><div class="tx"><b>Seguridad</b><small>Huella o Face ID para entrar</small></div></div>
   </div>
  </section>
 
  <div class="toast" id="toast"></div>
  <nav class="nav">
-  <button class="on" id="n-inicio" onclick="ir('inicio')"><span>⌂</span>Inicio</button>
-  <button id="n-inv" onclick="ir('inv')"><span>◫</span>Cajitas</button>
-  <button id="n-giro" onclick="ir('giro')"><span>⇄</span>Giros</button>
-  <button id="n-fac" onclick="ir('fac')"><span>🧾</span>Facturas</button>
+  <button class="on" id="n-inicio" onclick="ir('inicio')"><span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9H3z"/></svg></span>Inicio</button>
+  <button id="n-inv" onclick="ir('inv')"><span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12A9 9 0 1 1 12 3v9z"/><path d="M15 3.5A9 9 0 0 1 20.5 9H15z"/></svg></span>Portafolios</button>
+  <button id="n-giro" onclick="ir('giro')"><span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h12l-3-3M17 17H5l3 3"/></svg></span>Giros</button>
+  <button id="n-fac" onclick="ir('fac')"><span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/></svg></span>Facturas</button>
  </nav>
 </div>
-<div class="foot">Demo hecha por <b>Tributando</b> para Dominio, con datos de ejemplo. Por detrás, cada giro, comisión y cajita queda contabilizado solo en Tributando. <a href="https://wa.me/573332470715">WhatsApp 333 247 0715</a></div>
+<div class="foot">Demo hecha por <b>Tributando</b> para Dominio, con datos de ejemplo. Por detrás, cada giro, comisión e inversión queda contabilizado solo en Tributando. <a href="https://wa.me/573332470715">WhatsApp 333 247 0715</a></div>
 
 <script>
 const fmt=v=>'USD '+v.toLocaleString('es-CO',{minimumFractionDigits:2,maximumFractionDigits:2});
 const TASA=0.092,DIA=Math.pow(1+TASA,1/365)-1,COM=0.015,IVA=0.19;
 let disp=12400,nFac=2382,oculto=false,cajaSel=0;
 const cajas=[
- {e:'🏢',n:'Reserva empresa',v:18250,m:25000,ini:'02 ene 2026',mov:[['Abono','02 ene','+18.000'],['Rendimientos','ene–oct','+1.087,40'],['Comisión adm. FE-2366','31 oct','−837,40']]},
- {e:'🌎',n:'Pagos proveedores 2027',v:12600,m:20000,ini:'15 jun 2026',mov:[['Abono','15 jun','+12.000'],['Rendimientos','jun–oct','+600,00']]},
- {e:'🎓',n:'Educación hijos',v:5000,m:30000,ini:'01 sep 2026',mov:[['Abono','01 sep','+4.900'],['Rendimientos','sep–oct','+100,00']]}];
+ {e:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V5l8-2v18M12 9h8v12M7 8h2M7 12h2M7 16h2M15 13h2M15 17h2"/></svg>`,n:'Reserva de liquidez',v:18250,m:25000,ini:'02 ene 2026',mov:[['Abono','02 ene','+18.000'],['Rendimientos','ene–oct','+1.087,40'],['Comisión adm. FE-2366','31 oct','−837,40']]},
+ {e:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg>`,n:'Pagos internacionales 2027',v:12600,m:20000,ini:'15 jun 2026',mov:[['Abono','15 jun','+12.000'],['Rendimientos','jun–oct','+600,00']]},
+ {e:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg>`,n:'Patrimonio familiar',v:5000,m:30000,ini:'01 sep 2026',mov:[['Abono','01 sep','+4.900'],['Rendimientos','sep–oct','+100,00']]}];
 const movs=[
- {i:'↙',t:'Recibido · Cliente Panamá S.A.',d:'12 nov',v:8400},
- {i:'↗',t:'Giro · Miami Supplies LLC',d:'05 nov',v:-2638.7},
- {i:'◫',t:'Rendimientos cajitas',d:'31 oct',v:142.3}];
+ {i:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 7L7 17M15 17H7V9"/></svg>`,t:'Recibido · Cliente Panamá S.A.',d:'12 nov',v:8400},
+ {i:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg>`,t:'Giro · Miami Supplies LLC',d:'05 nov',v:-2638.7},
+ {i:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M19 5L5 19"/><circle cx="7" cy="7" r="2"/><circle cx="17" cy="17" r="2"/></svg>`,t:'Rendimientos portafolios',d:'31 oct',v:142.3}];
 const facs=[
  {n:'FE-2381',c:'Comisión giro recibido Panamá',v:126,iva:23.94,d:'12 nov 2026'},
- {n:'FE-2366',c:'Comisión administración cajitas',v:703.7,iva:133.7,d:'31 oct 2026'},
+ {n:'FE-2366',c:'Comisión administración portafolios',v:703.7,iva:133.7,d:'31 oct 2026'},
  {n:'FE-2350',c:'Comisión giro a Miami Supplies',v:32.52,iva:6.18,d:'05 nov 2026'}];
 const totCaj=()=>cajas.reduce((a,c)=>a+c.v,0);
 function cajaHTML(c,k){const p=Math.min(100,c.v/c.m*100);return `<div class="caja" onclick="verCaja(${k})"><div class="em">${c.e}</div><b>${c.n}</b><div class="v vivo">${fmt(c.v)}</div><small>+${fmt(c.v*DIA)} hoy</small><div class="bar"><i style="width:${p}%"></i></div></div>`}
@@ -175,18 +175,18 @@ function pinta(){
  document.getElementById('tot').textContent=fmt(t);
  document.getElementById('ganHoy').textContent='+ '+fmt(totCaj()*DIA)+' rendidos hoy';
  document.getElementById('cajasHome').innerHTML=cajas.slice(0,2).map(cajaHTML).join('');
- document.getElementById('cajasAll').innerHTML=cajas.map(cajaHTML).join('')+'<div class="caja nueva" onclick="ir(\'nueva\')">＋ Nueva cajita</div>';
+ document.getElementById('cajasAll').innerHTML=cajas.map(cajaHTML).join('')+'<div class="caja nueva" onclick="ir(\'nueva\')">＋ Nuevo portafolio</div>';
  document.getElementById('totCaj').textContent=fmt(totCaj());
  document.getElementById('movs').innerHTML=movs.map(m=>`<div class="it"><div class="ic">${m.i}</div><div class="tx"><b>${m.t}</b><small>${m.d}</small></div><div class="m ${m.v>0?'pos':''}">${m.v>0?'+':'−'}${fmt(Math.abs(m.v))}</div></div>`).join('');
- document.getElementById('facs').innerHTML=facs.map((f,k)=>`<div class="it" style="cursor:pointer" onclick="verFac(${k})"><div class="ic">🧾</div><div class="tx"><b>${f.n}</b><small>${f.c} · ${f.d}</small></div><div class="m">${fmt(f.v+f.iva)}</div></div>`).join('');
+ document.getElementById('facs').innerHTML=facs.map((f,k)=>`<div class="it" style="cursor:pointer" onclick="verFac(${k})"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/></svg></div><div class="tx"><b>${f.n}</b><small>${f.c} · ${f.d}</small></div><div class="m">${fmt(f.v+f.iva)}</div></div>`).join('');
  if(document.getElementById('s-caja').classList.contains('on'))verCaja(cajaSel,true);
  document.querySelectorAll('.monto').forEach(e=>e.classList.toggle('oculto',oculto));
 }
-function verCaja(k,keep){cajaSel=k;const c=cajas[k];document.getElementById('cjT').textContent=c.e+' '+c.n;document.getElementById('cjM').textContent='Desde '+c.ini+' · meta '+fmt(c.m);document.getElementById('cjV').textContent=fmt(c.v);document.getElementById('cjG').textContent='+ '+fmt(c.v*DIA)+' hoy · 9,2 % E.A.';const p=Math.min(100,c.v/c.m*100);document.getElementById('cjB').style.width=p+'%';document.getElementById('cjP').textContent=p.toFixed(0)+' % de la meta';document.getElementById('cjMov').innerHTML=c.mov.map(m=>`<div class="it"><div class="tx"><b>${m[0]}</b><small>${m[1]}</small></div><div class="m ${m[2][0]=='+'?'pos':''}">USD ${m[2]}</div></div>`).join('');if(!keep)ir('caja')}
+function verCaja(k,keep){cajaSel=k;const c=cajas[k];document.getElementById('cjT').textContent=c.n;document.getElementById('cjM').textContent='Desde '+c.ini+' · meta '+fmt(c.m);document.getElementById('cjV').textContent=fmt(c.v);document.getElementById('cjG').textContent='+ '+fmt(c.v*DIA)+' hoy · 9,2 % E.A.';const p=Math.min(100,c.v/c.m*100);document.getElementById('cjB').style.width=p+'%';document.getElementById('cjP').textContent=p.toFixed(0)+' % de la meta';document.getElementById('cjMov').innerHTML=c.mov.map(m=>`<div class="it"><div class="tx"><b>${m[0]}</b><small>${m[1]}</small></div><div class="m ${m[2][0]=='+'?'pos':''}">USD ${m[2]}</div></div>`).join('');if(!keep)ir('caja')}
 function verFac(k){const f=facs[k];document.getElementById('facDet').innerHTML=`<div class="fac"><h4>Factura electrónica ${f.n}</h4><div class="r"><span>Emisor</span><b>DOMINIO (ejemplo)</b></div><div class="r"><span>Concepto</span><span>${f.c}</span></div><div class="r"><span>Base</span><span>${fmt(f.v)}</span></div><div class="r"><span>IVA 19 %</span><span>${fmt(f.iva)}</span></div><div class="r"><b>Total</b><b>${fmt(f.v+f.iva)}</b></div><div class="r"><span>Estado</span><span style="color:var(--ok)">Aceptada DIAN</span></div></div>`}
 function calc(){const m=+document.getElementById('monto').value||0,c=m*COM,i=c*IVA;document.getElementById('cal').innerHTML=`<div><span>Envía</span><span>${fmt(m)}</span></div><div><span>Comisión (1,5 %)</span><span>${fmt(c)}</span></div><div><span>IVA de la comisión</span><span>${fmt(i)}</span></div><div class="t"><span>Total</span><span>${fmt(m+c+i)}</span></div>`}
-function enviar(){const m=+document.getElementById('monto').value||0;if(!m)return;const c=m*COM,i=c*IVA,b=document.getElementById('ben').value.split(' · ')[0];nFac++;facs.unshift({n:'FE-'+nFac,c:'Comisión giro a '+b,v:c,iva:i,d:'hoy'});movs.unshift({i:'↗',t:'Giro · '+b,d:'hoy',v:-(m+c+i)});disp=Math.max(0,disp-(m+c+i));pinta();toast('Enviado ✓ · factura FE-'+nFac+' generada');setTimeout(()=>{ir('fac');verFac(0)},1500)}
-function crearCaja(){const n=document.getElementById('ncN').value||'Mi cajita',m=+document.getElementById('ncM').value||1000,a=+document.getElementById('ncA').value||0;cajas.push({e:'⭐',n,v:a,m,ini:'hoy',mov:[['Abono','hoy','+'+a.toLocaleString('es-CO')]]});disp=Math.max(0,disp-a);pinta();toast('Cajita creada ✓');setTimeout(()=>ir('inv'),900)}
+function enviar(){const m=+document.getElementById('monto').value||0;if(!m)return;const c=m*COM,i=c*IVA,b=document.getElementById('ben').value.split(' · ')[0];nFac++;facs.unshift({n:'FE-'+nFac,c:'Comisión giro a '+b,v:c,iva:i,d:'hoy'});movs.unshift({i:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg>`,t:'Giro · '+b,d:'hoy',v:-(m+c+i)});disp=Math.max(0,disp-(m+c+i));pinta();toast('Enviado ✓ · factura FE-'+nFac+' generada');setTimeout(()=>{ir('fac');verFac(0)},1500)}
+function crearCaja(){const n=document.getElementById('ncN').value||'Mi portafolio',m=+document.getElementById('ncM').value||1000,a=+document.getElementById('ncA').value||0;cajas.push({e:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 12h18"/></svg>`,n,v:a,m,ini:'hoy',mov:[['Abono','hoy','+'+a.toLocaleString('es-CO')]]});disp=Math.max(0,disp-a);pinta();toast('Portafolio creado ✓');setTimeout(()=>ir('inv'),900)}
 function ir(s){document.querySelectorAll('.scr').forEach(e=>e.classList.remove('on'));document.getElementById('s-'+s).classList.add('on');document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('on'));const n=document.getElementById('n-'+s);if(n)n.classList.add('on');document.getElementById('s-'+s).scrollTop=0}
 function ojo(){oculto=!oculto;pinta()}
 function toast(t){const e=document.getElementById('toast');e.textContent=t;e.style.display='block';setTimeout(()=>e.style.display='none',2200)}
