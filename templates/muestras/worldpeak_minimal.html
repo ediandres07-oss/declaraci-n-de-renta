@@ -172,8 +172,8 @@ footer .env{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
 .wow .v-escena{position:sticky;top:0;height:100vh;height:100svh}
 .v-foto{position:absolute;inset:0;opacity:0;will-change:opacity,transform}
 .v-foto[data-i="0"]{opacity:1}
-.v-foto img{width:100%;height:100%;object-fit:cover;display:block}
-.v-velo{position:absolute;inset:0;background:linear-gradient(90deg,rgba(14,27,51,.82) 0%,rgba(14,27,51,.45) 48%,rgba(14,27,51,.08) 100%),linear-gradient(0deg,rgba(14,27,51,.55),transparent 40%)}
+.v-foto img,.v-foto video{width:100%;height:100%;object-fit:cover;display:block}
+.v-velo{position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,rgba(14,27,51,.9) 0%,rgba(14,27,51,.6) 45%,rgba(14,27,51,.15) 100%),linear-gradient(0deg,rgba(14,27,51,.55),transparent 40%)}
 .v-textos{position:relative;height:100%}
 .v-cap{position:absolute;left:0;top:50%;transform:translateY(-50%);max-width:620px;opacity:0;pointer-events:none}
 .v-cap[data-i="0"]{opacity:1;pointer-events:auto}
@@ -200,7 +200,7 @@ footer .env{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
 @keyframes vbaja{50%{transform:translateY(6px)}}
 /* ===== Película: franjas de cine, grano, viñeta, apertura y títulos ===== */
 .wow .viaje{height:720vh}
-.v-foto img{will-change:transform,filter}
+.v-foto img,.v-foto video{will-change:transform,filter}
 .v-cine{position:absolute;left:0;right:0;height:0;background:#000;z-index:4;pointer-events:none;will-change:height}
 .v-cine.arr{top:0}.v-cine.aba{bottom:0}
 .v-grano{position:absolute;inset:-50%;z-index:3;pointer-events:none;opacity:.09;mix-blend-mode:overlay;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");animation:vgrano .8s steps(6) infinite}
@@ -236,7 +236,7 @@ footer .env{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
 <main>
 <section class="viaje" id="inicio" aria-label="Portada: su viaje paso a paso">
   <div class="v-escena">
-    <div class="v-foto" data-i="0"><img src="https://images.unsplash.com/photo-1530521954074-e64f6810b32d?auto=format&amp;fit=crop&amp;w=1800&amp;q=72" alt="Viajero esperando su vuelo en el aeropuerto" fetchpriority=high></div><div class="v-foto" data-i="1"><img src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&amp;fit=crop&amp;w=1800&amp;q=72" alt="Ala de avión sobre las nubes al atardecer" loading=lazy></div><div class="v-foto" data-i="2"><img src="https://images.unsplash.com/photo-1592782985575-a96c6e647155?auto=format&amp;fit=crop&amp;w=1800&amp;q=72" alt="Isla con palmeras y mar turquesa" loading=lazy></div><div class="v-foto" data-i="3"><img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&amp;fit=crop&amp;w=1800&amp;q=72" alt="Hotel de playa con piscina y cabañas" loading=lazy></div><div class="v-foto" data-i="4"><img src="https://images.unsplash.com/photo-1576363399252-36302b835c28?auto=format&amp;fit=crop&amp;w=1800&amp;q=72" alt="Tortuga marina nadando sobre el arrecife" loading=lazy></div><div class="v-foto" data-i="5"><img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&amp;fit=crop&amp;w=1800&amp;q=72" alt="Playa del Caribe al atardecer" loading=lazy></div>
+    <div class="v-foto" data-i="0"><video muted playsinline preload="auto" poster="/static/muestras/worldpeak/peli/e0.jpg" src="/static/muestras/worldpeak/peli/e0.mp4" aria-label="Terminal del aeropuerto con aviones en la pista"></video></div><div class="v-foto" data-i="1"><video muted playsinline preload="auto" poster="/static/muestras/worldpeak/peli/e1.jpg" src="/static/muestras/worldpeak/peli/e1.mp4" aria-label="Ala del avión sobre las nubes"></video></div><div class="v-foto" data-i="2"><video muted playsinline preload="metadata" poster="/static/muestras/worldpeak/peli/e2.jpg" src="/static/muestras/worldpeak/peli/e2.mp4" aria-label="Playa del Caribe con agua turquesa"></video></div><div class="v-foto" data-i="3"><video muted playsinline preload="metadata" poster="/static/muestras/worldpeak/peli/e3.jpg" src="/static/muestras/worldpeak/peli/e3.mp4" aria-label="Hotel con piscina entre la selva y el mar"></video></div><div class="v-foto" data-i="4"><video muted playsinline preload="metadata" poster="/static/muestras/worldpeak/peli/e4.jpg" src="/static/muestras/worldpeak/peli/e4.mp4" aria-label="Tortuga marina en el arrecife"></video></div><div class="v-foto" data-i="5"><video muted playsinline preload="metadata" poster="/static/muestras/worldpeak/peli/e5.jpg" src="/static/muestras/worldpeak/peli/e5.mp4" aria-label="Atardecer en la playa"></video></div>
     <div class="v-velo"></div><div class="v-vineta"></div><div class="v-destello"></div><div class="v-grano" aria-hidden="true"></div>
     <div class="v-cine arr" aria-hidden="true"></div><div class="v-cine aba" aria-hidden="true"></div>
     <div class="v-tc" aria-hidden="true"><b>●</b><span>ESCENA 00</span></div>
@@ -615,7 +615,10 @@ document.querySelectorAll('[data-opciones]').forEach(function(b){ var m=document
       cineA=sec.querySelector('.v-cine.arr'), cineB=sec.querySelector('.v-cine.aba'), tc=sec.querySelector('.v-tc span'),
       dest=sec.querySelector('.v-destello'), esc=sec.querySelector('.v-escena');
   /* movimiento de cámara por escena: [x0,y0,z0, x1,y1,z1] (porcentaje y escala) */
-  var cam=[[0,0,1.05, -3,-2,1.18],[4,2,1.25, -4,-1,1.08],[-3,3,1.10, 3,-3,1.30],[3,0,1.22, -2,1,1.06],[-2,-2,1.06, 2,3,1.24],[0,2,1.28, 0,-1,1.04]];
+  var cam=[[0,0,1.02, -1.5,-1,1.10],[2,1,1.12, -2,0,1.03],[-1.5,1.5,1.04, 1.5,-1.5,1.14],[1.5,0,1.12, -1,0.5,1.03],[-1,-1,1.03, 1,1.5,1.12],[0,1,1.14, 0,-0.5,1.02]];
+  /* video que avanza con el scroll */
+  var vids=fotos.map(function(f){ var v=f.querySelector('video'); if(v){ v.pause(); v.addEventListener('loadedmetadata',pide); } return v; });
+  function cuadro(v,t){ if(!v||!v.duration||isNaN(v.duration)) return; var obj=Math.max(0,Math.min(v.duration-0.05,t*v.duration)); if(Math.abs(v.currentTime-obj)>0.03){ try{ v.currentTime=obj; }catch(e){} } }
   /* títulos palabra por palabra */
   caps.forEach(function(c){ c.querySelectorAll('h1,h2').forEach(function(h){
     [].slice.call(h.childNodes).forEach(function(n){
@@ -636,6 +639,8 @@ document.querySelectorAll('[data-opciones]').forEach(function(b){ var m=document
       z*=1+sal*0.35;
       f.style.opacity=o;
       f.style.zIndex=d<0?1:0;
+      if(o>0.01) cuadro(vids[i],Math.max(0,Math.min(1,(s0-i+0.6)/1.6)));
+      if(vids[i]&&i>=2&&Math.abs(d)<2&&vids[i].preload!=='auto') vids[i].preload='auto';
       var img=f.firstElementChild;
       img.style.transform='translate3d('+x+'%,'+y+'%,0) scale('+z.toFixed(3)+')';
       img.style.filter=sal>0.02?'blur('+(sal*10).toFixed(1)+'px) brightness('+(1+sal*0.25).toFixed(2)+')':'none';
