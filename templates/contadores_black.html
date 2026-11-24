@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tributando · El mes contable, sin digitar</title>
+<meta name="description" content="Tributando descarga las facturas electrónicas de la DIAN, aprende cómo causa cada proveedor y deja el mes listo: libro, IVA, retención y estados con terceros.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#04060b;--panel:#0b0f17;--txt:#eef1f6;--suave:#aab3c2;--tenue:#6f7a8c;--verde:#37d38f;--oro:#e6c483;--rojo:#ff6b6b;--linea:rgba(255,255,255,.08)}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--txt);font-family:"Plus Jakarta Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+.env{max-width:1120px;margin:0 auto;padding:0 clamp(16px,4vw,40px)}
+nav{display:flex;align-items:center;justify-content:space-between;padding:22px 0}
+.marca{font-weight:800;font-size:20px;letter-spacing:-.02em}.marca b{color:var(--oro)}
+.btn{display:inline-flex;align-items:center;gap:10px;border-radius:999px;padding:14px 24px;font-weight:700;font-size:15px;transition:transform .15s,box-shadow .2s}
+.btn:hover{transform:translateY(-1px)}
+.btn-v{background:var(--verde);color:#04110a;box-shadow:0 10px 40px -10px rgba(55,211,143,.6)}
+.btn-l{border:1px solid var(--linea);color:var(--txt)}
+.etq{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.22em;color:var(--oro);text-transform:uppercase;display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.etq:before{content:"";width:28px;height:1px;background:var(--oro)}
+h1{font-size:clamp(38px,6.4vw,76px);line-height:1.02;letter-spacing:-.035em;font-weight:800;max-width:900px}
+h1 em{font-style:normal;background:linear-gradient(90deg,var(--verde),var(--oro));-webkit-background-clip:text;background-clip:text;color:transparent}
+h2{font-size:clamp(28px,4.2vw,48px);line-height:1.08;letter-spacing:-.03em;font-weight:800;max-width:760px}
+.lead{color:var(--suave);font-size:clamp(16px,1.8vw,20px);line-height:1.55;max-width:640px;margin:22px 0 30px}
+.hero{padding:clamp(40px,8vw,90px) 0 40px}
+.acciones{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.pasos3{display:flex;flex-wrap:wrap;gap:22px;margin-top:34px;color:var(--suave);font-size:14px}
+.pasos3 span{display:flex;align-items:center;gap:10px}
+.pasos3 i{font-style:normal;width:26px;height:26px;border-radius:50%;border:1px solid var(--oro);color:var(--oro);display:grid;place-items:center;font-family:"JetBrains Mono",monospace;font-size:12px}
+section{padding:clamp(60px,9vw,110px) 0;border-top:1px solid var(--linea)}
+/* simulación */
+.sim{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:40px}
+.carril{background:var(--panel);border:1px solid var(--linea);border-radius:22px;padding:24px;position:relative;overflow:hidden}
+.carril h3{font-size:15px;font-weight:700;display:flex;justify-content:space-between;align-items:center}
+.carril h3 small{font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:600}
+.sin h3 small{color:var(--rojo)} .con h3 small{color:var(--verde)}
+.carril svg{width:100%;height:auto;display:block;margin:18px 0 8px}
+.ruta{fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.sin .ruta{stroke:rgba(255,107,107,.45);stroke-dasharray:5 7}
+.con .ruta{stroke:rgba(55,211,143,.55)}
+.nodo{fill:#121826;stroke:rgba(255,255,255,.18)}
+.nodo-t{fill:var(--suave);font-size:10.5px;font-family:"Plus Jakarta Sans",sans-serif}
+.paquete{filter:drop-shadow(0 0 6px currentColor)}
+.lista{list-style:none;color:var(--suave);font-size:14px;line-height:1.9}
+.lista li:before{content:"— ";color:var(--tenue)}
+/* calculadora */
+.calc{margin-top:22px;background:var(--panel);border:1px solid var(--linea);border-radius:22px;padding:26px;display:grid;grid-template-columns:1fr 1fr auto;gap:26px;align-items:end}
+.calc label{display:block;color:var(--suave);font-size:13px;margin-bottom:10px}
+.calc output{font-family:"JetBrains Mono",monospace;color:var(--txt);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--oro)}
+.horas{text-align:right}
+.horas b{display:block;font-size:clamp(34px,5vw,52px);letter-spacing:-.03em;color:var(--oro)}
+.horas span{color:var(--tenue);font-size:13px}
+.nota{color:var(--tenue);font-size:12.5px;margin-top:12px}
+/* recorrido */
+.tour{display:grid;grid-template-columns:280px 1fr;gap:28px;margin-top:40px}
+.tabs{display:flex;flex-direction:column;gap:8px}
+.tab{display:flex;gap:14px;align-items:center;padding:14px 16px;border-radius:14px;border:1px solid transparent;cursor:pointer;color:var(--suave);font-weight:600;font-size:15px;background:none;text-align:left;font-family:inherit}
+.tab i{font-style:normal;font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--tenue)}
+.tab.on{background:var(--panel);border-color:var(--linea);color:var(--txt)}
+.tab.on i{color:var(--oro)}
+.vista{background:var(--panel);border:1px solid var(--linea);border-radius:22px;padding:clamp(22px,3vw,36px);min-height:340px}
+.vista h3{font-size:clamp(22px,2.6vw,30px);letter-spacing:-.02em;margin-bottom:12px}
+.vista p{color:var(--suave);line-height:1.65;max-width:560px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.chip{font-family:"JetBrains Mono",monospace;font-size:12px;padding:7px 12px;border-radius:999px;border:1px solid var(--linea);color:var(--suave)}
+.barra-t{height:3px;background:var(--linea);border-radius:3px;margin-top:28px;overflow:hidden}
+.barra-t div{height:100%;width:0;background:linear-gradient(90deg,var(--verde),var(--oro))}
+/* precios */
+.precios{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:40px}
+.precio{background:var(--panel);border:1px solid var(--linea);border-radius:22px;padding:28px}
+.precio.dest{border-color:rgba(230,196,131,.45)}
+.precio h4{color:var(--suave);font-size:14px;font-weight:600}
+.precio .v{font-size:40px;font-weight:800;letter-spacing:-.03em;margin:10px 0 2px}
+.precio .v small{font-size:14px;color:var(--tenue);font-weight:500}
+.precio p{color:var(--tenue);font-size:13.5px;line-height:1.5}
+.calc2{margin-top:16px;background:var(--panel);border:1px solid var(--linea);border-radius:22px;padding:22px 26px;display:flex;flex-wrap:wrap;gap:18px 30px;align-items:center;justify-content:space-between}
+.calc2 .tot{font-size:26px;font-weight:800}
+.fin{text-align:center}
+.fin h2{margin:0 auto}
+.fin .acciones{justify-content:center;margin-top:30px}
+footer{border-top:1px solid var(--linea);padding:28px 0 90px;color:var(--tenue);font-size:13px}
+.wa-flot{position:fixed;right:18px;bottom:18px;z-index:20}
+@media (max-width:860px){
+  .sim,.precios{grid-template-columns:1fr}
+  .calc{grid-template-columns:1fr}.horas{text-align:left}
+  .tour{grid-template-columns:1fr}
+  .tabs{flex-direction:row;overflow-x:auto;padding-bottom:6px}
+  .tab{white-space:nowrap}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+{% set wa_txt = 'Hola, vi la página de Tributando y quiero una demostración con una de mis empresas.' %}
+<div class="env">
+  <nav>
+    <a class="marca" href="/">Tributando<b>.</b></a>
+    <a class="btn btn-l" href="https://wa.me/{{ whatsapp }}?text={{ wa_txt | urlencode }}">Pida una demostración</a>
+  </nav>
+
+  <header class="hero">
+    <div class="etq">Para contadores · Colombia</div>
+    <h1>¿Cuántas horas se le van <em>digitando facturas de la DIAN?</em></h1>
+    <p class="lead">Tributando descarga sus facturas electrónicas de la DIAN, aprende cómo causa usted cada proveedor y le deja el mes listo: libro, IVA, retención y estados financieros con terceros.</p>
+    <div class="acciones">
+      <a class="btn btn-v" href="https://wa.me/{{ whatsapp }}?text={{ wa_txt | urlencode }}">Pida una demostración</a>
+      <a class="btn btn-l" href="#recorrido">Ver el recorrido · 6 pasos</a>
+    </div>
+    <div class="pasos3">
+      <span><i>1</i>Nos escribe</span>
+      <span><i>2</i>Cargamos una de sus empresas</span>
+      <span><i>3</i>Usted revisa el mes causado</span>
+    </div>
+  </header>
+</div>
+
+<section id="simulacion">
+  <div class="env">
+    <div class="etq">Simulación</div>
+    <h2>El camino de una factura, sin y con Tributando.</h2>
+    <div class="sim">
+      <div class="carril sin">
+        <h3>Sin Tributando <small>5 paradas a mano</small></h3>
+        <svg viewBox="0 0 420 210" aria-label="Ruta larga de una factura sin Tributando">
+          <path id="rSin" class="ruta" d="M30 170 C 70 40, 120 40, 140 110 S 200 190, 230 120 S 300 20, 320 90 S 380 180, 395 40"/>
+          <g>
+            <circle class="nodo" cx="30" cy="170" r="7"/><text class="nodo-t" x="12" y="195">DIAN</text>
+            <circle class="nodo" cx="140" cy="110" r="7"/><text class="nodo-t" x="108" y="135">ZIP y XML</text>
+            <circle class="nodo" cx="230" cy="120" r="7"/><text class="nodo-t" x="200" y="145">Digitar</text>
+            <circle class="nodo" cx="320" cy="90" r="7"/><text class="nodo-t" x="290" y="70">Cuadrar IVA</text>
+            <circle class="nodo" cx="395" cy="40" r="7"/><text class="nodo-t" x="340" y="22">Excel aparte</text>
+          </g>
+          <circle class="paquete" r="6" fill="#ff6b6b" color="#ff6b6b"><animateMotion dur="7s" repeatCount="indefinite"><mpath href="#rSin"/></animateMotion></circle>
+        </svg>
+        <ul class="lista">
+          <li>Entrar al portal de la DIAN y bajar los ZIP</li>
+          <li>Abrir cada XML y digitarlo en el programa</li>
+          <li>Cuadrar el IVA y la retención a mano</li>
+          <li>Armar el balance por tercero en Excel</li>
+        </ul>
+      </div>
+      <div class="carril con">
+        <h3>Con Tributando <small>directo al libro</small></h3>
+        <svg viewBox="0 0 420 210" aria-label="Ruta directa de una factura con Tributando">
+          <path id="rCon" class="ruta" d="M30 170 C 140 150, 280 70, 395 40"/>
+          <g>
+            <circle class="nodo" cx="30" cy="170" r="7"/><text class="nodo-t" x="12" y="195">DIAN</text>
+            <circle class="nodo" cx="210" cy="112" r="7"/><text class="nodo-t" x="176" y="140">Causada</text>
+            <circle class="nodo" cx="395" cy="40" r="7"/><text class="nodo-t" x="330" y="22">Reportes</text>
+          </g>
+          <circle class="paquete" r="6" fill="#37d38f" color="#37d38f"><animateMotion dur="2.4s" repeatCount="indefinite"><mpath href="#rCon"/></animateMotion></circle>
+        </svg>
+        <ul class="lista">
+          <li>La descarga de la DIAN la hace el sistema</li>
+          <li>Cada proveedor va a la cuenta que usted le enseñó</li>
+          <li>IVA y retención salen del libro, listos para revisar</li>
+          <li>Balance de prueba por tercero y estados con firmas</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="calc">
+      <div>
+        <label>Facturas que causa al mes: <output id="oF">300</output></label>
+        <input id="iF" type="range" min="20" max="3000" step="10" value="300">
+      </div>
+      <div>
+        <label>Minutos que le toma cada una: <output id="oM">3</output></label>
+        <input id="iM" type="range" min="1" max="10" step="0.5" value="3">
+      </div>
+      <div class="horas"><b id="oH">15 h</b><span>al mes digitando</span></div>
+    </div>
+    <p class="nota">La cuenta es con sus propios datos: facturas × minutos. Son las horas que hoy se le van solo en digitar.</p>
+  </div>
+</section>
+
+<section id="recorrido">
+  <div class="env">
+    <div class="etq">El recorrido · 6 pasos</div>
+    <h2>Así queda un mes, de la DIAN al estado financiero.</h2>
+    <div class="tour">
+      <div class="tabs" role="tablist"></div>
+      <div class="vista" aria-live="polite">
+        <h3 id="vT"></h3>
+        <p id="vP"></p>
+        <div class="chips" id="vC"></div>
+        <div class="barra-t"><div id="vB"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="precios">
+  <div class="env">
+    <div class="etq">Precios</div>
+    <h2>Se paga por empresa, y entre más empresas, menos cuesta cada una.</h2>
+    <div class="precios">
+      <div class="precio"><h4>De la 1 a la 10</h4><div class="v">$69.900 <small>/ empresa al mes</small></div><p>Contabilidad completa: descarga DIAN, causación, bancos, impuestos y reportes.</p></div>
+      <div class="precio dest"><h4>De la 11 a la 30</h4><div class="v">$59.900 <small>/ empresa al mes</small></div><p>Para el contador que ya maneja una cartera de clientes.</p></div>
+      <div class="precio"><h4>De la 31 en adelante</h4><div class="v">$49.900 <small>/ empresa al mes</small></div><p>Para firmas contables con volumen.</p></div>
+    </div>
+    <div class="calc2">
+      <div><label class="nota" style="margin:0 0 8px;display:block">¿Cuántas empresas lleva? <output id="oE">5</output></label>
+        <input id="iE" type="range" min="1" max="120" value="5" style="width:min(420px,70vw)"></div>
+      <div style="text-align:right"><div class="tot" id="oT">$349.500</div><span class="nota">al mes, en total</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="fin">
+  <div class="env">
+    <h2>Le mostramos su propio mes causado, con una de sus empresas.</h2>
+    <div class="acciones">
+      <a class="btn btn-v" href="https://wa.me/{{ whatsapp }}?text={{ wa_txt | urlencode }}">Pida una demostración</a>
+    </div>
+  </div>
+</section>
+
+<div class="env"><footer>Tributando · contabilidad e impuestos para contadores en Colombia</footer></div>
+
+<script>
+(function(){
+  var fmt=function(n){return "$"+Math.round(n).toLocaleString("es-CO")};
+  // calculadora de horas (datos del visitante)
+  var iF=document.getElementById("iF"),iM=document.getElementById("iM");
+  function horas(){var f=+iF.value,m=+iM.value;document.getElementById("oF").textContent=f.toLocaleString("es-CO");
+    document.getElementById("oM").textContent=m.toLocaleString("es-CO");
+    document.getElementById("oH").textContent=Math.round(f*m/60).toLocaleString("es-CO")+" h";}
+  iF.oninput=iM.oninput=horas;horas();
+  // precio por escalera (mismo cálculo que el servidor: TRAMOS_CONTABILIDAD)
+  var tramos={{ tramos|tojson }};
+  function total(n){var t=0,p=0;for(var i=0;i<tramos.length;i++){var h=tramos[i][0],v=tramos[i][1];var tope=h===null?n:Math.min(n,h);if(tope>p){t+=(tope-p)*v;p=tope}if(h===null||n<=h)break}return t}
+  var iE=document.getElementById("iE");
+  function precio(){var n=+iE.value;document.getElementById("oE").textContent=n;document.getElementById("oT").textContent=fmt(total(n))}
+  iE.oninput=precio;precio();
+  // recorrido de 6 pasos
+  var P=[
+   ["Descarga de la DIAN","El sistema entra con el token de la empresa y baja lo del mes: facturas recibidas y emitidas, documentos soporte, nómina electrónica y POS. Sin abrir el portal.",["Recibidos","Emitidos","Soporte","Nómina","POS"]],
+   ["Causación que aprende","Cada proveedor va a la cuenta que usted usó antes. Si corrige una, la regla queda para el mes siguiente. Lo que usted fija a mano siempre manda.",["Regla por proveedor","PUC de 8 dígitos","IVA por tarifa"]],
+   ["Facturas en papel","El cliente le manda la foto o el PDF por WhatsApp y la factura queda causada, con el mismo criterio de las electrónicas.",["Foto","PDF","WhatsApp"]],
+   ["Bancos y cartera","Pagos y recaudos contra el banco, conciliación con el extracto y cartera y proveedores por tercero, para que no queden inflados.",["Conciliación","Cartera por tercero","Proveedores"]],
+   ["IVA y retención","Los borradores del 300 y del 350 salen del libro. La autorretención y la conciliación contra lo declarado quedan en la misma app.",["Formulario 300","Formulario 350","Autorretención"]],
+   ["Reportes para el cliente","Balance de prueba por tercero y estados financieros con encabezado, NIT y firmas del representante legal y del contador. La exógena sale del mismo libro.",["Balance por tercero","Estados financieros","Exógena"]]
+  ];
+  var tabs=document.querySelector(".tabs"),idx=0,timer;
+  P.forEach(function(p,i){var b=document.createElement("button");b.className="tab";b.setAttribute("role","tab");
+    b.innerHTML="<i>0"+(i+1)+"</i>"+p[0];b.onclick=function(){ver(i,true)};tabs.appendChild(b)});
+  function ver(i,manual){idx=i;[].forEach.call(tabs.children,function(t,j){t.classList.toggle("on",j===i)});
+    document.getElementById("vT").textContent=P[i][0];document.getElementById("vP").textContent=P[i][1];
+    document.getElementById("vC").innerHTML=P[i][2].map(function(c){return '<span class="chip">'+c+'</span>'}).join("");
+    var b=document.getElementById("vB");b.style.transition="none";b.style.width="0";void b.offsetWidth;
+    b.style.transition="width 6s linear";b.style.width="100%";
+    clearTimeout(timer);timer=setTimeout(function(){ver((idx+1)%P.length)},manual?12000:6000)}
+  ver(0);
+})();
+</script>
+</body>
+</html>

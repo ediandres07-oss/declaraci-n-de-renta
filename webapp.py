@@ -2294,6 +2294,17 @@ def mundo():
                                                   "https://contabilidad-tributando.onrender.com").rstrip("/"))
 
 
+@app.get("/contadores/mes")
+def contadores_mes():
+    """Landing de PRUEBA (23-nov-2026): idea tomada de NoPing (recorrido de 6 pasos y
+    simulación «sin / con») y en respuesta al Black Friday de Cifrato. Sin prueba
+    gratis (decisión 7-nov: demostración por WhatsApp) y con los precios REALES por
+    empresa (TRAMOS_CONTABILIDAD)."""
+    wa = IA_CFG.get("negocio", {}).get("whatsapp") or "573332470715"
+    return render_template("contadores_black.html", whatsapp=re.sub(r"\D", "", str(wa)),
+                           tramos=TRAMOS_CONTABILIDAD)
+
+
 @app.get("/cine")
 def cine():
     """Landing cinematográfica de PRUEBA (7-nov-2026): la historia se cuenta con el scroll
