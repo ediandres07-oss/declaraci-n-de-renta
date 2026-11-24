@@ -130,6 +130,7 @@ p.lead{margin-top:22px;font-size:clamp(16px,1.5vw,20px);line-height:1.55;color:v
 .menu{display:flex;align-items:center;gap:16px}
 .menu .corto{display:none}
 .entrar{color:var(--suave);text-decoration:none;font-weight:600;font-size:14px}.entrar:hover{color:var(--txt)}
+@media(max-width:420px){.menu{gap:8px;margin-left:10px}.menu .boton{padding:8px 10px;font-size:12px}.menu .entrar{font-size:12px}}
 /* la factura real que aparece donde estaba la de puntos (al final de la demo) */
 .freal{position:fixed;z-index:5;left:0;top:0;width:300px;height:480px;opacity:0;pointer-events:none;transform:perspective(1600px) rotateY(-9deg) scale(.94);transform-origin:50% 50%;transition:opacity .6s,transform 1s cubic-bezier(.2,.7,.2,1)}
 .freal.ver{opacity:1;pointer-events:auto;transform:perspective(1600px) rotateY(-9deg) scale(1)}
@@ -221,7 +222,7 @@ html.sin3d body{background:radial-gradient(80% 60% at 70% 30%,rgba(55,211,143,.1
 
 <header>
   <a class="marca" href="/"><img src="/static/img/logo-tributando.png" alt="">Tributando<span>.co</span></a>
-  <div class="menu"><a class="entrar" href="{{ app_url }}/login">Entrar</a><a class="boton" href="https://wa.me/{{ whatsapp }}?text={{ 'Hola, vi la página de Tributando y quiero una demostración.'|urlencode }}"><span class="largo">Pida una demostración</span><span class="corto">Demostración</span></a></div>
+  <div class="menu"><a class="entrar" href="/descargar-lector" title="Lector XML DIAN para Windows"><span class="largo">Descargar el Lector</span><span class="corto">Lector</span></a><a class="entrar" href="{{ app_url }}/login">Entrar</a><a class="boton" href="https://wa.me/{{ whatsapp }}?text={{ 'Hola, vi la página de Tributando y quiero una demostración.'|urlencode }}"><span class="largo">Pida una demostración</span><span class="corto">Demostración</span></a></div>
 </header>
 <nav class="capitulos" id="capitulos" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></nav>
 <div class="contador" id="contador"><b>01</b> / 06 · <span id="nombreCap">EL MUNDO</span></div>
@@ -339,7 +340,7 @@ html.sin3d body{background:radial-gradient(80% 60% at 70% 30%,rgba(55,211,143,.1
 </main>
 
 <footer class="pie">
-  <nav class="enlaces"><a href="/privacidad">Privacidad</a><a href="mailto:contacto@tributando.co">contacto@tributando.co</a></nav>
+  <nav class="enlaces"><a href="/descargar-lector">Descargar el Lector (Windows)</a><a href="/descargar-lector-mac">Lector para Mac</a><a href="/privacidad">Privacidad</a><a href="mailto:contacto@tributando.co">contacto@tributando.co</a></nav>
   <span>© 2026 Tributando · Medellín, Colombia</span>
   <span>Cifras y conversación de ejemplo. Su factura no se guarda en ningún lado. <a href="/">Volver al inicio</a></span>
 </footer>
