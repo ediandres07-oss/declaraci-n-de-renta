@@ -22,7 +22,7 @@ body{background:var(--bg);color:var(--txt);font-family:"Plus Jakarta Sans",syste
 header{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:16px clamp(16px,4vw,48px);transition:background .3s}
 header.fijo{background:rgba(5,7,12,.82);backdrop-filter:blur(12px);border-bottom:1px solid var(--linea)}
 .marca{display:flex;align-items:center;gap:10px;color:var(--txt);text-decoration:none;font-weight:800;letter-spacing:-.02em}
-.marca img{width:28px;height:28px;border-radius:7px}.marca span{color:var(--verde)}
+.marca span{color:var(--verde)}
 .boton{display:inline-flex;align-items:center;gap:8px;background:var(--verde);color:#04140c;font-weight:700;padding:12px 20px;border-radius:999px;text-decoration:none;font-size:15px;transition:transform .2s,box-shadow .2s;white-space:nowrap}
 .boton:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(55,211,143,.35)}
 .enlace-precio{color:var(--suave);text-decoration:none;font-weight:600;font-size:14px}.enlace-precio:hover{color:var(--txt)}
@@ -112,13 +112,28 @@ footer a{color:var(--suave)}
 }
 @media (max-width:400px){.enlace-precio{display:none}}
 @media (prefers-reduced-motion:reduce){.item,.extras span,.paso,.titulo-in{opacity:1;transform:none;filter:none;transition:none}}
+/* ===== Diseño nuevo 25-nov-2026 (Stitch, igual que la portada de tributando.co): anillo verde, tarjetas #0d131b ===== */
+:root{--bg:#04060b;--tarjeta:rgba(13,19,27,.88);--linea:#1b2430}
+.anillo-logo{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#04060b;border:2px solid rgba(55,211,143,.8);font-style:normal;color:#37d38f;font-weight:800;font-size:16px;
+  text-shadow:0 0 8px rgba(55,211,143,.8);box-shadow:0 0 12px rgba(55,211,143,.85),0 0 30px rgba(55,211,143,.45),inset 0 0 10px rgba(55,211,143,.35)}
+.portada{position:relative}
+.aro-fondo{position:fixed;right:-140px;top:-140px;width:min(560px,90vw);aspect-ratio:1;border-radius:50%;border:2px solid rgba(55,211,143,.6);z-index:1;pointer-events:none;
+  box-shadow:0 0 40px rgba(55,211,143,.45),0 0 110px rgba(55,211,143,.2),inset 0 0 50px rgba(55,211,143,.25);animation:latido 5s ease-in-out infinite}
+@keyframes latido{50%{box-shadow:0 0 60px rgba(55,211,143,.6),0 0 140px rgba(55,211,143,.28),inset 0 0 70px rgba(55,211,143,.35)}}
+h1 em,h2 em{background:none;-webkit-background-clip:border-box;background-clip:border-box;color:var(--verde);text-shadow:0 0 30px rgba(55,211,143,.35)}
+.boton{border-radius:12px;box-shadow:0 0 22px rgba(55,211,143,.38)}
+.boton:hover{box-shadow:0 0 34px rgba(55,211,143,.55)}
+.item,.caja{border-radius:22px}
+.item .ico{border:1px solid rgba(55,211,143,.25)}
+.firma i{background:#04060b;border:2px solid rgba(55,211,143,.8);color:#37d38f;box-shadow:0 0 14px rgba(55,211,143,.6)}
+.recibo{border-color:rgba(55,211,143,.45);box-shadow:0 0 30px rgba(55,211,143,.12)}
 </style>
 </head>
 <body>
-<canvas id="fondo" aria-hidden="true"></canvas><div class="velo"></div><div class="barra" id="barra"></div>
+<canvas id="fondo" aria-hidden="true"></canvas><div class="velo"></div><div class="aro-fondo" aria-hidden="true"></div><div class="barra" id="barra"></div>
 {% set wa = 'https://wa.me/' ~ whatsapp ~ '?text=' ~ wa_texto %}
 <header id="cab">
-  <a class="marca" href="/"><img src="/static/img/logo-tributando.png" alt="">Tributando<span>.co</span></a>
+  <a class="marca" href="/"><i class="anillo-logo">T</i><b>Tributando<span>.co</span></b></a>
   <div style="display:flex;gap:10px;align-items:center"><a class="enlace-precio" href="#precio">Ver mi precio</a><a class="boton chico" href="{{ wa }}">Pida su propuesta</a></div>
 </header>
 
