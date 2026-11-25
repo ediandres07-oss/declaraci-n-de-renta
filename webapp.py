@@ -1571,7 +1571,10 @@ def calendario_2026_publico():
 
 
 # --- SEO: robots + sitemap (para que Google indexe las páginas públicas) ---
-_URLS_PUBLICAS = ["/", "/contadores/recorrido", "/privacidad"]
+_URLS_PUBLICAS = ["/", "/contadores/recorrido", "/contabilidad", "/calendario-tributario-2026",
+                  "/lector-xml-dian", "/descargar-xml-dian", "/iva-descontable-xml-dian",
+                  "/plano-contable-siigo", "/plano-contable-world-office", "/plano-contable-helisa",
+                  "/plano-contable-contai", "/plano-contable-syscafe", "/privacidad"]
 
 
 @app.get("/robots.txt")
@@ -3010,9 +3013,13 @@ for _seo_slug in _SEO_PAGES:
 # escritorio y la app contable para pagar → 302 condicional en su vista, ver _al_recorrido),
 # /liquidador (herramienta pagada), /guia-dian (soporte a clientes), /descargar-lector*, /privacidad,
 # /muestra/*, /apps/*, ventanería, cotizador de obra, portafolio y demás líneas de negocio aparte.
-_VIEJAS_301 = {"/contadores/herramientas", "/contadores/demo", "/aliados", "/sas", "/contabilidad",
-               "/inicio-anterior", "/pase-gratis", "/vigilante", "/calendario-tributario-2026",
-               "/calendario", "/links", "/enlaces"} | {"/" + _k for _k in _SEO_PAGES}
+# 25-nov-2026, Edison «sí publica»: las páginas de búsqueda (las que traían gente desde Google)
+# vuelven a responder 200 con el diseño oscuro nuevo y están en el sitemap: /contabilidad,
+# /calendario-tributario-2026 y todas las de _SEO_PAGES. Aquí quedan solo las viejas sin
+# valor de búsqueda.
+_VIEJAS_301 = {"/contadores/herramientas", "/contadores/demo", "/aliados", "/sas",
+               "/inicio-anterior", "/pase-gratis", "/vigilante",
+               "/calendario", "/links", "/enlaces"}
 
 
 @app.before_request

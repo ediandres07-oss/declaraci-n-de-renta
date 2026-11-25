@@ -10,6 +10,9 @@
 <meta property="og:title" content="Calendario Tributario {{ ano }} Colombia — Vencimientos DIAN">
 <meta property="og:description" content="Todas las fechas de vencimiento DIAN {{ ano }}: renta, IVA, retención, exógena, RST, ICA y nómina.">
 <meta property="og:url" content="https://tributando.co/calendario-tributario-{{ ano }}">
+<link rel="icon" href="/static/img/logo-tributando.png">
+<meta name="theme-color" content="#04060b">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{ --navy:#1e2432; --oro:#c8991f; --dorado:#cdab7e; --tx:#2b3242; --tx2:#5a6473;
          --ln:#e6e2d8; --bg:#f7f5f1; --card:#fff; }
@@ -63,13 +66,41 @@
   @media(max-width:700px){ .wa-grid{ grid-template-columns:1fr 1fr; } }
   @media(max-width:440px){ .wa-grid{ grid-template-columns:1fr; } }
   footer a{ color:var(--oro); text-decoration:none; }
+  /* 25-nov-2026: diseño oscuro nuevo (igual que la portada) */
+  :root{ --navy:#eef1f6; --oro:#e6c483; --dorado:#37d38f; --tx:#eef1f6; --tx2:#aab3c2; --ln:#1b2430; --bg:#04060b; --card:#0d131b; }
+  html,body{ background:#04060b; }
+  body{ font-family:"Plus Jakarta Sans",system-ui,sans-serif; overflow-x:hidden; }
+  header{ background:radial-gradient(70% 90% at 85% 0%,rgba(55,211,143,.16),rgba(55,211,143,0) 60%),#070b10; border-bottom:1px solid #111821; }
+  header .marca{ display:inline-flex; align-items:center; gap:10px; color:#eef1f6; }
+  header .marca i{ width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-style:normal;color:#37d38f;border:2px solid rgba(55,211,143,.8);
+    box-shadow:0 0 12px rgba(55,211,143,.85),0 0 30px rgba(55,211,143,.45),inset 0 0 10px rgba(55,211,143,.35); }
+  header .marca span{ color:#37d38f; }
+  h1{ letter-spacing:-.03em; }
+  header p{ color:#aab3c2; }
+  .obl{ box-shadow:none; }
+  .obl h2{ color:#eef1f6; }
+  th,td{ border-bottom:1px solid #141c26; }
+  td.rango{ color:#37d38f; }
+  .aviso{ background:rgba(230,196,131,.08); border-color:rgba(230,196,131,.35); color:#e6c483; }
+  .cta{ background:#0d131b; border:1px solid rgba(55,211,143,.35); box-shadow:0 0 30px rgba(55,211,143,.10); }
+  .cta p{ color:#aab3c2; }
+  .cta a.boton{ background:#37d38f; color:#04140c; box-shadow:0 0 22px rgba(55,211,143,.4); }
+  .wa-box{ background:#0d131b; border-color:rgba(55,211,143,.55); box-shadow:0 0 30px rgba(55,211,143,.12); }
+  .wa-grid input,.wa-grid select{ background:#0a0f15; color:#eef1f6; }
+  .wa-btn{ background:#37d38f; color:#04140c; box-shadow:0 0 22px rgba(55,211,143,.4); }
+  .wa-res h3{ color:#37d38f; }
+  .wa-res li{ border-bottom:1px solid #141c26; }
+  .wa-res li b{ color:#37d38f; }
+  .lector-box{ background:#0d131b !important; border:1px solid rgba(230,196,131,.4); color:#eef1f6 !important; }
+  .lector-box a{ background:#37d38f !important; color:#04140c !important; }
+  footer a{ color:#37d38f; }
 </style>
 </head>
 <body>
 
 <header>
   <div class="wrap">
-    <div class="marca">Tributando<span>.co</span></div>
+    <a class="marca" href="/" style="text-decoration:none"><i>T</i><b>Tributando<span>.co</span></b></a>
     <h1>Calendario tributario {{ ano }} en Colombia</h1>
     <p>Fechas de vencimiento de la DIAN, organizadas por obligación.</p>
   </div>
@@ -139,24 +170,21 @@
     <small>Gratis para contadores · con tu cuenta de Google o Microsoft</small>
   </div>
 
-  <div style="background:linear-gradient(135deg,#cdab7e,#c8991f);border-radius:18px;padding:32px 26px;text-align:center;margin:20px 0 30px;color:#1e2432">
+  <div class="lector-box" style="background:linear-gradient(135deg,#cdab7e,#c8991f);border-radius:18px;padding:32px 26px;text-align:center;margin:20px 0 30px;color:#1e2432">
     <div style="font-size:12px;font-weight:800;letter-spacing:.6px;opacity:.8">CONTABILIDAD SIN DIGITAR</div>
     <h3 style="font-size:1.4rem;margin:8px 0 8px">🤖 Automatiza la contabilidad de la DIAN a tu software</h3>
     <p style="max-width:540px;margin:0 auto 18px;font-size:15px;line-height:1.6">
       Baja las facturas electrónicas de la <b>DIAN</b> y conviértelas en el <b>plano listo para tu
       software contable</b> — Siigo, World Office o Helisa — en minutos. <b>Sin digitar factura por factura.</b></p>
-    <a href="/contadores/lector" style="display:inline-block;background:#1e2432;color:#fff;font-weight:800;text-decoration:none;padding:13px 32px;border-radius:12px">Probar el Lector gratis →</a>
+    <a href="/lector-xml-dian" style="display:inline-block;background:#1e2432;color:#fff;font-weight:800;text-decoration:none;padding:13px 32px;border-radius:12px">Probar el Lector gratis →</a>
     <div style="font-size:12px;opacity:.8;margin-top:12px">Lector XML DIAN de Tributando · prueba gratis, sin tarjeta</div>
   </div>
 
-  <p class="intro" style="text-align:center">
-    ¿Persona natural? <a href="/vigilante" style="color:var(--oro);font-weight:700">Revisa gratis tu exógena</a> antes de declarar la renta.
-  </p>
-</main>
+  </main>
 
 <footer>
   Tributando.co · Calendario tributario Colombia · <a href="/">Inicio</a> ·
-  <a href="/vencimientos">Gestor de vencimientos</a> · <a href="/contabilidad">Contabilidad</a>
+  <a href="/vencimientos">Gestor de vencimientos</a> · <a href="/contabilidad">Contabilidad</a> · <a href="/lector-xml-dian">Lector XML DIAN</a>
 </footer>
 
 <script>
@@ -181,7 +209,6 @@
   });
 })();
 </script>
-{% include "_flotante_gratis.html" %}
 {% include "_clics.html" %}
 </body>
 </html>

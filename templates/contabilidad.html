@@ -12,7 +12,12 @@
   </script>
 
 <meta charset="utf-8">
-<title>Contabilidad para tu negocio — Tributando</title>
+<title>Contabilidad para tu negocio en Colombia — Tributando</title>
+<meta name="description" content="Servicio de contabilidad mensual para independientes, negocios y pequeñas empresas en Colombia: impuestos, nómina, conciliaciones y estados financieros, con un contador y un software que causa solo las facturas de la DIAN.">
+<link rel="canonical" href="https://tributando.co/contabilidad">
+<link rel="icon" href="/static/img/logo-tributando.png">
+<meta name="theme-color" content="#04060b">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
   :root {
@@ -100,14 +105,43 @@
     .publico, .planes, .lista-inc { grid-template-columns:1fr; }
     .plan.destacado { order:-1; }
   }
+
+  /* 25-nov-2026: diseño oscuro nuevo (igual que la portada) */
+  :root{ --marca:#37d38f; --marca-osc:#37d38f; --azul:#eef1f6; --dorado:#e6c483; --gris:#070b10; --gris2:#141c26; --borde:#1b2430;
+    --texto:#aab3c2; --suave:#aab3c2; --tenue:#6f7a8c; --sombra-1:none; --sombra-2:none; }
+  html,body{ background:#04060b; }
+  body{ font-family:"Plus Jakarta Sans",system-ui,sans-serif; overflow-x:hidden; }
+  .barra-sup{ background:rgba(4,6,11,.86); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border-bottom:1px solid #111821; box-shadow:none; }
+  .barra-sup .marca img{ display:none; }
+  .barra-sup .marca i{ width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-style:normal;color:#37d38f;border:2px solid rgba(55,211,143,.8);
+    box-shadow:0 0 12px rgba(55,211,143,.85),0 0 30px rgba(55,211,143,.45),inset 0 0 10px rgba(55,211,143,.35); }
+  .barra-sup .volver{ background:#0d131b; border:1px solid #1b2430; }
+  header.hero{ background:radial-gradient(60% 80% at 50% 100%,rgba(55,211,143,.16),rgba(55,211,143,0) 70%),#04060b; }
+  header.hero:before{ content:""; position:absolute; left:50%; bottom:-260px; width:520px; height:520px; transform:translateX(-50%); border-radius:50%;
+    border:2px solid rgba(55,211,143,.6); box-shadow:0 0 40px rgba(55,211,143,.45),0 0 110px rgba(55,211,143,.2),inset 0 0 50px rgba(55,211,143,.25); pointer-events:none; }
+  header.hero .contenedor{ position:relative; }
+  .hero .tag{ background:#0d131b; border:1px solid #1b2430; color:#aab3c2; }
+  .hero h1{ letter-spacing:-.035em; }
+  .hero h1 span{ color:#37d38f; text-shadow:0 0 28px rgba(55,211,143,.35); }
+  .hero p.sub{ color:#aab3c2; }
+  .btn-hero, .cierre .btn-hero{ background:#37d38f; color:#04140c; box-shadow:0 0 22px rgba(55,211,143,.4); }
+  .titulo{ color:#eef1f6; letter-spacing:-.03em; }
+  .pub, .plan{ background:#0d131b; }
+  .pub h3, .plan h3, .inc b, .plan .precio{ color:#eef1f6; }
+  .inc .ck{ background:rgba(55,211,143,.12); color:#37d38f; }
+  .plan.destacado{ border-color:rgba(55,211,143,.6); box-shadow:0 0 30px rgba(55,211,143,.14); }
+  .plan .cinta{ background:#37d38f; color:#04140c; }
+  .plan .cta{ background:#151d27; color:#eef1f6; }
+  .plan.destacado .cta{ background:#37d38f; color:#04140c; }
+  footer a{ color:#37d38f; }
 </style>
 </head>
 <body>
 
 <div class="barra-sup">
   <div class="contenedor">
-    <a class="marca" href="/"><img src="/static/img/logo-tributando.png" alt="">Tributando<b style="color:var(--dorado)">.co</b></a>
-    <a class="volver" href="/">← Declaración de renta</a>
+    <a class="marca" href="/"><i>T</i><span>Tributando<b style="color:#37d38f">.co</b></span></a>
+    <a class="volver" href="/">← Inicio</a>
   </div>
 </div>
 

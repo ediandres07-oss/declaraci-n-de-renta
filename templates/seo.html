@@ -18,58 +18,66 @@
 {% if p.faq %}<script type="application/ld+json">
 {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{% for f in p.faq %}{"@type":"Question","name":{{ f[0]|tojson }},"acceptedAnswer":{"@type":"Answer","text":{{ f[1]|tojson }}}}{{ "," if not loop.last }}{% endfor %}]}
 </script>{% endif %}
+<link rel="icon" href="/static/img/logo-tributando.png">
+<meta name="theme-color" content="#04060b">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-  :root{ --navy:#1e2432; --oro:#e6c483; --dorado2:#c9a25a; --texto:#f3f5f8; --suave:#c2c9d4; --tenue:#8b93a1;
-    --borde:rgba(230,196,131,.24); --vidrio:rgba(255,255,255,.045); --radio:16px; --verde:#37d38f; }
+  /* 25-nov-2026: diseño oscuro nuevo (igual que la portada): negro, verde con anillo, dorado */
+  :root{ --oro:#e6c483; --texto:#eef1f6; --suave:#aab3c2; --tenue:#6f7a8c; --verde:#37d38f;
+    --card:#0d131b; --borde:#1b2430; --radio:18px; }
   *{box-sizing:border-box;margin:0;padding:0;}
-  html{scroll-behavior:smooth;}
-  body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;color:var(--texto);line-height:1.65;background:#0a0c13;-webkit-font-smoothing:antialiased;}
-  body::before{content:"";position:fixed;inset:0;z-index:-2;background:
-    radial-gradient(1100px 560px at 20% 6%,rgba(230,196,131,.10),transparent 60%),
-    radial-gradient(900px 520px at 90% 96%,rgba(120,90,200,.10),transparent 60%),
-    linear-gradient(160deg,#0e1220,#0a0c13);}
-  a{color:var(--oro);text-decoration:none;}
-  .wrap{max-width:820px;margin:0 auto;padding:0 22px;}
-  header{border-bottom:1px solid rgba(255,255,255,.06);}
-  header .wrap{display:flex;align-items:center;gap:22px;height:64px;}
-  .logo{font-weight:700;font-size:17px;}
-  .logo b{color:var(--oro);}
+  html{scroll-behavior:smooth;background:#04060b;}
+  body{font-family:"Plus Jakarta Sans",system-ui,sans-serif;color:var(--texto);line-height:1.65;background:#04060b;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+  body::before{content:"";position:fixed;right:-160px;top:-160px;width:520px;height:520px;border-radius:50%;z-index:-1;pointer-events:none;
+    border:2px solid rgba(55,211,143,.55);box-shadow:0 0 40px rgba(55,211,143,.4),0 0 110px rgba(55,211,143,.18),inset 0 0 50px rgba(55,211,143,.22);}
+  a{color:var(--verde);text-decoration:none;}
+  .wrap{max-width:860px;margin:0 auto;padding:0 20px;}
+  header{position:sticky;top:0;z-index:5;background:rgba(4,6,11,.84);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid #111821;}
+  header .wrap{display:flex;align-items:center;gap:22px;height:66px;}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:17px;color:var(--texto);}
+  .logo i{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-style:normal;color:var(--verde);border:2px solid rgba(55,211,143,.8);
+    box-shadow:0 0 12px rgba(55,211,143,.85),0 0 30px rgba(55,211,143,.45),inset 0 0 10px rgba(55,211,143,.35);text-shadow:0 0 8px rgba(55,211,143,.8);}
+  .logo b{color:var(--verde);}
   nav{margin-left:auto;display:flex;gap:20px;font-size:14px;}
-  nav a{color:var(--suave);}
-  nav a:hover{color:var(--texto);}
-  .hero{padding:56px 0 30px;}
-  .kick{color:var(--dorado2);font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;}
-  h1{font-size:34px;line-height:1.2;margin:12px 0 16px;}
-  h1 .g{color:var(--oro);}
+  nav a{color:var(--suave);} nav a:hover{color:var(--texto);}
+  .hero{padding:60px 0 30px;}
+  .kick{display:inline-flex;align-items:center;gap:8px;color:var(--suave);font-weight:600;font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    background:var(--card);border:1px solid var(--borde);padding:7px 14px;border-radius:999px;}
+  .kick::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--verde);box-shadow:0 0 8px var(--verde);}
+  h1{font-size:40px;line-height:1.12;letter-spacing:-.035em;margin:18px 0 16px;font-weight:800;}
+  h1 .g{color:var(--verde);text-shadow:0 0 28px rgba(55,211,143,.35);}
   .lead{font-size:18px;color:var(--suave);max-width:680px;}
-  .cta{display:inline-flex;align-items:center;gap:8px;margin-top:22px;background:linear-gradient(135deg,var(--oro),var(--dorado2));
-    color:#1a1205;font-weight:700;padding:13px 22px;border-radius:12px;font-size:15px;}
-  .cta.ghost{background:transparent;color:var(--oro);border:1px solid var(--borde);}
-  section.blk{padding:26px 0;border-top:1px solid rgba(255,255,255,.05);}
-  h2{font-size:23px;margin-bottom:12px;}
+  .cta{display:inline-flex;align-items:center;gap:8px;margin-top:22px;background:var(--verde);color:#04140c;font-weight:700;padding:13px 22px;border-radius:12px;font-size:15px;
+    box-shadow:0 0 22px rgba(55,211,143,.4);}
+  .cta.ghost{background:var(--card);color:var(--texto);border:1px solid var(--borde);box-shadow:none;}
+  section.blk{margin:18px 0;padding:24px;background:var(--card);border:1px solid var(--borde);border-radius:var(--radio);}
+  h2{font-size:23px;margin-bottom:12px;letter-spacing:-.02em;}
   section.blk p{color:var(--suave);margin:8px 0;}
   ul.chk{list-style:none;margin:10px 0;}
   ul.chk li{padding:7px 0 7px 28px;position:relative;color:var(--suave);}
-  ul.chk li::before{content:"✓";position:absolute;left:0;color:var(--oro);font-weight:700;}
+  ul.chk li::before{content:"✓";position:absolute;left:0;color:var(--verde);font-weight:700;}
+  ul.chk li b{color:var(--oro);}
   .progs{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:8px;}
-  .progs a{display:block;background:var(--vidrio);border:1px solid var(--borde);border-radius:var(--radio);padding:14px 16px;color:var(--texto);}
-  .progs a b{color:var(--oro);}
-  details{background:var(--vidrio);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:2px 16px;margin:8px 0;}
+  .progs a{display:block;background:#0a0f15;border:1px solid var(--borde);border-radius:14px;padding:14px 16px;color:var(--texto);}
+  .progs a:hover{border-color:rgba(55,211,143,.45);}
+  .progs a b{color:var(--verde);}
+  details{background:#0a0f15;border:1px solid var(--borde);border-radius:12px;padding:2px 16px;margin:8px 0;}
   summary{cursor:pointer;padding:12px 0;font-weight:600;}
   details p{padding-bottom:12px;}
   .final{text-align:center;padding:44px 0;}
-  footer{border-top:1px solid rgba(255,255,255,.06);padding:26px 0;color:var(--tenue);font-size:13px;}
+  footer{border-top:1px solid #111821;padding:26px 0;color:var(--tenue);font-size:13px;margin-top:30px;}
   footer a{color:var(--suave);}
   footer .fl{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:10px;}
-  @media(max-width:640px){ h1{font-size:27px;} .progs{grid-template-columns:1fr;} }
+  @media(max-width:640px){ h1{font-size:30px;} .progs{grid-template-columns:1fr;} nav{gap:12px;font-size:13px} section.blk{padding:18px} }
 </style>
 </head>
 <body>
 <header><div class="wrap">
-  <span class="logo">Tributando<b>.co</b></span>
+  <a class="logo" href="/"><i>T</i><span>Tributando<b>.co</b></span></a>
   <nav>
     <a href="/">Inicio</a>
-    <a href="/contadores">Contadores</a>
+    <a href="/contadores/recorrido">Cómo funciona</a>
     <a href="/descargar-lector">Descargar</a>
   </nav>
 </div></header>
@@ -79,7 +87,7 @@
     <div class="kick">{{ p.kick or "Para contadores" }}</div>
     <h1>{{ p.h1|safe }}</h1>
     <p class="lead">{{ p.intro }}</p>
-    <a class="cta" href="/contadores">Pruébalo gratis →</a>
+    <a class="cta" href="/descargar-lector">Descargar el Lector →</a> <a class="cta ghost" href="https://wa.me/573332470715?text=Hola%2C%20quiero%20conocer%20el%20Lector%20de%20Tributando">Escríbenos por WhatsApp</a>
   </div>
 
   {% for s in p.sections %}
@@ -100,7 +108,7 @@
       <a href="/plano-contable-helisa"><b>Helisa</b> → plano desde XML</a>
       <a href="/plano-contable-syscafe"><b>Syscafé</b> → plano desde XML</a>
     </div>
-    <p style="margin-top:12px">¿Usas otro programa? <a href="/contadores">Escríbenos</a> y lo agregamos.</p>
+    <p style="margin-top:12px">¿Usas otro programa? <a href="https://wa.me/573332470715?text=Hola%2C%20quiero%20conocer%20el%20Lector%20de%20Tributando">Escríbenos</a> y lo agregamos.</p>
   </section>
   {% endif %}
 
@@ -115,15 +123,15 @@
     <h2>{{ p.cta_titulo or "Deja de digitar factura por factura" }}</h2>
     <p class="lead" style="margin:8px auto 0">{{ p.cta_texto or "Sube los XML de la DIAN y recibe el plano contable en minutos, con el IVA discriminado. Tu primera prueba es gratis." }}</p>
     <div style="margin-top:20px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-      <a class="cta" href="/contadores">Probar gratis →</a>
-      <a class="cta ghost" href="/descargar-lector">Descargar el Lector</a>
+      <a class="cta" href="/descargar-lector">Descargar el Lector →</a>
+      <a class="cta ghost" href="https://wa.me/573332470715?text=Hola%2C%20quiero%20conocer%20el%20Lector%20de%20Tributando">Escríbenos por WhatsApp</a>
     </div>
   </section>
 </main>
 
 <footer><div class="wrap">
   <div class="fl">
-    <a href="/">Inicio</a><a href="/contadores">Contadores</a>
+    <a href="/">Inicio</a><a href="/contadores/recorrido">Cómo funciona</a>
     <a href="/lector-xml-dian">Lector XML DIAN</a><a href="/descargar-lector">Descargar</a>
     <a href="/privacidad">Privacidad</a>
   </div>
