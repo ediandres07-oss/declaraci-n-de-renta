@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portafolio · Edison Monsalve, Contador Público · Tributando</title>
+<meta name="description" content="Contador público con software propio: contabilidad, impuestos y nómina, más factura electrónica, POS, nómina electrónica y CRM con WhatsApp.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#04060b">
+<link rel="icon" href="/static/img/logo-tributando.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* 25-nov-2026: diseño de Google Stitch aprobado por Edison (sin tarjeta profesional ni datos inventados) */
+:root{--bg:#04060b;--card:#0d131b;--card2:#111923;--linea:#1b2430;--txt:#eef1f6;--suave:#aab3c2;--tenue:#6f7a8c;--verde:#37d38f;--oro:#e6c483}
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
+html{background:var(--bg);scroll-behavior:smooth}
+body{background:var(--bg);color:var(--txt);font-family:"Plus Jakarta Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+.mono{font-family:"JetBrains Mono",monospace}
+.cont{max-width:1160px;margin:0 auto;padding:0 20px}
+section[id]{scroll-margin-top:80px}
+.anillo-logo{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:#04060b;border:2px solid rgba(55,211,143,.8);font-style:normal;color:#37d38f;font-weight:800;font-size:17px;
+  text-shadow:0 0 8px rgba(55,211,143,.8);box-shadow:0 0 12px rgba(55,211,143,.85),0 0 30px rgba(55,211,143,.45),inset 0 0 10px rgba(55,211,143,.35);flex:none}
+header{position:sticky;top:0;z-index:50;background:rgba(4,6,11,.84);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid #111821}
+header .cont{display:flex;align-items:center;gap:26px;height:68px}
+.marca{display:flex;align-items:center;gap:11px;font-weight:800;font-size:18px;letter-spacing:-.02em}
+.marca b span{color:var(--verde)}
+nav.links{display:flex;gap:24px;font-size:14px;color:var(--suave);margin-left:14px}
+nav.links a:hover{color:var(--txt)}
+.acc{margin-left:auto;display:flex;align-items:center;gap:16px;font-size:14px;font-weight:600}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;background:var(--verde);color:#04140c;font-weight:700;border-radius:12px;padding:12px 20px;font-size:14px;
+  box-shadow:0 0 22px rgba(55,211,143,.38);transition:transform .2s,box-shadow .2s;white-space:nowrap}
+.btn:hover{transform:translateY(-2px);box-shadow:0 0 34px rgba(55,211,143,.55)}
+.btn.osc{background:var(--card2);color:var(--txt);box-shadow:none;border:1px solid var(--linea)}
+.btn.g{padding:15px 24px;font-size:15px}
+.chip{display:inline-flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--suave);background:var(--card);border:1px solid var(--linea);padding:7px 14px;border-radius:999px}
+.chip i{width:7px;height:7px;border-radius:50%;background:var(--verde);box-shadow:0 0 8px var(--verde)}
+h1{font-size:clamp(40px,5.6vw,68px);font-weight:800;letter-spacing:-.045em;line-height:1.02;margin-top:22px}
+h1 em,h2 em{font-style:normal;color:var(--verde);text-shadow:0 0 30px rgba(55,211,143,.35)}
+h2{font-size:clamp(30px,4vw,44px);font-weight:800;letter-spacing:-.035em;line-height:1.08;margin-top:10px}
+.et{font-size:11px;letter-spacing:.22em;color:var(--verde);text-transform:uppercase}
+.lead{color:var(--suave);font-size:clamp(16px,1.5vw,18px);line-height:1.6;margin-top:18px;max-width:560px}
+.lead b{color:var(--txt)}
+/* portada */
+.hero{position:relative;overflow:hidden;padding:70px 0 40px}
+.hero .cont{display:grid;grid-template-columns:1.05fr 1fr;gap:50px;align-items:center}
+.ctas{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+.firma{display:inline-flex;align-items:center;gap:14px;margin-top:30px;background:var(--card);border:1px solid var(--linea);border-radius:16px;padding:14px 18px}
+.firma .av{position:relative;width:46px;height:46px;border-radius:12px;background:#131b25;color:var(--oro);display:grid;place-items:center;font-weight:800}
+.firma .av:after{content:"";position:absolute;right:-3px;bottom:-3px;width:11px;height:11px;border-radius:50%;background:var(--verde);border:2px solid var(--card)}
+.firma b{display:block;font-size:16px}.firma small{color:var(--suave);font-size:12.5px}
+.vis{position:relative;height:440px}
+.aro{position:absolute;left:50%;top:50%;width:420px;height:420px;transform:translate(-50%,-50%);border-radius:50%;border:2px solid rgba(55,211,143,.7);
+  box-shadow:0 0 40px rgba(55,211,143,.55),0 0 110px rgba(55,211,143,.25),inset 0 0 50px rgba(55,211,143,.3);animation:latido 5s ease-in-out infinite}
+@keyframes latido{50%{box-shadow:0 0 60px rgba(55,211,143,.7),0 0 140px rgba(55,211,143,.32),inset 0 0 70px rgba(55,211,143,.4)}}
+.estado{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(380px,92%);background:rgba(13,19,27,.96);border:1px solid #1f2a37;border-radius:18px;padding:18px;box-shadow:0 30px 70px rgba(0,0,0,.6)}
+.estado .bar{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--tenue);letter-spacing:.1em;margin-bottom:14px}
+.estado .bar i{width:9px;height:9px;border-radius:50%;background:#ff8a7a}.estado .bar i:nth-child(2){background:var(--oro)}.estado .bar i:nth-child(3){background:var(--verde)}
+.estado .bar span{margin-left:8px}.estado .bar em{margin-left:auto;font-style:normal;color:var(--verde);border:1px solid rgba(55,211,143,.4);border-radius:999px;padding:2px 8px}
+.estado .dos2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.estado .k{background:#0a0f15;border:1px solid #18212c;border-radius:12px;padding:11px}
+.estado .k small{display:block;font-size:10px;color:var(--tenue)}.estado .k b{display:block;font-size:15px;margin-top:4px;color:var(--verde)}.estado .k.o b{color:var(--oro)}
+.estado .conc{margin-top:10px;background:#0a0f15;border:1px solid #18212c;border-radius:12px;padding:11px;font-size:10px;color:var(--suave)}
+.estado .conc .l{height:6px;border-radius:6px;margin:8px 0 6px;background:linear-gradient(90deg,var(--verde),var(--oro))}
+.estado .fin{margin-top:10px;display:flex;align-items:center;gap:10px;border:1px solid rgba(55,211,143,.3);border-radius:12px;padding:10px 12px;font-size:12px}
+.estado .fin span{color:var(--verde);margin-left:auto}
+.ej{position:absolute;left:50%;bottom:0;transform:translateX(-50%);font-size:10px;color:var(--tenue);letter-spacing:.1em;text-transform:uppercase}
+/* secciones */
+section.s{padding:100px 0 0}
+.titulo{text-align:center;max-width:720px;margin:0 auto 42px}
+.titulo p{color:var(--suave);margin-top:12px;line-height:1.6}
+.titulo.izq{text-align:left;max-width:none;display:flex;justify-content:space-between;align-items:flex-end;gap:30px;flex-wrap:wrap}
+.titulo.izq p{max-width:420px;margin:0}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.tj{background:var(--card);border:1px solid var(--linea);border-radius:20px;padding:22px;transition:border-color .3s,box-shadow .3s}
+.tj:hover{border-color:rgba(55,211,143,.45);box-shadow:0 0 30px rgba(55,211,143,.1)}
+.tj .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.tj .ic{width:38px;height:38px;border-radius:11px;background:rgba(55,211,143,.10);border:1px solid rgba(55,211,143,.25);color:var(--verde);display:grid;place-items:center;font-size:17px}
+.tj .tag{font-size:9.5px;letter-spacing:.12em;color:var(--verde);border:1px solid rgba(55,211,143,.35);border-radius:999px;padding:3px 9px;text-transform:uppercase}
+.tj .tag.o{color:var(--oro);border-color:rgba(230,196,131,.4)}
+.tj h3{font-size:17px;margin-bottom:8px}.tj p{color:var(--suave);font-size:14px;line-height:1.55}
+.aviso{margin-top:18px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:18px 22px;border-radius:18px;border:1px solid rgba(230,196,131,.4);background:linear-gradient(90deg,rgba(230,196,131,.10),rgba(230,196,131,.02))}
+.aviso .ic{width:38px;height:38px;border-radius:11px;background:rgba(230,196,131,.14);color:var(--oro);display:grid;place-items:center;flex:none}
+.aviso p{flex:1;min-width:240px;color:var(--suave);font-size:15px;line-height:1.5}.aviso p b{color:var(--oro)}
+.aviso .progs{display:flex;gap:8px;flex-wrap:wrap}
+.aviso .progs span{font-size:11px;padding:5px 10px;border-radius:8px;background:#0a0f15;border:1px solid var(--linea);color:var(--suave)}
+.extras{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:22px}
+.extras span{padding:11px 17px;border-radius:999px;border:1px solid var(--linea);background:var(--card);font-size:14px;color:var(--suave)}
+.extras span b{color:var(--txt)}
+/* calculadora */
+.calc{display:grid;grid-template-columns:1.1fr 1fr;gap:18px}
+.caja{background:var(--card);border:1px solid var(--linea);border-radius:22px;padding:26px}
+.paso-c{display:flex;align-items:center;gap:10px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--oro);margin-bottom:12px}
+.paso-c b{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--oro);color:#1a1405;font-size:12px}
+.pregunta{display:block;font-size:16px;font-weight:700;margin-bottom:14px}
+.cuenta{display:inline-flex;align-items:center;gap:6px;padding:6px;border-radius:999px;border:1px solid var(--linea);background:#0a0f15}
+.cuenta button{width:44px;height:44px;border-radius:50%;border:0;background:rgba(55,211,143,.15);color:var(--verde);font-size:22px;font-weight:700;cursor:pointer}
+.cuenta button:hover{background:rgba(55,211,143,.3)}
+.cuenta output{min-width:56px;text-align:center;font-size:24px;font-weight:800;font-variant-numeric:tabular-nums}
+.ayuda{margin-top:10px;color:var(--tenue);font-size:13px}
+.chk{display:flex;gap:12px;align-items:flex-start;cursor:pointer;font-size:14.5px;color:var(--suave);line-height:1.45;background:#0a0f15;border:1px solid var(--linea);border-radius:14px;padding:14px}
+.chk input{margin-top:3px;width:20px;height:20px;accent-color:var(--verde);flex:none}
+.incluido{margin-top:22px;padding-top:18px;border-top:1px solid var(--linea)}
+.incluido h4{font-size:13px;margin-bottom:10px}
+.incluido ul{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:8px 14px}
+.incluido li{font-size:13.5px;color:var(--suave);padding-left:22px;position:relative}
+.incluido li:before{content:"✓";position:absolute;left:0;color:var(--verde);font-weight:800}
+.recibo{border-color:rgba(55,211,143,.45);background:linear-gradient(160deg,rgba(55,211,143,.10),#0d131b 45%);box-shadow:0 0 30px rgba(55,211,143,.12)}
+.r-cab{display:flex;justify-content:space-between;gap:10px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--tenue);padding-bottom:14px;border-bottom:1px dashed var(--linea)}
+.fila{display:flex;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid var(--linea);font-size:15px}
+.fila small{display:block;color:var(--tenue);font-size:12.5px;margin-top:2px}
+.fila span:last-child{white-space:nowrap;font-variant-numeric:tabular-nums}
+.total{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;padding:20px 0 10px;flex-wrap:wrap}
+.total span{font-weight:700;color:var(--suave)}
+.total b{font-size:clamp(34px,4vw,48px);font-weight:800;letter-spacing:-.04em;color:var(--verde);line-height:1;font-variant-numeric:tabular-nums;text-shadow:0 0 24px rgba(55,211,143,.35)}
+.nota{margin-top:12px;color:var(--tenue);font-size:13px;line-height:1.5}.nota b{color:var(--suave)}
+/* pasos */
+.paso{background:var(--card);border:1px solid var(--linea);border-radius:20px;padding:26px}
+.paso .n{font-size:40px;font-weight:800;color:var(--verde);line-height:1;text-shadow:0 0 22px rgba(55,211,143,.4)}
+.paso:nth-child(2) .n{color:var(--oro);text-shadow:0 0 22px rgba(230,196,131,.35)}
+.paso h3{font-size:18px;margin:14px 0 8px}.paso p{color:var(--suave);font-size:14.5px;line-height:1.55}
+/* cierre */
+.final{position:relative;text-align:center;margin-top:100px;padding:70px 24px;border-radius:28px;background:var(--card);border:1px solid var(--linea);overflow:hidden}
+.final:before{content:"";position:absolute;left:50%;top:-190px;width:420px;height:420px;transform:translateX(-50%);border-radius:50%;border:2px solid rgba(55,211,143,.5);
+  box-shadow:0 0 50px rgba(55,211,143,.35),inset 0 0 50px rgba(55,211,143,.2);pointer-events:none}
+.final>*{position:relative}.final .lead{margin:16px auto 28px}
+footer{margin-top:80px;border-top:1px solid #111821;padding:34px 0}
+footer .cont{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;color:var(--tenue);font-size:13px}
+footer a{color:var(--suave)}footer a:hover{color:var(--verde)}
+.flotante{position:fixed;right:18px;bottom:18px;z-index:40;opacity:0;transform:translateY(20px);transition:all .4s;pointer-events:none}
+.flotante.on{opacity:1;transform:none;pointer-events:auto}
+.rv{opacity:0;transform:translateY(30px);transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1)}
+.rv.ver{opacity:1;transform:none}
+@media(max-width:980px){nav.links{display:none}.hero .cont{grid-template-columns:1fr}.grid4{grid-template-columns:1fr 1fr}.grid3,.calc{grid-template-columns:1fr}}
+@media(max-width:640px){header .cont{height:60px;gap:10px}.acc .ver-precio{display:none}.marca{font-size:16px}.btn{padding:10px 14px}
+  .hero{padding-top:44px}.vis{height:400px}.aro{width:320px;height:320px}.grid4{grid-template-columns:1fr}.incluido ul{grid-template-columns:1fr}
+  section.s{padding-top:76px}.flotante{display:none}}
+@media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}.aro{animation:none}}
+</style>
+</head>
+<body>
+{% set wa = 'https://wa.me/' ~ whatsapp ~ '?text=' ~ wa_texto %}
+<header id="cab"><div class="cont">
+  <a class="marca" href="/"><i class="anillo-logo">T</i><b>Tributando<span>.co</span></b></a>
+  <nav class="links"><a href="#servicios">Servicios</a><a href="#herramientas">Herramientas</a><a href="#precio">Precio</a><a href="#pasos">Cómo empezamos</a></nav>
+  <div class="acc"><a class="ver-precio" href="#precio">Ver mi precio</a><a class="btn" href="{{ wa }}">Pida su propuesta</a></div>
+</div></header>
+
+<main>
+<section class="hero"><div class="cont">
+  <div>
+    <span class="chip"><i></i>{% if empresa %}Propuesta para {{ empresa }}{% else %}Portafolio de servicios contables{% endif %}</span>
+    <h1>Su contador público, <em>con su propio software.</em></h1>
+    <p class="lead">Llevo la contabilidad y los impuestos de su empresa, y le doy las herramientas para <b>facturar, vender y pagar la nómina</b> en un solo lugar, conectadas a sus libros.</p>
+    <div class="ctas">
+      <a class="btn g" href="{{ wa }}">Pida su propuesta</a>
+      <a class="btn osc g" href="#precio">Ver mi precio</a>
+    </div>
+    <div class="firma"><span class="av">EM</span><div><b>Edison Monsalve</b><small>Contador Público · Tributando</small></div></div>
+  </div>
+  <div class="vis">
+    <div class="aro"></div>
+    <div class="estado">
+      <div class="bar mono"><i></i><i></i><i></i><span>ESTADO DE SU EMPRESA</span><em>AL DÍA</em></div>
+      <div class="dos2">
+        <div class="k"><small class="mono">Facturas de la DIAN</small><b>Causadas</b></div>
+        <div class="k o"><small class="mono">Retención · 350</small><b>En borrador</b></div>
+      </div>
+      <div class="conc mono">CONCILIACIÓN BANCARIA<div class="l"></div>Bancos contra libros</div>
+      <div class="fin">◎ Estados financieros del mes<span>✓</span></div>
+    </div>
+    <div class="ej mono">Ilustración</div>
+  </div>
+</div></section>
+
+<section class="s" id="servicios"><div class="cont">
+  <div class="titulo rv"><div class="et mono">Como su contador</div><h2>Su empresa <em>al día</em></h2></div>
+  <div class="grid4">
+    <div class="tj rv"><div class="top"><span class="ic">▤</span></div><h3>Contabilidad mensual</h3><p>Sus compras, ventas, bancos y gastos causados cada mes, con estados financieros que sí se entienden.</p></div>
+    <div class="tj rv"><div class="top"><span class="ic">%</span></div><h3>Impuestos</h3><p>IVA, retención en la fuente, ICA, renta y exógena. Presentados a tiempo y salidos de sus propios libros.</p></div>
+    <div class="tj rv"><div class="top"><span class="ic">☺</span></div><h3>Nómina y seguridad social</h3><p>Liquidación de nómina, PILA, prestaciones, vacaciones y contratos.</p></div>
+    <div class="tj rv"><div class="top"><span class="ic">✓</span></div><h3>Asesoría</h3><p>Le explico sus números y le ayudo a decidir: cuánto pagar, cuándo y cómo ahorrar en impuestos dentro de la ley.</p></div>
+  </div>
+  <div class="aviso rv"><span class="ic">⇄</span><p><b>¿Ya tiene otro programa contable?</b> Igual le llevamos la contabilidad en el que usted use. Si quiere, también le pasamos todo a Tributando.</p>
+    <div class="progs mono"><span>Siigo</span><span>World Office</span><span>Helisa</span><span>Alegra</span></div></div>
+</div></section>
+
+<section class="s" id="herramientas"><div class="cont">
+  <div class="titulo izq rv"><div><div class="et mono">Las herramientas de Tributando</div><h2>Todo conectado <em>a sus libros</em></h2></div>
+    <p class="lead">Lo que su empresa emite y vende entra solo a la contabilidad. Sin digitar dos veces.</p></div>
+  <div class="grid3">
+    <div class="tj rv"><div class="top"><span class="ic">⎙</span><span class="tag mono">Factura</span></div><h3>Factura electrónica</h3><p>Emita desde el celular o el computador. Le hacemos la habilitación ante la DIAN.</p></div>
+    <div class="tj rv"><div class="top"><span class="ic">▦</span><span class="tag mono">POS</span></div><h3>POS electrónico</h3><p>Para ventas al detal: caja, tiquete electrónico y cierre del día.</p></div>
+    <div class="tj rv"><div class="top"><span class="ic">☷</span><span class="tag mono">Nómina</span></div><h3>Nómina electrónica</h3><p>Desprendibles, PILA y la nómina electrónica de cada mes.</p></div>
+    <div class="tj rv"><div class="top"><span class="ic">✎</span><span class="tag mono">Soporte</span></div><h3>Documento soporte</h3><p>Para sus compras a personas que no facturan, sin perder el costo ni el gasto.</p></div>
+    <div class="tj rv"><div class="top"><span class="ic">✆</span><span class="tag o mono">CRM</span></div><h3>CRM con WhatsApp</h3><p>Un solo WhatsApp para todo su equipo: clientes, seguimiento y un asistente que responde.</p></div>
+    <div class="tj rv"><div class="top"><span class="ic">◉</span><span class="tag o mono">Asistente</span></div><h3>Pregúntele a sus números</h3><p>Por WhatsApp o por voz: «¿cuánto IVA voy a pagar?» y le responde con sus libros.</p></div>
+  </div>
+  <div class="extras rv">
+    <span><b>Conciliación bancaria</b> y cartera</span>
+    <span><b>Pagos a proveedores</b> en un archivo para el banco</span>
+    <span><b>Seguridad y salud</b> en el trabajo (SST)</span>
+    <span><b>Carta digital con pedidos</b> para restaurantes</span>
+  </div>
+</div></section>
+
+<section class="s" id="precio"><div class="cont">
+  <div class="titulo rv"><div class="et mono">Su precio</div>
+    <h2>{% if empresa %}El precio para {{ empresa }}, <em>en un minuto</em>{% else %}Calcule su precio <em>en un minuto</em>{% endif %}</h2>
+    <p>Elija cuántos empleados tiene y si quiere nuestra facturación electrónica. El total cambia al instante.</p></div>
+  <div class="calc">
+    <div class="caja rv">
+      <p class="paso-c mono"><b>1</b>Nómina</p>
+      <label class="pregunta">¿Cuántos empleados tiene o va a tener?</label>
+      <div class="cuenta">
+        <button type="button" onclick="emp(-1)" aria-label="Menos empleados">−</button>
+        <output id="nEmp" aria-live="polite">0</output>
+        <button type="button" onclick="emp(1)" aria-label="Más empleados">+</button>
+      </div>
+      <p class="ayuda">Nómina electrónica: $25.000 por empleado al mes (mínimo $150.000).</p>
+      <p class="paso-c mono" style="margin-top:22px"><b>2</b>Facturación</p>
+      <label class="chk"><input type="checkbox" id="fe" onchange="calc()"><span>Quiero la facturación electrónica de Tributando ($230.000 al año, hasta 120 documentos; las primeras 5 facturas son gratis para probar)</span></label>
+      <div class="incluido"><h4>Incluido siempre</h4>
+        <ul><li>Montaje inicial (RUT, responsabilidades y habilitación como facturador)</li><li>Contabilidad completa</li><li>IVA, retención e ICA</li><li>Conciliación bancaria</li><li>Estados financieros</li><li>Asesoría contable permanente con el contador</li></ul>
+      </div>
+    </div>
+    <div class="caja recibo rv">
+      <div class="r-cab mono"><span>Su plan mensual</span><span>{% if empresa %}{{ empresa }}{% else %}Tributando.co{% endif %}</span></div>
+      <div class="fila"><span>Honorarios contables<small>{{ 'Comerciante que apenas comienza' if comerciante else 'Empresa que apenas comienza' }}</small></span><span>$875.000 / mes</span></div>
+      <div class="fila" id="filaNom" hidden><span id="txtNom">Nómina electrónica</span><span id="valNom"></span></div>
+      <div class="total"><span>Total al mes</span><b id="tot">$875.000</b></div>
+      <div class="fila" id="filaFe" hidden><span>Facturación electrónica</span><span>$230.000 / año</span></div>
+      <p class="nota">Aparte: la declaración de renta del año cuesta una mensualidad de honorarios y la exógena, otra. Cada año el valor sube lo mismo que el salario mínimo.</p>
+      <p class="nota"><b>A medida que {{ 'su negocio' if comerciante else 'su empresa' }} crece, crecemos con ustedes:</b> los $875.000 son para {{ 'comerciantes' if comerciante else 'empresas' }} que apenas comienzan; cuando aumentan las ventas, los documentos y los empleados, el honorario se ajusta a ese nuevo tamaño.</p>
+      <a class="btn g" id="btnContratar" href="#" data-clic="contratar" style="margin-top:16px;width:100%">Contratar por WhatsApp</a>
+      <p class="nota" style="text-align:center">Le escribimos el mismo día hábil para arrancar.</p>
+    </div>
+  </div>
+</div></section>
+
+<section class="s" id="pasos"><div class="cont">
+  <div class="titulo rv"><div class="et mono">Cómo empezamos</div><h2>Tres pasos, <em>sin enredos</em></h2></div>
+  <div class="grid3">
+    <div class="paso rv"><div class="n">1.</div><h3>Hablamos</h3><p>Me escribe por WhatsApp y me cuenta cómo está su empresa.</p></div>
+    <div class="paso rv"><div class="n">2.</div><h3>Le envío su propuesta</h3><p>Con mis honorarios según el tamaño de su empresa, y lo que incluye.</p></div>
+    <div class="paso rv"><div class="n">3.</div><h3>Arrancamos</h3><p>En Tributando o en su programa actual: recibimos la información y dejamos su empresa al día.</p></div>
+  </div>
+  <div class="final rv">
+    <div class="et mono">Tributando</div>
+    <h2>Su contabilidad, <em>en buenas manos.</em></h2>
+    <p class="lead">Cuénteme de su empresa y le envío la propuesta con mis honorarios. Con Tributando incluido, o en el programa que usted ya tenga.</p>
+    <a class="btn g" href="{{ wa }}">● Hablar por WhatsApp con Edison Monsalve</a>
+  </div>
+</div></section>
+</main>
+
+<footer><div class="cont">
+  <span>Edison Monsalve · Contador Público · Tributando · Medellín, Colombia</span>
+  <span><a href="/">tributando.co</a> · <a href="mailto:contacto@tributando.co">contacto@tributando.co</a></span>
+</div></footer>
+<a class="btn flotante" id="flot" href="{{ wa }}">Pida su propuesta</a>
+
+<script>
+const EMPRESA = {{ empresa|tojson }}, WA = "{{ whatsapp }}";
+let nEmp = 0;
+const peso = v => "$" + Math.round(v).toLocaleString("es-CO");
+function emp(d) { nEmp = Math.max(0, Math.min(200, nEmp + d)); document.getElementById("nEmp").textContent = nEmp; calc(); }
+function calc() {
+  const nom = nEmp > 0 ? Math.max(150000, 25000 * nEmp) : 0, fe = document.getElementById("fe").checked;
+  document.getElementById("filaNom").hidden = !nom;
+  document.getElementById("txtNom").textContent = "Nómina electrónica (" + nEmp + (nEmp === 1 ? " empleado)" : " empleados)");
+  document.getElementById("valNom").textContent = peso(nom) + " / mes";
+  document.getElementById("filaFe").hidden = !fe;
+  document.getElementById("tot").textContent = peso(875000 + nom);
+  const t = "Hola Edison, quiero contratar su servicio contable" + (EMPRESA ? " para " + EMPRESA : "") + ": honorarios $875.000"
+    + (nom ? " + nómina de " + nEmp + (nEmp === 1 ? " empleado " : " empleados ") + peso(nom) : "")
+    + " = " + peso(875000 + nom) + " al mes" + (fe ? ", más la facturación electrónica de $230.000 al año" : "") + ".";
+  document.getElementById("btnContratar").href = "https://wa.me/" + WA + "?text=" + encodeURIComponent(t);
+}
+calc();
+(function () {
+  var io = new IntersectionObserver(function (es) {
+    es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("ver"); io.unobserve(e.target); } });
+  }, { threshold: .15, rootMargin: "0px 0px -6% 0px" });
+  document.querySelectorAll(".rv").forEach(function (el) {
+    var k = Array.prototype.indexOf.call(el.parentElement.children, el);
+    el.style.transitionDelay = (k * 0.07) + "s"; io.observe(el);
+  });
+  var flot = document.getElementById("flot");
+  function onScroll() {
+    var y = scrollY, tot = document.documentElement.scrollHeight - innerHeight;
+    flot.classList.toggle("on", y > innerHeight * .9 && y < tot - innerHeight * .6);
+  }
+  addEventListener("scroll", onScroll, { passive: true }); onScroll();
+})();
+</script>
+{% include "_clics.html" %}
+</body>
+</html>
