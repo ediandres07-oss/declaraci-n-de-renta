@@ -1635,6 +1635,16 @@ def enlaces():
                            ia_whatsapp=IA_CFG.get("negocio", {}).get("whatsapp", ""))
 
 
+@app.get("/torah")
+@app.get("/tora")
+def habla_con_la_tora():
+    """Dirección corta de «Habla con la Torá» (24-nov-2026): la página vive en la app contable."""
+    destino = "https://contabilidad-tributando.onrender.com/torah"
+    if request.query_string:
+        destino += "?" + request.query_string.decode("utf-8", "ignore")
+    return redirect(destino, code=302)
+
+
 @app.get("/admin/dashboard")
 @autorizado_requerido
 def admin_dashboard():
