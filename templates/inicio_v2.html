@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tributando · Contabilidad que se mueve sola</title>
+<meta name="description" content="Bajamos solas las facturas electrónicas de la DIAN y las convertimos en contabilidad, IVA y retención, sin digitar nada.">
+<meta property="og:title" content="Tributando · Contabilidad que se mueve sola">
+<meta property="og:description" content="Facturas de la DIAN convertidas en contabilidad, IVA y retención, sin digitar.">
+<meta name="theme-color" content="#04060b">
+<link rel="icon" href="/static/img/logo-tributando.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#04060b;--card:#0d131b;--card2:#111923;--linea:#1b2430;--txt:#eef1f6;--suave:#aab3c2;--tenue:#6f7a8c;--verde:#37d38f;--oro:#e6c483}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--bg);scroll-behavior:smooth}
+body{background:var(--bg);color:var(--txt);font-family:"Plus Jakarta Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+.mono{font-family:"JetBrains Mono",monospace}
+.cont{max-width:1160px;margin:0 auto;padding:0 20px}
+/* logo con anillo verde */
+.anillo-logo{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:#04060b;border:2px solid rgba(55,211,143,.8);
+  box-shadow:0 0 12px rgba(55,211,143,.85),0 0 30px rgba(55,211,143,.45),inset 0 0 10px rgba(55,211,143,.35)}
+.anillo-logo{font-style:normal;color:#37d38f;font-weight:800;font-size:18px;text-shadow:0 0 8px rgba(55,211,143,.8)}
+/* menú */
+header{position:sticky;top:0;z-index:50;background:rgba(4,6,11,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid #111821}
+header .cont{display:flex;align-items:center;gap:28px;height:70px}
+.marca{display:flex;align-items:center;gap:11px;font-weight:800;font-size:19px;letter-spacing:-.02em}
+.marca b span{color:var(--verde)}
+nav.links{display:flex;gap:26px;font-size:14px;color:var(--suave);margin-left:18px}
+nav.links a:hover{color:var(--txt)}
+.acc{margin-left:auto;display:flex;align-items:center;gap:18px;font-size:14px;font-weight:600}
+.btn{display:inline-flex;align-items:center;gap:10px;background:var(--verde);color:#04140c;font-weight:700;border-radius:12px;padding:12px 20px;font-size:14px;
+  box-shadow:0 0 22px rgba(55,211,143,.38);transition:transform .2s,box-shadow .2s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 0 34px rgba(55,211,143,.55)}
+.btn.osc{background:var(--card2);color:var(--txt);box-shadow:none;border:1px solid var(--linea)}
+.btn.osc .wa{color:var(--verde)}
+.btn.g{padding:16px 26px;font-size:16px;border-radius:14px}
+/* portada */
+.hero{position:relative;text-align:center;padding:70px 0 0;overflow:hidden}
+.hero:before{content:"";position:absolute;inset:0;background:radial-gradient(60% 50% at 50% 70%,rgba(55,211,143,.13),rgba(55,211,143,0) 70%);pointer-events:none}
+.chip{display:inline-flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--suave);
+  background:var(--card);border:1px solid var(--linea);padding:7px 14px;border-radius:999px}
+.chip i{width:7px;height:7px;border-radius:50%;background:var(--verde);box-shadow:0 0 8px var(--verde)}
+h1{font-size:clamp(42px,7vw,84px);font-weight:800;letter-spacing:-.045em;line-height:1;margin:26px auto 0;max-width:900px}
+h1 em,h2 em{font-style:normal;color:var(--verde);text-shadow:0 0 30px rgba(55,211,143,.35)}
+.lead{color:var(--suave);font-size:clamp(16px,1.6vw,19px);line-height:1.6;max-width:640px;margin:22px auto 0}
+.ctas{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:32px}
+.escena{position:relative;height:560px;margin-top:40px}
+.aro{position:absolute;left:50%;top:50%;width:520px;height:520px;transform:translate(-50%,-50%);border-radius:50%;border:2px solid rgba(55,211,143,.7);
+  box-shadow:0 0 40px rgba(55,211,143,.55),0 0 110px rgba(55,211,143,.25),inset 0 0 50px rgba(55,211,143,.3);animation:latido 5s ease-in-out infinite}
+@keyframes latido{50%{box-shadow:0 0 60px rgba(55,211,143,.7),0 0 140px rgba(55,211,143,.32),inset 0 0 70px rgba(55,211,143,.4)}}
+.cel{position:absolute;left:50%;top:44px;transform:translateX(-50%);width:270px;background:#070b10;border:1px solid #1e2834;border-radius:36px;padding:16px 14px 18px;
+  box-shadow:0 30px 80px rgba(0,0,0,.7),0 0 0 8px #0b0f15;text-align:left}
+.cel .isla{width:84px;height:22px;border-radius:12px;background:#000;margin:0 auto 14px}
+.cel .top{display:flex;align-items:center;gap:8px;font-weight:700;font-size:13px;margin-bottom:12px}
+.cel .top .anillo-logo{width:26px;height:26px;font-size:12px}
+.cel .top b span{color:var(--verde)}.cel .top b{font-weight:700}.cel .top .pt{margin-left:auto;width:7px;height:7px;border-radius:50%;background:var(--verde);box-shadow:0 0 8px var(--verde)}
+.t{background:var(--card);border:1px solid #18212c;border-radius:16px;padding:12px;margin-bottom:9px}
+.t small{display:block;color:var(--tenue);font-size:10px}
+.t b{display:block;font-size:22px;letter-spacing:-.02em;margin-top:2px}
+.t .ok{color:var(--verde);font-size:10px;margin-top:3px}
+.t.oro{background:linear-gradient(140deg,#121a12,#0a0f14);border-color:rgba(230,196,131,.28)}
+.t.oro b{color:var(--oro);font-size:18px}
+.t.fila{display:flex;align-items:center;gap:10px;font-size:12px;font-weight:600}
+.t.fila .ic{width:28px;height:28px;border-radius:9px;background:#131b25;color:var(--verde);display:grid;place-items:center;font-size:13px}
+.t.fila small{font-weight:400;color:var(--verde)}
+.escanear{background:var(--verde);color:#04140c;font-weight:700;font-size:12px;text-align:center;border-radius:12px;padding:10px;box-shadow:0 0 18px rgba(55,211,143,.45)}
+.flota{position:absolute;background:rgba(13,19,27,.92);border:1px solid #1f2a37;border-radius:16px;padding:14px 16px;text-align:left;width:250px;
+  box-shadow:0 20px 50px rgba(0,0,0,.55);animation:flotar 6s ease-in-out infinite}
+.flota.a{left:calc(50% - 470px);top:150px;transform:rotate(-4deg)}
+.flota.b{left:calc(50% + 200px);top:300px;transform:rotate(3deg);animation-delay:-3s}
+@keyframes flotar{50%{translate:0 -10px}}
+.flota .k{font-size:10px;letter-spacing:.12em;color:var(--verde);display:flex;align-items:center;gap:6px}
+.flota .k.o{color:var(--oro)}
+.flota h4{font-size:14px;margin:6px 0 8px}
+.flota code{display:block;font-size:10px;color:var(--suave);background:#070b10;border:1px solid #18212c;border-radius:8px;padding:7px 8px;line-height:1.5}
+.flota .barra{height:5px;border-radius:5px;background:linear-gradient(90deg,var(--oro),#f3dca8);margin:10px 0 6px}
+.flota .nota{font-size:10px;color:var(--suave)}
+.ejemplo{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);font-size:10px;color:var(--tenue);letter-spacing:.1em;text-transform:uppercase}
+/* franja */
+.franja{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:900px;margin:10px auto 0}
+.franja div{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--linea);border-radius:16px;padding:16px 18px;text-align:left}
+.franja .ic{width:38px;height:38px;border-radius:12px;background:#131b25;color:var(--verde);display:grid;place-items:center;flex:none;font-size:17px}
+.franja b{display:block;font-size:15px}.franja small{color:var(--suave);font-size:12px}
+/* secciones */
+section.s{padding:110px 0 0}
+.titulo{text-align:center;max-width:720px;margin:0 auto 46px}
+.titulo .et{font-size:11px;letter-spacing:.22em;color:var(--verde);text-transform:uppercase}
+h2{font-size:clamp(30px,4.2vw,46px);font-weight:800;letter-spacing:-.035em;line-height:1.08;margin-top:12px}
+.titulo p{color:var(--suave);margin-top:14px;line-height:1.6}
+.pasos{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.paso{background:var(--card);border:1px solid var(--linea);border-radius:22px;padding:26px}
+.paso .n{width:38px;height:38px;border-radius:12px;background:var(--verde);color:#04140c;font-weight:800;display:grid;place-items:center;box-shadow:0 0 18px rgba(55,211,143,.45)}
+.paso:nth-child(3) .n{background:var(--oro);box-shadow:0 0 18px rgba(230,196,131,.4)}
+.paso h3{font-size:19px;margin:18px 0 10px}
+.paso p{color:var(--suave);font-size:14px;line-height:1.6}
+.paso .mini{margin-top:18px;background:#070b10;border:1px solid #18212c;border-radius:12px;padding:12px;font-size:11px;color:var(--suave);line-height:1.8}
+.paso .mini b{color:var(--verde);font-weight:600;float:right}
+.dos{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.col{background:linear-gradient(180deg,#0f1720,#0a0f15);border:1px solid var(--linea);border-radius:24px;padding:30px}
+.col .cab{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+.col .cab .ic{width:42px;height:42px;border-radius:13px;background:rgba(230,196,131,.12);color:var(--oro);display:grid;place-items:center;font-size:19px}
+.col.v .cab .ic{background:rgba(55,211,143,.12);color:var(--verde)}
+.col h3{font-size:21px}
+.it{display:flex;gap:14px;padding:15px 0;border-top:1px solid #151d27}
+.it .p{width:30px;height:30px;border-radius:10px;background:#131b25;color:var(--verde);display:grid;place-items:center;flex:none;font-size:13px}
+.it b{display:block;font-size:15px;margin-bottom:4px}.it span{color:var(--suave);font-size:13.5px;line-height:1.55}
+.final{position:relative;text-align:center;margin-top:110px;padding:70px 24px;border-radius:30px;background:var(--card);border:1px solid var(--linea);overflow:hidden}
+.final:before{content:"";position:absolute;left:50%;top:-180px;width:420px;height:420px;transform:translateX(-50%);border-radius:50%;border:2px solid rgba(55,211,143,.5);
+  box-shadow:0 0 50px rgba(55,211,143,.35),inset 0 0 50px rgba(55,211,143,.2);pointer-events:none}
+.final h2{position:relative}.final p{position:relative;color:var(--suave);margin:16px auto 30px;max-width:560px;line-height:1.6}
+.final .btn{position:relative}
+.final ul{position:relative;list-style:none;display:flex;gap:22px;justify-content:center;flex-wrap:wrap;margin-top:26px;font-size:12px;color:var(--suave)}
+.final li:before{content:"✓ ";color:var(--verde)}
+footer{margin-top:90px;border-top:1px solid #111821;padding:50px 0 34px}
+footer .grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:30px}
+footer p{color:var(--suave);font-size:13px;line-height:1.6;margin-top:14px;max-width:320px}
+footer h5{font-size:11px;letter-spacing:.16em;color:var(--tenue);text-transform:uppercase;margin-bottom:14px}
+footer li{list-style:none;margin-bottom:10px;font-size:13.5px;color:var(--suave)}
+footer li a:hover{color:var(--verde)}
+footer .legal{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:40px;padding-top:22px;border-top:1px solid #111821;font-size:12px;color:var(--tenue)}
+@media(max-width:960px){nav.links{display:none}.flota{display:none}.pasos,.dos{grid-template-columns:1fr}footer .grid{grid-template-columns:1fr 1fr}}
+@media(max-width:640px){header .cont{height:62px;gap:10px}.acc .entrar{display:none}.marca{font-size:17px}.btn{padding:10px 14px}
+  .hero{padding-top:44px}.escena{height:520px}.aro{width:340px;height:340px}.franja{grid-template-columns:1fr}
+  section.s{padding-top:80px}.col{padding:22px}footer .grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="cont">
+  <a class="marca" href="/"><i class="anillo-logo">T</i><b>Tributando<span>.co</span></b></a>
+  <nav class="links"><a href="#como">Cómo funciona</a><a href="#beneficios">Beneficios</a><a href="/contadores/lector">Lector XML</a><a href="/descargar-lector">Descargar el Lector</a></nav>
+  <div class="acc"><a class="entrar" href="{{ app_url }}/login">Iniciar sesión</a><a class="btn" href="{{ app_url }}/activar">Pruébalo</a></div>
+</div></header>
+
+<main>
+<section class="hero"><div class="cont">
+  <span class="chip"><i></i>Conectado con la facturación electrónica DIAN</span>
+  <h1>Contabilidad que se <em>mueve sola</em></h1>
+  <p class="lead">Bajamos solas las facturas electrónicas de la DIAN y las convertimos en contabilidad, IVA y retención, sin digitar nada.</p>
+  <div class="ctas">
+    <a class="btn g" href="{{ app_url }}/activar">Pruébalo ⚡</a>
+    <a class="btn osc g" href="https://wa.me/{{ whatsapp }}?text={{ 'Hola, quiero conocer Tributando'|urlencode }}"><span class="wa">●</span> Escríbenos por WhatsApp</a>
+  </div>
+  <div class="escena">
+    <div class="aro"></div>
+    <div class="flota a"><div class="k mono">● FACTURA DIAN</div><h4>Factura electrónica recibida</h4>
+      <code class="mono">Proveedor → cuenta de gasto<br>IVA descontable · ReteFuente</code><div class="nota" style="margin-top:8px">Causada sola desde el XML</div></div>
+    <div class="cel">
+      <div class="isla"></div>
+      <div class="top"><i class="anillo-logo">T</i><b>Tributando<span>.co</span></b><i class="pt"></i></div>
+      <div class="t"><small>Saldo en bancos</small><b>$ 24.850.000</b><div class="ok">● Cuentas conciliadas</div></div>
+      <div class="t oro"><small>IVA por pagar · bimestre</small><b>$ 3.420.500</b></div>
+      <div class="t fila"><span class="ic">▤</span><div>Facturas de la DIAN<br><small>Listas para causar</small></div></div>
+      <div class="escanear">▣ Escanear factura</div>
+    </div>
+    <div class="flota b"><div class="k o mono">▤ FORMULARIO 350</div><h4>Retención en la fuente</h4><div class="barra"></div><div class="nota">✓ Borrador sale de los libros</div></div>
+    <div class="ejemplo mono">Cifras de ejemplo</div>
+  </div>
+  <div class="franja">
+    <div><span class="ic">⌁</span><span><b>Cero digitación</b><small>Lee el XML y el PDF de cada factura</small></span></div>
+    <div><span class="ic">⇣</span><span><b>Directo de la DIAN</b><small>Emitidas y recibidas, solas</small></span></div>
+    <div><span class="ic">✓</span><span><b>300 y 350 en borrador</b><small>Salen de tus propios libros</small></span></div>
+  </div>
+</div></section>
+
+<section class="s" id="como"><div class="cont">
+  <div class="titulo"><div class="et mono">Así funciona</div><h2>Tu contabilidad al día en <em>3 pasos</em></h2>
+    <p>De la descarga de las facturas en la DIAN hasta el borrador de tus impuestos, sin digitar.</p></div>
+  <div class="pasos">
+    <div class="paso"><div class="n">1</div><h3>Conecta la DIAN</h3><p>El Lector baja las facturas electrónicas emitidas y recibidas de cada NIT, sin que tengas que entrar a descargarlas una por una.</p>
+      <div class="mini mono">Facturas emitidas <b>✓</b><br>Facturas recibidas <b>✓</b></div></div>
+    <div class="paso"><div class="n">2</div><h3>Se causa sola</h3><p>Cada factura se lleva a su cuenta con IVA y retenciones, leyendo los ítems del XML. Tú revisas y apruebas.</p>
+      <div class="mini mono">Gasto · IVA descontable <b>✓</b><br>ReteFuente · ReteIVA <b>✓</b></div></div>
+    <div class="paso"><div class="n">3</div><h3>Impuestos y reportes</h3><p>Balance, estado de resultados y borradores del 300 y el 350, desde el computador o el celular.</p>
+      <div class="mini mono">Borrador formulario 300 <b>Listo</b><br>Borrador formulario 350 <b>Listo</b></div></div>
+  </div>
+</div></section>
+
+<section class="s" id="beneficios"><div class="cont">
+  <div class="titulo"><div class="et mono">Para quién es</div><h2>Hecho para el <em>contador</em> y el <em>empresario</em> colombiano</h2></div>
+  <div class="dos">
+    <div class="col"><div class="cab"><span class="ic">▣</span><h3>Para contadores</h3></div>
+      <div class="it"><span class="p">⌁</span><div><b>Adiós a la digitación</b><span>Las facturas de tus clientes llegan causadas; tu tiempo va a revisar y asesorar.</span></div></div>
+      <div class="it"><span class="p">⇄</span><div><b>Conciliación con la DIAN</b><span>Cruza lo que reporta la DIAN contra los libros y te muestra qué falta.</span></div></div>
+      <div class="it"><span class="p">▦</span><div><b>Todos tus clientes en un panel</b><span>Varias empresas en la misma cuenta, con sus vencimientos a la vista.</span></div></div>
+      <div class="it"><span class="p">✎</span><div><b>Borradores listos</b><span>300, 350 y exógena salen de la contabilidad para que los revises.</span></div></div>
+    </div>
+    <div class="col v"><div class="cab"><span class="ic">◎</span><h3>Para empresarios e independientes</h3></div>
+      <div class="it"><span class="p">$</span><div><b>Tu dinero real, claro</b><span>Cuánto hay en el banco y cuánto le corresponde a la DIAN.</span></div></div>
+      <div class="it"><span class="p">!</span><div><b>Avisos antes de vencer</b><span>Recordatorios por WhatsApp de tus fechas según el último dígito del NIT.</span></div></div>
+      <div class="it"><span class="p">▣</span><div><b>Foto a la factura</b><span>Le tomas foto a un gasto con el celular y la app la lee.</span></div></div>
+      <div class="it"><span class="p">◷</span><div><b>Pregunta por WhatsApp</b><span>Pídele a tu asistente un saldo o un informe en español, sin abrir el computador.</span></div></div>
+    </div>
+  </div>
+
+  <div class="final">
+    <h2>¿Listo para que tu contabilidad <em>se mueva sola</em>?</h2>
+    <p>Escríbenos y te mostramos cómo queda tu empresa con tus propias facturas de la DIAN.</p>
+    <a class="btn g" href="https://wa.me/{{ whatsapp }}?text={{ 'Hola, quiero conocer Tributando'|urlencode }}">● Escribir por WhatsApp ahora</a>
+    <ul><li>Demostración sin compromiso</li><li>Con tus propias facturas</li><li>Atención en Colombia</li></ul>
+  </div>
+</div></section>
+</main>
+
+<footer><div class="cont">
+  <div class="grid">
+    <div><a class="marca" href="/"><i class="anillo-logo">T</i><b>Tributando<span>.co</span></b></a>
+      <p>Contabilidad automática desde la facturación electrónica de la DIAN, para contadores y empresas en Colombia.</p></div>
+    <div><h5>Plataforma</h5><ul><li><a href="#como">Cómo funciona</a></li><li><a href="/contadores/lector">Lector XML DIAN</a></li><li><a href="/descargar-lector">Lector para Windows</a></li><li><a href="/descargar-lector-mac">Lector para Mac</a></li></ul></div>
+    <div><h5>Más</h5><ul><li><a href="/contadores">Renta: pase de temporada</a></li><li><a href="/aliados">Aliados</a></li><li><a href="/sas">Crea tu S.A.S.</a></li></ul></div>
+    <div><h5>Contacto</h5><ul><li><a href="https://wa.me/{{ whatsapp }}">WhatsApp</a></li><li><a href="mailto:contacto@tributando.co">contacto@tributando.co</a></li><li><a href="/privacidad">Privacidad</a></li></ul></div>
+  </div>
+  <div class="legal"><span>© 2026 Tributando · Medellín, Colombia</span><span>tributando.co</span></div>
+</div></footer>
+</body>
+</html>

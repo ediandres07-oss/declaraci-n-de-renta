@@ -2293,6 +2293,15 @@ def apps_a_la_medida():
 
 
 @app.get("/")
+def inicio_v2():
+    """Portada 25-nov-2026 (diseño Google Stitch aprobado por Edison: fondo negro, anillo verde).
+    Sin cifras inventadas; la de partículas sigue en /mundo."""
+    wa = IA_CFG.get("negocio", {}).get("whatsapp") or "573332470715"
+    return render_template("inicio_v2.html", whatsapp=re.sub(r"\D", "", str(wa)),
+                           app_url=os.environ.get("CONTABILIDAD_URL",
+                                                  "https://contabilidad-tributando.onrender.com").rstrip("/"))
+
+
 @app.get("/mundo")
 def mundo():
     """Landing de PRUEBA (7-nov-2026, Edison: «algo bien moderno, mundial, que no se haya
